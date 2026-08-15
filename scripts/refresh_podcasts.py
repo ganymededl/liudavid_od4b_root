@@ -35,69 +35,87 @@ def js_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
-def newest_episode(source: str) -> Episode:
-    """Read playlist item #1 directly from the configured YouTube playlist."""
+def published_datetime(video: dict) -> datetime | None:
+    timestamp = video.get("timestamp") or video.get("release_timestamp")
+    if timestamp:
+        return datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
+
+    upload_date = str(video.get("upload_date") or "")
+    if re.fullmatch(r"\d{8}", upload_date):
+        return datetime.strptime(upload_date, "%Y%m%d").replace(tzinfo=timezone.utc)
+    return None
+
+
+def newest_episode(source: str, podcast_name: str) -> Episode:
+    """Resolve recent playlist candidates and select the newest verified full episode."""
     if not re.match(r"^https://(www\.)?youtube\.com/playlist\?", source):
         raise ValueError(f"Source is not a YouTube playlist URL: {source}")
 
-    options = {
+    playlist_options = {
         "quiet": True,
         "no_warnings": True,
         "skip_download": True,
         "extract_flat": "in_playlist",
-        "playlist_items": "1",
+        # YouTube's UI 'Latest' order can differ from the playlist's underlying order.
+        # Inspect enough recent candidates and compare their verified upload timestamps.
+        "playlist_items": "1:20",
         "lazy_playlist": True,
         "socket_timeout": 30,
         "retries": 3,
         "extractor_retries": 3,
     }
 
-    with YoutubeDL(options) as downloader:
+    with YoutubeDL(playlist_options) as downloader:
         playlist = downloader.extract_info(source, download=False)
 
-    entries = list(playlist.get("entries") or [])
-    if not entries or entries[0] is None:
-        raise RuntimeError("The playlist returned no first entry")
+    entries = [entry for entry in (playlist.get("entries") or []) if entry]
+    candidate_ids: list[str] = []
+    for entry in entries:
+        video_id = str(entry.get("id") or "").strip()
+        if VIDEO_ID.fullmatch(video_id) and video_id not in candidate_ids:
+            candidate_ids.append(video_id)
 
-    entry = entries[0]
-    video_id = str(entry.get("id") or "").strip()
-    title = str(entry.get("title") or "").strip()
-    if not VIDEO_ID.fullmatch(video_id) or not title:
-        raise RuntimeError("The playlist returned an invalid video ID or title")
+    if not candidate_ids:
+        raise RuntimeError("The playlist returned no valid video candidates")
 
-    published = None
-    timestamp = entry.get("timestamp") or entry.get("release_timestamp")
-    if timestamp:
-        published = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
-    else:
-        upload_date = str(entry.get("upload_date") or "")
-        if re.fullmatch(r"\d{8}", upload_date):
-            published = datetime.strptime(upload_date, "%Y%m%d").replace(tzinfo=timezone.utc)
+    video_options = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "socket_timeout": 30,
+        "retries": 3,
+        "extractor_retries": 3,
+        "extractor_args": {"youtube": {"player_client": ["android_vr", "web_safari"]}},
+    }
 
-    # Flat playlist extraction sometimes omits dates. Resolve only the selected video.
-    if published is None:
-        with YoutubeDL({
-            "quiet": True,
-            "no_warnings": True,
-            "skip_download": True,
-            "socket_timeout": 30,
-            "retries": 3,
-            "extractor_retries": 3,
-        }) as downloader:
-            video = downloader.extract_info(
-                f"https://www.youtube.com/watch?v={video_id}", download=False
-            )
-        timestamp = video.get("timestamp") or video.get("release_timestamp")
-        upload_date = str(video.get("upload_date") or "")
-        if timestamp:
-            published = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
-        elif re.fullmatch(r"\d{8}", upload_date):
-            published = datetime.strptime(upload_date, "%Y%m%d").replace(tzinfo=timezone.utc)
+    verified: list[Episode] = []
+    candidate_failures: list[str] = []
+    with YoutubeDL(video_options) as downloader:
+        for video_id in candidate_ids:
+            try:
+                video = downloader.extract_info(
+                    f"https://www.youtube.com/watch?v={video_id}", download=False
+                )
+                title = str(video.get("title") or "").strip()
+                published = published_datetime(video)
+                duration = int(video.get("duration") or 0)
+                if not title or published is None:
+                    raise RuntimeError("missing title or upload date")
 
-    if published is None:
-        raise RuntimeError(f"Could not verify the upload date for {video_id}")
+                # Decoder mixes shorts/clips into its surfaces. Keep full episodes only.
+                if podcast_name == "Decoder with Nilay Patel":
+                    if not title.rstrip().endswith("| Decoder") or duration < 20 * 60:
+                        continue
 
-    return Episode(title=title, video_id=video_id, published=published)
+                verified.append(Episode(title=title, video_id=video_id, published=published))
+            except Exception as exc:
+                candidate_failures.append(f"{video_id}: {exc}")
+
+    if not verified:
+        detail = "; ".join(candidate_failures[:3])
+        raise RuntimeError(f"No full playlist episode could be date-verified. {detail}")
+
+    return max(verified, key=lambda episode: episode.published)
 
 
 def field(block: list[str], name: str) -> str:
@@ -166,7 +184,7 @@ def main() -> int:
             continue
 
         try:
-            episode = newest_episode(source)
+            episode = newest_episode(source, name)
             block_changed = False
             block_changed |= replace_field(block, "latestUrl", episode.watch_url)
             block_changed |= replace_field(block, "latestTitle", episode.title)
@@ -191,7 +209,7 @@ def main() -> int:
     if failures:
         print("Cards left unchanged because verification failed:", file=sys.stderr)
         for failure in reversed(failures):
-            print(f"- {failure}", file=sys.stderr)
+            print(f"::warning title=Podcast verification failed::{failure}", file=sys.stderr)
 
     return 0
 
