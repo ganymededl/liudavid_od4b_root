@@ -1,0 +1,64 @@
+name: Refresh podcast cards
+
+on:
+  schedule:
+    # GitHub cron is UTC. Run at both possible UTC hours, then keep only 8 AM ET.
+    - cron: '5 12,13 * * *'
+  workflow_dispatch:
+  repository_dispatch:
+    types: [personal-hub-refresh]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: personal-hub-podcast-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check Eastern-time schedule
+        id: schedule
+        shell: python
+        run: |
+          import os
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+
+          should_run = os.environ.get('GITHUB_EVENT_NAME') in {'workflow_dispatch', 'repository_dispatch'}
+          if not should_run:
+              should_run = datetime.now(ZoneInfo('America/New_York')).hour == 8
+
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f"run={'true' if should_run else 'false'}\n")
+
+      - name: Refresh podcast cards
+        if: steps.schedule.outputs.run == 'true'
+        run: python scripts/refresh_podcasts.py
+
+      - name: Commit and push changes
+        if: steps.schedule.outputs.run == 'true'
+        shell: bash
+        run: |
+          if git diff --quiet -- index.html; then
+            echo 'No podcast changes found.'
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- index.html
+          git commit -m "Daily podcast refresh $(date -u +%F)"
+          git push origin HEAD:main
