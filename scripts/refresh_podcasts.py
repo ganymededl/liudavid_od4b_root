@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
-"""Refresh Personal Hub podcast cards from configured YouTube playlists."""
+"""Refresh Personal Hub podcast cards from their exact YouTube playlists."""
 
 from __future__ import annotations
 
 import json
 import re
 import sys
-import urllib.parse
-import urllib.request
-import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
+from yt_dlp import YoutubeDL
+
 INDEX_PATH = Path(__file__).resolve().parents[1] / "index.html"
-USER_AGENT = "Mozilla/5.0 (compatible; PersonalHubPodcastRefresh/1.0)"
-ATOM = "{http://www.w3.org/2005/Atom}"
-YT = "{http://www.youtube.com/xml/schemas/2015}"
+VIDEO_ID = re.compile(r"^[A-Za-z0-9_-]{11}$")
 
 
 @dataclass(frozen=True)
@@ -38,41 +35,68 @@ def js_string(value: str) -> str:
     return json.dumps(value, ensure_ascii=False)
 
 
-def playlist_id_from_url(source: str) -> str:
-    parsed = urllib.parse.urlparse(source)
-    if parsed.netloc.lower() not in {"youtube.com", "www.youtube.com", "m.youtube.com"}:
-        raise ValueError(f"Source is not a YouTube URL: {source}")
-    playlist_ids = urllib.parse.parse_qs(parsed.query).get("list", [])
-    if not playlist_ids or not playlist_ids[0]:
-        raise ValueError(f"YouTube playlist ID is missing: {source}")
-    return playlist_ids[0]
-
-
 def newest_episode(source: str) -> Episode:
-    playlist_id = playlist_id_from_url(source)
-    feed_url = "https://www.youtube.com/feeds/videos.xml?playlist_id=" + urllib.parse.quote(playlist_id)
-    request = urllib.request.Request(feed_url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=30) as response:
-        payload = response.read()
+    """Read playlist item #1 directly from the configured YouTube playlist."""
+    if not re.match(r"^https://(www\.)?youtube\.com/playlist\?", source):
+        raise ValueError(f"Source is not a YouTube playlist URL: {source}")
 
-    root = ET.fromstring(payload)
-    entry = root.find(f"{ATOM}entry")
-    if entry is None:
-        raise RuntimeError(f"No videos were returned for playlist {playlist_id}")
+    options = {
+        "quiet": True,
+        "no_warnings": True,
+        "skip_download": True,
+        "extract_flat": "in_playlist",
+        "playlist_items": "1",
+        "lazy_playlist": True,
+        "socket_timeout": 30,
+        "retries": 3,
+        "extractor_retries": 3,
+    }
 
-    title_element = entry.find(f"{ATOM}title")
-    video_element = entry.find(f"{YT}videoId")
-    published_element = entry.find(f"{ATOM}published")
-    if title_element is None or video_element is None or published_element is None:
-        raise RuntimeError(f"The YouTube feed was incomplete for playlist {playlist_id}")
+    with YoutubeDL(options) as downloader:
+        playlist = downloader.extract_info(source, download=False)
 
-    title = (title_element.text or "").strip()
-    video_id = (video_element.text or "").strip()
-    published_text = (published_element.text or "").strip()
-    if not title or not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
-        raise RuntimeError(f"The YouTube feed returned invalid episode data for playlist {playlist_id}")
+    entries = list(playlist.get("entries") or [])
+    if not entries or entries[0] is None:
+        raise RuntimeError("The playlist returned no first entry")
 
-    published = datetime.fromisoformat(published_text.replace("Z", "+00:00"))
+    entry = entries[0]
+    video_id = str(entry.get("id") or "").strip()
+    title = str(entry.get("title") or "").strip()
+    if not VIDEO_ID.fullmatch(video_id) or not title:
+        raise RuntimeError("The playlist returned an invalid video ID or title")
+
+    published = None
+    timestamp = entry.get("timestamp") or entry.get("release_timestamp")
+    if timestamp:
+        published = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
+    else:
+        upload_date = str(entry.get("upload_date") or "")
+        if re.fullmatch(r"\d{8}", upload_date):
+            published = datetime.strptime(upload_date, "%Y%m%d").replace(tzinfo=timezone.utc)
+
+    # Flat playlist extraction sometimes omits dates. Resolve only the selected video.
+    if published is None:
+        with YoutubeDL({
+            "quiet": True,
+            "no_warnings": True,
+            "skip_download": True,
+            "socket_timeout": 30,
+            "retries": 3,
+            "extractor_retries": 3,
+        }) as downloader:
+            video = downloader.extract_info(
+                f"https://www.youtube.com/watch?v={video_id}", download=False
+            )
+        timestamp = video.get("timestamp") or video.get("release_timestamp")
+        upload_date = str(video.get("upload_date") or "")
+        if timestamp:
+            published = datetime.fromtimestamp(int(timestamp), tz=timezone.utc)
+        elif re.fullmatch(r"\d{8}", upload_date):
+            published = datetime.strptime(upload_date, "%Y%m%d").replace(tzinfo=timezone.utc)
+
+    if published is None:
+        raise RuntimeError(f"Could not verify the upload date for {video_id}")
+
     return Episode(title=title, video_id=video_id, published=published)
 
 
@@ -90,7 +114,12 @@ def replace_field(block: list[str], name: str, value: str) -> bool:
     for index, line in enumerate(block):
         match = pattern.match(line)
         if match:
-            new_line = f"{match.group(1)}{name}:" + " " * max(1, 13 - len(name)) + js_string(value) + match.group(2)
+            new_line = (
+                f"{match.group(1)}{name}:"
+                + " " * max(1, 13 - len(name))
+                + js_string(value)
+                + match.group(2)
+            )
             if new_line != line:
                 block[index] = new_line
                 return True
@@ -99,7 +128,10 @@ def replace_field(block: list[str], name: str, value: str) -> bool:
 
 
 def podcast_blocks(lines: list[str]) -> list[tuple[int, int]]:
-    start = next((i for i, line in enumerate(lines) if re.match(r"^\s*podcasts:\s*\[", line)), None)
+    start = next(
+        (i for i, line in enumerate(lines) if re.match(r"^\s*podcasts:\s*\[", line)),
+        None,
+    )
     if start is None:
         raise ValueError("CONFIG.podcasts was not found")
 
@@ -126,7 +158,6 @@ def main() -> int:
     changes: list[str] = []
     failures: list[str] = []
 
-    # Process from the end so replacing a block never invalidates later indices.
     for start, end in reversed(podcast_blocks(lines)):
         block = lines[start:end]
         name = field(block, "name")
@@ -143,7 +174,7 @@ def main() -> int:
             if block_changed:
                 lines[start:end] = block
                 changes.append(f"{name}: {episode.title} ({episode.display_date})")
-        except Exception as exc:  # Keep this card unchanged and process the remaining cards.
+        except Exception as exc:
             failures.append(f"{name}: {exc}")
 
     updated = "\n".join(lines) + ("\n" if original.endswith("\n") else "")

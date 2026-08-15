@@ -44,6 +44,10 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
               output.write(f"run={'true' if should_run else 'false'}\n")
 
+      - name: Install playlist reader
+        if: steps.schedule.outputs.run == 'true'
+        run: python -m pip install --disable-pip-version-check --upgrade yt-dlp
+
       - name: Refresh podcast cards
         if: steps.schedule.outputs.run == 'true'
         run: python scripts/refresh_podcasts.py
