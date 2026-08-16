@@ -227,7 +227,10 @@
   .rec-caveat[hidden] { display: none; }
   .rec-caveat b { color: var(--text); }
   .rec-caveat.gate { border-left-color: #ef5d84; }
+  .rec-caveat.close { border-left-color: var(--c1); }
   .rec-note { margin: 14px 0 0; font-size: 13px; color: var(--text-soft); line-height: 1.45; }
+  .sec-xref { margin-top: 10px; font-size: 15px; color: var(--text-soft); }
+  .sec-xref a { color: var(--c1); text-decoration: none; border-bottom: 1px solid currentColor; }
   .meter { display: grid; grid-template-columns: 120px 1fr 38px; align-items: center; gap: 12px; font-size: 13px; }
   .meter .track { height: 9px; border-radius: 999px; background: var(--surface-soft); overflow: hidden; border: 1px solid var(--border); }
   .meter .fill { height: 100%; border-radius: 999px; transition: width .45s ease; }
@@ -293,12 +296,12 @@
     <nav class="sections" aria-label="Page sections">
       <a href="#definitions">Definitions</a>
       <a href="#documented">Documented</a>
-      <a href="#power">Agent power</a>
-      <a href="#practice">In practice</a>
-      <a href="#patterns">Usage patterns</a>
       <a href="#comparison">Compare</a>
       <a href="#matcher">Decision helper</a>
+      <a href="#patterns">Usage patterns</a>
       <a href="#scenarios">Examples</a>
+      <a href="#power">Agent power</a>
+      <a href="#practice">In practice</a>
       <a href="#handoffs">Handoffs</a>
       <a href="#guardrails">Guardrails</a>
     </nav>
@@ -423,7 +426,7 @@
             <tr><td>Cowork output packaging</td><td>Created files appear in an output folder; users can preview, download individually, or use Download All for a ZIP of many files.</td><td>Supports batch patterns—many per-record artifacts stay in one retrievable task package.</td></tr>
             <tr><td>Cowork memory</td><td>Memory is scoped to the current conversation and does not persist across conversations.</td><td>Use Cowork for contained runs; use an agent when durable, repeatable context matters.</td></tr>
             <tr><td>Cowork skills</td><td>Built-in and custom skills load during a session; users can create custom skills with companion-file limits.</td><td>Cowork is extensible but intentionally bounded; a curated task library matters.</td></tr>
-            <tr><td>Cowork automation</td><td>Supports recurring scheduled prompts and event-driven tasks, generally draft-and-approve for consequential actions.</td><td>Cowork isn't “one-time only”; choose it when the workflow stays M365-centered and task-contained.</td></tr>
+            <tr><td>Cowork automation</td><td>Recurring Cowork runs repeat one predefined task on a schedule or trigger; each run is scoped to its own conversation, so no state carries between runs, and actions stay M365-centered and draft-and-approve for consequential steps.</td><td>“Repeat” here means rerunning the same bounded task—not persistent state, cross-system connectors, or serving other people. That distinction, not repetition itself, is what marks the move to an agent.</td></tr>
             <tr><td>Agent grounding</td><td>Copilot Studio agents connect to SharePoint, Dataverse, websites, and enterprise data as knowledge sources.</td><td>Choose an agent when answers must be grounded in your specific content, with citations.</td></tr>
             <tr><td>Agent actions &amp; channels</td><td>Agents take actions through connectors and custom APIs and publish to Teams, websites, and Microsoft 365 Copilot.</td><td>Choose an agent when the capability should act and reach many people at once.</td></tr>
           </tbody>
@@ -447,13 +450,174 @@
     </div>
   </section>
 
+  <!-- COMPARISON -->
+  <section id="comparison">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Compare</span>
+        <h2>Side-by-side comparison</h2>
+        <p>The clearest distinction is not “which AI is smartest?” It is who steers, how long the work runs, where it executes, and what kind of outcome it must produce.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Dimension</th><th class="c1">Copilot</th><th class="c2">Copilot Cowork</th><th class="c3">Copilot agents</th></tr></thead>
+          <tbody>
+            <tr><td>Primary job</td><td>Answer, create, summarize, analyze, or assist</td><td>Run a fast, contained multi-step assignment and package its outputs</td><td>Serve a repeatable, grounded capability to many people</td></tr>
+            <tr><td>Interaction model</td><td>Conversation; you steer prompt by prompt</td><td>One task; the process fans out and returns one organized output package</td><td>Configured once; runs many times on chat, schedule, or trigger</td></tr>
+            <tr><td>Human role</td><td>You do the work with AI help</td><td>You direct, review, and approve</td><td>You design intent, grounding, and approval boundaries; the agent runs</td></tr>
+            <tr><td>Power ceiling</td><td>Focused assistance</td><td>Strong contained agentic execution</td><td>High: grounding, actions, connectors, orchestration, and autonomy</td></tr>
+            <tr><td>Grounding</td><td>The current chat, app, file, email, meeting, or M365 context</td><td>Multiple M365 sources, files, messages, meetings, skills, and plugins</td><td>Your knowledge sources, systems, and data—cited in responses</td></tr>
+            <tr><td>Actions</td><td>Usually user-led in the current experience</td><td>Plans and stages actions with human checkpoints</td><td>Takes actions through connectors and APIs; consequential steps gated</td></tr>
+            <tr><td>Automation depth</td><td>Prompt reuse and product-supported agents</td><td>Scheduled prompts and event-driven tasks centered on M365</td><td>Schedules, event triggers, and autonomous multi-step runs</td></tr>
+            <tr><td>Repeat behavior</td><td>No automation; re-prompted each time</td><td>Reruns one task on a schedule or trigger; no state carries between runs, M365-centered actions</td><td>Runs continuously or on trigger with persistent grounding, state, and cross-system connectors</td></tr>
+            <tr><td>Typical duration</td><td>Seconds to minutes</td><td>Minutes to hours; bounded runs feel faster because outputs stay contained</td><td>Ongoing / on-demand—runs whenever it's invoked or triggered</td></tr>
+            <tr><td>Typical output</td><td>An answer, draft, summary, analysis, or table</td><td>One organized output folder: briefing, deck, workbook, report, or batch</td><td>An in-channel answer, action, or artifact—repeated reliably</td></tr>
+            <tr><td>Reach</td><td>Just you</td><td>You and your immediate work</td><td>A team, the organization, or the people you serve</td></tr>
+            <tr><td>Typical builder</td><td>Any user</td><td>Any user</td><td>Makers &amp; IT with Copilot Studio</td></tr>
+            <tr><td>Definition of done</td><td>Can emerge through conversation</td><td>Should be clear before delegation</td><td>Designed and tested before publishing</td></tr>
+            <tr><td>Use first when</td><td>The need is simple, quick, conversational, or app-local</td><td>The work is bounded, delegated, reviewable, and benefits from one task workspace</td><td>The work is repeatable, grounded, always-on, or shared with many</td></tr>
+            <tr><td>Move up or across when</td><td>The task becomes a delegated multi-step workstream</td><td>The task should run the same way for others, grounded and governed</td><td>A quick chat or a bounded task would reduce unnecessary complexity</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISION HELPER -->
+  <section id="matcher">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Decision helper</span>
+        <h2>Which should I use?</h2>
+        <p>Answer five questions about the shape of the work—not the topic—and one about the data it touches. The result is a starting point, not a rule: preference, familiarity, access, and interaction style can reasonably change the choice.</p>
+      </div>
+      <div class="helper">
+        <div class="form">
+          <div class="q"><label for="q1">How much do you want to steer?</label>
+            <select id="q1"><option value="0">I want to steer every step</option><option value="1">I want one contained run and output package</option><option value="2">I want the workflow built and running on its own</option></select></div>
+          <div class="q"><label for="q2">How complex is the work?</label>
+            <select id="q2"><option value="0">One answer, draft, summary, or analysis</option><option value="1">Multi-step, but bounded</option><option value="2">Repeatable and grounded in our data</option></select></div>
+          <div class="q"><label for="q3">Where must it execute?</label>
+            <select id="q3"><option value="0">In chat or a Microsoft 365 app</option><option value="1">Across M365 sources into one task folder</option><option value="2">Across our data, systems, or public-facing channels</option></select></div>
+          <div class="q"><label for="q4">Will you repeat it?</label>
+            <select id="q4"><option value="0">No, this is mostly one-time</option><option value="1">Yes, but as the same standalone task each time</option><option value="2">Yes, and it should remember context or reach across systems and people</option></select></div>
+          <div class="q"><label for="q5">Who is it for?</label>
+            <select id="q5"><option value="0">Just me</option><option value="1">Me plus a few teammates</option><option value="2">A whole team, org, or the people we serve</option></select></div>
+          <div class="q"><label for="q6" id="q6Label">What data does it touch?</label>
+            <select id="q6"><option value="0">Public or already-published info</option><option value="1">Directory information</option><option value="2">FERPA education records</option></select></div>
+        </div>
+        <div class="result" id="result">
+          <span class="rec-eyebrow">Recommended starting point</span>
+          <h3 class="rec" id="recName">Copilot</h3>
+          <p class="why" id="recWhy"><b>Why:</b> The task is best handled with frequent human steering and does not require a delegated or grounded workflow.</p>
+          <div class="bar">
+            <div class="meter m1"><span class="name c1">Copilot</span><span class="track"><span class="fill" id="f1" style="width:60%"></span></span><span id="p1v">60</span></div>
+            <div class="meter m2"><span class="name c2">Cowork</span><span class="track"><span class="fill" id="f2" style="width:20%"></span></span><span id="p2v">20</span></div>
+            <div class="meter m3"><span class="name c3">Agents</span><span class="track"><span class="fill" id="f3" style="width:20%"></span></span><span id="p3v">20</span></div>
+          </div>
+          <div class="rec-caveat close" id="recClose" hidden></div>
+          <div class="rec-caveat" id="recCaveat" hidden></div>
+          <p class="rec-note">The data question does not change the recommendation—the shape of the work does. It sets the conditions you must meet before you build.</p>
+        </div>
+      </div>
+
+      <!-- USE / AVOID -->
+      <div class="use-grid" style="margin-top:36px;">
+        <div class="use">
+          <span class="tag" style="color:var(--c1)">Use Copilot when</span>
+          <div class="row"><strong>You need an answer or assist</strong><span>Summarize, explain, compare, brainstorm, rewrite, analyze, or draft.</span></div>
+          <div class="row"><strong>You will assemble the result</strong><span>You are still choosing the next step and doing the final work.</span></div>
+          <div class="row"><strong>The task is short</strong><span>One or a few conversational turns should finish it.</span></div>
+          <div class="foot"><b>Avoid as the default:</b> when you are manually prompting through a predictable process that could be delegated or automated.</div>
+        </div>
+        <div class="use">
+          <span class="tag" style="color:var(--c2)">Use Cowork when</span>
+          <div class="row"><strong>You can state “done” clearly</strong><span>The deliverable, audience, format, sources, and constraints are knowable.</span></div>
+          <div class="row"><strong>You want one-go execution</strong><span>A skill can run in one contained chat without redesigning the process.</span></div>
+          <div class="row"><strong>You want a finished output folder</strong><span>A briefing, deck, report, or batch of per-item files should stay together.</span></div>
+          <div class="foot"><b>Move to an agent:</b> when the same bounded work should run repeatedly for others, grounded and governed.</div>
+        </div>
+        <div class="use">
+          <span class="tag" style="color:var(--c3)">Use an agent when</span>
+          <div class="row"><strong>The work repeats at volume</strong><span>Many people need the same capability, consistently.</span></div>
+          <div class="row"><strong>It must be grounded</strong><span>Answers should cite your documents, data, and systems.</span></div>
+          <div class="row"><strong>It should act or run on its own</strong><span>Take approved actions, or run on a schedule or trigger.</span></div>
+          <div class="foot"><b>Don't overbuild:</b> if Copilot or Cowork comfortably fits, an agent's setup and governance may not be worth it.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USAGE PATTERNS -->
+  <section id="patterns">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Usage patterns</span>
+        <h2>How they show up in real work</h2>
+        <p>The clearest signal is the shape of the work—who steers, how long it runs, where it executes, and whether it repeats. This section is the abstract pattern layer; the <a href="#scenarios">examples below</a> are concrete instances of these same three patterns.</p>
+      </div>
+      <div class="cards-3">
+        <article class="pcard p1"><span class="tag">Copilot pattern</span><h3>A question → an answer you act on</h3><p class="sub">You stay in the app, ask for a summary, draft, or analysis, review it, and take the next step yourself.</p><div class="choose"><b>Signal:</b> the need is fast, conversational, and app-local.</div></article>
+        <article class="pcard p2"><span class="tag">Cowork pattern</span><h3>One contained task → a folder of finished outputs</h3><p class="sub">You define the deliverable, delegate it, and refine within one task; the results land together, ready to review or download.</p><div class="choose"><b>Signal:</b> the outcome is knowable and the work fans out into artifacts.</div></article>
+        <article class="pcard p3"><span class="tag">Agent pattern</span><h3>A defined process → run repeatedly, grounded and governed</h3><p class="sub">You build the capability once, ground it on your data, publish it, and let it serve many people on a schedule or trigger.</p><div class="choose"><b>Signal:</b> the same work should run consistently for a team or the people you serve.</div></article>
+      </div>
+      <div class="table-wrap" style="margin-top:24px;">
+        <table>
+          <thead><tr><th>Example assignment</th><th>Best starting point</th><th>Why it fits</th></tr></thead>
+          <tbody id="patternsBody">
+            <tr><td>Summarize a faculty email and draft a reply</td><td>Copilot</td><td>One conversational turn against context already open in front of you.</td></tr>
+            <tr><td>Consolidate a term's course feedback into a workbook</td><td>Cowork</td><td>A defined window, known sources, and a structured deliverable.</td></tr>
+            <tr><td>Personalized outreach to admitted students</td><td>Cowork</td><td>One skill fans out many per-student messages, contained to a single task.</td></tr>
+            <tr><td>Answer student FAQs on your website 24/7</td><td>Copilot agent</td><td>Repeatable, grounded, always-on, and student-facing.</td></tr>
+            <tr><td>Route and triage help-desk tickets by policy</td><td>Copilot agent</td><td>Needs grounding, actions across systems, and consistent rules at volume.</td></tr>
+            <tr><td>Daily enrollment digest to leadership</td><td>Copilot agent</td><td>Scheduled, stateful, and notifies only when useful.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENARIOS -->
+  <section id="scenarios">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Examples</span>
+        <h2>Common business scenarios</h2>
+        <p id="scenSub">Filter by work type. Each card names the best starting point and the condition that would move the task to another tool.</p>
+        <p class="sec-xref">Each card is an instance of one of the three <a href="#patterns">usage patterns</a> above—the colour of the recommended tool tells you which.</p>
+      </div>
+      <div class="filters" id="filters">
+        <button class="active" data-cat="all">All scenarios</button>
+        <button data-cat="content">Content</button>
+        <button data-cat="meetings">Meetings</button>
+        <button data-cat="analysis">Analysis</button>
+        <button data-cat="workflows">Workflows</button>
+      </div>
+      <div class="scen-grid" id="scenGrid">
+        <article class="scen" data-cat="content"><span class="kicker">Content</span><h3>Rewrite a message to students</h3><p>You have the note and want it clearer, warmer, or more concise.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — move to Cowork if it becomes a reviewable batch.</div></article>
+        <article class="scen" data-cat="content"><span class="kicker">Content</span><h3>Improve three lecture slides</h3><p>You know the material and want stronger wording and structure.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — use Cowork for a full template-and-folder production run.</div></article>
+        <article class="scen" data-cat="meetings"><span class="kicker">Meetings</span><h3>Prepare for a faculty or committee meeting</h3><p>You need the agenda summarized, likely questions, and talking points.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — use Cowork when prep spans many meetings and follow-ups.</div></article>
+        <article class="scen" data-cat="meetings"><span class="kicker">Meetings</span><h3>Build a weekly advising-prep pack</h3><p>For each advising session, gather context, brief, and draft follow-up.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — a bounded, repeatable workstream with reviewable outputs.</div></article>
+        <article class="scen" data-cat="analysis"><span class="kicker">Analysis</span><h3>Explain an enrollment spreadsheet</h3><p>You need trends, anomalies, or a narrative from a workbook.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — use Cowork when many workbooks become a finished report.</div></article>
+        <article class="scen" data-cat="analysis"><span class="kicker">Analysis</span><h3>Extract applicant contacts to a workbook</h3><p>Turn scattered context into a structured, reviewable dataset.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — a defined input and a structured deliverable.</div></article>
+        <article class="scen" data-cat="analysis"><span class="kicker">Analysis</span><h3>Create a term business review</h3><p>Combine data, notes, and metrics into a review-ready narrative.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — assembled from known sources and refined in one task.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Personalized outreach to admitted students</h3><p>Apply known messaging and create one draft per student in a folder.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — multi-step but bounded, repeatable, and cleanly contained.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Student self-service assistant on your website</h3><p>A branded assistant answering 24/7, grounded in your content.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — repeatable, grounded, and student-facing.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>IT help desk in Teams</h3><p>Resolve student and staff IT questions from your knowledge base.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — always-on, grounded, and shared across the institution.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Daily enrollment / retention digest</h3><p>On a schedule, collect sources, rank changes, and notify when useful.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — needs persistent state, scheduling, and controlled notifications.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Triage &amp; route student service requests</h3><p>Classify requests and route to the right office by policy.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — connected data and approval-gated actions, FERPA-aware.</div></article>
+      </div>
+      <div class="note" id="scenNote" hidden></div>
+    </div>
+  </section>
+
   <!-- AGENT POWER -->
   <section id="power">
     <div class="wrap">
       <div class="sec-head">
         <span class="eyebrow">Agent power</span>
         <h2>Where Copilot agents extend furthest</h2>
-        <p>Cowork is optimized for contained execution. Copilot agents are an extensible platform for capabilities you build, connect, automate, and deploy beyond a single task run.</p>
+        <p>A deeper dive for readers whose answer above pointed to agents. Cowork is optimized for contained execution; Copilot agents are an extensible platform for capabilities you build, connect, automate, and deploy beyond a single task run.</p>
       </div>
       <div class="num-grid">
         <div class="ncard"><span class="n">1</span><b>Grounding on your data</b><p>Connect agents to SharePoint, Dataverse, websites, and enterprise systems so answers cite your knowledge.</p></div>
@@ -495,163 +659,6 @@
         <div class="ncard"><span class="n">12</span><b>Enrollment &amp; retention digest</b><p>Assemble a scheduled summary of enrollment or retention metrics.</p></div>
       </div>
       <div class="note"><b>Common pattern:</b> agents shine for high-volume, repeatable work that should run the same way every time—grounded in your data and available wherever your people and the public already are.</div>
-    </div>
-  </section>
-
-  <!-- USAGE PATTERNS -->
-  <section id="patterns">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="eyebrow">Usage patterns</span>
-        <h2>How they show up in real work</h2>
-        <p>The clearest signal is the shape of the work—who steers, how long it runs, where it executes, and whether it repeats.</p>
-      </div>
-      <div class="cards-3">
-        <article class="pcard p1"><span class="tag">Copilot pattern</span><h3>A question → an answer you act on</h3><p class="sub">You stay in the app, ask for a summary, draft, or analysis, review it, and take the next step yourself.</p><div class="choose"><b>Signal:</b> the need is fast, conversational, and app-local.</div></article>
-        <article class="pcard p2"><span class="tag">Cowork pattern</span><h3>One contained task → a folder of finished outputs</h3><p class="sub">You define the deliverable, delegate it, and refine within one task; the results land together, ready to review or download.</p><div class="choose"><b>Signal:</b> the outcome is knowable and the work fans out into artifacts.</div></article>
-        <article class="pcard p3"><span class="tag">Agent pattern</span><h3>A defined process → run repeatedly, grounded and governed</h3><p class="sub">You build the capability once, ground it on your data, publish it, and let it serve many people on a schedule or trigger.</p><div class="choose"><b>Signal:</b> the same work should run consistently for a team or the people you serve.</div></article>
-      </div>
-      <div class="table-wrap" style="margin-top:24px;">
-        <table>
-          <thead><tr><th>Example assignment</th><th>Best starting point</th><th>Why it fits</th></tr></thead>
-          <tbody id="patternsBody">
-            <tr><td>Summarize a faculty email and draft a reply</td><td>Copilot</td><td>One conversational turn against context already open in front of you.</td></tr>
-            <tr><td>Consolidate a term's course feedback into a workbook</td><td>Cowork</td><td>A defined window, known sources, and a structured deliverable.</td></tr>
-            <tr><td>Personalized outreach to admitted students</td><td>Cowork</td><td>One skill fans out many per-student messages, contained to a single task.</td></tr>
-            <tr><td>Answer student FAQs on your website 24/7</td><td>Copilot agent</td><td>Repeatable, grounded, always-on, and student-facing.</td></tr>
-            <tr><td>Route and triage help-desk tickets by policy</td><td>Copilot agent</td><td>Needs grounding, actions across systems, and consistent rules at volume.</td></tr>
-            <tr><td>Daily enrollment digest to leadership</td><td>Copilot agent</td><td>Scheduled, stateful, and notifies only when useful.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- COMPARISON -->
-  <section id="comparison">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="eyebrow">Compare</span>
-        <h2>Side-by-side comparison</h2>
-        <p>The clearest distinction is not “which AI is smartest?” It is who steers, how long the work runs, where it executes, and what kind of outcome it must produce.</p>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Dimension</th><th class="c1">Copilot</th><th class="c2">Copilot Cowork</th><th class="c3">Copilot agents</th></tr></thead>
-          <tbody>
-            <tr><td>Primary job</td><td>Answer, create, summarize, analyze, or assist</td><td>Run a fast, contained multi-step assignment and package its outputs</td><td>Serve a repeatable, grounded capability to many people</td></tr>
-            <tr><td>Interaction model</td><td>Conversation; you steer prompt by prompt</td><td>One task; the process fans out and returns one organized output package</td><td>Configured once; runs many times on chat, schedule, or trigger</td></tr>
-            <tr><td>Human role</td><td>You do the work with AI help</td><td>You direct, review, and approve</td><td>You design intent, grounding, and approval boundaries; the agent runs</td></tr>
-            <tr><td>Power ceiling</td><td>Focused assistance</td><td>Strong contained agentic execution</td><td>High: grounding, actions, connectors, orchestration, and autonomy</td></tr>
-            <tr><td>Grounding</td><td>The current chat, app, file, email, meeting, or M365 context</td><td>Multiple M365 sources, files, messages, meetings, skills, and plugins</td><td>Your knowledge sources, systems, and data—cited in responses</td></tr>
-            <tr><td>Actions</td><td>Usually user-led in the current experience</td><td>Plans and stages actions with human checkpoints</td><td>Takes actions through connectors and APIs; consequential steps gated</td></tr>
-            <tr><td>Automation depth</td><td>Prompt reuse and product-supported agents</td><td>Scheduled prompts and event-driven tasks centered on M365</td><td>Schedules, event triggers, and autonomous multi-step runs</td></tr>
-            <tr><td>Typical duration</td><td>Seconds to minutes</td><td>Minutes to hours; bounded runs feel faster because outputs stay contained</td><td>Ongoing / on-demand—runs whenever it's invoked or triggered</td></tr>
-            <tr><td>Typical output</td><td>An answer, draft, summary, analysis, or table</td><td>One organized output folder: briefing, deck, workbook, report, or batch</td><td>An in-channel answer, action, or artifact—repeated reliably</td></tr>
-            <tr><td>Reach</td><td>Just you</td><td>You and your immediate work</td><td>A team, the organization, or the people you serve</td></tr>
-            <tr><td>Typical builder</td><td>Any user</td><td>Any user</td><td>Makers &amp; IT with Copilot Studio</td></tr>
-            <tr><td>Definition of done</td><td>Can emerge through conversation</td><td>Should be clear before delegation</td><td>Designed and tested before publishing</td></tr>
-            <tr><td>Use first when</td><td>The need is simple, quick, conversational, or app-local</td><td>The work is bounded, delegated, reviewable, and benefits from one task workspace</td><td>The work is repeatable, grounded, always-on, or shared with many</td></tr>
-            <tr><td>Move up or across when</td><td>The task becomes a delegated multi-step workstream</td><td>The task should run the same way for others, grounded and governed</td><td>A quick chat or a bounded task would reduce unnecessary complexity</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- DECISION HELPER -->
-  <section id="matcher">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="eyebrow">Decision helper</span>
-        <h2>Which should I use?</h2>
-        <p>Answer five questions about the shape of the work—not the topic—and one about the data it touches. The result is a starting point, not a rule: preference, familiarity, access, and interaction style can reasonably change the choice.</p>
-      </div>
-      <div class="helper">
-        <div class="form">
-          <div class="q"><label for="q1">How much do you want to steer?</label>
-            <select id="q1"><option value="0">I want to steer every step</option><option value="1">I want one contained run and output package</option><option value="2">I want the workflow built and running on its own</option></select></div>
-          <div class="q"><label for="q2">How complex is the work?</label>
-            <select id="q2"><option value="0">One answer, draft, summary, or analysis</option><option value="1">Multi-step, but bounded</option><option value="2">Repeatable and grounded in our data</option></select></div>
-          <div class="q"><label for="q3">Where must it execute?</label>
-            <select id="q3"><option value="0">In chat or a Microsoft 365 app</option><option value="1">Across M365 sources into one task folder</option><option value="2">Across our data, systems, or public-facing channels</option></select></div>
-          <div class="q"><label for="q4">Will you repeat it?</label>
-            <select id="q4"><option value="0">No, this is mostly one-time</option><option value="1">Yes, rerun as one packaged task</option><option value="2">Yes, scheduled or triggered automatically</option></select></div>
-          <div class="q"><label for="q5">Who is it for?</label>
-            <select id="q5"><option value="0">Just me</option><option value="1">Me plus a few teammates</option><option value="2">A whole team, org, or the people we serve</option></select></div>
-          <div class="q"><label for="q6" id="q6Label">What data does it touch?</label>
-            <select id="q6"><option value="0">Public or already-published info</option><option value="1">Directory information</option><option value="2">FERPA education records</option></select></div>
-        </div>
-        <div class="result" id="result">
-          <span class="rec-eyebrow">Recommended starting point</span>
-          <h3 class="rec" id="recName">Copilot</h3>
-          <p class="why" id="recWhy"><b>Why:</b> The task is best handled with frequent human steering and does not require a delegated or grounded workflow.</p>
-          <div class="bar">
-            <div class="meter m1"><span class="name c1">Copilot</span><span class="track"><span class="fill" id="f1" style="width:60%"></span></span><span id="p1v">60</span></div>
-            <div class="meter m2"><span class="name c2">Cowork</span><span class="track"><span class="fill" id="f2" style="width:20%"></span></span><span id="p2v">20</span></div>
-            <div class="meter m3"><span class="name c3">Agents</span><span class="track"><span class="fill" id="f3" style="width:20%"></span></span><span id="p3v">20</span></div>
-          </div>
-          <div class="rec-caveat" id="recCaveat" hidden></div>
-          <p class="rec-note">The data question does not change the recommendation—the shape of the work does. It sets the conditions you must meet before you build.</p>
-        </div>
-      </div>
-
-      <!-- USE / AVOID -->
-      <div class="use-grid" style="margin-top:36px;">
-        <div class="use">
-          <span class="tag" style="color:var(--c1)">Use Copilot when</span>
-          <div class="row"><strong>You need an answer or assist</strong><span>Summarize, explain, compare, brainstorm, rewrite, analyze, or draft.</span></div>
-          <div class="row"><strong>You will assemble the result</strong><span>You are still choosing the next step and doing the final work.</span></div>
-          <div class="row"><strong>The task is short</strong><span>One or a few conversational turns should finish it.</span></div>
-          <div class="foot"><b>Avoid as the default:</b> when you are manually prompting through a predictable process that could be delegated or automated.</div>
-        </div>
-        <div class="use">
-          <span class="tag" style="color:var(--c2)">Use Cowork when</span>
-          <div class="row"><strong>You can state “done” clearly</strong><span>The deliverable, audience, format, sources, and constraints are knowable.</span></div>
-          <div class="row"><strong>You want one-go execution</strong><span>A skill can run in one contained chat without redesigning the process.</span></div>
-          <div class="row"><strong>You want a finished output folder</strong><span>A briefing, deck, report, or batch of per-item files should stay together.</span></div>
-          <div class="foot"><b>Move to an agent:</b> when the same bounded work should run repeatedly for others, grounded and governed.</div>
-        </div>
-        <div class="use">
-          <span class="tag" style="color:var(--c3)">Use an agent when</span>
-          <div class="row"><strong>The work repeats at volume</strong><span>Many people need the same capability, consistently.</span></div>
-          <div class="row"><strong>It must be grounded</strong><span>Answers should cite your documents, data, and systems.</span></div>
-          <div class="row"><strong>It should act or run on its own</strong><span>Take approved actions, or run on a schedule or trigger.</span></div>
-          <div class="foot"><b>Don't overbuild:</b> if Copilot or Cowork comfortably fits, an agent's setup and governance may not be worth it.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- SCENARIOS -->
-  <section id="scenarios">
-    <div class="wrap">
-      <div class="sec-head">
-        <span class="eyebrow">Examples</span>
-        <h2>Common business scenarios</h2>
-        <p id="scenSub">Filter by work type. Each card names the best starting point and the condition that would move the task to another tool.</p>
-      </div>
-      <div class="filters" id="filters">
-        <button class="active" data-cat="all">All scenarios</button>
-        <button data-cat="content">Content</button>
-        <button data-cat="meetings">Meetings</button>
-        <button data-cat="analysis">Analysis</button>
-        <button data-cat="workflows">Workflows</button>
-      </div>
-      <div class="scen-grid" id="scenGrid">
-        <article class="scen" data-cat="content"><span class="kicker">Content</span><h3>Rewrite a message to students</h3><p>You have the note and want it clearer, warmer, or more concise.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — move to Cowork if it becomes a reviewable batch.</div></article>
-        <article class="scen" data-cat="content"><span class="kicker">Content</span><h3>Improve three lecture slides</h3><p>You know the material and want stronger wording and structure.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — use Cowork for a full template-and-folder production run.</div></article>
-        <article class="scen" data-cat="meetings"><span class="kicker">Meetings</span><h3>Prepare for a faculty or committee meeting</h3><p>You need the agenda summarized, likely questions, and talking points.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — use Cowork when prep spans many meetings and follow-ups.</div></article>
-        <article class="scen" data-cat="meetings"><span class="kicker">Meetings</span><h3>Build a weekly advising-prep pack</h3><p>For each advising session, gather context, brief, and draft follow-up.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — a bounded, repeatable workstream with reviewable outputs.</div></article>
-        <article class="scen" data-cat="analysis"><span class="kicker">Analysis</span><h3>Explain an enrollment spreadsheet</h3><p>You need trends, anomalies, or a narrative from a workbook.</p><div class="start"><span class="lab">Start with</span><b class="c1">Copilot</b> — use Cowork when many workbooks become a finished report.</div></article>
-        <article class="scen" data-cat="analysis"><span class="kicker">Analysis</span><h3>Extract applicant contacts to a workbook</h3><p>Turn scattered context into a structured, reviewable dataset.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — a defined input and a structured deliverable.</div></article>
-        <article class="scen" data-cat="analysis"><span class="kicker">Analysis</span><h3>Create a term business review</h3><p>Combine data, notes, and metrics into a review-ready narrative.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — assembled from known sources and refined in one task.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Personalized outreach to admitted students</h3><p>Apply known messaging and create one draft per student in a folder.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — multi-step but bounded, repeatable, and cleanly contained.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Student self-service assistant on your website</h3><p>A branded assistant answering 24/7, grounded in your content.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — repeatable, grounded, and student-facing.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>IT help desk in Teams</h3><p>Resolve student and staff IT questions from your knowledge base.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — always-on, grounded, and shared across the institution.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Daily enrollment / retention digest</h3><p>On a schedule, collect sources, rank changes, and notify when useful.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — needs persistent state, scheduling, and controlled notifications.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Triage &amp; route student service requests</h3><p>Classify requests and route to the right office by policy.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — connected data and approval-gated actions, FERPA-aware.</div></article>
-      </div>
     </div>
   </section>
 
@@ -727,9 +734,8 @@
       <div class="note"><b>Start simple, then graduate the workflow.</b> Most work should begin with Copilot. Move to Cowork when the assignment is clear enough to delegate. Move to an agent when the workflow should run repeatedly, grounded in your data, for many people. Availability and capabilities depend on licensing, configuration, permissions, and policy.</div>
     </div>
   </section>
-</main>
 
-<footer>
+  <footer>
   <div class="wrap">
     <div class="disclaimer">This guide is an informational decision aid, not a contractual or licensing document. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 16, 2026.</b></div>
     <div>Choose the right way to work with AI · <span id="year"></span></div>
@@ -784,6 +790,21 @@
     els.name.style.color = META[win].color;
     els.why.innerHTML = "<b>Why:</b> " + META[win].why;
     els.result.style.borderColor = META[win].color;
+    // Surface near-ties rather than presenting a coin-flip as a confident answer.
+    // Ties resolve toward the simpler tool by design ("start simple, escalate on
+    // need"), but the reader should be told the margin was thin.
+    const order = [0,1,2].sort((a,b) => s[b]-s[a]);
+    const gap = s[order[0]] - s[order[1]];
+    const close = document.getElementById("recClose");
+    if (gap <= 2) {
+      close.hidden = false;
+      const margin = gap === 0 ? "score identically"
+        : "score within " + gap + " point" + (gap === 1 ? "" : "s");
+      close.innerHTML = "<b>Close call:</b> " + META[order[0]].name + " and " + META[order[1]].name +
+        " " + margin + ". Either is defensible—your answers point both ways. Start with the simpler one and escalate if it stops fitting.";
+    } else {
+      close.hidden = true; close.innerHTML = "";
+    }
     renderCaveat(win);
   }
 
@@ -895,6 +916,7 @@
         ["Daily operations digest to leadership","Copilot agent","Scheduled, stateful, and notifies only when useful."],
       ],
       scenSub: "Filter by work type. Examples are drawn from public-sector work; each names the best starting point and when to move.",
+      scenNote: '<b>Cloud tier check:</b> the agent-based examples here—public-facing assistants, Teams help desks, and connector-driven routing—are exactly where <b>GCC-Moderate</b> feature coverage is most likely to lag commercial, since they depend on publishing channels and connectors. Confirm availability for your tenant before you scope one of these.',
       scenarios: [
         ["content","Rewrite a public notice","You have the notice and want it clearer, plainer, or more concise.","c1","Copilot","move to Cowork if it becomes a reviewable batch."],
         ["content","Improve three briefing slides","You know the material and want stronger wording and structure.","c1","Copilot","use Cowork for a full template-and-folder production run."],
@@ -903,9 +925,9 @@
         ["analysis","Explain a budget spreadsheet","You need trends, anomalies, or a narrative from a workbook.","c1","Copilot","use Cowork when many workbooks become a finished report."],
         ["analysis","Extract permit-holder contacts to a workbook","Turn scattered context into a structured, reviewable dataset.","c2","Cowork","a defined input and a structured deliverable."],
         ["analysis","Create a monthly operations review","Combine data, notes, and metrics into a review-ready narrative.","c2","Cowork","assembled from known sources and refined in one task."],
-        ["workflows","Personalized notices to permit / license holders","Apply known messaging and create one notice per recipient in a folder.","c2","Cowork","multi-step but bounded, repeatable, and cleanly contained."],
+        ["workflows","Status updates across an active caseload","Apply known update logic and create one per-case status draft, held for review, in one output folder.","c2","Cowork","multi-step but bounded, repeatable, and cleanly contained."],
         ["workflows","Resident self-service assistant on your website","A branded assistant answering 24/7, grounded in your content.","c3","Copilot agent","repeatable, grounded, and resident-facing."],
-        ["workflows","Employee IT help desk in Teams","Resolve staff IT questions from your policies and knowledge base.","c3","Copilot agent","always-on, grounded, and shared across the agency."],
+        ["workflows","Policy & general-orders help desk in Teams","Resolve procedural questions from your SOP and policy library, with hand-off to a supervisor on edge cases.","c3","Copilot agent","always-on, grounded, and shared across the agency."],
         ["workflows","Daily operations digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs persistent state, scheduling, and controlled notifications."],
         ["workflows","Triage & route 311 / service requests","Classify requests and route to the right department by policy.","c3","Copilot agent","connected data and approval-gated actions, records-aware."],
       ],
@@ -953,6 +975,9 @@
     document.getElementById("heroEg").innerHTML = d.heroEg;
     document.getElementById("practiceSub").textContent = d.practiceSub;
     document.getElementById("scenSub").textContent = d.scenSub;
+    const sn = document.getElementById("scenNote");
+    if (d.scenNote) { sn.hidden = false; sn.innerHTML = d.scenNote; }
+    else { sn.hidden = true; sn.innerHTML = ""; }
     document.getElementById("guardNote").innerHTML = d.guardNote;
     document.getElementById("practiceGrid").innerHTML = d.practice.map((p,i) =>
       `<div class="ncard"><span class="n">${i+1}</span><b>${esc(p[0])}</b><p>${esc(p[1])}</p></div>`).join("");
