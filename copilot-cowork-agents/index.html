@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Copilot, Cowork, or Agents? | Choose the right Microsoft AI</title>
+<meta name="description" content="A simple decision hub to help you choose between Microsoft 365 Copilot, Microsoft Cowork, and Copilot agents for any task." />
+<script>
+  (() => {
+    const saved = (() => { try { return localStorage.getItem("aiHubTheme"); } catch (e) { return null; } })();
+    const param = new URLSearchParams(window.location.search).get("theme");
+    const theme = param || saved || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3f4f8;
+    --bg-grad-1: #eef2fb;
+    --bg-grad-2: #f6f0fa;
+    --surface: #ffffff;
+    --surface-soft: #f6f7fb;
+    --border: #e3e6ee;
+    --border-strong: #c7ccdb;
+    --text: #1b1c21;
+    --text-muted: #565a66;
+    --text-soft: #757a88;
+    --accent: #0f6cbd;
+    --accent-hover: #0c568f;
+    --accent-soft: rgba(15, 108, 189, 0.08);
+    --accent-fg: #ffffff;
+    --c1: #0f6cbd; /* Copilot */
+    --c1-soft: rgba(15,108,189,0.10);
+    --c2: #7a5cc7; /* Cowork */
+    --c2-soft: rgba(122,92,199,0.10);
+    --c3: #0a8a5f; /* Agents */
+    --c3-soft: rgba(10,138,95,0.10);
+    --success: #16794a;
+    --warning: #b45309;
+    --shadow: 0 1px 2px rgba(20,24,40,0.06), 0 8px 28px rgba(20,24,40,0.08);
+    --shadow-soft: 0 0 2px rgba(0,0,0,0.10), 0 1px 2px rgba(0,0,0,0.10);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --maxw: 1120px;
+  }
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #16181d;
+    --bg-grad-1: #1a1e2a;
+    --bg-grad-2: #211b2b;
+    --surface: #21242c;
+    --surface-soft: #262a33;
+    --border: #333846;
+    --border-strong: #454b5c;
+    --text: #e7e9ef;
+    --text-muted: #a3a9b8;
+    --text-soft: #8b91a1;
+    --accent: #5aa7e8;
+    --accent-hover: #78b8ee;
+    --accent-soft: rgba(90,167,232,0.14);
+    --accent-fg: #10151b;
+    --c1: #5aa7e8;
+    --c1-soft: rgba(90,167,232,0.14);
+    --c2: #b39af0;
+    --c2-soft: rgba(179,154,240,0.14);
+    --c3: #4fc79a;
+    --c3-soft: rgba(79,199,154,0.14);
+    --success: #58d69a;
+    --warning: #f0b45a;
+    --shadow: 0 1px 2px rgba(0,0,0,0.4), 0 10px 30px rgba(0,0,0,0.4);
+    --shadow-soft: 0 0 2px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.4);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, var(--bg-grad-2), transparent 60%),
+      radial-gradient(1000px 500px at 0% 0%, var(--bg-grad-1), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 22px; }
+  .eyebrow {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--text-soft);
+  }
+
+  /* Header */
+  header.topbar {
+    position: sticky; top: 0; z-index: 50;
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    backdrop-filter: saturate(140%) blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-inner { display: flex; align-items: center; gap: 18px; height: 60px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; white-space: nowrap; }
+  .brand .logo {
+    width: 26px; height: 26px; border-radius: 7px; flex: none;
+    background: conic-gradient(from 210deg, var(--c1), var(--c2), var(--c3), var(--c1));
+  }
+  nav.sections { display: flex; gap: 4px; margin-left: auto; overflow-x: auto; }
+  nav.sections a {
+    text-decoration: none; color: var(--text-muted); font-size: 13.5px;
+    padding: 7px 11px; border-radius: 999px; white-space: nowrap;
+  }
+  nav.sections a:hover { background: var(--accent-soft); color: var(--text); }
+  .theme-btn {
+    flex: none; border: 1px solid var(--border-strong); background: var(--surface);
+    color: var(--text-muted); width: 38px; height: 34px; border-radius: 9px; cursor: pointer;
+    font-size: 15px;
+  }
+  .theme-btn:hover { color: var(--text); border-color: var(--accent); }
+
+  /* Hero */
+  .hero { padding: 62px 0 34px; }
+  .hero-grid { display: grid; grid-template-columns: 1.35fr 1fr; gap: 34px; align-items: start; }
+  h1 { font-size: clamp(30px, 4.4vw, 50px); line-height: 1.05; margin: 12px 0 16px; letter-spacing: -0.02em; }
+  h1 .accent { background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { font-size: 17px; color: var(--text-muted); max-width: 56ch; }
+  .cta-row { display: flex; gap: 12px; margin-top: 22px; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; text-decoration: none;
+    padding: 11px 18px; border-radius: 999px; font-weight: 600; font-size: 14.5px; cursor: pointer; border: 1px solid transparent;
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); }
+  .btn.primary:hover { background: var(--accent-hover); }
+  .btn.ghost { background: var(--surface); border-color: var(--border-strong); color: var(--text); }
+  .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+  .ladder { display: grid; gap: 12px; }
+  .ladder .step {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: start;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; box-shadow: var(--shadow-soft);
+  }
+  .ladder .num {
+    width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+    font-weight: 700; color: #fff; font-family: Consolas, monospace;
+  }
+  .step.s1 .num { background: var(--c1); }
+  .step.s2 .num { background: var(--c2); }
+  .step.s3 .num { background: var(--c3); }
+  .ladder .step b { display: block; margin-bottom: 2px; }
+  .ladder .step p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+  /* Sections */
+  section { padding: 46px 0; border-top: 1px solid var(--border); }
+  .sec-head { max-width: 62ch; margin-bottom: 26px; }
+  h2 { font-size: clamp(24px, 3vw, 32px); margin: 8px 0 8px; letter-spacing: -0.01em; }
+  .sec-head p { color: var(--text-muted); margin: 0; font-size: 15.5px; }
+
+  .cards-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .pcard {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow-soft); position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+  }
+  .pcard::before { content:""; position:absolute; inset:0 0 auto 0; height:4px; }
+  .pcard.p1::before { background: var(--c1); }
+  .pcard.p2::before { background: var(--c2); }
+  .pcard.p3::before { background: var(--c3); }
+  .pcard .tag { font-family: Consolas, monospace; font-size: 11.5px; text-transform: uppercase; letter-spacing:.06em; }
+  .pcard.p1 .tag { color: var(--c1); }
+  .pcard.p2 .tag { color: var(--c2); }
+  .pcard.p3 .tag { color: var(--c3); }
+  .pcard h3 { margin: 10px 0 6px; font-size: 19px; }
+  .pcard .sub { color: var(--text-muted); font-size: 14px; margin: 0 0 14px; }
+  .pcard ul { margin: 0 0 14px; padding-left: 18px; color: var(--text-muted); font-size: 14px; }
+  .pcard ul li { margin-bottom: 6px; }
+  .pcard .choose {
+    margin-top: auto; background: var(--surface-soft); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px 14px; font-size: 13.5px; color: var(--text);
+  }
+  .pcard .choose b { color: var(--text); }
+
+  .note {
+    margin-top: 22px; background: var(--accent-soft); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px; font-size: 14px; color: var(--text-muted);
+  }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-soft); }
+  table { border-collapse: collapse; width: 100%; min-width: 720px; background: var(--surface); font-size: 14px; }
+  thead th { text-align: left; padding: 14px 16px; background: var(--surface-soft); border-bottom: 1px solid var(--border); font-size: 13px; position: sticky; top: 0; }
+  thead th.c1 { color: var(--c1); } thead th.c2 { color: var(--c2); } thead th.c3 { color: var(--c3); }
+  tbody td { padding: 13px 16px; border-bottom: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+  tbody td:first-child { color: var(--text); font-weight: 600; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* Decision helper */
+  .helper { display: grid; grid-template-columns: 1.1fr 1fr; gap: 24px; align-items: stretch; }
+  .helper .form {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 22px; box-shadow: var(--shadow-soft);
+  }
+  .q { margin-bottom: 16px; }
+  .q label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 7px; }
+  .q select {
+    width: 100%; padding: 11px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong);
+    background: var(--surface-soft); color: var(--text); font-size: 14px; font-family: inherit; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center;
+  }
+  .q select:focus { outline: 2px solid var(--accent); border-color: var(--accent); }
+  .helper .result {
+    border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow-soft);
+    border: 1px solid var(--border); background: var(--surface);
+    display: flex; flex-direction: column; justify-content: center;
+    transition: border-color .2s;
+  }
+  .result .rec-eyebrow { font-family: Consolas, monospace; font-size: 12px; text-transform: uppercase; letter-spacing:.08em; color: var(--text-soft); }
+  .result h3 { font-size: 30px; margin: 6px 0 6px; letter-spacing:-0.01em; }
+  .result .why { color: var(--text-muted); font-size: 14.5px; margin: 0 0 16px; }
+  .result .bar { display: grid; gap: 8px; }
+  .result .meter { display: grid; grid-template-columns: 110px 1fr 34px; align-items: center; gap: 10px; font-size: 12.5px; }
+  .result .meter .track { height: 8px; border-radius: 999px; background: var(--surface-soft); overflow: hidden; border: 1px solid var(--border); }
+  .result .meter .fill { height: 100%; border-radius: 999px; transition: width .4s ease; }
+  .m1 .fill { background: var(--c1); } .m2 .fill { background: var(--c2); } .m3 .fill { background: var(--c3); }
+  .result .meter .name.c1 { color: var(--c1); } .result .meter .name.c2 { color: var(--c2); } .result .meter .name.c3 { color: var(--c3); }
+
+  /* Scenarios */
+  .scen-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .scen {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px; box-shadow: var(--shadow-soft);
+  }
+  .scen .pill { display: inline-block; font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; font-family: Consolas, monospace; }
+  .scen .pill.c1 { background: var(--c1-soft); color: var(--c1); }
+  .scen .pill.c2 { background: var(--c2-soft); color: var(--c2); }
+  .scen .pill.c3 { background: var(--c3-soft); color: var(--c3); }
+  .scen b { display: block; margin-bottom: 4px; font-size: 15px; }
+  .scen p { margin: 0; color: var(--text-muted); font-size: 13.5px; }
+
+  .guard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .guard { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-soft); }
+  .guard b { display:block; margin-bottom: 6px; }
+  .guard p { margin: 0; color: var(--text-muted); font-size: 14px; }
+
+  footer { padding: 40px 0 60px; border-top: 1px solid var(--border); color: var(--text-soft); font-size: 13px; }
+  footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  .disclaimer { max-width: 70ch; }
+
+  @media (max-width: 900px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .cards-3 { grid-template-columns: 1fr; }
+    .helper { grid-template-columns: 1fr; }
+    .scen-grid { grid-template-columns: 1fr; }
+    .guard-grid { grid-template-columns: 1fr; }
+    nav.sections { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#top" style="text-decoration:none;">
+      <span class="logo" aria-hidden="true"></span>
+      <span>Microsoft AI — Which one?</span>
+    </a>
+    <nav class="sections" aria-label="Page sections">
+      <a href="#products">The three</a>
+      <a href="#compare">Compare</a>
+      <a href="#helper">Decision helper</a>
+      <a href="#scenarios">Scenarios</a>
+      <a href="#handoff">Handoffs</a>
+      <a href="#trust">Trust &amp; control</a>
+    </nav>
+    <button class="theme-btn" id="themeToggle" title="Toggle light/dark" aria-label="Toggle theme">◐</button>
+  </div>
+</header>
+
+<a id="top"></a>
+<main>
+  <!-- HERO -->
+  <div class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="eyebrow">Choosing the right AI for the job</span>
+        <h1>Copilot, Cowork, or <span class="accent">agents?</span></h1>
+        <p class="lede">
+          Microsoft gives you more than one way to work with AI. Use <b>Copilot</b> for fast help in the
+          apps you already use. Use <b>Cowork</b> to hand off a defined, multi-step task and refine the
+          result. Use <b>Copilot agents</b> to embed AI into a repeatable process for a team or your
+          customers. The lanes overlap — this guide helps you pick a good starting point.
+        </p>
+        <div class="cta-row">
+          <a class="btn primary" href="#helper">Help me choose →</a>
+          <a class="btn ghost" href="#compare">See the full comparison</a>
+        </div>
+      </div>
+      <div class="ladder" aria-label="Three-level decision">
+        <div class="step s1">
+          <div class="num">1</div>
+          <div><b>Need help while you work?</b><p>Use Copilot for an answer, a draft, a summary, or in-app assistance across Microsoft 365.</p></div>
+        </div>
+        <div class="step s2">
+          <div class="num">2</div>
+          <div><b>Want to delegate a defined task?</b><p>Use Cowork when the outcome is clear, you want the work done for you, and you'll still review and refine it.</p></div>
+        </div>
+        <div class="step s3">
+          <div class="num">3</div>
+          <div><b>Building a repeatable capability?</b><p>Use Copilot agents to automate a process, ground AI in your data, and deploy it to a team or customers.</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <section id="products">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">What each one is</span>
+        <h2>Three ways to put AI to work</h2>
+        <p>The same request can often be handled by more than one. Start with the lane that matches how much you want to delegate and how repeatable the work is.</p>
+      </div>
+      <div class="cards-3">
+        <article class="pcard p1">
+          <span class="tag">Interactive assistance</span>
+          <h3>Microsoft 365 Copilot</h3>
+          <p class="sub">Copilot helps <b>you</b> do the work, in the flow of your apps.</p>
+          <ul>
+            <li>Great for Q&amp;A, drafting, summarizing, analysis, and ideation</li>
+            <li>Works inside Word, Excel, Outlook, Teams, PowerPoint, and Copilot Chat</li>
+            <li>Best for one-turn or short back-and-forth tasks</li>
+            <li>You stay the operator — you ask, review, and take the next step</li>
+          </ul>
+          <div class="choose"><b>Choose it when:</b> you want an answer or an assist right now — not a hands-off workstream.</div>
+        </article>
+        <article class="pcard p2">
+          <span class="tag">Bounded delegated execution</span>
+          <h3>Microsoft Cowork</h3>
+          <p class="sub">Cowork runs a defined, multi-step task with you in the loop.</p>
+          <ul>
+            <li>Give it one bounded goal; it plans steps and works through them</li>
+            <li>Strong for batch production — one output per account, recipient, or item</li>
+            <li>Collects finished files in an output folder to preview or download</li>
+            <li>Pauses for your approval before sensitive actions</li>
+          </ul>
+          <div class="choose"><b>Choose it when:</b> the outcome is defined, you want it delegated, and you'll still review and refine.</div>
+        </article>
+        <article class="pcard p3">
+          <span class="tag">Custom &amp; autonomous</span>
+          <h3>Copilot agents</h3>
+          <p class="sub">Purpose-built agents that run a process and can be shared.</p>
+          <ul>
+            <li>Build with Copilot Studio or use prebuilt agents</li>
+            <li>Ground answers in your own data, documents, and systems</li>
+            <li>Automate a workflow and trigger it on a schedule or an event</li>
+            <li>Deploy to a team, the whole org, or customer-facing channels</li>
+          </ul>
+          <div class="choose"><b>Choose it when:</b> the work is repeatable, needs your data, or should serve many people the same way.</div>
+        </article>
+      </div>
+      <div class="note">
+        <b>These are lanes, not hard gates.</b> Copilot fits fast assistance; Cowork fits bounded, delegated
+        execution with review; agents fit repeatable, grounded, or shared capabilities. Familiarity, licensing,
+        and how much you want to delegate also matter — many tasks work well in more than one.
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARE -->
+  <section id="compare">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Side by side</span>
+        <h2>How they compare</h2>
+        <p>A quick reference across the dimensions that usually drive the choice.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Dimension</th>
+              <th class="c1">Microsoft 365 Copilot</th>
+              <th class="c2">Microsoft Cowork</th>
+              <th class="c3">Copilot agents</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Best for</td><td>Fast help, answers, and drafts</td><td>A defined multi-step deliverable</td><td>A repeatable, shareable capability</td></tr>
+            <tr><td>Who does the work</td><td>You, with assistance</td><td>Cowork, with your review</td><td>The agent, on your rules</td></tr>
+            <tr><td>Interaction</td><td>Conversational, in-app</td><td>One contained task with refinement</td><td>Configured once, runs many times</td></tr>
+            <tr><td>Time horizon</td><td>Seconds to minutes</td><td>Minutes to hours</td><td>Ongoing / on-demand</td></tr>
+            <tr><td>Grounding</td><td>Your M365 content &amp; the web</td><td>Files you provide for the task</td><td>Your data sources, systems, and knowledge</td></tr>
+            <tr><td>Output</td><td>Inline responses and edits</td><td>Files in an output folder</td><td>Actions, answers, or artifacts in-channel</td></tr>
+            <tr><td>Automation</td><td>Manual, in the moment</td><td>Can run on a schedule or trigger</td><td>Scheduled, event-driven, or embedded</td></tr>
+            <tr><td>Reach</td><td>Just you</td><td>You and your immediate work</td><td>A team, the org, or your customers</td></tr>
+            <tr><td>Typical builder</td><td>Any user</td><td>Any user</td><td>Makers &amp; IT with Copilot Studio</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DECISION HELPER -->
+  <section id="helper">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Interactive</span>
+        <h2>Decision helper</h2>
+        <p>Answer four quick questions. The recommendation updates as you go — there are no wrong answers, just a suggested starting point.</p>
+      </div>
+      <div class="helper">
+        <div class="form">
+          <div class="q">
+            <label for="q1">1. How much do you want to steer?</label>
+            <select id="q1">
+              <option value="assist">I want to steer every step</option>
+              <option value="deliverable">I want one contained run and output package</option>
+              <option value="process">I want the workflow investigated or engineered</option>
+            </select>
+          </div>
+          <div class="q">
+            <label for="q2">2. How much do you want to delegate?</label>
+            <select id="q2">
+              <option value="handson">Stay hands-on — I'll drive</option>
+              <option value="review">Delegate, but I'll review the result</option>
+              <option value="automate">Run it automatically for me/others</option>
+            </select>
+          </div>
+          <div class="q">
+            <label for="q3">3. Where must it execute?</label>
+            <select id="q3">
+              <option value="inapp">In chat or a Microsoft 365 app</option>
+              <option value="workspace">In a contained task workspace</option>
+              <option value="systems">Grounded in our data / business systems</option>
+            </select>
+          </div>
+          <div class="q">
+            <label for="q4">4. Who is it for?</label>
+            <select id="q4">
+              <option value="me">Just me</option>
+              <option value="team">Me plus a few teammates</option>
+              <option value="many">A whole team, org, or customers</option>
+            </select>
+          </div>
+        </div>
+        <div class="result" id="result">
+          <span class="rec-eyebrow">Suggested starting point</span>
+          <h3 id="recName">Microsoft 365 Copilot</h3>
+          <p class="why" id="recWhy">Based on your answers, a fast in-app assist is the simplest place to start.</p>
+          <div class="bar">
+            <div class="meter m1"><span class="name c1">Copilot</span><span class="track"><span class="fill" id="f1" style="width:60%"></span></span><span id="p1v">60</span></div>
+            <div class="meter m2"><span class="name c2">Cowork</span><span class="track"><span class="fill" id="f2" style="width:20%"></span></span><span id="p2v">20</span></div>
+            <div class="meter m3"><span class="name c3">Agents</span><span class="track"><span class="fill" id="f3" style="width:20%"></span></span><span id="p3v">20</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCENARIOS -->
+  <section id="scenarios">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Examples</span>
+        <h2>Common scenarios</h2>
+        <p>Real tasks and a sensible default lane for each. Your context may shift the answer.</p>
+      </div>
+      <div class="scen-grid">
+        <div class="scen"><span class="pill c1">Copilot</span><b>Summarize a long email thread</b><p>Ask Copilot in Outlook for the key points and any action items before you reply.</p></div>
+        <div class="scen"><span class="pill c1">Copilot</span><b>Draft a first version of a document</b><p>Generate a starting draft in Word from your notes, then edit it yourself.</p></div>
+        <div class="scen"><span class="pill c1">Copilot</span><b>Explain a spreadsheet</b><p>Ask what a formula does or spot trends in Excel while you stay in control.</p></div>
+        <div class="scen"><span class="pill c2">Cowork</span><b>Personalized outreach for 40 accounts</b><p>Give Cowork the list and template; it produces one tailored file per account to review.</p></div>
+        <div class="scen"><span class="pill c2">Cowork</span><b>Turn a folder of files into a report</b><p>Hand off the sources and the format; refine the draft until it's right, then download.</p></div>
+        <div class="scen"><span class="pill c2">Cowork</span><b>Prep a recurring weekly brief</b><p>Set it to assemble the same brief on a schedule, with your approval before it lands.</p></div>
+        <div class="scen"><span class="pill c3">Agents</span><b>Answer employee HR/IT questions</b><p>Build an agent grounded in your policies so staff self-serve in Teams 24/7.</p></div>
+        <div class="scen"><span class="pill c3">Agents</span><b>Triage inbound customer requests</b><p>An agent classifies, responds, and routes cases against your systems automatically.</p></div>
+        <div class="scen"><span class="pill c3">Agents</span><b>A branded assistant on your website</b><p>Deploy a Copilot Studio agent to answer product questions for your customers.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HANDOFFS -->
+  <section id="handoff">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">They work together</span>
+        <h2>Handing work off between them</h2>
+        <p>The best results often move across lanes as the work matures.</p>
+      </div>
+      <div class="guard-grid">
+        <div class="guard"><b>Copilot → Cowork</b><p>You explored an idea and shaped the output in Copilot. When it becomes a defined, repeatable deliverable across many items, hand it to Cowork to produce at scale.</p></div>
+        <div class="guard"><b>Cowork → Agents</b><p>A Cowork task you run every week is a signal. When the process is stable and should serve others, turn it into a Copilot agent that runs on its own.</p></div>
+        <div class="guard"><b>Agents → Copilot</b><p>An agent surfaces an answer or draft; you refine the specifics with Copilot in your app before it goes out.</p></div>
+        <div class="guard"><b>Start simple, escalate on need</b><p>Begin in the lightest lane that can do the job. Move up only when scale, repeatability, or reach makes it worth it.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRUST -->
+  <section id="trust">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow">Trust &amp; control</span>
+        <h2>Enterprise data protection, by design</h2>
+        <p>All three run on Microsoft's enterprise foundation. A few points customers ask about most.</p>
+      </div>
+      <div class="guard-grid">
+        <div class="guard"><b>Your data stays yours</b><p>Prompts, responses, and your organization's data are not used to train the foundation models. Content is protected within your Microsoft 365 tenant boundary.</p></div>
+        <div class="guard"><b>Permissions are honored</b><p>AI only surfaces content a user already has access to. Existing identity, access, and sensitivity labels are respected end to end.</p></div>
+        <div class="guard"><b>Admin &amp; governance controls</b><p>IT manages availability, data connections, and agent publishing through the Microsoft 365 admin and Copilot Studio governance surfaces.</p></div>
+        <div class="guard"><b>Compliance &amp; residency</b><p>Backed by Microsoft's enterprise compliance commitments, with data-residency options depending on service and region.</p></div>
+      </div>
+      <div class="note">
+        Capabilities, packaging, and licensing evolve. Confirm current specifics with your Microsoft representative
+        or the official product documentation before making commitments.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="disclaimer">
+      This guide is an informational decision aid, not a contractual or licensing document. Product names,
+      capabilities, and availability are subject to change. Confirm specifics with official Microsoft
+      documentation and your Microsoft representative.
+    </div>
+    <div>Built as a customer-facing decision hub · <span id="year"></span></div>
+  </div>
+</footer>
+
+<script>
+  // Theme toggle
+  const root = document.documentElement;
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("aiHubTheme", next); } catch (e) {}
+  });
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  // Decision helper scoring
+  const els = {
+    q1: document.getElementById("q1"),
+    q2: document.getElementById("q2"),
+    q3: document.getElementById("q3"),
+    q4: document.getElementById("q4"),
+    name: document.getElementById("recName"),
+    why: document.getElementById("recWhy"),
+    f: [document.getElementById("f1"), document.getElementById("f2"), document.getElementById("f3")],
+    p: [document.getElementById("p1v"), document.getElementById("p2v"), document.getElementById("p3v")],
+    result: document.getElementById("result"),
+  };
+
+  // weights: [copilot, cowork, agents]
+  const W = {
+    q1: { assist:[6,1,0], deliverable:[1,6,2], process:[0,2,6] },
+    q2: { handson:[6,1,0], review:[1,6,1], automate:[0,2,6] },
+    q3: { inapp:[6,1,0], workspace:[1,6,1], systems:[0,1,6] },
+    q4: { me:[5,2,0], team:[1,4,3], many:[0,1,6] },
+  };
+  const META = [
+    { key:"c1", name:"Microsoft 365 Copilot",
+      why:"You want fast, in-app help and you'll stay in control — Copilot is the simplest place to start." },
+    { key:"c2", name:"Microsoft Cowork",
+      why:"The outcome is defined and you'd rather delegate the multi-step work, then review and refine it — that's Cowork's sweet spot." },
+    { key:"c3", name:"Copilot agents",
+      why:"The work is repeatable, needs your data, or should serve many people — build it once as an agent and let it run." },
+  ];
+  const ACCENT = ["var(--c1)","var(--c2)","var(--c3)"];
+
+  function compute() {
+    const s = [0,0,0];
+    [["q1"],["q2"],["q3"],["q4"]].forEach(([q]) => {
+      const w = W[q][els[q].value];
+      for (let i=0;i<3;i++) s[i]+=w[i];
+    });
+    const total = s[0]+s[1]+s[2] || 1;
+    const pct = s.map(v => Math.round((v/total)*100));
+    // fix rounding to 100
+    const diff = 100 - (pct[0]+pct[1]+pct[2]);
+    pct[pct.indexOf(Math.max(...pct))] += diff;
+
+    let win = 0;
+    if (s[1] > s[win]) win = 1;
+    if (s[2] > s[win]) win = 2;
+
+    for (let i=0;i<3;i++){ els.f[i].style.width = pct[i]+"%"; els.p[i].textContent = pct[i]; }
+    els.name.textContent = META[win].name;
+    els.name.style.color = ACCENT[win];
+    els.why.textContent = META[win].why;
+    els.result.style.borderColor = ACCENT[win];
+  }
+  ["q1","q2","q3","q4"].forEach(q => els[q].addEventListener("change", compute));
+  compute();
+</script>
+</body>
+</html>
