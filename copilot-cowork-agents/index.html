@@ -711,9 +711,9 @@
       <div class="sec-head" style="margin-top:44px;">
         <h2 style="font-size:clamp(24px,3vw,32px);">Licensing &amp; availability</h2>
         <p style="font-size:15px; color:var(--text-muted);">
-          <b>Copilot &amp; Cowork:</b> Included with Microsoft 365 Copilot license (add-on to Microsoft 365 for enterprise). 
-          <b>Copilot agents:</b> Built with Copilot Studio (capacity-based pricing via message packs; free tier available for evaluation). 
-          Commercial cloud availability confirmed; government cloud (GCC-Moderate/High) support varies by service—confirm with your Microsoft team.
+          <b>Copilot &amp; Cowork:</b> Included with Microsoft 365 Copilot license (add-on to Microsoft 365 for enterprise).
+          <b>Copilot agents:</b> Built with Copilot Studio. Authoring agents grounded in tenant data requires a Microsoft 365 Copilot license or Copilot Studio pay-as-you-go billing (consumed as Copilot Credits).
+          <b>Government cloud:</b> Copilot Studio US Government plans are licensed the same as public cloud and are available in GCC and GCC High—but pay-as-you-go billing is <i>not</i> supported in GCC or GCC High, so the licensed path applies there. Confirm specifics with your Microsoft team.
         </p>
       </div>
 
@@ -732,6 +732,11 @@
           <a class="reflink" href="https://learn.microsoft.com/microsoft-copilot-studio/" target="_blank" rel="noopener"><span class="body"><strong>Copilot Studio documentation</strong><span>Build, extend, publish, and govern custom agents.</span></span><span class="arrow">↗</span></a>
           <a class="reflink" href="https://www.microsoft.com/microsoft-copilot/microsoft-copilot-studio" target="_blank" rel="noopener"><span class="body"><strong>Copilot Studio overview</strong><span>Product overview, pricing, and getting started.</span></span><span class="arrow">↗</span></a>
         </div>
+        <div class="refcol" id="govRefs" hidden>
+          <span class="tag">Government cloud</span>
+          <a class="reflink" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-licensing-gcc" target="_blank" rel="noopener"><span class="body"><strong>Copilot Studio for US Government customers</strong><span>GCC and GCC High plans, FedRAMP High, CJIS eligibility, and client limits.</span></span><span class="arrow">↗</span></a>
+          <a class="reflink" href="https://learn.microsoft.com/en-us/microsoft-365/copilot/extensibility/prerequisites" target="_blank" rel="noopener"><span class="body"><strong>Copilot extensibility prerequisites</strong><span>Licensing models, and what isn't available in GCC, GCC High, and DoD.</span></span><span class="arrow">↗</span></a>
+        </div>
       </div>
       <div class="note"><b>Start simple, then graduate the workflow.</b> Most work should begin with Copilot. Move to Cowork when the assignment is clear enough to delegate. Move to an agent when the workflow should run repeatedly, grounded in your data, for many people. Availability and capabilities depend on licensing, configuration, permissions, and policy.</div>
     </div>
@@ -739,7 +744,7 @@
 
   <footer>
   <div class="wrap">
-    <div class="disclaimer">This guide is an informational decision aid, not a contractual or licensing document. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 16, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-16 19:01 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
+    <div class="disclaimer">This guide is an informational decision aid, not a contractual or licensing document. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 16, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-16 19:07 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
     <div>Choose the right way to work with AI · <span id="year"></span></div>
   </div>
 </footer>
@@ -918,7 +923,7 @@
         ["Daily operations digest to leadership","Copilot agent","Scheduled, stateful, and notifies only when useful."],
       ],
       scenSub: "Filter by work type. Examples are drawn from public-sector work; each names the best starting point and when to move.",
-      scenNote: '<b>Cloud tier check:</b> the agent-based examples here—public-facing assistants, Teams help desks, and connector-driven routing—are exactly where <b>GCC-Moderate</b> feature coverage is most likely to lag commercial, since they depend on publishing channels and connectors. Confirm availability for your tenant before you scope one of these.',
+      scenNote: '<b>Government cloud check:</b> these examples assume a commercial tenant. If yours is <b>GCC</b>, <b>GCC High</b>, or <b>DoD</b>, three documented limits hit this list directly—agents grounded in <b>shared tenant work data</b> aren\'t currently available in those environments; Copilot Studio US Government client access is limited to the web client and <b>isn\'t available in Microsoft Teams</b> (which affects the Teams help-desk example specifically); and <b>pay-as-you-go billing isn\'t supported</b>. Copilot Studio itself <i>is</i> available in GCC and GCC High at FedRAMP High. Confirm your scenario before scoping one of these.',
       scenarios: [
         ["content","Rewrite a public notice","You have the notice and want it clearer, plainer, or more concise.","c1","Copilot","move to Cowork if it becomes a reviewable batch."],
         ["content","Improve three briefing slides","You know the material and want stronger wording and structure.","c1","Copilot","use Cowork for a full template-and-folder production run."],
@@ -938,7 +943,7 @@
         ["Cowork work order","c2","Define the finished outcome","Run notices for the approved permit-holder list and message. Create one personalized notice per recipient, don't send anything, and save every draft plus a summary in one output folder for my review."],
         ["Agent brief","c3","Name the capability and controls","Build a resident-services agent grounded in our public help content and policy library. Answer questions, cite sources, escalate to staff on low confidence, and keep all systems read-only."],
       ],
-      guardNote: '<b>Sector note (state &amp; local government):</b> public-sector work carries records, privacy, and compliance obligations (for example public-records and <b>CJIS</b> requirements). Ground agents only on approved content, keep systems read-only unless an action is explicitly approved, and route sensitive requests to the right authority. <b>Cloud tier availability:</b> Copilot and Cowork are available in GCC-Moderate and GCC-High; however, Copilot agents (Copilot Studio) currently require evaluation for GCC-Moderate—check product availability with your Microsoft representative. All three services are available in commercial cloud.',
+      guardNote: '<b>Sector note (state &amp; local government):</b> public-sector work carries records, privacy, and compliance obligations (for example public-records and <b>CJIS</b> requirements). Ground agents only on approved content, keep systems read-only unless an action is explicitly approved, and route sensitive requests to the right authority. <b>Government cloud:</b> Copilot Studio is available in <b>GCC</b> and <b>GCC High</b>, runs in Azure Government at <b>FedRAMP High</b>, and has features designed to support CJIS Policy requirements for law enforcement agencies—eligibility validation explicitly covers CJIS-regulated data. Three documented limits still apply in those environments: agents grounded in <b>shared tenant work data</b> aren\'t currently available in GCC, GCC High, or DoD; Copilot Studio US Government client access is limited to the web client and <b>isn\'t available in Microsoft Teams</b>; and <b>usage-based (pay-as-you-go) billing isn\'t supported</b>. Confirm your specific scenario with your Microsoft team.',
       q6Label: "What data does it touch?",
       q6Options: ["Public or already-published info", "Internal records (non-regulated)", "CJIS / regulated or records-retained"],
       caveats: [
@@ -949,9 +954,9 @@
           "Assume agent conversations and outputs are discoverable. Confirm where transcripts are retained and that retention matches your records schedule before you publish it.",
         ],
         [
-          "Do not paste regulated or CJIS-scoped data into an ad-hoc prompt. Confirm the surface is approved for this data class, and check whether your tenant is commercial, GCC-Moderate, or GCC-High before proceeding.",
+          "Do not paste regulated or CJIS-scoped data into an ad-hoc prompt. Confirm the surface is approved for this data class, and check whether your tenant is commercial, GCC, GCC High, or DoD before proceeding.",
           "Confirm the surface is authorized for this data class in your cloud tier, keep the task and its outputs inside approved storage, and have the records or security owner review the package before it leaves the tenant.",
-          "Confirm <b>GCC-Moderate availability for Copilot Studio</b> before committing to an agent—connector and orchestration coverage differs from commercial. Then ground only on approved sources, keep systems of record read-only, gate every action behind human approval, and get security and records sign-off on the design.",
+          "Check your cloud tier first. Copilot Studio <i>is</i> available in GCC and GCC High at FedRAMP High, with features designed to support CJIS Policy requirements—but agents grounded in <b>shared tenant work data</b> aren't currently available in GCC, GCC High, or DoD, Microsoft Teams isn't a supported client there, and pay-as-you-go billing isn't supported. Then ground only on approved sources, keep systems of record read-only, gate every action behind human approval, and get security and records sign-off on the design.",
         ],
       ],
     },
@@ -980,6 +985,7 @@
     const sn = document.getElementById("scenNote");
     if (d.scenNote) { sn.hidden = false; sn.innerHTML = d.scenNote; }
     else { sn.hidden = true; sn.innerHTML = ""; }
+    document.getElementById("govRefs").hidden = (key !== "slg");
     document.getElementById("guardNote").innerHTML = d.guardNote;
     document.getElementById("practiceGrid").innerHTML = d.practice.map((p,i) =>
       `<div class="ncard"><span class="n">${i+1}</span><b>${esc(p[0])}</b><p>${esc(p[1])}</p></div>`).join("");
