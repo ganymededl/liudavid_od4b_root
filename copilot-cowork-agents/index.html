@@ -945,6 +945,10 @@
     };
     requestAnimationFrame(jump);
     window.addEventListener("load", () => setTimeout(jump, 60), { once: true });
+    // Belt-and-braces: if webfonts are ever added, re-correct once metrics settle.
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(jump).catch(() => {});
+    // Restoring from bfcache can replay a stale scroll offset.
+    window.addEventListener("pageshow", (e) => { if (e.persisted) jump(); });
   })();
 </script>
 </body>
