@@ -128,6 +128,14 @@
   .btn.primary:hover { background: var(--accent-hover); }
   .btn.ghost { background: var(--surface); border-color: var(--border-strong); color: var(--text); }
   .btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .ind-switch { display: inline-flex; background: var(--surface-soft); border: 1px solid var(--border); border-radius: 999px; padding: 5px; gap: 5px; margin-bottom: 20px; box-shadow: var(--shadow-soft); }
+  .ind-btn { font-family: inherit; font-size: 14px; font-weight: 650; padding: 10px 20px; border-radius: 999px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .ind-btn .dot { width: 9px; height: 9px; border-radius: 999px; background: var(--rainbow); opacity: .5; }
+  .ind-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-soft); }
+  .ind-btn.active .dot { opacity: 1; }
+  .ind-btn:hover:not(.active) { color: var(--text); }
+  .hero-eg { margin-top: 4px; font-size: 15px; color: var(--text-soft); }
+  .hero-eg b { color: var(--text-muted); }
 
   .ladder { display: grid; gap: 14px; }
   .ladder .step { display: grid; grid-template-columns: 38px 1fr; gap: 15px; align-items: start; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow-soft); }
@@ -293,19 +301,24 @@
   <div class="hero">
     <div class="wrap hero-grid">
       <div>
-        <span class="eyebrow">Choosing the right AI for the job</span>
+        <div class="ind-switch" role="tablist" aria-label="Choose industry">
+          <button class="ind-btn active" data-ind="edu" role="tab"><span class="dot"></span>Higher Education</button>
+          <button class="ind-btn" data-ind="slg" role="tab"><span class="dot"></span>State &amp; Local Gov</button>
+        </div>
+        <span class="eyebrow" id="eyebrow">For higher education</span>
         <h1>Choose the right way to <span class="grad-text">work with AI.</span></h1>
         <p class="lede">
           Use <b>Copilot</b> for simple tasks and fast chats in the flow of Microsoft 365.
           Use <b>Cowork</b> for bounded execution when you want to delegate a defined task,
           stay in the loop, and refine the result through one contained workstream.
           Use <b>Copilot agents</b> for repeatable, grounded work you build once and deploy to a
-          team or your customers. The boundaries overlap, and the best starting point can vary by user.
+          team or the people you serve. The boundaries overlap, and the best starting point can vary by user.
         </p>
         <div class="cta-row">
           <a class="btn primary" href="#matcher">Help me choose →</a>
           <a class="btn ghost" href="#comparison">See the full comparison</a>
         </div>
+        <p class="hero-eg" id="heroEg">Tailored for institutions like <b>Harvard University</b>.</p>
       </div>
       <div class="ladder" aria-label="Three-level decision">
         <div class="step s1"><div class="num">1</div><div><b>Need help while you work?</b><p>Use Copilot for a conversation, answer, draft, summary, analysis, or in-app assist.</p></div></div>
@@ -454,9 +467,9 @@
       <div class="sec-head">
         <span class="eyebrow">Agents in practice</span>
         <h2>How teams put agents to work</h2>
-        <p>Common, high-value agent patterns across service, sales, operations, and the workplace—each grounded in an organization's own data and available where people already work.</p>
+        <p id="practiceSub">Common, high-value agent patterns across service, sales, operations, and the workplace—each grounded in an organization's own data and available where people already work.</p>
       </div>
-      <div class="num-grid">
+      <div class="num-grid" id="practiceGrid">
         <div class="ncard"><span class="n">1</span><b>Customer self-service</b><p>Answer product and support questions 24/7, grounded in your help content, with escalation to a human.</p></div>
         <div class="ncard"><span class="n">2</span><b>Employee help desk</b><p>Resolve HR and IT questions in Teams from your policies and knowledge base.</p></div>
         <div class="ncard"><span class="n">3</span><b>Sales research assistant</b><p>Summarize accounts, pull CRM context, and prepare call briefs on demand.</p></div>
@@ -490,7 +503,7 @@
       <div class="table-wrap" style="margin-top:24px;">
         <table>
           <thead><tr><th>Example assignment</th><th>Best starting point</th><th>Why it fits</th></tr></thead>
-          <tbody>
+          <tbody id="patternsBody">
             <tr><td>Summarize a thread and draft a reply</td><td>Copilot</td><td>One conversational turn against context already open in front of you.</td></tr>
             <tr><td>Consolidate 90 days of activity into a workbook</td><td>Cowork</td><td>A defined window, known sources, structured deliverable, and clear end state.</td></tr>
             <tr><td>Personalized outreach across a portfolio</td><td>Cowork</td><td>One skill fans out many per-account artifacts, contained to a single task.</td></tr>
@@ -601,7 +614,7 @@
       <div class="sec-head">
         <span class="eyebrow">Examples</span>
         <h2>Common business scenarios</h2>
-        <p>Filter by work type. Each card names the best starting point and the condition that would move the task to another tool.</p>
+        <p id="scenSub">Filter by work type. Each card names the best starting point and the condition that would move the task to another tool.</p>
       </div>
       <div class="filters" id="filters">
         <button class="active" data-cat="all">All scenarios</button>
@@ -646,7 +659,7 @@
         <h2 style="font-size:clamp(24px,3vw,32px);">How to ask each tool</h2>
         <p>The same topic is framed differently depending on whether you want assistance, delegation, or a running capability.</p>
       </div>
-      <div class="prompt-grid">
+      <div class="prompt-grid" id="promptGrid">
         <div class="prompt"><span class="tag" style="color:var(--c1)">Copilot prompt</span><h3>Ask for the next useful response</h3><div class="code">Summarize this email thread. List the three decisions, open questions, and owners, then draft a concise reply for me to review.</div></div>
         <div class="prompt"><span class="tag" style="color:var(--c2)">Cowork work order</span><h3>Define the finished outcome</h3><div class="code">Run the outreach skill for the approved account list and campaign message. Create one personalized draft per account, don't send anything, and save every draft plus a summary in one output folder for my review.</div></div>
         <div class="prompt"><span class="tag" style="color:var(--c3)">Agent brief</span><h3>Name the capability and controls</h3><div class="code">Build a support agent grounded in our product help site and policy library. Answer customer questions, cite sources, escalate to a human on low confidence, and keep all systems read-only.</div></div>
@@ -669,6 +682,7 @@
         <div class="ncard"><span class="n">4</span><b>Verify the result</b><p>Check facts, numbers, recipients, permissions, citations, and business logic before relying on the output.</p></div>
       </div>
       <div class="note"><b>Important:</b> never choose a more powerful surface to bypass a control that applies in Copilot. Use the least-powerful surface that can complete the work safely and effectively. All three run on Microsoft's enterprise foundation—prompts, responses, and your data are not used to train the foundation models, and existing identity, permissions, and sensitivity labels are respected.</div>
+      <div class="note" id="guardNote"></div>
 
       <div class="sec-head" style="margin-top:44px;">
         <h2 style="font-size:clamp(24px,3vw,32px);">Learn more</h2>
@@ -745,15 +759,152 @@
   ids.forEach(q => document.getElementById(q).addEventListener("change", compute));
   compute();
 
-  // Scenario filters
-  const filterWrap = document.getElementById("filters");
-  const cards = Array.from(document.querySelectorAll("#scenGrid .scen"));
-  filterWrap.addEventListener("click", (e) => {
-    const btn = e.target.closest("button"); if (!btn) return;
-    filterWrap.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
-    const cat = btn.dataset.cat;
-    cards.forEach(c => { c.style.display = (cat === "all" || c.dataset.cat === cat) ? "" : "none"; });
+  // ── Industry-tailored content ─────────────────────────────
+  const INDUSTRY = {
+    edu: {
+      eyebrow: "For higher education",
+      heroEg: 'Tailored for institutions like <b>Harvard University</b>.',
+      practiceSub: "High-value agent patterns across student services, faculty support, research administration, and campus operations—grounded in your institution's own content.",
+      practice: [
+        ["Student self-service","Answer admissions, registration, and financial-aid questions 24/7 from your knowledge base, with escalation to staff."],
+        ["IT & help desk","Resolve student, faculty, and staff IT and account questions in Teams."],
+        ["Advising assistant","Summarize student context and prep advising sessions, within appropriate access."],
+        ["Course & catalog lookup","Answer questions on courses, prerequisites, schedules, and deadlines."],
+        ["Research administration","Search grants, IRB, and compliance policies and return cited answers."],
+        ["Onboarding guide","Walk new students and staff through enrollment, orientation, and setup."],
+        ["Library & knowledge assistant","Search library guides, policies, and resources with citations."],
+        ["Application & form intake","Extract fields from applications and forms and post them to your systems."],
+        ["Committee follow-through","Turn faculty and committee notes into action items, with approval."],
+        ["FERPA-aware triage","Classify incoming requests and route by policy, protecting student records."],
+        ["Facilities & campus ops","Give staff a mobile assistant for procedures, work orders, and lookups."],
+        ["Enrollment & retention digest","Assemble a scheduled summary of enrollment or retention metrics."],
+      ],
+      patterns: [
+        ["Summarize a faculty email and draft a reply","Copilot","One conversational turn against context already open in front of you."],
+        ["Consolidate a term's course feedback into a workbook","Cowork","A defined window, known sources, and a structured deliverable."],
+        ["Personalized outreach to admitted students","Cowork","One skill fans out many per-student messages, contained to a single task."],
+        ["Answer student FAQs on your website 24/7","Copilot agent","Repeatable, grounded, always-on, and student-facing."],
+        ["Route and triage help-desk tickets by policy","Copilot agent","Needs grounding, actions across systems, and consistent rules at volume."],
+        ["Daily enrollment digest to leadership","Copilot agent","Scheduled, stateful, and notifies only when useful."],
+      ],
+      scenSub: "Filter by work type. Examples are drawn from higher-education work; each names the best starting point and when to move.",
+      scenarios: [
+        ["content","Rewrite a message to students","You have the note and want it clearer, warmer, or more concise.","c1","Copilot","move to Cowork if it becomes a reviewable batch."],
+        ["content","Improve three lecture slides","You know the material and want stronger wording and structure.","c1","Copilot","use Cowork for a full template-and-folder production run."],
+        ["meetings","Prepare for a faculty or committee meeting","You need the agenda summarized, likely questions, and talking points.","c1","Copilot","use Cowork when prep spans many meetings and follow-ups."],
+        ["meetings","Build a weekly advising-prep pack","For each advising session, gather context, brief, and draft follow-up.","c2","Cowork","a bounded, repeatable workstream with reviewable outputs."],
+        ["analysis","Explain an enrollment spreadsheet","You need trends, anomalies, or a narrative from a workbook.","c1","Copilot","use Cowork when many workbooks become a finished report."],
+        ["analysis","Extract applicant contacts to a workbook","Turn scattered context into a structured, reviewable dataset.","c2","Cowork","a defined input and a structured deliverable."],
+        ["analysis","Create a term business review","Combine data, notes, and metrics into a review-ready narrative.","c2","Cowork","assembled from known sources and refined in one task."],
+        ["workflows","Personalized outreach to admitted students","Apply known messaging and create one draft per student in a folder.","c2","Cowork","multi-step but bounded, repeatable, and cleanly contained."],
+        ["workflows","Student self-service assistant on your website","A branded assistant answering 24/7, grounded in your content.","c3","Copilot agent","repeatable, grounded, and student-facing."],
+        ["workflows","IT help desk in Teams","Resolve student and staff IT questions from your knowledge base.","c3","Copilot agent","always-on, grounded, and shared across the institution."],
+        ["workflows","Daily enrollment / retention digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs persistent state, scheduling, and controlled notifications."],
+        ["workflows","Triage & route student service requests","Classify requests and route to the right office by policy.","c3","Copilot agent","connected data and approval-gated actions, FERPA-aware."],
+      ],
+      prompts: [
+        ["Copilot prompt","c1","Ask for the next useful response","Summarize this email thread from a faculty member. List the decisions, open questions, and owners, then draft a concise reply for me to review."],
+        ["Cowork work order","c2","Define the finished outcome","Run outreach for the approved admitted-student list and message. Create one personalized draft per student, don't send anything, and save every draft plus a summary in one output folder for my review."],
+        ["Agent brief","c3","Name the capability and controls","Build a student-support agent grounded in our admissions and registrar help content. Answer questions, cite sources, escalate to staff on low confidence, keep student records read-only, and follow FERPA."],
+      ],
+      guardNote: '<b>Sector note (higher education):</b> student records are protected under <b>FERPA</b>. Ground agents only on content a user is entitled to see, keep systems read-only unless an action is explicitly approved, and route record-sensitive requests to the right office.',
+    },
+    slg: {
+      eyebrow: "For state & local government",
+      heroEg: 'Tailored for agencies like the <b>NYPD</b> and other public-sector organizations.',
+      practiceSub: "High-value agent patterns across resident services, records, permitting, and internal operations—grounded in your agency's own policies and content.",
+      practice: [
+        ["Resident self-service","Answer questions about services, permits, and programs 24/7, with escalation to staff."],
+        ["Employee IT & help desk","Resolve staff IT and account questions in Teams."],
+        ["Records & status lookup","Look up permit, license, or case status across systems in natural language."],
+        ["311 / service-request intake","Capture, classify, and route non-emergency service requests."],
+        ["Policy & procedure assistant","Search regulations, SOPs, and manuals and return cited answers."],
+        ["Onboarding guide","Walk new employees and residents through processes and forms."],
+        ["Public information assistant","Answer FAQs on hours, locations, forms, and programs."],
+        ["Document & form intake","Extract fields from applications and forms and post them to your systems."],
+        ["Council / board follow-through","Turn meeting notes into action items, with approval."],
+        ["Compliance-aware triage","Classify requests and escalate by policy, records-aware."],
+        ["Field operations","Give frontline staff a mobile assistant for procedures and lookups."],
+        ["Operations digest","Assemble a scheduled summary of service metrics for leadership."],
+      ],
+      patterns: [
+        ["Summarize a resident email and draft a reply","Copilot","One conversational turn against context already open in front of you."],
+        ["Consolidate a quarter's service data into a workbook","Cowork","A defined window, known sources, and a structured deliverable."],
+        ["Personalized notices to permit holders","Cowork","One skill fans out many per-recipient notices, contained to a single task."],
+        ["Answer resident FAQs on your website 24/7","Copilot agent","Repeatable, grounded, always-on, and resident-facing."],
+        ["Route and triage 311 / service requests by policy","Copilot agent","Needs grounding, actions across systems, and consistent rules at volume."],
+        ["Daily operations digest to leadership","Copilot agent","Scheduled, stateful, and notifies only when useful."],
+      ],
+      scenSub: "Filter by work type. Examples are drawn from public-sector work; each names the best starting point and when to move.",
+      scenarios: [
+        ["content","Rewrite a public notice","You have the notice and want it clearer, plainer, or more concise.","c1","Copilot","move to Cowork if it becomes a reviewable batch."],
+        ["content","Improve three briefing slides","You know the material and want stronger wording and structure.","c1","Copilot","use Cowork for a full template-and-folder production run."],
+        ["meetings","Prepare for a council or board meeting","You need the agenda summarized, likely questions, and talking points.","c1","Copilot","use Cowork when prep spans many meetings and follow-ups."],
+        ["meetings","Build a weekly operations-prep pack","For each priority item, gather context, brief, and draft follow-up.","c2","Cowork","a bounded, repeatable workstream with reviewable outputs."],
+        ["analysis","Explain a budget spreadsheet","You need trends, anomalies, or a narrative from a workbook.","c1","Copilot","use Cowork when many workbooks become a finished report."],
+        ["analysis","Extract permit-holder contacts to a workbook","Turn scattered context into a structured, reviewable dataset.","c2","Cowork","a defined input and a structured deliverable."],
+        ["analysis","Create a monthly operations review","Combine data, notes, and metrics into a review-ready narrative.","c2","Cowork","assembled from known sources and refined in one task."],
+        ["workflows","Personalized notices to permit / license holders","Apply known messaging and create one notice per recipient in a folder.","c2","Cowork","multi-step but bounded, repeatable, and cleanly contained."],
+        ["workflows","Resident self-service assistant on your website","A branded assistant answering 24/7, grounded in your content.","c3","Copilot agent","repeatable, grounded, and resident-facing."],
+        ["workflows","Employee IT help desk in Teams","Resolve staff IT questions from your policies and knowledge base.","c3","Copilot agent","always-on, grounded, and shared across the agency."],
+        ["workflows","Daily operations digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs persistent state, scheduling, and controlled notifications."],
+        ["workflows","Triage & route 311 / service requests","Classify requests and route to the right department by policy.","c3","Copilot agent","connected data and approval-gated actions, records-aware."],
+      ],
+      prompts: [
+        ["Copilot prompt","c1","Ask for the next useful response","Summarize this resident inquiry. List the decisions, open questions, and owners, then draft a concise reply for me to review."],
+        ["Cowork work order","c2","Define the finished outcome","Run notices for the approved permit-holder list and message. Create one personalized notice per recipient, don't send anything, and save every draft plus a summary in one output folder for my review."],
+        ["Agent brief","c3","Name the capability and controls","Build a resident-services agent grounded in our public help content and policy library. Answer questions, cite sources, escalate to staff on low confidence, and keep all systems read-only."],
+      ],
+      guardNote: '<b>Sector note (state &amp; local government):</b> public-sector work carries records, privacy, and compliance obligations (for example public-records and <b>CJIS</b> requirements). Ground agents only on approved content, keep systems read-only unless an action is explicitly approved, and route sensitive requests to the right authority.',
+    },
+  };
+  const CATLABEL = { content:"Content", meetings:"Meetings", analysis:"Analysis", workflows:"Workflows" };
+  const esc = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  let currentCat = "all";
+  function applyFilter(cat) {
+    currentCat = cat;
+    document.querySelectorAll("#filters button").forEach(b => b.classList.toggle("active", b.dataset.cat === cat));
+    document.querySelectorAll("#scenGrid .scen").forEach(c => { c.style.display = (cat === "all" || c.dataset.cat === cat) ? "" : "none"; });
+  }
+  document.getElementById("filters").addEventListener("click", (e) => {
+    const btn = e.target.closest("button"); if (!btn) return; applyFilter(btn.dataset.cat);
   });
+
+  function renderIndustry(key) {
+    const d = INDUSTRY[key] || INDUSTRY.edu;
+    root.setAttribute("data-industry", key);
+    document.querySelectorAll(".ind-btn").forEach(b => b.classList.toggle("active", b.dataset.ind === key));
+    document.getElementById("eyebrow").textContent = d.eyebrow;
+    document.getElementById("heroEg").innerHTML = d.heroEg;
+    document.getElementById("practiceSub").textContent = d.practiceSub;
+    document.getElementById("scenSub").textContent = d.scenSub;
+    document.getElementById("guardNote").innerHTML = d.guardNote;
+    document.getElementById("practiceGrid").innerHTML = d.practice.map((p,i) =>
+      `<div class="ncard"><span class="n">${i+1}</span><b>${esc(p[0])}</b><p>${esc(p[1])}</p></div>`).join("");
+    document.getElementById("patternsBody").innerHTML = d.patterns.map(r =>
+      `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("");
+    document.getElementById("promptGrid").innerHTML = d.prompts.map(p =>
+      `<div class="prompt"><span class="tag" style="color:var(--${p[1]})">${esc(p[0])}</span><h3>${esc(p[2])}</h3><div class="code">${esc(p[3])}</div></div>`).join("");
+    document.getElementById("scenGrid").innerHTML = d.scenarios.map(s =>
+      `<article class="scen" data-cat="${s[0]}"><span class="kicker">${CATLABEL[s[0]]}</span><h3>${esc(s[1])}</h3><p>${esc(s[2])}</p><div class="start"><span class="lab">Start with</span><b class="${s[3]}">${esc(s[4])}</b> — ${esc(s[5])}</div></article>`).join("");
+    applyFilter(currentCat);
+  }
+
+  function setIndustry(key) {
+    renderIndustry(key);
+    try { localStorage.setItem("aiHubIndustry", key); } catch (e) {}
+    try { const u = new URL(window.location); u.searchParams.set("industry", key); history.replaceState(null, "", u); } catch (e) {}
+  }
+  document.querySelectorAll(".ind-btn").forEach(b => b.addEventListener("click", () => setIndustry(b.dataset.ind)));
+
+  // Initial industry: URL param → saved → default (edu)
+  let initInd = new URLSearchParams(location.search).get("industry");
+  if (["slg","sled","gov","government","stateandlocal"].includes((initInd||"").toLowerCase())) initInd = "slg";
+  else if (["edu","highered","education","university"].includes((initInd||"").toLowerCase())) initInd = "edu";
+  else { try { initInd = localStorage.getItem("aiHubIndustry"); } catch (e) { initInd = null; } }
+  if (initInd !== "slg" && initInd !== "edu") initInd = "edu";
+  renderIndustry(initInd);
 </script>
 </body>
 </html>
