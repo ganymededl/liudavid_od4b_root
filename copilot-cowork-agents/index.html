@@ -218,6 +218,16 @@
   .result .why { color: var(--text-muted); font-size: 16px; margin: 0 0 20px; }
   .result .why b { color: var(--text); }
   .bar { display: grid; gap: 10px; }
+  .rec-caveat {
+    margin-top: 20px; padding: 14px 16px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); border-left: 4px solid #d0ad45;
+    background: var(--surface-soft); font-size: 14.5px; line-height: 1.5;
+    color: var(--text-muted);
+  }
+  .rec-caveat[hidden] { display: none; }
+  .rec-caveat b { color: var(--text); }
+  .rec-caveat.gate { border-left-color: #ef5d84; }
+  .rec-note { margin: 14px 0 0; font-size: 13px; color: var(--text-soft); line-height: 1.45; }
   .meter { display: grid; grid-template-columns: 120px 1fr 38px; align-items: center; gap: 12px; font-size: 13px; }
   .meter .track { height: 9px; border-radius: 999px; background: var(--surface-soft); overflow: hidden; border: 1px solid var(--border); }
   .meter .fill { height: 100%; border-radius: 999px; transition: width .45s ease; }
@@ -555,7 +565,7 @@
       <div class="sec-head">
         <span class="eyebrow">Decision helper</span>
         <h2>Which should I use?</h2>
-        <p>Answer five questions about the work—not the topic. The result is a starting point, not a rule: preference, familiarity, access, and interaction style can reasonably change the choice.</p>
+        <p>Answer five questions about the shape of the work—not the topic—and one about the data it touches. The result is a starting point, not a rule: preference, familiarity, access, and interaction style can reasonably change the choice.</p>
       </div>
       <div class="helper">
         <div class="form">
@@ -569,6 +579,8 @@
             <select id="q4"><option value="0">No, this is mostly one-time</option><option value="1">Yes, rerun as one packaged task</option><option value="2">Yes, scheduled or triggered automatically</option></select></div>
           <div class="q"><label for="q5">Who is it for?</label>
             <select id="q5"><option value="0">Just me</option><option value="1">Me plus a few teammates</option><option value="2">A whole team, org, or the people we serve</option></select></div>
+          <div class="q"><label for="q6" id="q6Label">What data does it touch?</label>
+            <select id="q6"><option value="0">Public or already-published info</option><option value="1">Directory information</option><option value="2">FERPA education records</option></select></div>
         </div>
         <div class="result" id="result">
           <span class="rec-eyebrow">Recommended starting point</span>
@@ -579,6 +591,8 @@
             <div class="meter m2"><span class="name c2">Cowork</span><span class="track"><span class="fill" id="f2" style="width:20%"></span></span><span id="p2v">20</span></div>
             <div class="meter m3"><span class="name c3">Agents</span><span class="track"><span class="fill" id="f3" style="width:20%"></span></span><span id="p3v">20</span></div>
           </div>
+          <div class="rec-caveat" id="recCaveat" hidden></div>
+          <p class="rec-note">The data question does not change the recommendation—the shape of the work does. It sets the conditions you must meet before you build.</p>
         </div>
       </div>
 
@@ -732,6 +746,10 @@
   document.getElementById("year").textContent = new Date().getFullYear();
 
   // Decision helper
+  // q1-q5 describe the SHAPE of the work, which determines the tool regardless of
+  // sector, so the scoring matrix is shared. Sector differences are expressed as
+  // preconditions on the recommendation (see DATACLASS / caveat logic below), not
+  // as score changes — identical answers must yield an identical recommendation.
   const ids = ["q1","q2","q3","q4","q5"];
   const els = {
     name: document.getElementById("recName"),
@@ -739,26 +757,16 @@
     f: [document.getElementById("f1"), document.getElementById("f2"), document.getElementById("f3")],
     p: [document.getElementById("p1v"), document.getElementById("p2v"), document.getElementById("p3v")],
     result: document.getElementById("result"),
+    caveat: document.getElementById("recCaveat"),
   };
   // weight tables per question: index 0/1/2 -> [copilot, cowork, agents]
-  // Scoring weights vary by industry for more relevant recommendations
-  const W_EDU = {
+  const W = {
     q1: [[6,1,0],[1,6,1],[0,2,6]],
     q2: [[6,1,0],[1,6,2],[0,2,6]],
     q3: [[6,1,0],[1,6,1],[0,1,6]],
     q4: [[6,2,0],[1,5,2],[0,1,6]],
     q5: [[5,2,0],[1,5,3],[0,1,6]],
   };
-  const W_SLG = {
-    q1: [[6,1,0],[1,6,1],[0,2,6]],  // same: need help right now
-    q2: [[5,2,1],[1,6,2],[0,3,6]],  // heavier agents for repeatability/scalability
-    q3: [[5,2,1],[1,6,2],[0,2,6]],  // heavier agents for consistent rules
-    q4: [[5,1,2],[1,5,3],[0,2,7]],  // much heavier agents: approval-gated execution critical for gov
-    q5: [[4,2,1],[1,5,3],[0,1,7]],  // much heavier agents: repeatable rules-based work critical
-  };
-  let W = W_EDU;  // default to EDU
-  // Update W matrix when industry changes
-  const updateWeightsForIndustry = (ind) => { W = (ind === "slg") ? W_SLG : W_EDU; compute(); };
   const META = [
     { name:"Copilot", color:"var(--c1)", why:"The task is best handled with frequent human steering and does not require a delegated or grounded workflow." },
     { name:"Microsoft Cowork", color:"var(--c2)", why:"The outcome is defined and you'd rather delegate the multi-step work, then review and refine it—Cowork's sweet spot." },
@@ -776,9 +784,24 @@
     els.name.style.color = META[win].color;
     els.why.innerHTML = "<b>Why:</b> " + META[win].why;
     els.result.style.borderColor = META[win].color;
+    renderCaveat(win);
+  }
+
+  // Data-class preconditions. These never change WHICH tool is recommended —
+  // they state what must be true before you build it on that surface.
+  function renderCaveat(win) {
+    const key = root.getAttribute("data-industry") || "edu";
+    const sel = document.getElementById("q6");
+    const lvl = Math.max(0, Math.min(2, +sel.value || 0));
+    const set = (INDUSTRY[key] || INDUSTRY.edu).caveats;
+    const text = set && set[lvl] && set[lvl][win];
+    if (!text) { els.caveat.hidden = true; els.caveat.innerHTML = ""; return; }
+    els.caveat.hidden = false;
+    els.caveat.classList.toggle("gate", lvl === 2);
+    els.caveat.innerHTML = (lvl === 2 ? "<b>Before you build:</b> " : "<b>Check first:</b> ") + text;
   }
   ids.forEach(q => document.getElementById(q).addEventListener("change", compute));
-  compute();
+  document.getElementById("q6").addEventListener("change", compute);
 
   // ── Industry-tailored content ─────────────────────────────
   const INDUSTRY = {
@@ -829,6 +852,21 @@
         ["Agent brief","c3","Name the capability and controls","Build a student-support agent grounded in our admissions and registrar help content. Answer questions, cite sources, escalate to staff on low confidence, keep student records read-only, and follow FERPA."],
       ],
       guardNote: '<b>Sector note (higher education):</b> student records are protected under <b>FERPA</b>. Ground agents only on content a user is entitled to see, keep systems read-only unless an action is explicitly approved, and route record-sensitive requests to the right office.',
+      q6Label: "What data does it touch?",
+      q6Options: ["Public or already-published info", "Directory information", "FERPA education records"],
+      caveats: [
+        [null, null, null],
+        [
+          "Directory information is still governed—confirm the student has not opted out of directory disclosure before using it in a message or list.",
+          "Directory information is still governed—confirm no opt-outs apply to the list you generate, and keep the output inside your tenant for review.",
+          "Directory information is still governed—scope the agent's grounding to fields cleared for disclosure and honor directory opt-outs at query time.",
+        ],
+        [
+          "Do not paste education records into an ad-hoc prompt. Work from data you are already entitled to see in that app, and keep the record system as the source of truth.",
+          "Keep education records inside approved sources, save outputs to a location with the same access controls as the records themselves, and have a records owner review before anything is sent.",
+          "Ground only on content the requester is entitled to see, keep student-record systems read-only, gate any write or send action behind human approval, and confirm the design with your registrar and FERPA reviewer before publishing.",
+        ],
+      ],
     },
     slg: {
       eyebrow: "For state & local government",
@@ -877,6 +915,21 @@
         ["Agent brief","c3","Name the capability and controls","Build a resident-services agent grounded in our public help content and policy library. Answer questions, cite sources, escalate to staff on low confidence, and keep all systems read-only."],
       ],
       guardNote: '<b>Sector note (state &amp; local government):</b> public-sector work carries records, privacy, and compliance obligations (for example public-records and <b>CJIS</b> requirements). Ground agents only on approved content, keep systems read-only unless an action is explicitly approved, and route sensitive requests to the right authority. <b>Cloud tier availability:</b> Copilot and Cowork are available in GCC-Moderate and GCC-High; however, Copilot agents (Copilot Studio) currently require evaluation for GCC-Moderate—check product availability with your Microsoft representative. All three services are available in commercial cloud.',
+      q6Label: "What data does it touch?",
+      q6Options: ["Public or already-published info", "Internal records (non-regulated)", "CJIS / regulated or records-retained"],
+      caveats: [
+        [null, null, null],
+        [
+          "Assume the output is discoverable. Anything you generate about agency business may be subject to public-records requests—write it accordingly.",
+          "Assume the output is discoverable and retained. Save the task package where your records-retention schedule applies, not to personal storage.",
+          "Assume agent conversations and outputs are discoverable. Confirm where transcripts are retained and that retention matches your records schedule before you publish it.",
+        ],
+        [
+          "Do not paste regulated or CJIS-scoped data into an ad-hoc prompt. Confirm the surface is approved for this data class, and check whether your tenant is commercial, GCC-Moderate, or GCC-High before proceeding.",
+          "Confirm the surface is authorized for this data class in your cloud tier, keep the task and its outputs inside approved storage, and have the records or security owner review the package before it leaves the tenant.",
+          "Confirm <b>GCC-Moderate availability for Copilot Studio</b> before committing to an agent—connector and orchestration coverage differs from commercial. Then ground only on approved sources, keep systems of record read-only, gate every action behind human approval, and get security and records sign-off on the design.",
+        ],
+      ],
     },
   };
   const CATLABEL = { content:"Content", meetings:"Meetings", analysis:"Analysis", workflows:"Workflows" };
@@ -910,7 +963,13 @@
     document.getElementById("scenGrid").innerHTML = d.scenarios.map(s =>
       `<article class="scen" data-cat="${s[0]}"><span class="kicker">${CATLABEL[s[0]]}</span><h3>${esc(s[1])}</h3><p>${esc(s[2])}</p><div class="start"><span class="lab">Start with</span><b class="${s[3]}">${esc(s[4])}</b> — ${esc(s[5])}</div></article>`).join("");
     applyFilter(currentCat);
-    updateWeightsForIndustry(key);  // Update decision helper scoring for this industry
+    // Swap the data-class question for this sector, keeping the user's level.
+    const q6 = document.getElementById("q6");
+    const keep = Math.max(0, Math.min(2, +q6.value || 0));
+    document.getElementById("q6Label").textContent = d.q6Label;
+    q6.innerHTML = d.q6Options.map((o,i) => `<option value="${i}">${esc(o)}</option>`).join("");
+    q6.value = String(keep);
+    compute();
   }
 
   function setIndustry(key) {
