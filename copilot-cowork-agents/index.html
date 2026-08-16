@@ -231,6 +231,8 @@
   .rec-note { margin: 14px 0 0; font-size: 13px; color: var(--text-soft); line-height: 1.45; }
   .sec-xref { margin-top: 10px; font-size: 15px; color: var(--text-soft); }
   .sec-xref a { color: var(--c1); text-decoration: none; border-bottom: 1px solid currentColor; }
+  .build { display: block; margin-top: 8px; opacity: .75; font-size: 12.5px; }
+  .build #buildStamp { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; }
   .meter { display: grid; grid-template-columns: 120px 1fr 38px; align-items: center; gap: 12px; font-size: 13px; }
   .meter .track { height: 9px; border-radius: 999px; background: var(--surface-soft); overflow: hidden; border: 1px solid var(--border); }
   .meter .fill { height: 100%; border-radius: 999px; transition: width .45s ease; }
@@ -737,7 +739,7 @@
 
   <footer>
   <div class="wrap">
-    <div class="disclaimer">This guide is an informational decision aid, not a contractual or licensing document. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 16, 2026.</b></div>
+    <div class="disclaimer">This guide is an informational decision aid, not a contractual or licensing document. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 16, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-16 19:01 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
     <div>Choose the right way to work with AI · <span id="year"></span></div>
   </div>
 </footer>
