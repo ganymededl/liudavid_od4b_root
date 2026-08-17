@@ -380,7 +380,7 @@
       <div class="sec-head">
         <span class="eyebrow">Definitions</span>
         <h2>What each name means here</h2>
-        <p>“Copilot” is a broad product family. To make this guide useful, <b>Copilot</b> below means Microsoft 365 Copilot Chat and in-app assistance—not Cowork, agents, or every product carrying the Copilot name.</p>
+        <p>“Copilot” is a broad product family. To make this guide useful, <b>Copilot</b> below means Microsoft 365 Copilot Chat and in-app assistance—not Cowork, agents, or every product carrying the Copilot name. The three-lane model on this page is a practical framework created by this guide, not an official Microsoft product taxonomy.</p>
       </div>
       <div class="cards-3">
         <article class="pcard p1">
@@ -397,7 +397,7 @@
         <article class="pcard p2">
           <span class="tag">Bounded delegated execution</span>
           <p class="lead">Cowork runs a defined workstream with you in the loop.</p>
-          <p class="sub">You give Cowork one bounded task in one chat. It plans steps, acquires skills, responds to refinement, and collects finished artifacts in an output folder.</p>
+          <p class="sub">You give Cowork a contained workstream. It plans steps, acquires skills, responds to refinement, and collects finished artifacts in an output folder; recent tasks can be revisited or resumed.</p>
           <ul>
             <li>Best when the outcome is defined but review may still improve it</li>
             <li>Strong for batch production: one output per account, recipient, or item</li>
@@ -457,20 +457,22 @@
           <thead><tr><th>Product fact</th><th>What Microsoft documents</th><th>What it means for this guide</th></tr></thead>
           <tbody>
             <tr><td>Cowork output packaging</td><td>Created files appear in an output folder; users can preview, download individually, or use Download All for a ZIP of many files.</td><td>Supports batch patterns—many per-record artifacts stay in one retrievable task package.</td></tr>
-            <tr><td>Cowork memory</td><td>Memory is scoped to the current conversation and does not persist across conversations.</td><td>Use Cowork for contained runs; use an agent when durable, repeatable context matters.</td></tr>
+            <tr><td>Cowork task history</td><td>Recent tasks can be searched, revisited, and resumed; scheduled and event-driven tasks are also managed in task views.</td><td>Task history and resumability do not equal durable business state. Design explicit storage and controls when state must persist across runs.</td></tr>
             <tr><td>Cowork skills</td><td>Built-in and custom skills load during a session; users can create custom skills with companion-file limits.</td><td>Cowork is extensible but intentionally bounded; a curated task library matters.</td></tr>
-            <tr><td>Cowork automation</td><td>Recurring Cowork runs repeat one predefined task on a schedule or trigger; each run is scoped to its own conversation, so no durable state carries between runs, and actions stay M365-centered and draft-and-approve for consequential steps.</td><td>“Repeat” here means rerunning the same bounded task—not durable state, cross-system connectors, or serving other people. That distinction, not repetition itself, is what marks the move to an agent.</td></tr>
+            <tr><td>Cowork automation</td><td>Cowork supports scheduled prompts and supported event-driven tasks, with task history and resumable sessions. Availability, billing, permissions, and approval behavior depend on tenant configuration.</td><td>Repetition alone does not require an agent. Choose an agent when the capability needs broader reach, deeper integration, centralized lifecycle governance, or deliberately designed business state.</td></tr>
             <tr><td>Agent grounding</td><td>Copilot Studio agents connect to SharePoint, Dataverse, websites, and enterprise data as knowledge sources.</td><td>Choose an agent when answers must be grounded in your specific content; citations can be available when the configured source and experience support them.</td></tr>
-            <tr><td>Agent actions &amp; channels</td><td>Agents take actions through connectors and custom APIs and publish to Teams, websites, and Microsoft 365 Copilot.</td><td>Choose an agent when the capability should act and reach many people at once.</td></tr>
+            <tr><td>Agent actions &amp; channels</td><td>Agents can take actions through configured connectors and custom APIs and publish to supported channels.</td><td>Choose an agent when the capability should act and reach many people at once; confirm connector, authentication, channel, and approval support for the design.</td></tr>
           </tbody>
         </table>
       </div>
       <div class="note"><b>Availability note:</b> These are documented product patterns, not a promise that every capability is available in every tenant. Licensing, rollout status, preview/GA status, geography, government cloud, admin configuration, and permissions can change what is available. Verify current product documentation before scoping a deployment. “Faster” means lower interaction overhead for a well-bounded task, not guaranteed runtime.</div>
       <div class="refs">
         <div class="refcol">
-          <span class="tag">Copilot &amp; Cowork sources</span>
+          <span class="tag">Copilot &amp; Cowork sources · checked August 17, 2026</span>
           <a class="reflink" href="https://learn.microsoft.com/microsoft-365/copilot/cowork/" target="_blank" rel="noopener"><span class="body"><strong>Copilot Cowork overview</strong><span>Capabilities, skills, plugins, workflow, controls, and task management.</span></span><span class="arrow">↗</span></a>
           <a class="reflink" href="https://learn.microsoft.com/microsoft-365/copilot/cowork/use-cowork" target="_blank" rel="noopener"><span class="body"><strong>Use Copilot Cowork</strong><span>Side panel, input/output folders, downloads, schedules, triggers, and approvals.</span></span><span class="arrow">↗</span></a>
+          <a class="reflink" href="https://learn.microsoft.com/microsoft-365/copilot/cowork/get-started" target="_blank" rel="noopener"><span class="body"><strong>Get started with Copilot Cowork</strong><span>Access prerequisites, including Microsoft 365 Copilot access and enabled usage-based billing.</span></span><span class="arrow">↗</span></a>
+          <a class="reflink" href="https://learn.microsoft.com/microsoft-365/copilot/cowork/cowork-faq" target="_blank" rel="noopener"><span class="body"><strong>Copilot Cowork FAQ</strong><span>Task history, resumability, scheduled prompts, event-driven tasks, and approvals.</span></span><span class="arrow">↗</span></a>
           <a class="reflink" href="https://adoption.microsoft.com/en-us/copilot/" target="_blank" rel="noopener"><span class="body"><strong>Microsoft Copilot Adoption Hub</strong><span>Guidance, scenarios, and adoption resources.</span></span><span class="arrow">↗</span></a>
         </div>
         <div class="refcol">
@@ -500,9 +502,9 @@
             <tr><td>Interaction model</td><td>Conversation; you steer prompt by prompt</td><td>One task; the process fans out and returns one organized output package</td><td>Configured once; runs many times on chat, schedule, or trigger</td></tr>
             <tr><td>Human role</td><td>You do the work with AI help</td><td>You direct, review, and approve</td><td>You design intent, grounding, and approval boundaries; the agent runs</td></tr>
             <tr><td>Power ceiling</td><td>Focused assistance</td><td>Strong contained agentic execution</td><td>High: grounding, actions, connectors, orchestration, and autonomy</td></tr>
-            <tr><td>Grounding</td><td>The current chat, app, file, email, meeting, or M365 context</td><td>Multiple M365 sources, files, messages, meetings, skills, and plugins</td><td>Your knowledge sources, systems, and data—cited in responses</td></tr>
-            <tr><td>Actions</td><td>Usually user-led in the current experience</td><td>Plans and stages actions with human checkpoints</td><td>Takes actions through connectors and APIs; consequential steps gated</td></tr>
-            <tr><td>Automation depth</td><td>Prompt reuse and product-supported agents</td><td>Scheduled prompts and event-driven tasks centered on M365</td><td>Schedules, event triggers, and autonomous multi-step runs</td></tr>
+            <tr><td>Grounding</td><td>The current chat, app, file, email, meeting, or M365 context</td><td>Multiple M365 sources, files, messages, meetings, skills, and plugins</td><td>Your configured knowledge sources, systems, and data; citations may be available when the source and experience support them</td></tr>
+            <tr><td>Actions</td><td>Usually user-led in the current experience</td><td>Plans and stages actions with human checkpoints</td><td>Can take actions through configured connectors and APIs; approval behavior depends on the agent, connector, authentication, and configuration</td></tr>
+            <tr><td>Automation depth</td><td>Prompt reuse and product-supported agents</td><td>Scheduled prompts and supported event-driven tasks centered on M365</td><td>Schedules, event triggers, and autonomous multi-step runs where configured</td></tr>
             <tr><td>Repeat behavior</td><td>No automation; re-prompted each time</td><td>Reruns one task on a schedule or trigger; no durable state carries between runs, with M365-centered actions</td><td>Runs continuously or on trigger with persistent grounding and explicitly designed state, plus cross-system connectors where configured</td></tr>
             <tr><td>Typical duration</td><td>Seconds to minutes</td><td>Minutes to hours; bounded runs feel faster because outputs stay contained</td><td>Ongoing / on-demand—runs whenever it's invoked or triggered</td></tr>
             <tr><td>Typical output</td><td>An answer, draft, summary, analysis, or table</td><td>One organized output folder: briefing, deck, workbook, report, or batch</td><td>An in-channel answer, action, or artifact—repeated reliably</td></tr>
@@ -534,7 +536,7 @@
           <div class="q"><label for="q3">Where must it execute?</label>
             <select id="q3"><option value="0">In chat or a Microsoft 365 app</option><option value="1">Across M365 sources into one task folder</option><option value="2">Across our data, systems, or public-facing channels</option></select></div>
           <div class="q"><label for="q4">Will you repeat it?</label>
-            <select id="q4"><option value="0">No, this is mostly one-time</option><option value="1">Yes, but as the same standalone task each time</option><option value="2">Yes, and it should remember context or reach across systems and people</option></select></div>
+            <select id="q4"><option value="0">No, this is mostly one-time</option><option value="1">Yes, but as the same standalone task each time</option><option value="2">Yes, and it should retain business state or reach across systems and people</option></select></div>
           <div class="q"><label for="q5">Who is it for?</label>
             <select id="q5"><option value="0">Just me</option><option value="1">Me plus a few teammates</option><option value="2">A whole team, org, or the people we serve</option></select></div>
           <div class="q"><label for="q6" id="q6Label">What data does it touch?</label>
@@ -551,7 +553,7 @@
           </div>
           <div class="rec-caveat close" id="recClose" hidden></div>
           <div class="rec-caveat" id="recCaveat" hidden></div>
-          <p class="rec-note">The data question does not change the recommendation—the shape of the work does. It sets the conditions you must meet before you build.</p>
+          <p class="rec-note">The data class does not select the product lane, but regulated, sensitive, or records-retained data is a hard build-and-deployment gate. Confirm authorization, approved sources, minimization, retention, audit, escalation, and institutional review before proceeding.</p>
         </div>
       </div>
 
@@ -656,8 +658,8 @@
       </div>
       <div class="num-grid">
         <div class="ncard"><span class="n">1</span><b>Grounding on your data</b><p>Connect agents to SharePoint, Dataverse, websites, and enterprise systems so answers can use your knowledge and cite it where supported.</p></div>
-        <div class="ncard"><span class="n">2</span><b>Actions &amp; connectors</b><p>Take real actions through 1,000+ connectors and custom APIs, with approvals where needed.</p></div>
-        <div class="ncard"><span class="n">3</span><b>Autonomous triggers</b><p>Run on a schedule or when an event fires—new email, record change, or form submission.</p></div>
+        <div class="ncard"><span class="n">2</span><b>Actions &amp; connectors</b><p>Take real actions through configured connectors and custom APIs, with approval controls where the agent and connection support them.</p></div>
+        <div class="ncard"><span class="n">3</span><b>Autonomous triggers</b><p>Run on supported schedules or events when the tenant, agent, and connection are configured for them.</p></div>
         <div class="ncard"><span class="n">4</span><b>Multi-agent orchestration</b><p>Compose agents that hand off to each other for research, drafting, and review.</p></div>
         <div class="ncard"><span class="n">5</span><b>Custom topics &amp; logic</b><p>Design conversation flows, business rules, and variables for reliable, repeatable outcomes.</p></div>
         <div class="ncard"><span class="n">6</span><b>Channels &amp; reach</b><p>Publish to Teams, your website, Microsoft 365 Copilot, or customer-facing surfaces.</p></div>
@@ -745,7 +747,7 @@
         <h2 style="font-size:clamp(24px,3vw,32px);">Licensing &amp; availability</h2>
         <p style="font-size:15px; color:var(--text-muted);">
           <b>Availability:</b> Feature availability can depend on licensing, rollout status, preview/GA status, geography, government cloud, tenant configuration, admin controls, and permissions. Verify the current documentation for the intended scenario.
-          <b>Copilot &amp; Cowork:</b> Included with Microsoft 365 Copilot license (add-on to Microsoft 365 for enterprise).
+          <b>Copilot:</b> Microsoft 365 Copilot access is licensed as an add-on to eligible Microsoft 365 plans. <b>Cowork:</b> Requires active Microsoft 365 Copilot access <i>and</i> administrator-enabled usage-based/Cowork billing; a Microsoft 365 Copilot license alone is not a sufficient description.
           <b>Copilot agents:</b> Built with Copilot Studio. Authoring agents grounded in tenant data requires a Microsoft 365 Copilot license or Copilot Studio pay-as-you-go billing (consumed as Copilot Credits).
           <b>Government cloud:</b> Copilot Studio US Government plans are licensed the same as public cloud and are available in GCC and GCC High—but pay-as-you-go billing is <i>not</i> supported in GCC or GCC High, so the licensed path applies there. Confirm specifics with your Microsoft team.
         </p>
@@ -778,7 +780,7 @@
 
   <footer>
   <div class="wrap">
-    <div class="disclaimer">This guide is an informational decision aid, not licensing, compliance, security, architecture, legal, or support authority. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 17, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-17 01:20 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
+    <div class="disclaimer">This guide is an informational decision aid, not licensing, compliance, security, architecture, legal, or support authority. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 17, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-17 01:27 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
     <div>Choose the right way to work with AI · <span id="year"></span></div>
   </div>
 </footer>
