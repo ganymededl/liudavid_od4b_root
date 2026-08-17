@@ -334,7 +334,7 @@
           <a class="btn primary" href="#matcher">Help me choose →</a>
           <a class="btn ghost" href="#comparison">See the full comparison</a>
         </div>
-        <p class="hero-eg" id="heroEg">Tailored for institutions like <b>Harvard University</b>.</p>
+        <p class="hero-eg" id="heroEg">A customer-facing informational guide for higher-education decision-makers.</p>
       </div>
       <div class="ladder" aria-label="Three-level decision">
         <div class="step s1"><div class="num">1</div><div><b>Need help while you work?</b><p>Use Copilot for a conversation, answer, draft, summary, analysis, or in-app assist.</p></div></div>
@@ -428,13 +428,13 @@
             <tr><td>Cowork output packaging</td><td>Created files appear in an output folder; users can preview, download individually, or use Download All for a ZIP of many files.</td><td>Supports batch patterns—many per-record artifacts stay in one retrievable task package.</td></tr>
             <tr><td>Cowork memory</td><td>Memory is scoped to the current conversation and does not persist across conversations.</td><td>Use Cowork for contained runs; use an agent when durable, repeatable context matters.</td></tr>
             <tr><td>Cowork skills</td><td>Built-in and custom skills load during a session; users can create custom skills with companion-file limits.</td><td>Cowork is extensible but intentionally bounded; a curated task library matters.</td></tr>
-            <tr><td>Cowork automation</td><td>Recurring Cowork runs repeat one predefined task on a schedule or trigger; each run is scoped to its own conversation, so no state carries between runs, and actions stay M365-centered and draft-and-approve for consequential steps.</td><td>“Repeat” here means rerunning the same bounded task—not persistent state, cross-system connectors, or serving other people. That distinction, not repetition itself, is what marks the move to an agent.</td></tr>
-            <tr><td>Agent grounding</td><td>Copilot Studio agents connect to SharePoint, Dataverse, websites, and enterprise data as knowledge sources.</td><td>Choose an agent when answers must be grounded in your specific content, with citations.</td></tr>
+            <tr><td>Cowork automation</td><td>Recurring Cowork runs repeat one predefined task on a schedule or trigger; each run is scoped to its own conversation, so no durable state carries between runs, and actions stay M365-centered and draft-and-approve for consequential steps.</td><td>“Repeat” here means rerunning the same bounded task—not durable state, cross-system connectors, or serving other people. That distinction, not repetition itself, is what marks the move to an agent.</td></tr>
+            <tr><td>Agent grounding</td><td>Copilot Studio agents connect to SharePoint, Dataverse, websites, and enterprise data as knowledge sources.</td><td>Choose an agent when answers must be grounded in your specific content; citations can be available when the configured source and experience support them.</td></tr>
             <tr><td>Agent actions &amp; channels</td><td>Agents take actions through connectors and custom APIs and publish to Teams, websites, and Microsoft 365 Copilot.</td><td>Choose an agent when the capability should act and reach many people at once.</td></tr>
           </tbody>
         </table>
       </div>
-      <div class="note"><b>Important nuance:</b> “Faster” here means lower interaction overhead for a well-bounded task, not guaranteed runtime. Microsoft documents Cowork work as potentially taking minutes to hours. Its differentiator is a contained Microsoft 365 task experience with visible inputs, progress, skills, refinement, and packaged outputs.</div>
+      <div class="note"><b>Availability note:</b> These are documented product patterns, not a promise that every capability is available in every tenant. Licensing, rollout status, preview/GA status, geography, government cloud, admin configuration, and permissions can change what is available. Verify current product documentation before scoping a deployment. “Faster” means lower interaction overhead for a well-bounded task, not guaranteed runtime.</div>
       <div class="refs">
         <div class="refcol">
           <span class="tag">Copilot &amp; Cowork sources</span>
@@ -471,7 +471,7 @@
             <tr><td>Grounding</td><td>The current chat, app, file, email, meeting, or M365 context</td><td>Multiple M365 sources, files, messages, meetings, skills, and plugins</td><td>Your knowledge sources, systems, and data—cited in responses</td></tr>
             <tr><td>Actions</td><td>Usually user-led in the current experience</td><td>Plans and stages actions with human checkpoints</td><td>Takes actions through connectors and APIs; consequential steps gated</td></tr>
             <tr><td>Automation depth</td><td>Prompt reuse and product-supported agents</td><td>Scheduled prompts and event-driven tasks centered on M365</td><td>Schedules, event triggers, and autonomous multi-step runs</td></tr>
-            <tr><td>Repeat behavior</td><td>No automation; re-prompted each time</td><td>Reruns one task on a schedule or trigger; no state carries between runs, M365-centered actions</td><td>Runs continuously or on trigger with persistent grounding, state, and cross-system connectors</td></tr>
+            <tr><td>Repeat behavior</td><td>No automation; re-prompted each time</td><td>Reruns one task on a schedule or trigger; no durable state carries between runs, with M365-centered actions</td><td>Runs continuously or on trigger with persistent grounding and explicitly designed state, plus cross-system connectors where configured</td></tr>
             <tr><td>Typical duration</td><td>Seconds to minutes</td><td>Minutes to hours; bounded runs feel faster because outputs stay contained</td><td>Ongoing / on-demand—runs whenever it's invoked or triggered</td></tr>
             <tr><td>Typical output</td><td>An answer, draft, summary, analysis, or table</td><td>One organized output folder: briefing, deck, workbook, report, or batch</td><td>An in-channel answer, action, or artifact—repeated reliably</td></tr>
             <tr><td>Reach</td><td>Just you</td><td>You and your immediate work</td><td>A team, the organization, or the people you serve</td></tr>
@@ -542,7 +542,7 @@
         <div class="use">
           <span class="tag" style="color:var(--c3)">Use an agent when</span>
           <div class="row"><strong>The work repeats at volume</strong><span>Many people need the same capability, consistently.</span></div>
-          <div class="row"><strong>It must be grounded</strong><span>Answers should cite your documents, data, and systems.</span></div>
+          <div class="row"><strong>It must be grounded</strong><span>Answers should use your documents, data, and systems; citations may be available when the source and experience support them.</span></div>
           <div class="row"><strong>It should act or run on its own</strong><span>Take approved actions, or run on a schedule or trigger.</span></div>
           <div class="foot"><b>Don't overbuild:</b> if Copilot or Cowork comfortably fits, an agent's setup and governance may not be worth it.</div>
         </div>
@@ -572,7 +572,7 @@
             <tr><td>Personalized outreach to admitted students</td><td>Cowork</td><td>One skill fans out many per-student messages, contained to a single task.</td></tr>
             <tr><td>Answer student FAQs on your website 24/7</td><td>Copilot agent</td><td>Repeatable, grounded, always-on, and student-facing.</td></tr>
             <tr><td>Route and triage help-desk tickets by policy</td><td>Copilot agent</td><td>Needs grounding, actions across systems, and consistent rules at volume.</td></tr>
-            <tr><td>Daily enrollment digest to leadership</td><td>Copilot agent</td><td>Scheduled, stateful, and notifies only when useful.</td></tr>
+            <tr><td>Daily enrollment digest to leadership</td><td>Copilot agent</td><td>Scheduled and controlled; add durable state only if the design needs history across runs.</td></tr>
           </tbody>
         </table>
       </div>
@@ -606,8 +606,8 @@
         <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Personalized outreach to admitted students</h3><p>Apply known messaging and create one draft per student in a folder.</p><div class="start"><span class="lab">Start with</span><b class="c2">Cowork</b> — multi-step but bounded, repeatable, and cleanly contained.</div></article>
         <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Student self-service assistant on your website</h3><p>A branded assistant answering 24/7, grounded in your content.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — repeatable, grounded, and student-facing.</div></article>
         <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>IT help desk in Teams</h3><p>Resolve student and staff IT questions from your knowledge base.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — always-on, grounded, and shared across the institution.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Daily enrollment / retention digest</h3><p>On a schedule, collect sources, rank changes, and notify when useful.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — needs persistent state, scheduling, and controlled notifications.</div></article>
-        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Triage &amp; route student service requests</h3><p>Classify requests and route to the right office by policy.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — connected data and approval-gated actions, FERPA-aware.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Daily enrollment / retention digest</h3><p>On a schedule, collect sources, rank changes, and notify when useful.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — needs scheduling and controlled notifications; add durable state only if history across runs is required.</div></article>
+        <article class="scen" data-cat="workflows"><span class="kicker">Workflows</span><h3>Triage &amp; route student service requests</h3><p>Classify requests and route to the right office by policy.</p><div class="start"><span class="lab">Start with</span><b class="c3">Copilot agent</b> — connected data, approval-gated actions, and FERPA-reviewed handling rules.</div></article>
       </div>
       <div class="note" id="scenNote" hidden></div>
     </div>
@@ -622,7 +622,7 @@
         <p>A deeper dive for readers whose answer above pointed to agents. Cowork is optimized for contained execution; Copilot agents are an extensible platform for capabilities you build, connect, automate, and deploy beyond a single task run.</p>
       </div>
       <div class="num-grid">
-        <div class="ncard"><span class="n">1</span><b>Grounding on your data</b><p>Connect agents to SharePoint, Dataverse, websites, and enterprise systems so answers cite your knowledge.</p></div>
+        <div class="ncard"><span class="n">1</span><b>Grounding on your data</b><p>Connect agents to SharePoint, Dataverse, websites, and enterprise systems so answers can use your knowledge and cite it where supported.</p></div>
         <div class="ncard"><span class="n">2</span><b>Actions &amp; connectors</b><p>Take real actions through 1,000+ connectors and custom APIs, with approvals where needed.</p></div>
         <div class="ncard"><span class="n">3</span><b>Autonomous triggers</b><p>Run on a schedule or when an event fires—new email, record change, or form submission.</p></div>
         <div class="ncard"><span class="n">4</span><b>Multi-agent orchestration</b><p>Compose agents that hand off to each other for research, drafting, and review.</p></div>
@@ -653,10 +653,10 @@
         <div class="ncard"><span class="n">4</span><b>Course &amp; catalog lookup</b><p>Answer questions on courses, prerequisites, schedules, and deadlines.</p></div>
         <div class="ncard"><span class="n">5</span><b>Research administration</b><p>Search grants, IRB, and compliance policies and return cited answers.</p></div>
         <div class="ncard"><span class="n">6</span><b>Onboarding guide</b><p>Walk new students and staff through enrollment, orientation, and setup.</p></div>
-        <div class="ncard"><span class="n">7</span><b>Library &amp; knowledge assistant</b><p>Search library guides, policies, and resources with citations.</p></div>
+        <div class="ncard"><span class="n">7</span><b>Library &amp; knowledge assistant</b><p>Search library guides, policies, and resources; cite configured sources when supported.</p></div>
         <div class="ncard"><span class="n">8</span><b>Application &amp; form intake</b><p>Extract fields from applications and forms and post them to your systems.</p></div>
         <div class="ncard"><span class="n">9</span><b>Committee follow-through</b><p>Turn faculty and committee notes into action items, with approval.</p></div>
-        <div class="ncard"><span class="n">10</span><b>FERPA-aware triage</b><p>Classify incoming requests and route by policy, protecting student records.</p></div>
+        <div class="ncard"><span class="n">10</span><b>FERPA-conscious triage</b><p>Classify incoming requests and route by policy, with approved handling for student records.</p></div>
         <div class="ncard"><span class="n">11</span><b>Facilities &amp; campus ops</b><p>Give staff a mobile assistant for procedures, work orders, and lookups.</p></div>
         <div class="ncard"><span class="n">12</span><b>Enrollment &amp; retention digest</b><p>Assemble a scheduled summary of enrollment or retention metrics.</p></div>
       </div>
@@ -705,12 +705,13 @@
         <div class="ncard"><span class="n">3</span><b>Review consequential actions</b><p>Sending, publishing, scheduling, deleting, purchasing, or updating a system needs the right human approval.</p></div>
         <div class="ncard"><span class="n">4</span><b>Verify the result</b><p>Check facts, numbers, recipients, permissions, citations, and business logic before relying on the output.</p></div>
       </div>
-      <div class="note"><b>Important:</b> never choose a more powerful surface to bypass a control that applies in Copilot. Use the least-powerful surface that can complete the work safely and effectively. All three run on Microsoft's enterprise foundation—prompts, responses, and your data are not used to train the foundation models, and existing identity, permissions, and sensitivity labels are respected.</div>
+      <div class="note"><b>Important:</b> never choose a more powerful surface to bypass a control that applies in Copilot. Use the least-powerful surface that can complete the work safely and effectively. For Microsoft 365 commercial customers, Microsoft's current documentation says prompts, responses, and data accessed through Microsoft Graph aren't used to train foundation LLMs. This statement is not a universal claim for every Copilot-branded product, tenant, agent, or consumer experience; review the applicable service and agent terms. Existing identity, permissions, and sensitivity labels still need to be configured correctly.</div>
       <div class="note" id="guardNote"></div>
 
       <div class="sec-head" style="margin-top:44px;">
         <h2 style="font-size:clamp(24px,3vw,32px);">Licensing &amp; availability</h2>
         <p style="font-size:15px; color:var(--text-muted);">
+          <b>Availability:</b> Feature availability can depend on licensing, rollout status, preview/GA status, geography, government cloud, tenant configuration, admin controls, and permissions. Verify the current documentation for the intended scenario.
           <b>Copilot &amp; Cowork:</b> Included with Microsoft 365 Copilot license (add-on to Microsoft 365 for enterprise).
           <b>Copilot agents:</b> Built with Copilot Studio. Authoring agents grounded in tenant data requires a Microsoft 365 Copilot license or Copilot Studio pay-as-you-go billing (consumed as Copilot Credits).
           <b>Government cloud:</b> Copilot Studio US Government plans are licensed the same as public cloud and are available in GCC and GCC High—but pay-as-you-go billing is <i>not</i> supported in GCC or GCC High, so the licensed path applies there. Confirm specifics with your Microsoft team.
@@ -744,7 +745,7 @@
 
   <footer>
   <div class="wrap">
-    <div class="disclaimer">This guide is an informational decision aid, not a contractual or licensing document. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 16, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-16 19:07 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
+    <div class="disclaimer">This guide is an informational decision aid, not licensing, compliance, security, architecture, legal, or support authority. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 17, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-17 01:17 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
     <div>Choose the right way to work with AI · <span id="year"></span></div>
   </div>
 </footer>
@@ -835,7 +836,7 @@
   const INDUSTRY = {
     edu: {
       eyebrow: "For higher education",
-      heroEg: 'Tailored for institutions like <b>Harvard University</b>.',
+      heroEg: "A customer-facing informational guide for higher-education decision-makers.",
       practiceSub: "High-value agent patterns across student services, faculty support, research administration, and campus operations—grounded in your institution's own content.",
       practice: [
         ["Student self-service","Answer admissions, registration, and financial-aid questions 24/7 from your knowledge base, with escalation to staff."],
@@ -844,10 +845,10 @@
         ["Course & catalog lookup","Answer questions on courses, prerequisites, schedules, and deadlines."],
         ["Research administration","Search grants, IRB, and compliance policies and return cited answers."],
         ["Onboarding guide","Walk new students and staff through enrollment, orientation, and setup."],
-        ["Library & knowledge assistant","Search library guides, policies, and resources with citations."],
+        ["Library & knowledge assistant","Search library guides, policies, and resources; cite configured sources when supported."],
         ["Application & form intake","Extract fields from applications and forms and post them to your systems."],
         ["Committee follow-through","Turn faculty and committee notes into action items, with approval."],
-        ["FERPA-aware triage","Classify incoming requests and route by policy, protecting student records."],
+        ["FERPA-conscious triage","Classify incoming requests and route by policy, with approved handling for student records."],
         ["Facilities & campus ops","Give staff a mobile assistant for procedures, work orders, and lookups."],
         ["Enrollment & retention digest","Assemble a scheduled summary of enrollment or retention metrics."],
       ],
@@ -857,7 +858,7 @@
         ["Personalized outreach to admitted students","Cowork","One skill fans out many per-student messages, contained to a single task."],
         ["Answer student FAQs on your website 24/7","Copilot agent","Repeatable, grounded, always-on, and student-facing."],
         ["Route and triage help-desk tickets by policy","Copilot agent","Needs grounding, actions across systems, and consistent rules at volume."],
-        ["Daily enrollment digest to leadership","Copilot agent","Scheduled, stateful, and notifies only when useful."],
+        ["Daily enrollment digest to leadership","Copilot agent","Scheduled and controlled; add durable state only if the design needs history across runs."],
       ],
       scenSub: "Filter by work type. Examples are drawn from higher-education work; each names the best starting point and when to move.",
       scenarios: [
@@ -871,8 +872,8 @@
         ["workflows","Personalized outreach to admitted students","Apply known messaging and create one draft per student in a folder.","c2","Cowork","multi-step but bounded, repeatable, and cleanly contained."],
         ["workflows","Student self-service assistant on your website","A branded assistant answering 24/7, grounded in your content.","c3","Copilot agent","repeatable, grounded, and student-facing."],
         ["workflows","IT help desk in Teams","Resolve student and staff IT questions from your knowledge base.","c3","Copilot agent","always-on, grounded, and shared across the institution."],
-        ["workflows","Daily enrollment / retention digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs persistent state, scheduling, and controlled notifications."],
-        ["workflows","Triage & route student service requests","Classify requests and route to the right office by policy.","c3","Copilot agent","connected data and approval-gated actions, FERPA-aware."],
+        ["workflows","Daily enrollment / retention digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs scheduling and controlled notifications; add durable state only if history across runs is required."],
+        ["workflows","Triage & route student service requests","Classify requests and route to the right office by policy.","c3","Copilot agent","connected data, approval-gated actions, and FERPA-reviewed handling rules."],
       ],
       prompts: [
         ["Copilot prompt","c1","Ask for the next useful response","Summarize this email thread from a faculty member. List the decisions, open questions, and owners, then draft a concise reply for me to review."],
@@ -920,7 +921,7 @@
         ["Personalized notices to permit holders","Cowork","One skill fans out many per-recipient notices, contained to a single task."],
         ["Answer public-records and permit-status questions 24/7","Copilot agent","Repeatable, grounded, always-on, and resident-facing."],
         ["Route and triage 311 / service requests by policy","Copilot agent","Needs grounding, actions across systems, and consistent rules at volume."],
-        ["Daily operations digest to leadership","Copilot agent","Scheduled, stateful, and notifies only when useful."],
+        ["Daily operations digest to leadership","Copilot agent","Scheduled and controlled; add durable state only if the design needs history across runs."],
       ],
       scenSub: "Filter by work type. Examples are drawn from public-sector work; each names the best starting point and when to move.",
       scenNote: '<b>Government cloud check:</b> these examples assume a commercial tenant. If yours is <b>GCC</b>, <b>GCC High</b>, or <b>DoD</b>, three documented limits hit this list directly—agents grounded in <b>shared tenant work data</b> aren\'t currently available in those environments; Copilot Studio US Government client access is limited to the web client and <b>isn\'t available in Microsoft Teams</b> (which affects the Teams help-desk example specifically); and <b>pay-as-you-go billing isn\'t supported</b>. Copilot Studio itself <i>is</i> available in GCC and GCC High at FedRAMP High. Confirm your scenario before scoping one of these.',
@@ -935,7 +936,7 @@
         ["workflows","Status updates across an active caseload","Apply known update logic and create one per-case status draft, held for review, in one output folder.","c2","Cowork","multi-step but bounded, repeatable, and cleanly contained."],
         ["workflows","Resident self-service assistant on your website","Answer public-records and permit-status questions 24/7, grounded in your published FAQ and process pages, with escalation to staff.","c3","Copilot agent","repeatable, grounded, and resident-facing."],
         ["workflows","Policy & general-orders help desk in Teams","Resolve procedural questions from your SOP and policy library, with hand-off to a supervisor on edge cases.","c3","Copilot agent","always-on, grounded, and shared across the agency."],
-        ["workflows","Daily operations digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs persistent state, scheduling, and controlled notifications."],
+        ["workflows","Daily operations digest","On a schedule, collect sources, rank changes, and notify when useful.","c3","Copilot agent","needs scheduling and controlled notifications; add durable state only if history across runs is required."],
         ["workflows","Triage & route 311 / service requests","Classify requests and route to the right department by policy.","c3","Copilot agent","connected data and approval-gated actions, records-aware."],
       ],
       prompts: [
