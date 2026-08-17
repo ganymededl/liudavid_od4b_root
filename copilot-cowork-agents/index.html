@@ -72,6 +72,13 @@
 
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+  a, button, select { scroll-margin-top: 84px; scroll-margin-bottom: 16px; }
+  .skip-link {
+    position: fixed; left: 12px; top: -60px; z-index: 100;
+    padding: 10px 14px; border-radius: 8px; background: var(--accent);
+    color: var(--accent-fg); font-weight: 650; text-decoration: none;
+  }
+  .skip-link:focus { top: 12px; }
   body {
     margin: 0;
     font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
@@ -118,6 +125,11 @@
   nav.sections a:hover { background: var(--accent-soft); color: var(--text); }
   .theme-btn { flex: none; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-muted); width: 38px; height: 34px; border-radius: 9px; cursor: pointer; font-size: 15px; }
   .theme-btn:hover { color: var(--text); border-color: var(--accent); }
+  .mobile-sections { display: none; }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
 
   /* Hero */
   .hero { padding: 74px 0 48px; }
@@ -281,17 +293,27 @@
   .disclaimer { max-width: 74ch; }
 
   @media (max-width: 960px) {
+    .topbar-inner { height: auto; min-height: 64px; flex-wrap: wrap; padding-top: 14px; padding-bottom: 14px; }
     .hero-grid { grid-template-columns: 1fr; }
     .cards-3, .use-grid, .scen-grid, .prompt-grid { grid-template-columns: 1fr; }
     .num-grid, .num-grid.g3 { grid-template-columns: repeat(2, 1fr); }
     .helper, .two-up, .refs, .flow-grid { grid-template-columns: 1fr; }
     nav.sections { display: none; }
+    .mobile-sections { display: block; order: 3; flex-basis: 100%; margin: 0 0 0; }
+    .mobile-sections summary { cursor: pointer; color: var(--text-muted); font-size: 13px; font-weight: 650; }
+    .mobile-links { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; }
+    .mobile-links a { color: var(--accent); font-size: 13px; padding: 4px 8px; }
   }
   @media (max-width: 560px) { .num-grid, .num-grid.g3 { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .meter .fill, .result { transition: none; }
+  }
 </style>
 </head>
 <body>
 
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <header class="topbar">
   <div class="wrap topbar-inner">
     <a class="brand" href="#top"><span class="logo" aria-hidden="true"></span><span>Which Microsoft AI?</span></a>
@@ -307,19 +329,27 @@
       <a href="#handoffs">Handoffs</a>
       <a href="#guardrails">Guardrails</a>
     </nav>
+    <details class="mobile-sections">
+      <summary>Jump to section</summary>
+      <div class="mobile-links">
+        <a href="#definitions">Definitions</a><a href="#documented">Documented</a><a href="#comparison">Compare</a>
+        <a href="#matcher">Decision helper</a><a href="#patterns">Patterns</a><a href="#scenarios">Examples</a>
+        <a href="#power">Agent power</a><a href="#practice">In practice</a><a href="#handoffs">Handoffs</a><a href="#guardrails">Guardrails</a>
+      </div>
+    </details>
     <button class="theme-btn" id="themeToggle" title="Toggle light/dark" aria-label="Toggle theme">◐</button>
   </div>
 </header>
 
 <a id="top"></a>
-<main>
+<main id="main-content">
   <!-- HERO -->
   <div class="hero">
     <div class="wrap hero-grid">
       <div>
         <div class="ind-switch" role="tablist" aria-label="Choose industry">
-          <button class="ind-btn active" data-ind="edu" role="tab"><span class="dot"></span>Higher Education</button>
-          <button class="ind-btn" data-ind="slg" role="tab"><span class="dot"></span>State &amp; Local Gov</button>
+          <button class="ind-btn active" data-ind="edu" role="tab" aria-selected="true" aria-controls="main-content" tabindex="0"><span class="dot"></span>Higher Education</button>
+          <button class="ind-btn" data-ind="slg" role="tab" aria-selected="false" aria-controls="main-content" tabindex="-1"><span class="dot"></span>State &amp; Local Gov</button>
         </div>
         <span class="eyebrow" id="eyebrow">For higher education</span>
         <h1>Choose the right way to <span class="grad-text">work with AI.</span></h1>
@@ -423,6 +453,7 @@
       </div>
       <div class="table-wrap" style="margin-top:24px;">
         <table>
+          <caption class="sr-only">Documented product facts and how they inform this guide</caption>
           <thead><tr><th>Product fact</th><th>What Microsoft documents</th><th>What it means for this guide</th></tr></thead>
           <tbody>
             <tr><td>Cowork output packaging</td><td>Created files appear in an output folder; users can preview, download individually, or use Download All for a ZIP of many files.</td><td>Supports batch patterns—many per-record artifacts stay in one retrievable task package.</td></tr>
@@ -462,6 +493,7 @@
       </div>
       <div class="table-wrap">
         <table>
+          <caption class="sr-only">Side-by-side comparison of Copilot, Copilot Cowork, and Copilot agents</caption>
           <thead><tr><th>Dimension</th><th class="c1">Copilot</th><th class="c2">Copilot Cowork</th><th class="c3">Copilot agents</th></tr></thead>
           <tbody>
             <tr><td>Primary job</td><td>Answer, create, summarize, analyze, or assist</td><td>Run a fast, contained multi-step assignment and package its outputs</td><td>Serve a repeatable, grounded capability to many people</td></tr>
@@ -508,7 +540,7 @@
           <div class="q"><label for="q6" id="q6Label">What data does it touch?</label>
             <select id="q6"><option value="0">Public or already-published info</option><option value="1">Directory information</option><option value="2">FERPA education records</option></select></div>
         </div>
-        <div class="result" id="result">
+        <div class="result" id="result" role="status" aria-live="polite" aria-atomic="true">
           <span class="rec-eyebrow">Recommended starting point</span>
           <h3 class="rec" id="recName">Copilot</h3>
           <p class="why" id="recWhy"><b>Why:</b> The task is best handled with frequent human steering and does not require a delegated or grounded workflow.</p>
@@ -565,6 +597,7 @@
       </div>
       <div class="table-wrap" style="margin-top:24px;">
         <table>
+          <caption class="sr-only">Usage pattern examples and recommended starting points</caption>
           <thead><tr><th>Example assignment</th><th>Best starting point</th><th>Why it fits</th></tr></thead>
           <tbody id="patternsBody">
             <tr><td>Summarize a faculty email and draft a reply</td><td>Copilot</td><td>One conversational turn against context already open in front of you.</td></tr>
@@ -745,7 +778,7 @@
 
   <footer>
   <div class="wrap">
-    <div class="disclaimer">This guide is an informational decision aid, not licensing, compliance, security, architecture, legal, or support authority. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 17, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-17 01:17 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
+    <div class="disclaimer">This guide is an informational decision aid, not licensing, compliance, security, architecture, legal, or support authority. Product names, capabilities, and availability are subject to change—confirm specifics with official Microsoft documentation and your Microsoft representative. <b>Last verified: August 17, 2026.</b> <span class="build">Build <span id="buildStamp">2026-08-17 01:20 ET</span> — if you are reviewing this page, check this stamp first; GitHub Pages caches for 10 minutes and may serve you an older build.</span></div>
     <div>Choose the right way to work with AI · <span id="year"></span></div>
   </div>
 </footer>
@@ -978,7 +1011,12 @@
   function renderIndustry(key) {
     const d = INDUSTRY[key] || INDUSTRY.edu;
     root.setAttribute("data-industry", key);
-    document.querySelectorAll(".ind-btn").forEach(b => b.classList.toggle("active", b.dataset.ind === key));
+    document.querySelectorAll(".ind-btn").forEach(b => {
+      const active = b.dataset.ind === key;
+      b.classList.toggle("active", active);
+      b.setAttribute("aria-selected", String(active));
+      b.tabIndex = active ? 0 : -1;
+    });
     document.getElementById("eyebrow").textContent = d.eyebrow;
     document.getElementById("heroEg").innerHTML = d.heroEg;
     document.getElementById("practiceSub").textContent = d.practiceSub;
@@ -1011,7 +1049,31 @@
     try { localStorage.setItem("aiHubIndustry", key); } catch (e) {}
     try { const u = new URL(window.location); u.searchParams.set("industry", key); history.replaceState(null, "", u); } catch (e) {}
   }
-  document.querySelectorAll(".ind-btn").forEach(b => b.addEventListener("click", () => setIndustry(b.dataset.ind)));
+  document.querySelectorAll(".ind-btn").forEach(b => {
+    b.addEventListener("click", () => setIndustry(b.dataset.ind));
+    b.addEventListener("keydown", e => {
+      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+      e.preventDefault();
+      const tabs = [...document.querySelectorAll(".ind-btn")];
+      const index = tabs.indexOf(b);
+      const next = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1
+        : (index + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+      tabs[next].focus();
+      setIndustry(tabs[next].dataset.ind);
+    });
+  });
+
+  // Override smooth scrolling when keyboard focus would otherwise remain off-screen.
+  document.addEventListener("focusin", e => {
+    const el = e.target;
+    if (!(el instanceof HTMLElement)) return;
+    const box = el.getBoundingClientRect();
+    if (box.top >= 84 && box.bottom <= window.innerHeight - 12) return;
+    const previous = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    el.scrollIntoView({ block: "nearest", inline: "nearest" });
+    root.style.scrollBehavior = previous;
+  });
 
   // Initial industry: URL param → saved → default (edu)
   let initInd = new URLSearchParams(location.search).get("industry");
