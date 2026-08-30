@@ -14,3 +14,7 @@ desktop.ini
 *.env
 secrets.js
 config.local.js
+
+# Private build-log automation state
+data/builds.pending.json
+data/build-log-state.json

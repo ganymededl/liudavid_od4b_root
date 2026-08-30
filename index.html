@@ -397,7 +397,7 @@
   }
 
   /* ── Libraries ──────────────────────────────────────── */
-  .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap {
+  .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap, .build-log-wrap {
     padding: 20px 32px;
   }
   .libraries {
@@ -505,6 +505,152 @@
     margin-top: 3px;
     letter-spacing: 0.02em;
   }
+
+  /* ── Build log ───────────────────────────────────────── */
+  .build-log-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .build-log-head .section-label { margin-bottom: 4px; }
+  .build-log-intro {
+    max-width: 560px;
+    color: var(--t2);
+    font-size: 10px;
+    line-height: 1.45;
+  }
+  .build-count {
+    flex-shrink: 0;
+    color: var(--t2);
+    font-size: 9px;
+  }
+  .build-filters {
+    display: grid;
+    grid-template-columns: minmax(150px, 1.5fr) repeat(3, minmax(110px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .build-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .build-filter label {
+    color: var(--t3);
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .build-filter input,
+  .build-filter select {
+    width: 100%;
+    min-height: 34px;
+    padding: 7px 10px;
+    border: 0.5px solid var(--border);
+    border-radius: 9px;
+    background: var(--card);
+    color: var(--t1);
+    font: inherit;
+    font-size: 10px;
+    outline: none;
+  }
+  .build-filter input:focus,
+  .build-filter select:focus {
+    border-color: var(--c1);
+    box-shadow: 0 0 0 2px rgba(0,217,255,0.12);
+  }
+  .build-filter option {
+    background: var(--bg2);
+    color: var(--t1);
+  }
+  .build-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+  }
+  .build-table thead {
+    background: var(--card);
+    border-bottom: 0.5px solid var(--border2);
+  }
+  .build-table th {
+    padding: 12px 10px;
+    text-align: left;
+    color: var(--t1);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    font-size: 9px;
+    text-transform: uppercase;
+  }
+  .build-table tbody tr {
+    border-bottom: 0.5px solid var(--border);
+    transition: background 0.15s;
+  }
+  .build-table tbody tr:hover {
+    background: var(--card);
+  }
+  .build-table tbody tr:last-child {
+    border-bottom: none;
+  }
+  .build-table td {
+    padding: 10px;
+    color: var(--t1);
+    vertical-align: top;
+    line-height: 1.35;
+  }
+  .build-table td:nth-child(1) {
+    white-space: nowrap;
+    font-size: 9px;
+    color: var(--t2);
+  }
+  .build-table td:nth-child(2) {
+    font-weight: 700;
+    max-width: 200px;
+  }
+  .build-table td:nth-child(3) {
+    font-size: 9px;
+    color: var(--t2);
+    max-width: 280px;
+  }
+  .build-table td:nth-child(4),
+  .build-table td:nth-child(5),
+  .build-table td:nth-child(6) {
+    font-size: 8.5px;
+    color: var(--t2);
+  }
+  .build-table td:nth-child(4) .build-type {
+    display: inline-block;
+  }
+  .build-table .build-type {
+    border: 0.5px solid var(--border2);
+    background: rgba(0,217,255,0.08);
+    color: var(--c1);
+    padding: 3px 7px;
+    border-radius: 100px;
+    font-size: 7.5px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .build-table td:nth-child(7) {
+    white-space: nowrap;
+  }
+  .build-links {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .build-link {
+    color: var(--c1);
+    font-size: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .build-link:hover { text-decoration: underline; }
 
   /* ── Dots ───────────────────────────────────────────── */
   .dots-wrap {
@@ -699,11 +845,16 @@
 
   @media (max-width: 560px) {
     .hero { padding: 40px 20px 24px; }
-    .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap { padding: 16px 20px; }
+    .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap, .build-log-wrap { padding: 16px 20px; }
     .nav { padding: 12px 16px; }
     .music { max-width: 200px; }
     .station .sn { max-width: 70px; }
     .vol { display: none; }
+    .build-log-head { align-items: flex-start; flex-direction: column; gap: 6px; }
+    .build-filters { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 380px) {
+    .build-filters { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -789,10 +940,22 @@
       <div class="podcasts" id="podcasts"></div>
     </section>
 
-    <!-- RECENT -->
-    <section class="recent-wrap">
-      <p class="section-label">Recent additions</p>
-      <div class="recent" id="recent"></div>
+    <!-- BUILD LEDGER -->
+    <section class="build-log-wrap" aria-labelledby="buildLogTitle">
+      <p class="section-label" id="buildLogTitle">Build ledger</p>
+      <a class="lib" href="./build-ledger.html">
+        <div class="lib-icon" style="background: linear-gradient(135deg, #00d9ff, #00ffa3);">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="4" y="5" width="16" height="14" rx="2" stroke="#000" stroke-width="1.8"></rect>
+            <path d="M8 9H16M8 12H16M8 15H13" stroke="#000" stroke-width="1.8" stroke-linecap="round"></path>
+          </svg>
+        </div>
+        <div class="lib-name">Scout &amp; Cowork Build Ledger</div>
+        <div class="lib-desc">Open the dedicated page with filters for build type, customer, platform, date, and conversation reference.</div>
+        <div class="lib-cta">Open ledger
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </a>
     </section>
 
     <!-- DOTS -->
@@ -878,6 +1041,13 @@ const CONFIG = {
       href:  "https://ganymededl.github.io/liudavid_od4b_root/copilot-cowork-agents/",
       icon:  "list",
       color: ["#199fd7", "#45ab71"]
+    },
+    {
+      name:  "Build Ledger",
+      desc:  "Dedicated artifact ledger with filters across Scout and Cowork outputs",
+      href:  "./build-ledger.html",
+      icon:  "list",
+      color: ["#00d9ff", "#00ffa3"]
     }
   ],
 
@@ -894,13 +1064,6 @@ const CONFIG = {
     "Northern Spain",
     "Siena Tuscany Italy",
     "Salamanca Spain"
-  ],
-
-  // ── RECENT ADDITIONS ─────────────────────────────────────────
-  recent: [
-    { title: "Copilot Arcade — 3 games",       date: "Apr 2026", lib: "Games" },
-    { title: "CompStat agent system prompt",    date: "Apr 2026", lib: "Prompt Engineering" },
-    { title: "EXO bulk MaxReceiveSize scripts", date: "Apr 2026", lib: "Scripts & Automation" }
   ],
 
   // ── PODCASTS ─────────────────────────────────────────
@@ -1029,23 +1192,126 @@ CONFIG.libraries.forEach(lib => {
   libsEl.appendChild(a);
 });
 
-// ── RENDER: recent additions ────────────────────────────────
-const recEl = document.getElementById("recent");
-const libColorByName = {};
-CONFIG.libraries.forEach(l => { libColorByName[l.name] = l.color[0]; });
-CONFIG.recent.forEach(r => {
-  const d = document.createElement("div");
-  d.className = "rec";
-  const dot = libColorByName[r.lib] || "#00d9ff";
-  d.innerHTML = `
-    <span class="rec-dot" style="background: ${dot}; box-shadow: 0 0 6px ${dot}66;"></span>
-    <div class="rec-body">
-      <div class="rec-title">${r.title}</div>
-      <div class="rec-meta">${r.date} · ${r.lib}</div>
-    </div>
-  `;
-  recEl.appendChild(d);
-});
+// ── RENDER: build log ───────────────────────────────────────
+const buildGrid = document.getElementById("buildGrid");
+const buildCount = document.getElementById("buildCount");
+const buildSearch = document.getElementById("buildSearch");
+const buildType = document.getElementById("buildType");
+const buildCustomer = document.getElementById("buildCustomer");
+const buildAudience = document.getElementById("buildAudience");
+let builds = [];
+
+function safeWebUrl(value) {
+  if (!value) return "";
+  try {
+    const url = new URL(value, window.location.href);
+    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
+  } catch {
+    return "";
+  }
+}
+
+function appendText(parent, className, text) {
+  const element = document.createElement("span");
+  element.className = className;
+  element.textContent = text;
+  parent.appendChild(element);
+  return element;
+}
+
+function addFilterOptions(select, values) {
+  [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b)).forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  });
+}
+
+function createBuildLink(label, href) {
+  const url = safeWebUrl(href);
+  if (!url) return null;
+  const link = document.createElement("a");
+  link.className = "build-link";
+  link.href = url;
+  link.target = "_blank";
+  link.rel = "noopener";
+  link.textContent = label;
+  return link;
+}
+
+function renderBuilds() {
+  const query = buildSearch.value.trim().toLowerCase();
+  const filtered = builds.filter(build => {
+    const haystack = [build.title, build.description, build.customer, build.type, build.createdWith]
+      .filter(Boolean).join(" ").toLowerCase();
+    return (!query || haystack.includes(query))
+      && (!buildType.value || build.type === buildType.value)
+      && (!buildCustomer.value || build.customer === buildCustomer.value)
+      && (!buildAudience.value || build.audience === buildAudience.value);
+  });
+
+  buildGrid.replaceChildren();
+  buildCount.textContent = `${filtered.length} of ${builds.length} build${builds.length === 1 ? "" : "s"}`;
+
+  if (!filtered.length) {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td colspan="7" style="text-align: center; padding: 22px; color: var(--t2); font-size: 10px;">${builds.length ? "No builds match these filters." : "No builds have been logged yet."}</td>`;
+    buildGrid.appendChild(row);
+    return;
+  }
+
+  filtered.forEach(build => {
+    const row = document.createElement("tr");
+    const audience = build.customer ? `${build.audience} · ${build.customer}` : build.audience;
+    
+    const links = [];
+    const artifactLink = createBuildLink("Open", build.artifactUrl);
+    const sessionLink = createBuildLink("Session", build.sessionUrl);
+    if (artifactLink) links.push(artifactLink.outerHTML);
+    if (sessionLink) links.push(sessionLink.outerHTML);
+    
+    row.innerHTML = `
+      <td>${build.builtDate}</td>
+      <td>${build.title}</td>
+      <td>${build.description}</td>
+      <td><span class="build-type">${build.type}</span></td>
+      <td>${build.createdWith}</td>
+      <td>${audience}</td>
+      <td><div class="build-links">${links.join("")}</div></td>
+    `;
+    buildGrid.appendChild(row);
+  });
+}
+
+async function initBuildLog() {
+  try {
+    const response = await fetch("./data/builds.json", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Build log request failed: ${response.status}`);
+    const data = await response.json();
+    if (!Array.isArray(data)) throw new Error("Build log must be an array");
+    builds = data.slice().sort((a, b) => b.builtDate.localeCompare(a.builtDate));
+    addFilterOptions(buildType, builds.map(build => build.type));
+    addFilterOptions(buildCustomer, builds.map(build => build.customer));
+    addFilterOptions(buildAudience, builds.map(build => build.audience));
+    renderBuilds();
+  } catch (error) {
+    buildCount.textContent = "Build log unavailable";
+    buildGrid.replaceChildren();
+    const empty = document.createElement("div");
+    empty.className = "build-empty";
+    empty.textContent = "The build log could not be loaded.";
+    buildGrid.appendChild(empty);
+    console.error(error);
+  }
+}
+
+if (buildGrid && buildCount && buildSearch && buildType && buildCustomer && buildAudience) {
+  [buildSearch, buildType, buildCustomer, buildAudience].forEach(control => {
+    control.addEventListener(control === buildSearch ? "input" : "change", renderBuilds);
+  });
+  initBuildLog();
+}
 
 // ── RENDER: tools / quick access ────────────────────────────
 const toolsEl = document.getElementById("tools");
