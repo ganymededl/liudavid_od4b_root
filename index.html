@@ -1044,7 +1044,7 @@ const CONFIG = {
     },
     {
       name:  "Build Ledger",
-      desc:  "Dedicated artifact ledger with filters across Scout and Cowork outputs",
+      desc:  "Dedicated artifact ledger with filters across Scout, Cowork, and Copilot outputs",
       href:  "./build-ledger.html",
       icon:  "list",
       color: ["#00d9ff", "#00ffa3"]
@@ -1264,13 +1264,13 @@ function renderBuilds() {
   filtered.forEach(build => {
     const row = document.createElement("tr");
     const audience = build.customer ? `${build.audience} · ${build.customer}` : build.audience;
-    
+
     const links = [];
     const artifactLink = createBuildLink("Open", build.artifactUrl);
     const sessionLink = createBuildLink("Session", build.sessionUrl);
     if (artifactLink) links.push(artifactLink.outerHTML);
     if (sessionLink) links.push(sessionLink.outerHTML);
-    
+
     row.innerHTML = `
       <td>${build.builtDate}</td>
       <td>${build.title}</td>

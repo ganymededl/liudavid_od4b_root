@@ -9,13 +9,14 @@ root navigation page with links to projects, demos, and resources.
 - Dark / light theme toggle
 - Ambient audio controls
 - Links to key projects and demos
-- Dedicated Scout and Copilot Build Ledger page backed by `data/builds.json`
+- Dedicated Scout, Copilot Cowork, and Copilot CLI Build Ledger page backed by `data/builds.json`
 
 ## Build Ledger
 
 Open `build-ledger.html` for the full artifact roster with table sorting and
-filters (type, customer, platform, and audience). The public roster is stored
-in `data/builds.json`.
+filters (type, customer, platform, and audience). The roster is stored in
+`data/builds.json` and is refreshed from verified Scout, Copilot Cowork, and
+local Copilot archive sources.
 
 ## Tech Stack
 
