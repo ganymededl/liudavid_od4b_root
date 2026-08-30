@@ -9,7 +9,7 @@ root navigation page with links to projects, demos, and resources.
 - Dark / light theme toggle
 - Ambient audio controls
 - Links to key projects and demos
-- Dedicated Scout and Cowork Build Ledger page backed by `data/builds.json`
+- Dedicated Scout and Copilot Build Ledger page backed by `data/builds.json`
 
 ## Build Ledger
 
