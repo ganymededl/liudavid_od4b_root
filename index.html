@@ -87,6 +87,13 @@
     opacity: 0;
     transition: opacity 1.2s ease-in-out;
     will-change: opacity, transform;
+    /* Normalize bright/high-key photos (blue sky, light stone) into the
+       same tonal range as moody night shots, so text/card contrast is
+       consistent regardless of which Pexels photo loads. */
+    filter: brightness(0.62) saturate(0.78) contrast(1.08);
+  }
+  [data-light="true"] .slide {
+    filter: brightness(0.94) saturate(0.92) contrast(1.02);
   }
   .slide.active {
     opacity: 1;
@@ -102,10 +109,10 @@
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(180deg,
-      rgba(6,6,9,0.80) 0%,
-      rgba(6,6,9,0.34) 24%,
-      rgba(6,6,9,0.30) 64%,
-      rgba(6,6,9,0.90) 100%
+      rgba(6,6,9,0.70) 0%,
+      rgba(6,6,9,0.22) 24%,
+      rgba(6,6,9,0.18) 64%,
+      rgba(6,6,9,0.85) 100%
     );
   }
   [data-light="true"] .vignette {
@@ -405,6 +412,26 @@
   .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap, .build-log-wrap {
     padding: 20px 32px;
   }
+  /* Shared frosted backdrop behind the tile grids: each .lib/.pod card
+     already blurs the photo independently, which left visible seams in
+     the gaps between cards on high-contrast photos (e.g. striped towers).
+     One panel behind the whole grid removes that patchwork. */
+  .libraries-wrap, .tools-wrap { position: relative; }
+  .libraries-wrap::before, .tools-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 6px 16px;
+    background: rgba(6,6,9,0.38);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 22px;
+    z-index: 0;
+  }
+  [data-light="true"] .libraries-wrap::before,
+  [data-light="true"] .tools-wrap::before {
+    background: rgba(255,255,255,0.55);
+  }
+  .libraries-wrap > *, .tools-wrap > * { position: relative; z-index: 1; }
   .libraries {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
