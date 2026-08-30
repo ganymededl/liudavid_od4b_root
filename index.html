@@ -20,6 +20,8 @@
     --glass:    rgba(6,6,9,0.68);
     --card:     rgba(255,255,255,0.04);
     --cardh:    rgba(255,255,255,0.08);
+    --tile:     rgba(10,10,16,0.58);
+    --tileh:    rgba(10,10,16,0.72);
     --border:   rgba(255,255,255,0.07);
     --border2:  rgba(0,217,255,0.22);
     --ownerDim: rgba(244,244,248,0.65);
@@ -35,6 +37,8 @@
     --glass:    rgba(240,242,248,0.85);
     --card:     rgba(255,255,255,0.78);
     --cardh:    rgba(255,255,255,0.95);
+    --tile:     rgba(255,255,255,0.80);
+    --tileh:    rgba(255,255,255,0.94);
     --border:   rgba(0,0,0,0.08);
     --border2:  rgba(0,180,210,0.35);
     --ownerDim: rgba(10,10,20,0.65);
@@ -98,18 +102,18 @@
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(180deg,
-      rgba(6,6,9,0.75) 0%,
-      rgba(6,6,9,0.05) 35%,
-      rgba(6,6,9,0.05) 58%,
-      rgba(6,6,9,0.88) 100%
+      rgba(6,6,9,0.80) 0%,
+      rgba(6,6,9,0.34) 24%,
+      rgba(6,6,9,0.30) 64%,
+      rgba(6,6,9,0.90) 100%
     );
   }
   [data-light="true"] .vignette {
     background: linear-gradient(180deg,
-      rgba(240,242,248,0.55) 0%,
-      rgba(240,242,248,0.02) 35%,
-      rgba(240,242,248,0.02) 58%,
-      rgba(240,242,248,0.82) 100%
+      rgba(240,242,248,0.62) 0%,
+      rgba(240,242,248,0.28) 24%,
+      rgba(240,242,248,0.24) 64%,
+      rgba(240,242,248,0.86) 100%
     );
   }
 
@@ -341,6 +345,7 @@
     line-height: 1;
     letter-spacing: -0.02em;
     color: var(--ownerDim);
+    text-shadow: 0 2px 18px rgba(0,0,0,0.55);
   }
   .owner .first, .owner .last {
     font-weight: 300;
@@ -409,22 +414,25 @@
     display: block;
     text-decoration: none;
     color: var(--t1);
-    background: var(--card);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: var(--tile);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 0.5px solid var(--border);
     border-top: 0.5px solid rgba(255,255,255,0.10);
     border-radius: 14px;
     padding: 15px;
-    transition: background 0.18s, transform 0.15s, border-color 0.2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+    transition: background 0.18s, transform 0.15s, border-color 0.2s, box-shadow 0.18s;
   }
   [data-light="true"] .lib {
     border-top: 0.5px solid rgba(255,255,255,0.85);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
   }
   .lib:hover {
     transform: translateY(-3px);
     border-color: rgba(0,217,255,0.18);
-    background: var(--cardh);
+    background: var(--tileh);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.32);
   }
   .lib:active { transform: scale(0.97); }
 
@@ -779,20 +787,25 @@
   .pod {
     display: flex;
     flex-direction: column;
-    background: var(--card);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    background: var(--tile);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 0.5px solid var(--border);
     border-top: 0.5px solid rgba(255,255,255,0.10);
     border-radius: 14px;
     overflow: hidden;
-    transition: background 0.18s, transform 0.15s, border-color 0.2s;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+    transition: background 0.18s, transform 0.15s, border-color 0.2s, box-shadow 0.18s;
   }
-  [data-light="true"] .pod { border-top: 0.5px solid rgba(255,255,255,0.85); }
+  [data-light="true"] .pod {
+    border-top: 0.5px solid rgba(255,255,255,0.85);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  }
   .pod:hover {
     transform: translateY(-3px);
     border-color: rgba(0,217,255,0.22);
-    background: var(--cardh);
+    background: var(--tileh);
+    box-shadow: 0 10px 26px rgba(0,0,0,0.32);
   }
   .pod-thumb {
     width: 100%;
