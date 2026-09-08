@@ -68,11 +68,48 @@
 
   .app {
     position: relative;
+    background: var(--bg);
     min-height: 100vh;
     isolation: isolate;
   }
 
   /* ── Slideshow backdrop ───────────────────────────── */
+  .noir-backdrop {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    border: 0;
+    z-index: 0;
+    opacity: .48;
+    pointer-events: none;
+  }
+  [data-light="true"] .noir-backdrop { opacity: .25; }
+  .backdrop-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; align-items: center; }
+  .backdrop-controls button {
+    padding: 8px 12px;
+    color: var(--t1);
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: 11px;
+  }
+  .backdrop-controls button:focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; }
+  .hero .backdrop-controls { margin-top: 20px; }
+  @media (prefers-reduced-motion: reduce) {
+    .slide.active { animation: none; }
+  }
+  .lib-details { color: var(--t2); padding-left: 16px; font-size: 11px; line-height: 1.8; margin: 10px 0; }
+  #creative .lib { display: grid; grid-template-columns: 230px 1fr; column-gap: 24px; align-content: center; }
+  #creative .lib > :not(img) { grid-column: 2; }
+  .noir-thumb { width: 230px; height: 190px; object-fit: contain; grid-column: 1; grid-row: 1 / 5; }
+  @media (max-width: 600px) {
+    #creative .lib { grid-template-columns: 100px 1fr; column-gap: 16px; }
+    .noir-thumb { width: 100px; height: 140px; align-self: center; }
+  }
+  [hidden] { display: none !important; }
   .slides {
     position: absolute;
     inset: 0;
@@ -900,7 +937,8 @@
 </head>
 <body>
 <div class="app" id="app">
-  <div class="slides" id="slides"></div>
+  <iframe class="noir-backdrop" id="noirBackdrop" title="Decorative Volatility Noir sculpture" aria-hidden="true" tabindex="-1" inert></iframe>
+  <div class="slides" id="slides" hidden></div>
   <div class="vignette"></div>
 
   <div class="content">
@@ -944,7 +982,7 @@
 
     <!-- HERO -->
     <section class="hero">
-      <span class="city-pill" id="cityPill">Loading</span>
+      <span class="city-pill" id="cityPill">Volatility Noir / GPT-6 Astra</span>
       <h1 class="owner" id="ownerName">
         <span class="first">David</span>
         <span class="middle">Shih Chun</span>
@@ -960,6 +998,10 @@
         <span class="pill">SharePoint</span>
         <span class="pill">Public sector</span>
       </div>
+      <div class="backdrop-controls">
+        <button id="backgroundPause" type="button" aria-pressed="false">Pause sculpture</button>
+        <button id="backgroundSwitch" type="button">Use photo background</button>
+      </div>
     </section>
 
     <!-- LIBRARIES -->
@@ -969,6 +1011,11 @@
     </section>
 
     <!-- TOOLS / QUICK ACCESS -->
+    <section class="tools-wrap" aria-labelledby="creativeTitle">
+      <p class="section-label" id="creativeTitle">Creative experiments &middot; public, no sign-in</p>
+      <div class="libraries" id="creative"></div>
+    </section>
+
     <section class="tools-wrap">
       <p class="section-label">Tools &amp; quick access</p>
       <div class="libraries" id="tools"></div>
@@ -1000,10 +1047,10 @@
 
     <!-- DOTS -->
     <div class="dots-wrap">
-      <div class="dots" id="dots"></div>
+      <div class="dots" id="dots" hidden></div>
     </div>
 
-    <footer class="footer">Photos provided by Pexels</footer>
+    <footer class="footer" id="backgroundCredit">Volatility Noir &middot; Built with GPT-6 Astra &middot; Silent generative background</footer>
   </div>
 
   <!-- GENRE MODAL -->
@@ -1067,6 +1114,16 @@ const CONFIG = {
 
   // ── TOOLS / QUICK ACCESS ──────────────────────────────────
   // Quick-launch tools shown on the main page. Edit href to update a link.
+  creative: [
+    {
+      name: "Volatility Noir",
+      desc: "A chrome ribbon sculpture you can rotate, strain, and fracture. Optional original synthesized sound.",
+      href: "volatility-noir.html?preset=rupture&scoutTheme=dark",
+      image: "volatility-noir-thumb.png",
+      model: "GPT-6 Astra",
+      public: true
+    }
+  ],
   tools: [
     {
       name:  "SPO Folder Finder",
@@ -1215,7 +1272,9 @@ const themeIcon = document.getElementById("themeIcon");
 function applyTheme(mode) {
   const light = mode === "light";
   root.setAttribute("data-light", light ? "true" : "false");
-  themeIcon.outerHTML = (light ? ICONS.sun : ICONS.moon).replace('<svg', '<svg id="themeIcon"');
+  document.getElementById("themeIcon").outerHTML = (light ? ICONS.sun : ICONS.moon).replace('<svg', '<svg id="themeIcon"');
+  document.documentElement.style.background = getComputedStyle(root).getPropertyValue("--bg");
+  syncNoirBackground();
 }
 (function initTheme() {
   const saved = localStorage.getItem("dsc-theme") || "dark";
@@ -1375,6 +1434,28 @@ if (buildGrid && buildCount && buildSearch && buildType && buildCustomer && buil
 }
 
 // ── RENDER: tools / quick access ────────────────────────────
+const creativeEl = document.getElementById("creative");
+(CONFIG.creative || []).forEach(item => {
+  const a = document.createElement("a");
+  a.href = item.href; a.className = "lib"; a.target = "_blank"; a.rel = "noopener";
+  const image = document.createElement("img");
+  image.className = "noir-thumb"; image.src = item.image; image.alt = ""; image.loading = "lazy";
+  const name = document.createElement("div");
+  name.className = "lib-name"; name.textContent = item.name;
+  const description = document.createElement("div");
+  description.className = "lib-desc"; description.textContent = item.desc;
+  const details = document.createElement("ul");
+  details.className = "lib-details";
+  const model = document.createElement("li");
+  model.textContent = "Built with " + item.model; details.appendChild(model);
+  if (item.public) {
+    const access = document.createElement("li");
+    access.textContent = "Public / no Microsoft sign-in"; details.appendChild(access);
+  }
+  const cta = document.createElement("div");
+  cta.className = "lib-cta"; cta.textContent = "Enter the artwork";
+  a.append(image, name, description, details, cta); creativeEl.appendChild(a);
+});
 const toolsEl = document.getElementById("tools");
 (CONFIG.tools || []).forEach(t => {
   const a = document.createElement("a");
@@ -1533,6 +1614,7 @@ function advanceSlide() {
 
 function restartTimer() {
   if (slideTimer) clearInterval(slideTimer);
+  if (motionPreference.matches || !photosActive) return;
   slideTimer = setInterval(advanceSlide, CONFIG.pexels.rotateSecs * 1000);
 }
 
@@ -1546,7 +1628,73 @@ async function initSlideshow() {
   restartTimer();
 }
 
-initSlideshow();
+// The public artwork is the default; the previous photo slideshow remains opt-in.
+var noirPaused = false;
+var photosActive = false;
+var photosInitialized = false;
+const noirFrame = document.getElementById("noirBackdrop");
+const backgroundPause = document.getElementById("backgroundPause");
+const backgroundSwitch = document.getElementById("backgroundSwitch");
+const backgroundCredit = document.getElementById("backgroundCredit");
+const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+function syncNoirBackground() {
+  const frame = document.getElementById("noirBackdrop");
+  if (!frame?.contentWindow) return;
+  frame.contentWindow.postMessage({
+    type: "noir-settings",
+    theme: document.getElementById("app").getAttribute("data-light") === "true" ? "light" : "dark",
+    paused: noirPaused === true,
+    hidden: photosActive === true || document.hidden
+  }, location.origin);
+}
+function updateBackgroundPause() {
+  const held = noirPaused || motionPreference.matches;
+  backgroundPause.textContent = motionPreference.matches ? "Reduced motion enabled" : held ? "Resume sculpture" : "Pause sculpture";
+  backgroundPause.disabled = motionPreference.matches;
+  backgroundPause.setAttribute("aria-pressed", String(held));
+  syncNoirBackground();
+}
+noirFrame.addEventListener("load", syncNoirBackground);
+addEventListener("message", event => {
+  if (event.origin !== location.origin || event.source !== noirFrame.contentWindow) return;
+  if (event.data?.type === "noir-ready") syncNoirBackground();
+  if (event.data?.type === "noir-motion-preference") updateBackgroundPause();
+  if (event.data?.type === "noir-error") {
+    backgroundCredit.textContent = "Sculpture unavailable: WebGL graphics acceleration required. Photo background is available.";
+    backgroundPause.disabled = true;
+  }
+});
+noirFrame.src = "volatility-noir.html?background=1&scoutTheme=" + (root.getAttribute("data-light") === "true" ? "light" : "dark");
+backgroundPause.addEventListener("click", () => { noirPaused = !noirPaused; updateBackgroundPause(); });
+motionPreference.addEventListener("change", () => {
+  updateBackgroundPause();
+  if (photosActive) {
+    if (motionPreference.matches) clearInterval(slideTimer);
+    else restartTimer();
+  }
+});
+document.addEventListener("visibilitychange", syncNoirBackground);
+backgroundSwitch.addEventListener("click", async () => {
+  photosActive = !photosActive;
+  noirFrame.hidden = photosActive;
+  slidesEl.hidden = !photosActive;
+  dotsEl.hidden = !photosActive;
+  backgroundPause.hidden = photosActive;
+  backgroundSwitch.textContent = photosActive ? "Use sculpture background" : "Use photo background";
+  backgroundCredit.textContent = photosActive ? "Photos provided by Pexels" : "Volatility Noir / Built with GPT-6 Astra / Silent generative background";
+  syncNoirBackground();
+  if (photosActive) {
+    if (!photosInitialized) {
+      photosInitialized = true;
+      backgroundSwitch.disabled = true;
+      try { await initSlideshow(); } finally { backgroundSwitch.disabled = false; }
+    } else { showSlide(currentSlide); restartTimer(); }
+  } else {
+    clearInterval(slideTimer);
+    cityPill.textContent = "Volatility Noir / GPT-6 Astra";
+  }
+});
+updateBackgroundPause();
 
 // ── RADIO ───────────────────────────────────────────────────
 const RB_MIRRORS = ["de1.api.radio-browser.info", "de2.api.radio-browser.info", "at1.api.radio-browser.info"];

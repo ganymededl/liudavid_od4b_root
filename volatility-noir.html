@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Volatility Noir — Study 001</title>
+<link rel="icon" href="data:,">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+    if (new URLSearchParams(window.location.search).get("background") === "1") {
+      document.documentElement.setAttribute("data-background", "true");
+    }
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+button, input { font: inherit; }
+button { color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, canvas:focus-visible, a:focus-visible {
+  outline: 2px solid var(--cp-accent); outline-offset: 5px; }
+.mono { font-family: Consolas, "Courier New", Courier, monospace; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.edition { min-height: 100svh; max-width: 1920px; margin: auto; display: grid; grid-template-rows: 88px minmax(520px,1fr) auto; }
+header { margin: 0 44px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--cp-border); gap: 20px; }
+.brand { display: flex; gap: 14px; align-items: center; }
+.mark { width: 31px; height: 31px; color: var(--cp-accent); }
+.brand-name { font-size: 13px; letter-spacing: .24em; font-weight: 600; }
+.submark { margin-top: 5px; color: var(--cp-text-soft); font-size: 9px; letter-spacing: .19em; }
+.top-right { display: flex; gap: 32px; align-items: center; }
+.top-right .mono { color: var(--cp-text-soft); }
+.quiet { border: 0; background: none; padding: 9px 0; display: inline-flex; gap: 9px; align-items: center; }
+.quiet svg { height: 15px; width: 15px; }
+.light { width: 5px; height: 5px; background: var(--cp-accent); border-radius: 50%; display: inline-block; }
+.gallery { min-height: 0; position: relative; overflow: hidden; display: grid; grid-template-columns: 210px 1fr 174px; padding: 0 44px; }
+.margin-left { align-self: center; z-index: 2; padding-bottom: 42px; pointer-events: none; }
+.index { display: flex; align-items: center; gap: 10px; color: var(--cp-accent); }
+.index::after { content: ""; width: 28px; height: 1px; background: var(--cp-accent); }
+h1 { font-size: 30px; font-weight: 350; letter-spacing: -.05em; line-height: 1.05; margin: 23px 0 19px; }
+.caption { font-size: 12px; line-height: 1.8; color: var(--cp-text-muted); max-width: 156px; }
+.notation { margin-top: 45px; color: var(--cp-text-soft); font-size: 9px; line-height: 1.9; }
+.art { position: absolute; inset: 0; }
+.art::before { content: ""; position: absolute; width: 48%; height: 9%; left: 27%; top: 80%; border-radius: 50%;
+  background: var(--cp-text-muted); filter: blur(29px); opacity: .13; transform: scaleY(.48); pointer-events: none; }
+#sculpture { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+#sculpture:active { cursor: grabbing; }
+.art-hint { position: absolute; left: 50%; bottom: 27px; transform: translateX(-50%); color: var(--cp-text-soft); pointer-events: none; font-size: 9px; white-space: nowrap; }
+.margin-right { grid-column: 3; align-self: center; z-index: 2; padding-left: 28px; border-left: 1px solid var(--cp-border); }
+.control-title { color: var(--cp-text-soft); }
+.tension-reading { font-size: 54px; font-weight: 250; letter-spacing: -.075em; margin: 5px 0 13px; font-variant-numeric: tabular-nums; }
+.tension-reading small { font-size: 11px; color: var(--cp-text-soft); font-weight: 400; letter-spacing: 0; margin-left: 6px; }
+input[type=range] { display: block; width: 100%; accent-color: var(--cp-accent); cursor: ew-resize; margin: 0 0 11px; height: 22px; }
+.range-labels { display: flex; justify-content: space-between; font-size: 8px; color: var(--cp-text-soft); }
+.presets { display: grid; gap: 0; margin-top: 32px; }
+.preset { border: 0; border-bottom: 1px solid var(--cp-border); background: none; text-align: left; padding: 12px 0;
+  display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
+.preset span { color: var(--cp-text-soft); font-size: 9px; }
+.preset[aria-pressed=true] { color: var(--cp-accent); }
+.preset[aria-pressed=true]::after { content: ""; width: 4px; height: 4px; border-radius: 50%; background: var(--cp-accent); }
+.preset[aria-pressed=true] span { display: none; }
+.aside-note { color: var(--cp-text-soft); font-size: 10px; line-height: 1.65; margin: 20px 0 0; }
+footer { margin: 0 44px; padding: 22px 0 24px; border-top: 1px solid var(--cp-border); display: grid; grid-template-columns: 210px 1fr auto; gap: 28px; align-items: center; }
+.transport { display: flex; align-items: center; gap: 15px; }
+.round { height: 37px; width: 37px; border: 1px solid var(--cp-border-strong); border-radius: 50%; background: none; display: grid; place-items: center; }
+.transport small { color: var(--cp-text-soft); display: block; font-size: 9px; margin-top: 5px; }
+.score { display: grid; grid-template-columns: 1fr 90px; gap: 22px; align-items: center; }
+#score { height: 45px; width: 100%; display: block; }
+.score-label { line-height: 1.7; color: var(--cp-text-soft); font-size: 8px; }
+.actions { display: flex; gap: 22px; }
+.actions button { font-size: 10px; }
+.status { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); background: var(--cp-panel-strong);
+  border: 1px solid var(--cp-border); padding: 12px 20px; max-width: 85vw; font-size: 12px; z-index: 10; border-radius: .625rem; }
+.status:empty { display: none; }
+.error { position: absolute; inset: 15% 25%; display: grid; place-content: center; background: var(--cp-bg); z-index: 5; line-height: 1.8; }
+.error[hidden] { display: none; }
+html[data-background="true"], html[data-background="true"] body { background: transparent; overflow: hidden; }
+html[data-background="true"] .edition { display: block; min-height: 0; }
+html[data-background="true"] header,
+html[data-background="true"] footer,
+html[data-background="true"] .margin-left,
+html[data-background="true"] .margin-right,
+html[data-background="true"] .art-hint { display: none; }
+html[data-background="true"] .gallery { position: fixed; inset: 0; height: 100%; padding: 0; }
+html[data-background="true"] .art { inset: 0; }
+html[data-background="true"] .art::before { display: none; }
+html[data-background="true"] #sculpture { cursor: default; }
+body.immersive header, body.immersive .margin-left, body.immersive .margin-right, body.immersive footer { visibility: hidden; }
+body.immersive .art { position: fixed; inset: 0; z-index: 3; background: var(--cp-bg); }
+body.immersive .art-hint { z-index: 4; }
+@media (min-height: 820px) { .edition { grid-template-rows: 88px minmax(620px,1fr) auto; } }
+@media (max-width: 850px) {
+  header { margin: 0 24px; } .gallery { padding: 0 24px; grid-template-columns: 145px 1fr 136px; }
+  .margin-right { padding-left: 18px; } h1 { font-size: 25px; }
+  .top-right { gap: 18px; } .top-right>span.mono { display: none; }
+  footer { margin: 0 24px; grid-template-columns: 160px 1fr; gap: 15px; }
+  .actions { grid-column: 1 / -1; justify-content: flex-end; } .caption { max-width: 120px; }
+}
+@media (max-width: 600px) {
+  .edition { display: block; } header { height: 73px; margin: 0 20px; }
+  .brand-name { font-size: 10px; letter-spacing: .17em; } .mark { width: 25px; }
+  .submark { font-size: 7px; } #sound { font-size: 9px; }
+  .gallery { display: block; height: 700px; padding: 0 20px; }
+  .art { top: 32px; bottom: 170px; }
+  .margin-left { position: absolute; top: 22px; left: 20px; padding: 0; pointer-events: none; }
+  .index { font-size: 8px; } h1 { font-size: 23px; margin: 13px 0; }
+  .caption, .notation { display: none; }
+  .margin-right { position: absolute; left: 20px; right: 20px; bottom: 20px; border-left: none; border-top: 1px solid var(--cp-border);
+    padding: 16px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .tension-reading { font-size: 31px; margin: 2px 0; }
+  .tension-block { grid-column: 1; } .presets { grid-column: 2; grid-row: 1; margin: 0; }
+  .preset { padding: 10px 0; } .aside-note { display: none; }
+  .art-hint { bottom: 4px; font-size: 8px; } footer { margin: 0 20px; grid-template-columns: 130px 1fr; }
+  .score { grid-template-columns: 1fr; } .score-label { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<main class="edition">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M3 5L12 27L19 5M12 27L29 5M8 5L17 27L24 5" stroke="currentColor" stroke-width="1.2"/></svg>
+      <div><div class="brand-name">VOLATILITY NOIR</div><div class="submark mono">An instrument for the eye</div></div>
+    </div>
+    <div class="top-right">
+      <span class="mono">Study 001 / Built with GPT-6 Astra</span>
+      <button id="sound" class="quiet mono" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 8V12H6L11 16V4L6 8H3ZM14 6Q19 10 14 14" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span>Enable sound</span>
+      </button>
+    </div>
+  </header>
+  <section class="gallery" aria-label="Interactive metallic ribbon sculpture">
+    <div class="art">
+      <canvas id="sculpture" tabindex="0" aria-label="Metallic ribbon knot. Drag to orbit. Arrow keys rotate. Double-click or press Escape to toggle immersive view."></canvas>
+      <div class="art-hint mono">Drag to orbit &nbsp; / &nbsp; double-click to enter the piece</div>
+      <div id="error" class="error" role="alert" hidden></div>
+    </div>
+    <aside class="margin-left">
+      <div class="index mono">Study 001</div>
+      <h1>Held<br>together.</h1>
+      <p class="caption">One continuous ribbon.<br>Pull it toward its limit.</p>
+      <div class="notation mono">Procedural sculpture<br>Chrome / rose / tension<br><br>Built with GPT-6 Astra<br>No sampled audio.</div>
+    </aside>
+    <aside class="margin-right" aria-label="Sculpture controls">
+      <div class="tension-block">
+        <label class="control-title mono" for="tension">Tension</label>
+        <div class="tension-reading"><output id="reading" for="tension">32</output><small>/ 100</small></div>
+        <input id="tension" type="range" min="0" max="100" value="32" aria-label="Tension">
+        <div class="range-labels mono"><span>Held</span><span>Unravelled</span></div>
+      </div>
+      <div class="presets">
+        <button class="preset" data-value="12" aria-pressed="false">01 &nbsp; Poise <span>12</span></button>
+        <button class="preset" data-value="55" aria-pressed="false">02 &nbsp; Strain <span>55</span></button>
+        <button class="preset" data-value="94" aria-pressed="false">03 &nbsp; Rupture <span>94</span></button>
+      </div>
+      <p class="aside-note">The same tension shapes the ribbon and tunes the sound.</p>
+    </aside>
+  </section>
+  <footer>
+    <div class="transport">
+      <button id="motion" class="round" aria-label="Pause motion" aria-pressed="false">
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path id="motion-icon" d="M3 2V10M9 2V10" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      </button>
+      <div class="mono"><span id="motion-label">Slow orbit</span><small>Real-time / WebGL</small></div>
+    </div>
+    <div class="score">
+      <canvas id="score" aria-label="Procedural score trace; not a market chart"></canvas>
+      <div class="score-label mono">Score trace<br><span id="score-state">Sound disabled</span></div>
+    </div>
+    <div class="actions">
+      <button id="reset" class="quiet mono">Reset</button>
+      <button id="theme" class="quiet mono">Light / dark</button>
+      <button id="save" class="quiet mono">Collect frame <span aria-hidden="true">&#8599;</span></button>
+    </div>
+  </footer>
+</main>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const backgroundMode = document.documentElement.dataset.background === "true";
+  const parameters = new URLSearchParams(location.search);
+  const initialTension = parameters.get("preset") === "rupture" || backgroundMode ? 94 : 32;
+  const canvas = $("sculpture");
+  const gl = canvas.getContext("webgl", { antialias: true, alpha: true, preserveDrawingBuffer: true });
+  const error = $("error");
+  const status = $("status");
+  let noticeTimer;
+  function notice(message) {
+    status.textContent = message;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { status.textContent = ""; }, 6000);
+  }
+  function fail(message) {
+    error.hidden = false;
+    error.textContent = message;
+    ["sound", "motion", "save"].forEach(id => { $(id).disabled = true; });
+    if (backgroundMode) parent.postMessage({type:"noir-error"}, location.origin);
+  }
+  if (!gl) {
+    fail("This sculpture needs WebGL. Enable graphics acceleration in your browser and reload.");
+    return;
+  }
+
+  const vertexSource = `
+    attribute vec3 aPosition;
+    attribute vec3 aNormal;
+    attribute vec2 aUV;
+    uniform mat4 uProjection;
+    uniform mat3 uRotation;
+    uniform float uDistance;
+    varying vec3 vPosition;
+    varying vec3 vNormal;
+    varying vec2 vUV;
+    void main() {
+      vPosition = uRotation * aPosition;
+      vNormal = uRotation * aNormal;
+      vUV = aUV;
+      gl_Position = uProjection * vec4(vPosition - vec3(0.0, 0.0, uDistance), 1.0);
+    }
+  `;
+  const fragmentSource = `
+    precision highp float;
+    varying vec3 vPosition;
+    varying vec3 vNormal;
+    varying vec2 vUV;
+    uniform vec3 uPaper;
+    uniform vec3 uInk;
+    uniform vec3 uRose;
+    uniform vec3 uWhite;
+    uniform float uDistance;
+    uniform float uTime;
+    uniform float uTension;
+
+    float softbox(vec3 r, vec3 direction, float exponent) {
+      return pow(max(dot(r, normalize(direction)), 0.0), exponent);
+    }
+    vec3 studio(vec3 r) {
+      float up = smoothstep(-0.65, 0.85, r.y);
+      vec3 c = mix(uInk * 0.13, uPaper * 0.65, up);
+      float strip = smoothstep(0.20, 0.25, r.x) * (1.0 - smoothstep(0.43, 0.48, r.x));
+      float wide = smoothstep(-0.75, -0.64, r.x) * (1.0 - smoothstep(-0.23, -0.17, r.x));
+      float top = softbox(r, vec3(-0.3, 1.0, 0.3), 9.0);
+      c += uWhite * (strip * 1.5 + wide * 0.80 + top * 1.8);
+      c += uRose * softbox(r, vec3(1.0, -0.25, 0.6), 12.0) * 0.8;
+      c += uWhite * softbox(r, vec3(-1.0, -0.3, -0.2), 20.0) * 0.9;
+      return c;
+    }
+    void main() {
+      float rupture = smoothstep(0.72, 1.0, uTension);
+      float cut = fract(vUV.x * 18.0);
+      if (rupture > 0.001 && cut < rupture * 0.13) discard;
+      vec3 n = normalize(vNormal);
+      if (!gl_FrontFacing) n = -n;
+      vec3 v = normalize(vec3(0.0, 0.0, uDistance) - vPosition);
+      vec3 r = reflect(-v, n);
+      float nv = max(dot(n, v), 0.0);
+      float fresnel = 0.72 + 0.28 * pow(1.0 - nv, 5.0);
+      vec3 c = studio(r) * fresnel;
+      float occlusion = 0.62 + 0.38 * smoothstep(0.25, 2.5, length(vPosition.xy));
+      c *= occlusion;
+      // Fine longitudinal machining marks stay subtle enough to preserve the studio reflections.
+      float brushing = sin(vUV.y * 1600.0 + sin(vUV.x * 130.0) * 0.4);
+      c *= 0.985 + 0.015 * brushing;
+      float seam = pow(abs(sin(vUV.y * 6.2831853)), 80.0);
+      c = mix(c, c * uRose * 1.2 + uRose * 0.18, seam * 0.76);
+      float traveling = pow(0.5 + 0.5 * cos(vUV.x * 18.84956 - uTime * 0.7), 16.0);
+      c += uRose * seam * traveling * (0.25 + uTension * 0.45);
+      c = c / (c + vec3(0.65));
+      c = pow(c, vec3(0.90));
+      gl_FragColor = vec4(c, 1.0);
+    }
+  `;
+  function shader(type, source) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, source);
+    gl.compileShader(s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+      const message = gl.getShaderInfoLog(s);
+      gl.deleteShader(s);
+      throw new Error(message);
+    }
+    return s;
+  }
+  let program;
+  try {
+    program = gl.createProgram();
+    const vs = shader(gl.VERTEX_SHADER, vertexSource), fs = shader(gl.FRAGMENT_SHADER, fragmentSource);
+    gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+    gl.deleteShader(vs); gl.deleteShader(fs);
+  } catch (e) {
+    console.error("Sculpture shader initialization failed:", e);
+    fail("The sculpture could not initialize its shaders. " + e.message);
+    return;
+  }
+  gl.useProgram(program);
+  const uniforms = {};
+  ["uProjection","uRotation","uDistance","uTime","uTension","uPaper","uInk","uRose","uWhite"].forEach(name => {
+    uniforms[name] = gl.getUniformLocation(program, name);
+  });
+  const N = 600, M = 48;
+  const positions = new Float32Array((N+1)*(M+1)*3);
+  const normals = new Float32Array(positions.length);
+  const uvs = new Float32Array((N+1)*(M+1)*2);
+  const indices = new Uint16Array(N*M*6);
+  for (let i = 0, k = 0; i < N; i++) for (let j = 0; j < M; j++) {
+    const a = i*(M+1)+j, b = a+M+1;
+    indices.set([a,b,a+1,b,b+1,a+1], k); k += 6;
+  }
+  for (let i=0;i<=N;i++) for(let j=0;j<=M;j++) {
+    const k=(i*(M+1)+j)*2;
+    uvs[k]=i/N; uvs[k+1]=j/M;
+  }
+  function attribute(name, data, size, usage) {
+    const buffer=gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+    gl.bufferData(gl.ARRAY_BUFFER,data,usage);
+    const loc=gl.getAttribLocation(program,name);
+    gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc,size,gl.FLOAT,false,0,0);
+    return buffer;
+  }
+  const pb=attribute("aPosition",positions,3,gl.DYNAMIC_DRAW);
+  const nb=attribute("aNormal",normals,3,gl.DYNAMIC_DRAW);
+  attribute("aUV",uvs,2,gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,gl.createBuffer());
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,indices,gl.STATIC_DRAW);
+  gl.enable(gl.DEPTH_TEST);
+
+  function unit(a) { const d=Math.hypot(...a)||1; return a.map(v=>v/d); }
+  function cross(a,b) { return [a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]]; }
+  function center(t,s) {
+    const pulse = Math.cos(3*t);
+    const radius=1.48+(0.48+s*0.20)*pulse;
+    const breakaway=Math.max(0,s-0.70)*0.85;
+    return [radius*Math.cos(2*t)*(1+breakaway), radius*Math.sin(2*t),
+      (0.65+s*0.45)*Math.sin(3*t)];
+  }
+  function mesh(s) {
+    for(let i=0;i<=N;i++) {
+      const t=i/N*Math.PI*2, p=center(t,s), next=center(t+0.0001,s), prev=center(t-0.0001,s);
+      const tangent=unit(next.map((v,k)=>v-prev[k]));
+      const binormal=unit(cross(tangent,[0,0,1]));
+      const normal=unit(cross(binormal,tangent));
+      const twist=t*2 + s*1.8*Math.sin(3*t);
+      const c=Math.cos(twist), d=Math.sin(twist);
+      const a=normal.map((v,k)=>v*c+binormal[k]*d);
+      const b=binormal.map((v,k)=>v*c-normal[k]*d);
+      const width=0.48+(1-s)*0.13+Math.sin(t*3+0.4)*0.07;
+      const thickness=0.095+(1-s)*0.065;
+      for(let j=0;j<=M;j++) {
+        const q=j/M*Math.PI*2, ca=Math.cos(q), sa=Math.sin(q);
+        const k=(i*(M+1)+j)*3;
+        for(let axis=0;axis<3;axis++) positions[k+axis]=p[axis]+a[axis]*ca*width+b[axis]*sa*thickness;
+      }
+    }
+    // Surface derivatives capture the ribbon's changing width and torsion.
+    for(let i=0;i<=N;i++) for(let j=0;j<=M;j++) {
+      const before=((i+N-1)%N)*(M+1)+j, after=((i+1)%N)*(M+1)+j;
+      const left=i*(M+1)+(j+M-1)%M, right=i*(M+1)+(j+1)%M;
+      const along=[0,1,2].map(k=>positions[after*3+k]-positions[before*3+k]);
+      const across=[0,1,2].map(k=>positions[right*3+k]-positions[left*3+k]);
+      normals.set(unit(cross(along,across)),(i*(M+1)+j)*3);
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER,pb); gl.bufferSubData(gl.ARRAY_BUFFER,0,positions);
+    gl.bindBuffer(gl.ARRAY_BUFFER,nb); gl.bufferSubData(gl.ARRAY_BUFFER,0,normals);
+  }
+  let palette;
+  function colors() {
+    const style=getComputedStyle(document.documentElement);
+    const rgb=name=> {
+      const hex=style.getPropertyValue(name).trim();
+      return [1,3,5].map(k=>parseInt(hex.slice(k,k+2),16)/255);
+    };
+    palette={paper:rgb("--cp-bg"),ink:rgb("--cp-text"),rose:rgb("--cp-accent"),white:rgb("--cp-accent-fg")};
+    // Studio lamps use the brighter of the theme's foreground/background pair.
+    const lamp=palette.white[0]>0.5 ? palette.white : palette.ink;
+    gl.uniform3fv(uniforms.uPaper,palette.paper);
+    gl.uniform3fv(uniforms.uInk,palette.ink);
+    gl.uniform3fv(uniforms.uRose,palette.rose);
+    gl.uniform3fv(uniforms.uWhite,lamp);
+  }
+  colors();
+  let aspect=1, distance=9.8;
+  function resize() {
+    const rect=canvas.getBoundingClientRect();
+    const dpr=Math.min(window.devicePixelRatio||1,backgroundMode?1:1.6);
+    canvas.width=Math.round(rect.width*dpr); canvas.height=Math.round(rect.height*dpr);
+    gl.viewport(0,0,canvas.width,canvas.height); aspect=rect.width/rect.height;
+    const f=1/Math.tan(34*Math.PI/360), near=0.1, far=50;
+    const matrix=new Float32Array([f/aspect,0,0,0, 0,f,0,0, 0,0,(far+near)/(near-far),-1, 0,0,2*far*near/(near-far),0]);
+    gl.uniformMatrix4fv(uniforms.uProjection,false,matrix);
+    distance=aspect<0.85?12.3:9.8;
+    gl.uniform1f(uniforms.uDistance,distance);
+  }
+  new ResizeObserver(resize).observe(canvas);
+  const reduced=matchMedia("(prefers-reduced-motion: reduce)");
+  let reducedSetting=reduced.matches;
+  let paused=reducedSetting, time=0, previous=0, yaw=0.30, pitch=-0.30;
+  let targetTension=initialTension/100, tension=initialTension/100, geometryTension=-1, dragging=false, lastX=0, lastY=0;
+  let backgroundPaused=false, backgroundHidden=false, lastBackgroundFrame=0;
+  if(backgroundMode) {
+    canvas.tabIndex=-1;
+    addEventListener("message",event=>{
+      if(event.source!==parent || event.origin!==location.origin || event.data?.type!=="noir-settings")return;
+      backgroundPaused=event.data.paused===true;
+      backgroundHidden=event.data.hidden===true;
+      const theme=event.data.theme;
+      if(theme==="light"||theme==="dark"){document.documentElement.dataset.theme=theme;colors();}
+    });
+  }
+  function rotation(x,y,z) {
+    const cx=Math.cos(x),sx=Math.sin(x),cy=Math.cos(y),sy=Math.sin(y),cz=Math.cos(z),sz=Math.sin(z);
+    return new Float32Array([
+      cy*cz,cy*sz,-sy,
+      sx*sy*cz-cx*sz,sx*sy*sz+cx*cz,sx*cy,
+      cx*sy*cz+sx*sz,cx*sy*sz-sx*cz,cx*cy
+    ]);
+  }
+  function setTension(value) {
+    $("tension").value=String(value); $("reading").value=String(value);
+    targetTension=value/100;
+    document.querySelectorAll(".preset").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.value)===value)));
+    updateAudio();
+  }
+  $("tension").addEventListener("input",e=>setTension(Number(e.target.value)));
+  document.querySelectorAll(".preset").forEach(button=>button.addEventListener("click",()=>setTension(Number(button.dataset.value))));
+  function motionUI() {
+    $("motion").setAttribute("aria-pressed",String(paused));
+    $("motion").setAttribute("aria-label",paused?"Resume motion":"Pause motion");
+    $("motion-label").textContent=paused?"Motion held":"Slow orbit";
+    $("motion-icon").setAttribute("d",paused?"M3 1L11 6L3 11Z":"M3 2V10M9 2V10");
+  }
+  motionUI();
+  $("motion").addEventListener("click",()=>{paused=!paused;motionUI();});
+  canvas.addEventListener("pointerdown",e=>{
+    dragging=true;lastX=e.clientX;lastY=e.clientY;canvas.setPointerCapture(e.pointerId);
+  });
+  canvas.addEventListener("pointermove",e=>{
+    if(!dragging)return;
+    yaw+=(e.clientX-lastX)*.006;pitch+=(e.clientY-lastY)*.006;
+    pitch=Math.max(-1.4,Math.min(1.4,pitch));lastX=e.clientX;lastY=e.clientY;
+  });
+  ["pointerup","pointercancel","lostpointercapture"].forEach(event=>canvas.addEventListener(event,()=>{dragging=false;}));
+  function immersive() {
+    document.body.classList.toggle("immersive");
+    document.querySelector(".art-hint").textContent=document.body.classList.contains("immersive")
+      ?"Double-click or Escape to return":"Drag to orbit / double-click to enter the piece";
+  }
+  canvas.addEventListener("dblclick",immersive);
+  canvas.addEventListener("keydown",e=>{
+    if(["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)){
+      e.preventDefault();
+      if(e.key==="ArrowLeft")yaw-=.12; if(e.key==="ArrowRight")yaw+=.12;
+      if(e.key==="ArrowUp")pitch-=.12; if(e.key==="ArrowDown")pitch+=.12;
+    }
+  });
+  document.addEventListener("keydown",e=>{
+    if(e.key==="Escape"&&document.body.classList.contains("immersive"))immersive();
+    if(e.code==="Space"&&e.target===canvas){e.preventDefault();paused=!paused;motionUI();}
+  });
+  $("theme").addEventListener("click",()=>{
+    const root=document.documentElement;root.dataset.theme=root.dataset.theme==="dark"?"light":"dark";colors();
+  });
+  $("reset").addEventListener("click",()=>{
+    setTension(initialTension);yaw=.30;pitch=-.30;time=0;paused=reduced.matches;motionUI();
+  });
+
+  let audio=null, soundOn=false;
+  function buildAudio() {
+    const Audio=window.AudioContext||window.webkitAudioContext;
+    if(!Audio)throw new Error("Web Audio is not available in this browser.");
+    const context=new Audio();
+    const master=context.createGain();master.gain.value=0;
+    const compressor=context.createDynamicsCompressor();compressor.threshold.value=-18;compressor.ratio.value=6;
+    master.connect(compressor);compressor.connect(context.destination);
+    const lowpass=context.createBiquadFilter();lowpass.type="lowpass";lowpass.frequency.value=1700;lowpass.Q.value=.4;lowpass.connect(master);
+    const delay=context.createDelay(2);delay.delayTime.value=.43;
+    const feedback=context.createGain();feedback.gain.value=.28;
+    const wet=context.createGain();wet.gain.value=.24;
+    lowpass.connect(delay);delay.connect(feedback);feedback.connect(delay);delay.connect(wet);wet.connect(master);
+    const voices=[55,82.4069,110,164.8138,220,261.6256].map((frequency,i)=>{
+      const oscillator=context.createOscillator(),gain=context.createGain(),pan=context.createStereoPanner();
+      oscillator.type=i<2?"sine":"triangle";oscillator.frequency.value=frequency;
+      gain.gain.value=i<2?.12:.028;pan.pan.value=(i/5-.5)*1.2;
+      oscillator.connect(gain);gain.connect(pan);pan.connect(lowpass);oscillator.start();
+      return {oscillator,gain,frequency};
+    });
+    return {context,master,lowpass,voices};
+  }
+  function updateAudio() {
+    if(!audio)return;
+    const now=audio.context.currentTime,s=targetTension;
+    audio.lowpass.frequency.setTargetAtTime(800+s*2700,now,.3);
+    audio.voices.forEach((voice,i)=>{
+      voice.oscillator.detune.setTargetAtTime((i%2?1:-1)*s*s*42,now,.3);
+    });
+  }
+  function audioUI() {
+    $("sound").setAttribute("aria-pressed",String(soundOn));
+    $("sound").querySelector("span").textContent=soundOn?"Mute sound":"Enable sound";
+    $("score-state").textContent=soundOn?"Synthesis active":"Sound disabled";
+  }
+  $("sound").addEventListener("click",async()=>{
+    if(backgroundMode)return;
+    $("sound").disabled=true;
+    try {
+      if(!audio)audio=buildAudio();
+      await audio.context.resume();soundOn=!soundOn;
+      audio.master.gain.setTargetAtTime(soundOn?.32:0,audio.context.currentTime,.22);
+      updateAudio();audioUI();
+    } catch(e) {console.error("Audio failed:",e);notice("Sound could not start: "+e.message);}
+    finally {$("sound").disabled=false;}
+  });
+  document.addEventListener("visibilitychange",()=>{
+    if(audio&&soundOn&&document.hidden){soundOn=false;audio.master.gain.setTargetAtTime(0,audio.context.currentTime,.1);audioUI();}
+    previous=0;
+  });
+  const score=$("score"),scoreCtx=score.getContext("2d");
+  function trace() {
+    const width=Math.max(1,Math.round(score.clientWidth*devicePixelRatio)),height=Math.max(1,Math.round(score.clientHeight*devicePixelRatio));
+    if(score.width!==width||score.height!==height){score.width=width;score.height=height;}
+    scoreCtx.clearRect(0,0,width,height);
+    const style=getComputedStyle(document.documentElement);
+    scoreCtx.strokeStyle=style.getPropertyValue("--cp-border").trim();scoreCtx.lineWidth=1;
+    scoreCtx.beginPath();scoreCtx.moveTo(0,height/2);scoreCtx.lineTo(width,height/2);scoreCtx.stroke();
+    scoreCtx.strokeStyle=style.getPropertyValue("--cp-accent").trim();
+    scoreCtx.lineWidth=devicePixelRatio;
+    scoreCtx.beginPath();
+    for(let x=0;x<=width;x+=2) {
+      const q=x/width,envelope=Math.pow(Math.sin(q*Math.PI),1.5);
+      const wave=Math.sin(q*96-time*.75)*Math.sin(q*21+time*.3)+Math.sin(q*160+time)*tension*.4;
+      const y=height/2+wave*height*.30*envelope;
+      if(x===0)scoreCtx.moveTo(x,y);else scoreCtx.lineTo(x,y);
+    }
+    scoreCtx.stroke();
+  }
+  let frame=0, lost=false;
+  function render(now) {
+    if(lost)return;
+    if(reduced.matches!==reducedSetting){
+      reducedSetting=reduced.matches;paused=reducedSetting;motionUI();
+      if(backgroundMode)parent.postMessage({type:"noir-motion-preference"},location.origin);
+    }
+    if(backgroundMode&&(backgroundHidden||now-lastBackgroundFrame<1000/24)){
+      if(backgroundHidden)previous=now;
+      requestAnimationFrame(render);return;
+    }
+    lastBackgroundFrame=now;
+    const dt=previous?Math.min((now-previous)/1000,.05):0;previous=now;
+    if(!document.hidden) {
+      if(!paused&&!dragging&&!backgroundPaused)time+=dt;
+      tension+=(targetTension-tension)*(reduced.matches?1:1-Math.exp(-dt*5));
+      if(Math.abs(tension-geometryTension)>.0007){
+        mesh(tension);geometryTension=tension;
+      }
+      gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+      gl.uniformMatrix3fv(uniforms.uRotation,false,rotation(pitch+Math.sin(time*.15)*.045,yaw+time*.045,.13));
+      gl.uniform1f(uniforms.uTime,time);gl.uniform1f(uniforms.uTension,tension);
+      gl.drawElements(gl.TRIANGLES,indices.length,gl.UNSIGNED_SHORT,0);
+      if(!backgroundMode&&frame%3===0)trace();
+      if(soundOn&&audio&&frame%6===0){
+        const nowAudio=audio.context.currentTime;
+        audio.voices.forEach((voice,i)=>{
+          const base=i<2?.12:.028,breath=.78+.22*Math.sin(time*(.35+tension*.9)+i*.9);
+          voice.gain.gain.setTargetAtTime(base*breath,nowAudio,.12);
+        });
+      }
+      frame++;
+    }
+    requestAnimationFrame(render);
+  }
+  $("save").addEventListener("click",()=>{
+    const output=document.createElement("canvas");output.width=1800;output.height=1400;
+    const c=output.getContext("2d"),style=getComputedStyle(document.documentElement);
+    c.fillStyle=style.getPropertyValue("--cp-bg").trim();c.fillRect(0,0,output.width,output.height);
+    const scale=Math.min(1700/canvas.width,1140/canvas.height);
+    const width=canvas.width*scale,height=canvas.height*scale;
+    c.drawImage(canvas,(1800-width)/2,(1400-height)/2,width,height);
+    c.fillStyle=style.getPropertyValue("--cp-text").trim();c.font='18px "Segoe UI", sans-serif';
+    c.fillText("VOLATILITY NOIR / STUDY 001",70,70);
+    c.font='14px Consolas, monospace';
+    c.fillText("TENSION "+String(Math.round(tension*100)).padStart(2,"0")+" / 100",70,1330);
+    c.textAlign="right";    c.fillText("BUILT WITH GPT-6 ASTRA",1730,1330);
+    output.toBlob(blob=>{
+      if(!blob){notice("The browser could not create the image.");return;}
+      const link=document.createElement("a"),url=URL.createObjectURL(blob);
+      link.href=url;link.download="volatility-noir-study-001.png";link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),10000);notice("Frame collected as a PNG.");
+    },"image/png");
+  });
+  canvas.addEventListener("webglcontextlost",e=>{
+    e.preventDefault();lost=true;
+    if(audio){soundOn=false;audio.master.gain.value=0;audioUI();}
+    fail("The browser lost its graphics context. Reload this page to restore the sculpture.");
+  });
+  setTension(initialTension);resize();mesh(tension);geometryTension=tension;requestAnimationFrame(render);
+  if(backgroundMode)parent.postMessage({type:"noir-ready"},location.origin);
+})();
+</script>
+</body>
+</html>
