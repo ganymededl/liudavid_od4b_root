@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mini Soundtrack Lab</title>
+  <style>
+    :root {
+      --bg: #0f1020;
+      --panel: #1a1c34;
+      --text: #f4f6ff;
+      --muted: #b7bddf;
+      --accent: #ff5ea8;
+      --accent2: #7c4dff;
+      --ok: #39d98a;
+      --border: rgba(255,255,255,0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Inter, Arial, sans-serif;
+      background: radial-gradient(circle at 20% 0%, #272a52 0%, var(--bg) 45%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 28px 18px 36px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 4vw, 2.4rem);
+    }
+    .sub {
+      margin: 0 0 22px;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 900px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      backdrop-filter: blur(6px);
+    }
+    label {
+      display: block;
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    select, button {
+      width: 100%;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      font-size: 0.95rem;
+    }
+    select {
+      background: #101228;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .btn-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    button {
+      cursor: pointer;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: #131630;
+      color: var(--text);
+    }
+    .meta {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    ol {
+      margin: 10px 0 0 20px;
+      padding: 0;
+      line-height: 1.45;
+    }
+    ol li { margin: 5px 0; }
+    a { color: #9ed1ff; }
+    .total {
+      margin-top: 10px;
+      font-weight: 700;
+      color: var(--ok);
+    }
+    .canvas-wrap {
+      display: grid;
+      gap: 10px;
+      justify-items: start;
+    }
+    canvas {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      width: min(100%, 420px);
+      aspect-ratio: 1 / 1;
+      background: #111;
+    }
+    .small {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Mini Soundtrack Lab</h1>
+    <p class="sub">Generate a quick 20-minute mood playlist and export a matching cover image. Public page, no sign-in needed.</p>
+
+    <div class="grid">
+      <section class="panel">
+        <label for="mood">Mood</label>
+        <select id="mood">
+          <option value="focus">Deep Focus</option>
+          <option value="drive">Night Drive</option>
+          <option value="chaos">Chaos Mode</option>
+          <option value="reset">Sunday Reset</option>
+        </select>
+        <label for="duration">Target duration</label>
+        <select id="duration">
+          <option value="20">20 minutes</option>
+          <option value="25">25 minutes</option>
+          <option value="30">30 minutes</option>
+        </select>
+        <div class="btn-row">
+          <button id="build">Build Playlist</button>
+          <button class="secondary" id="copy">Copy Tracklist</button>
+        </div>
+        <p class="meta" id="meta">Pick a mood and generate.</p>
+        <ol id="list"></ol>
+        <div class="total" id="total"></div>
+      </section>
+
+      <section class="panel">
+        <div class="canvas-wrap">
+          <canvas id="cover" width="1000" height="1000"></canvas>
+          <div class="btn-row" style="width:100%;">
+            <button id="redraw">Redraw Cover</button>
+            <button class="secondary" id="download">Download PNG</button>
+          </div>
+          <p class="small">Tip: Use the generated title as your playlist name in Spotify/YouTube/Apple Music.</p>
+          <div class="small" id="coverTitle"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const TRACKS = {
+      focus: [
+        { t: "Lo-fi focus beat", m: 3.6, q: "lofi focus beats no lyrics" },
+        { t: "Ambient piano study", m: 4.2, q: "ambient piano study music" },
+        { t: "Coding synth pulse", m: 3.9, q: "coding synthwave instrumental" },
+        { t: "Neon rain ambience", m: 5.0, q: "rain ambience with soft synth" },
+        { t: "Minimal deep work", m: 4.4, q: "minimal deep work soundtrack" },
+        { t: "Calm drum loop", m: 2.8, q: "chill drum loop instrumental" }
+      ],
+      drive: [
+        { t: "Midnight synthwave", m: 4.6, q: "midnight synthwave driving mix" },
+        { t: "City lights remix", m: 3.8, q: "city lights synth instrumental" },
+        { t: "Electric horizon", m: 4.1, q: "retro electric horizon music" },
+        { t: "After-hours bassline", m: 3.7, q: "night drive bass instrumental" },
+        { t: "Neon tunnel", m: 5.2, q: "neon tunnel synthwave track" },
+        { t: "Fast lane", m: 2.9, q: "fast lane electronic instrumental" }
+      ],
+      chaos: [
+        { t: "Glitch sprint", m: 3.1, q: "glitch hop intense instrumental" },
+        { t: "Boss fight energy", m: 4.0, q: "boss fight electronic music" },
+        { t: "Breakcore sparks", m: 2.7, q: "breakcore instrumental playlist" },
+        { t: "Overclock mode", m: 3.4, q: "overclock gaming soundtrack" },
+        { t: "Pulse overload", m: 4.9, q: "high energy edm instrumental" },
+        { t: "Laser run", m: 2.6, q: "cyberpunk laser run soundtrack" }
+      ],
+      reset: [
+        { t: "Sunday morning jazzhop", m: 4.4, q: "sunday morning jazzhop instrumental" },
+        { t: "Acoustic calm", m: 3.5, q: "acoustic calm instrumental" },
+        { t: "Coffeehouse groove", m: 3.8, q: "coffeehouse groove no vocals" },
+        { t: "Soft sunrise keys", m: 4.1, q: "soft piano sunrise instrumental" },
+        { t: "Warm afternoon tape", m: 4.7, q: "warm lofi tape instrumental" },
+        { t: "Breeze and strings", m: 3.2, q: "light strings chill instrumental" }
+      ]
+    };
+
+    const PALETTES = {
+      focus: ["#3a86ff", "#8338ec", "#06d6a0"],
+      drive: ["#ff006e", "#3a86ff", "#ffbe0b"],
+      chaos: ["#ef476f", "#ffd166", "#06d6a0"],
+      reset: ["#7bdff2", "#b2f7ef", "#eff7f6"]
+    };
+
+    const moodEl = document.getElementById("mood");
+    const durationEl = document.getElementById("duration");
+    const listEl = document.getElementById("list");
+    const metaEl = document.getElementById("meta");
+    const totalEl = document.getElementById("total");
+    const coverEl = document.getElementById("cover");
+    const coverTitleEl = document.getElementById("coverTitle");
+    const ctx = coverEl.getContext("2d");
+    let lastTracks = [];
+    let lastMood = "focus";
+    let lastDuration = 20;
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    function buildPlaylist() {
+      const mood = moodEl.value;
+      const target = Number(durationEl.value);
+      const source = shuffle(TRACKS[mood]);
+      const chosen = [];
+      let total = 0;
+      const max = target + 2.5;
+
+      for (const tr of source) {
+        if (total + tr.m <= max || chosen.length < 3) {
+          chosen.push(tr);
+          total += tr.m;
+        }
+        if (total >= target - 1.5 && chosen.length >= 4) break;
+      }
+      while (total < target - 1.5) {
+        const extra = source[Math.floor(Math.random() * source.length)];
+        if (total + extra.m > max) break;
+        chosen.push(extra);
+        total += extra.m;
+      }
+
+      listEl.innerHTML = "";
+      chosen.forEach((tr) => {
+        const li = document.createElement("li");
+        const q = encodeURIComponent(tr.q);
+        li.innerHTML = `${tr.t} (${tr.m.toFixed(1)}m) — <a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">open</a>`;
+        listEl.appendChild(li);
+      });
+
+      const title = `${moodEl.options[moodEl.selectedIndex].text} · ${target}-Minute Mix`;
+      metaEl.textContent = title;
+      totalEl.textContent = `Total runtime: ${total.toFixed(1)} minutes`;
+      lastTracks = chosen;
+      lastMood = mood;
+      lastDuration = target;
+      drawCover();
+    }
+
+    function drawCover() {
+      const mood = lastMood;
+      const palette = PALETTES[mood];
+      const title = `${moodEl.options[moodEl.selectedIndex].text.toUpperCase()} MIX`;
+      const stamp = `${lastDuration} MIN`;
+
+      const g = ctx.createLinearGradient(0, 0, 1000, 1000);
+      g.addColorStop(0, palette[0]);
+      g.addColorStop(0.55, palette[1]);
+      g.addColorStop(1, palette[2]);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 1000, 1000);
+
+      for (let i = 0; i < 16; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${(Math.random() * 0.18).toFixed(2)})`;
+        const x = Math.random() * 1000;
+        const y = Math.random() * 1000;
+        const w = 80 + Math.random() * 280;
+        const h = 80 + Math.random() * 280;
+        if (i % 2 === 0) ctx.fillRect(x, y, w, h);
+        else {
+          ctx.beginPath();
+          ctx.arc(x, y, 40 + Math.random() * 140, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.fillStyle = "rgba(0,0,0,0.28)";
+      ctx.fillRect(70, 700, 860, 220);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "700 72px Segoe UI, Arial";
+      ctx.fillText(title, 100, 785);
+      ctx.font = "500 34px Segoe UI, Arial";
+      ctx.fillText(stamp, 100, 840);
+      ctx.fillText("MINI SOUNDTRACK LAB", 100, 885);
+
+      coverTitleEl.textContent = `${title} (${stamp})`;
+    }
+
+    document.getElementById("build").addEventListener("click", buildPlaylist);
+    document.getElementById("redraw").addEventListener("click", drawCover);
+
+    document.getElementById("download").addEventListener("click", () => {
+      const a = document.createElement("a");
+      const slug = moodEl.value + "-" + lastDuration + "min-cover.png";
+      a.href = coverEl.toDataURL("image/png");
+      a.download = slug;
+      a.click();
+    });
+
+    document.getElementById("copy").addEventListener("click", async () => {
+      if (!lastTracks.length) {
+        metaEl.textContent = "Build a playlist first, then copy it.";
+        return;
+      }
+      const text = [
+        `${moodEl.options[moodEl.selectedIndex].text} · ${lastDuration}-Minute Mix`,
+        ...lastTracks.map((t, i) => `${i + 1}. ${t.t} (${t.m.toFixed(1)}m)`),
+      ].join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        metaEl.textContent = "Tracklist copied to clipboard.";
+      } catch {
+        metaEl.textContent = "Clipboard blocked in this browser — copy manually from the list.";
+      }
+    });
+
+    buildPlaylist();
+  </script>
+</body>
+</html>
