@@ -101,16 +101,6 @@
   @media (prefers-reduced-motion: reduce) {
     .slide.active { animation: none; }
   }
-  .lib-details { color: var(--t2); padding-left: 16px; font-size: 11px; line-height: 1.8; margin: 10px 0; }
-  #creative { grid-template-columns: minmax(0, 1fr); }
-  #creative .lib { display: grid; grid-template-columns: 300px 1fr; column-gap: 26px; align-content: center; }
-  #creative .lib > :not(img) { grid-column: 2; }
-  .noir-thumb { width: 300px; height: 186px; object-fit: contain; grid-column: 1; grid-row: 1 / 5; }
-  @media (max-width: 600px) {
-    #creative .lib { grid-template-columns: 1fr; column-gap: 0; }
-    #creative .lib > :not(img) { grid-column: 1; }
-    .noir-thumb { width: 100%; height: 132px; grid-row: auto; margin-bottom: 12px; }
-  }
   [hidden] { display: none !important; }
   .slides {
     position: absolute;
@@ -1121,24 +1111,12 @@ const CONFIG = {
       name: "ARTificial Gallery",
       desc: "Five original works \u2014 four interactive studies (including the Mini Soundtrack Lab) and The Imitation of Light, an unofficial Pet Shop Boys / Alan Turing fan film.",
       href: "artificial-gallery.html?scoutTheme=dark",
-      image: "artificial-gallery-thumb.png",
-      bullets: [
-        "New: The Imitation of Light \u00b7 64-second film",
-        "Also: Volatility Noir \u00b7 Midnight Transit Orchestra \u00b7 Reno Noise \u2192 Luxe Score \u00b7 Mini Soundtrack Lab",
-        "Built with GPT-6 Astra and Claude Opus 5",
-        "Public / no Microsoft sign-in"
-      ]
+      icon: "star",
+      color: ["#00d9ff", "#00ffa3"],
+      public: true
     }
   ],
   tools: [
-    {
-      name:  "SPO Folder Finder",
-      desc:  "Resolve SharePoint / OneDrive drive + folder IDs fast",
-      href:  "https://ganymededl.github.io/spofolderfinder/",
-      icon:  "star",
-      color: ["#ffd166", "#f59e0b"],
-      public: true
-    },
     {
       name:  "DemoIQ Config Builder",
       desc:  "OD4B-gated DemoIQ configuration builder",
@@ -1424,27 +1402,20 @@ if (buildGrid && buildCount && buildSearch && buildType && buildCustomer && buil
 const creativeEl = document.getElementById("creative");
 (CONFIG.creative || []).forEach(item => {
   const a = document.createElement("a");
-  a.href = item.href; a.className = "lib"; a.target = "_blank"; a.rel = "noopener";
-  const image = document.createElement("img");
-  image.className = "noir-thumb"; image.src = item.image; image.alt = ""; image.loading = "lazy";
-  const name = document.createElement("div");
-  name.className = "lib-name"; name.textContent = item.name;
-  const description = document.createElement("div");
-  description.className = "lib-desc"; description.textContent = item.desc;
-  const details = document.createElement("ul");
-  details.className = "lib-details";
-  const lines = item.bullets || [
-    "Built with " + item.model,
-    ...(item.public ? ["Public / no Microsoft sign-in"] : [])
-  ];
-  lines.forEach(text => {
-    const line = document.createElement("li");
-    line.textContent = text;
-    details.appendChild(line);
-  });
-  const cta = document.createElement("div");
-  cta.className = "lib-cta"; cta.textContent = item.cta || "Enter the gallery";
-  a.append(image, name, description, details, cta); creativeEl.appendChild(a);
+  a.href = item.href;
+  a.className = "lib";
+  a.target = "_blank";
+  a.rel = "noopener";
+  a.innerHTML = `
+    ${item.public ? '<div class="lib-public-badge">Public</div>' : ''}
+    <div class="lib-icon" style="background: linear-gradient(135deg, ${item.color[0]}, ${item.color[1]});">
+      ${ICONS[item.icon] || ICONS.star}
+    </div>
+    <div class="lib-name">${item.name}</div>
+    <div class="lib-desc">${item.desc}</div>
+    <div class="lib-cta">${item.cta || "Enter the gallery"} ${ICONS.arrow}</div>
+  `;
+  creativeEl.appendChild(a);
 });
 const toolsEl = document.getElementById("tools");
 (CONFIG.tools || []).forEach(t => {
