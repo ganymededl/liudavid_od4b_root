@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Midnight Transit Orchestra — Study 002</title>
+<link rel="icon" href="data:,">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+button, input { font: inherit; }
+button { color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, canvas:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 5px; }
+button[disabled] { opacity: .45; cursor: default; }
+.mono { font-family: Consolas, "Courier New", Courier, monospace; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.edition { min-height: 100svh; max-width: 1920px; margin: auto; display: grid; grid-template-rows: 88px minmax(520px,1fr) auto; }
+header { margin: 0 44px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--cp-border); gap: 20px; }
+.brand { display: flex; gap: 14px; align-items: center; }
+.mark { width: 31px; height: 31px; color: var(--cp-accent); }
+.brand-name { font-size: 13px; letter-spacing: .24em; font-weight: 600; }
+.submark { margin-top: 5px; color: var(--cp-text-soft); font-size: 9px; letter-spacing: .19em; }
+.top-right { display: flex; gap: 28px; align-items: center; }
+.top-right .mono { color: var(--cp-text-soft); }
+.quiet { border: 0; background: none; padding: 9px 0; display: inline-flex; gap: 9px; align-items: center; }
+.gallery { min-height: 0; position: relative; overflow: hidden; display: grid; grid-template-columns: 214px 1fr 182px; padding: 0 44px; }
+.margin-left { align-self: center; z-index: 2; padding-bottom: 42px; pointer-events: none; }
+.index { display: flex; align-items: center; gap: 10px; color: var(--cp-accent); }
+.index::after { content: ""; width: 28px; height: 1px; background: var(--cp-accent); }
+h1 { font-size: 30px; font-weight: 350; letter-spacing: -.05em; line-height: 1.05; margin: 23px 0 19px; }
+.caption { font-size: 12px; line-height: 1.8; color: var(--cp-text-muted); max-width: 162px; }
+.notation { margin-top: 45px; color: var(--cp-text-soft); font-size: 9px; line-height: 1.9; }
+.art { position: absolute; inset: 0; }
+#scar, #live { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.clock {
+  position: absolute; left: 50%; top: 26px; transform: translateX(-50%);
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 62px; font-weight: 300; letter-spacing: -.03em;
+  color: var(--cp-text); opacity: .16; pointer-events: none; font-variant-numeric: tabular-nums;
+}
+.phase { position: absolute; left: 50%; bottom: 24px; transform: translateX(-50%); color: var(--cp-text-soft); pointer-events: none; white-space: nowrap; }
+.margin-right { grid-column: 3; align-self: center; z-index: 2; padding-left: 28px; border-left: 1px solid var(--cp-border); }
+.readout { margin-bottom: 20px; }
+.control-title { color: var(--cp-text-soft); display: block; }
+.value { font-size: 40px; font-weight: 250; letter-spacing: -.06em; margin-top: 3px; font-variant-numeric: tabular-nums; line-height: 1; }
+.value small { font-size: 10px; color: var(--cp-text-soft); font-weight: 400; letter-spacing: 0; margin-left: 6px; }
+.chaos-bar { margin-top: 9px; height: 3px; background: var(--cp-border); position: relative; overflow: hidden; }
+.chaos-bar i { position: absolute; inset: 0 100% 0 0; background: var(--cp-accent); transition: right .5s ease; }
+.legs { border-top: 1px solid var(--cp-border); margin-top: 22px; padding-top: 12px; max-height: 186px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, #000 62%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 62%, transparent 100%); }
+.leg { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; font-size: 10px; color: var(--cp-text-muted); border-bottom: 1px solid var(--cp-border); }
+.leg.on { color: var(--cp-accent); }
+.leg b { font-weight: 600; }
+footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-border); display: grid; grid-template-columns: 214px 1fr auto; gap: 28px; align-items: center; }
+.transport { display: flex; align-items: center; gap: 14px; }
+.round { height: 40px; width: 40px; border: 1px solid var(--cp-border-strong); border-radius: 50%; background: none; display: grid; place-items: center; flex: none; }
+.round.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+.transport small { color: var(--cp-text-soft); display: block; font-size: 9px; margin-top: 5px; }
+.timeline { display: grid; gap: 9px; }
+.bar { height: 34px; position: relative; }
+#waveform { width: 100%; height: 34px; display: block; }
+.ticks { display: flex; justify-content: space-between; color: var(--cp-text-soft); }
+.actions { display: flex; gap: 20px; align-items: center; }
+.actions button { font-size: 10px; }
+.status { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--cp-panel-strong);
+  border: 1px solid var(--cp-border); padding: 12px 20px; max-width: 85vw; font-size: 12px; z-index: 10; border-radius: .625rem; }
+.status:empty { display: none; }
+@media (min-height: 820px) { .edition { grid-template-rows: 88px minmax(620px,1fr) auto; } }
+@media (max-width: 900px) {
+  header, footer { margin: 0 24px; } .gallery { padding: 0 24px; grid-template-columns: 150px 1fr 150px; }
+  .margin-right { padding-left: 18px; } h1 { font-size: 25px; } .clock { font-size: 44px; }
+  .top-right { gap: 16px; } .top-right > span.mono { display: none; }
+  footer { grid-template-columns: 150px 1fr; } .actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .caption { max-width: 130px; } .legs { display: none; }
+}
+@media (max-width: 620px) {
+  .edition { display: block; } header { height: 74px; margin: 0 18px; }
+  .brand-name { font-size: 10px; letter-spacing: .16em; } .mark { width: 25px; }
+  .gallery { display: block; height: 660px; padding: 0 18px; }
+  .art { top: 30px; bottom: 150px; }
+  .margin-left { position: absolute; top: 18px; left: 18px; padding: 0; }
+  h1 { font-size: 22px; margin: 12px 0; } .caption, .notation { display: none; }
+  .clock { font-size: 30px; top: 10px; left: auto; right: 0; transform: none; }
+  .margin-right { position: absolute; left: 18px; right: 18px; bottom: 16px; border-left: 0; border-top: 1px solid var(--cp-border);
+    padding: 14px 0 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0 14px; }
+  .readout { margin: 0; } .value { font-size: 26px; } .legs { display: none; }
+  footer { margin: 0 18px; grid-template-columns: 1fr; gap: 14px; }
+  .phase { bottom: 6px; font-size: 8px; }
+}
+</style>
+</head>
+<body>
+<main class="edition">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M4 24L12 24L12 8L20 8L20 24L28 24" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="12" cy="24" r="2.4" stroke="currentColor" stroke-width="1.2"/>
+        <circle cx="20" cy="8" r="2.4" stroke="currentColor" stroke-width="1.2"/>
+      </svg>
+      <div><div class="brand-name">MIDNIGHT TRANSIT ORCHESTRA</div><div class="submark mono">An instrument for the commute</div></div>
+    </div>
+    <div class="top-right">
+      <span class="mono">Study 002 / Built with Claude Opus 5</span>
+      <button id="shuffle" class="quiet mono">Shuffle another day</button>
+    </div>
+  </header>
+
+  <section class="gallery" aria-label="Generative transit map and score">
+    <div class="art">
+      <canvas id="scar" aria-label="Accumulating motion-trail map of the day's rides"></canvas>
+      <canvas id="live" aria-hidden="true"></canvas>
+      <div class="clock" id="clock">05:00</div>
+      <div class="phase mono" id="phase">Press render today &nbsp;/&nbsp; 90 seconds, one day</div>
+    </div>
+
+    <aside class="margin-left">
+      <div class="index mono">Study 002</div>
+      <h1>Your day,<br>scored.</h1>
+      <p class="caption">Ride density sets the pulse.<br>Transfers set the damage.</p>
+      <div class="notation mono">
+        Generative score<br>Steel / sub / grit<br><br>
+        Built with Claude Opus 5<br>No sampled audio.
+      </div>
+    </aside>
+
+    <aside class="margin-right" aria-label="Day readouts">
+      <div class="readout">
+        <span class="control-title mono">Legs</span>
+        <div class="value" id="legCount">0</div>
+      </div>
+      <div class="readout">
+        <span class="control-title mono">Transfers</span>
+        <div class="value" id="transferCount">0</div>
+      </div>
+      <div class="readout">
+        <span class="control-title mono">Transfer chaos</span>
+        <div class="value" id="chaosValue">0.00<small id="tempo">124 BPM</small></div>
+        <div class="chaos-bar"><i id="chaosBar"></i></div>
+      </div>
+      <div class="legs" id="legList"></div>
+    </aside>
+  </section>
+
+  <footer>
+    <div class="transport">
+      <button id="render" class="round primary" aria-label="Render today">
+        <svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path id="renderIcon" d="M3 1.5L10 6L3 10.5Z" fill="currentColor"/></svg>
+      </button>
+      <div class="mono"><span id="renderLabel">Render today</span><small id="renderSub">90-second generated track</small></div>
+    </div>
+    <div class="timeline">
+      <div class="bar"><canvas id="waveform" aria-label="Track density trace"></canvas></div>
+      <div class="ticks mono"><span>05:00</span><span>Morning rush</span><span>Midday</span><span>Evening rush</span><span id="elapsed">0:00 / 1:30</span></div>
+    </div>
+    <div class="actions">
+      <button id="theme" class="quiet mono">Light / dark</button>
+      <button id="cover" class="quiet mono">Collect cover <span aria-hidden="true">&#8599;</span></button>
+    </div>
+  </footer>
+</main>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const scarCanvas = $("scar"), liveCanvas = $("live");
+  const scarCtx = scarCanvas.getContext("2d"), liveCtx = liveCanvas.getContext("2d");
+  const waveCanvas = $("waveform"), waveCtx = waveCanvas.getContext("2d");
+  const statusEl = $("status");
+  let noticeTimer;
+  function notice(message) {
+    statusEl.textContent = message;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { statusEl.textContent = ""; }, 6000);
+  }
+
+  const TRACK_SECONDS = 90;
+  const DAY_START = 5 * 60;          // 05:00 in minutes
+  const DAY_MINUTES = 20 * 60;       // through 01:00
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+  // ── Seeded day model ──────────────────────────────────────────────
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function todaySeed() {
+    const d = new Date();
+    return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+  }
+
+  const LINE_KEYS = ["accent", "link", "warning", "success", "text"];
+
+  function buildDay(seed) {
+    const rand = mulberry32(seed);
+    const pick = arr => arr[Math.floor(rand() * arr.length)];
+
+    // Station lattice: jittered 4x4 grid reads like a transit map.
+    const stations = [];
+    for (let gy = 0; gy < 4; gy++) {
+      for (let gx = 0; gx < 4; gx++) {
+        stations.push({
+          x: 0.10 + gx * 0.2667 + (rand() - 0.5) * 0.075,
+          y: 0.12 + gy * 0.2533 + (rand() - 0.5) * 0.070,
+          hits: 0
+        });
+      }
+    }
+
+    const lineNames = ["A", "C", "F", "L", "Q", "6", "G", "J"];
+    // Trip windows: pre-dawn, AM rush, midday, PM rush, night.
+    const windows = [
+      { start: 6 * 60 + 20, spread: 55, legs: 1, chance: 0.35 },
+      { start: 7 * 60 + 40, spread: 40, legs: 3, chance: 1.00 },
+      { start: 12 * 60 + 30, spread: 90, legs: 2, chance: 0.65 },
+      { start: 17 * 60 + 50, spread: 55, legs: 3, chance: 1.00 },
+      { start: 22 * 60 + 10, spread: 110, legs: 2, chance: 0.75 }
+    ];
+
+    const legs = [], transfers = [];
+    windows.forEach((w, wi) => {
+      if (rand() > w.chance) return;
+      let clock = w.start + (rand() - 0.5) * w.spread;
+      const count = Math.max(1, w.legs - (rand() < 0.3 ? 1 : 0));
+      let from = Math.floor(rand() * stations.length);
+      for (let i = 0; i < count; i++) {
+        let to = Math.floor(rand() * stations.length);
+        if (to === from) to = (to + 1 + Math.floor(rand() * 3)) % stations.length;
+        const lateNight = clock > 21 * 60 || clock < 6 * 60 + 30;
+        const mode = lateNight && rand() < 0.55 ? "lyft" : (rand() < 0.13 ? "walk" : "subway");
+        const duration = mode === "walk" ? 4 + rand() * 7
+          : mode === "lyft" ? 12 + rand() * 22
+          : 8 + rand() * 19;
+        legs.push({
+          mode,
+          line: mode === "subway" ? pick(lineNames) : (mode === "lyft" ? "LYFT" : "WALK"),
+          lineKey: LINE_KEYS[Math.floor(rand() * LINE_KEYS.length)],
+          from, to,
+          start: clock,
+          duration,
+          trip: wi
+        });
+        stations[from].hits++; stations[to].hits++;
+        clock += duration;
+        if (i < count - 1) {
+          // Transfer wait: mostly short, occasionally a platform disaster.
+          const wait = rand() < 0.22 ? 7 + rand() * 16 : 1.5 + rand() * 5;
+          transfers.push({ at: to, minute: clock, wait });
+          clock += wait;
+          from = to;
+        }
+      }
+    });
+
+    const waits = transfers.map(t => t.wait);
+    const mean = waits.length ? waits.reduce((a, b) => a + b, 0) / waits.length : 0;
+    const variance = waits.length ? waits.reduce((a, b) => a + (b - mean) ** 2, 0) / waits.length : 0;
+    const spikes = waits.filter(w => w > 8).length;
+    const chaos = Math.min(1, Math.sqrt(variance) / 9 * 0.62 + spikes / Math.max(3, waits.length) * 0.55);
+
+    const minutesMoving = legs.reduce((a, l) => a + l.duration, 0);
+    const density = Math.min(1, minutesMoving / 190);
+
+    // Per-hour transit load drives the arrangement over the 90 seconds.
+    const load = new Array(20).fill(0);
+    legs.forEach(l => {
+      const startHour = Math.floor((l.start - DAY_START) / 60);
+      const endHour = Math.floor((l.start + l.duration - DAY_START) / 60);
+      for (let h = startHour; h <= endHour; h++) if (h >= 0 && h < 20) load[h] += 1;
+    });
+    const peak = Math.max(1, ...load);
+
+    return {
+      seed, stations, legs, transfers, chaos, density,
+      load: load.map(v => v / peak),
+      bpm: Math.round(122 + density * 16 + chaos * 6),
+      root: 36 + Math.floor(chaos * 4)   // MIDI-ish: lower root as the day frays
+    };
+  }
+
+  // ── Map geometry: orthogonal + 45 degree runs, transit-map style ───
+  function routePath(a, b) {
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const diagonal = Math.min(Math.abs(dx), Math.abs(dy));
+    const sx = Math.sign(dx), sy = Math.sign(dy);
+    const points = [{ x: a.x, y: a.y }];
+    if (Math.abs(dx) > Math.abs(dy)) {
+      points.push({ x: a.x + (Math.abs(dx) - diagonal) * sx, y: a.y });
+      points.push({ x: b.x, y: b.y });
+    } else {
+      points.push({ x: a.x, y: a.y + (Math.abs(dy) - diagonal) * sy });
+      points.push({ x: b.x, y: b.y });
+    }
+    return points;
+  }
+  function pathLength(points) {
+    let total = 0;
+    for (let i = 1; i < points.length; i++) total += Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+    return total;
+  }
+  function pointAt(points, t) {
+    const total = pathLength(points);
+    let target = total * t;
+    for (let i = 1; i < points.length; i++) {
+      const seg = Math.hypot(points[i].x - points[i - 1].x, points[i].y - points[i - 1].y);
+      if (target <= seg || i === points.length - 1) {
+        const k = seg === 0 ? 0 : target / seg;
+        return {
+          x: points[i - 1].x + (points[i].x - points[i - 1].x) * k,
+          y: points[i - 1].y + (points[i].y - points[i - 1].y) * k
+        };
+      }
+      target -= seg;
+    }
+    return points[points.length - 1];
+  }
+
+  // ── Palette pulled from theme variables ───────────────────────────
+  let palette = {};
+  function readPalette() {
+    const style = getComputedStyle(document.documentElement);
+    const parse = name => {
+      const hex = style.getPropertyValue(name).trim();
+      return [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16));
+    };
+    palette = {
+      accent: parse("--cp-accent"),
+      link: parse("--cp-link"),
+      warning: parse("--cp-warning"),
+      success: parse("--cp-success"),
+      text: parse("--cp-text"),
+      bg: parse("--cp-bg")
+    };
+  }
+  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+  // ── Canvas sizing ─────────────────────────────────────────────────
+  let W = 0, H = 0, dpr = 1;
+  function resize() {
+    const rect = scarCanvas.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
+    dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    [scarCanvas, liveCanvas].forEach(c => {
+      c.width = Math.round(rect.width * dpr);
+      c.height = Math.round(rect.height * dpr);
+    });
+    W = scarCanvas.width; H = scarCanvas.height;
+    scarCtx.setTransform(1, 0, 0, 1, 0, 0);
+    liveCtx.setTransform(1, 0, 0, 1, 0, 0);
+    computeInsets();
+    paintBase();
+  }
+  new ResizeObserver(resize).observe(scarCanvas);
+
+  // Keep the route field inside the centre column so lines never run under the marginalia.
+  let insetL = 30, insetR = 30;
+  function computeInsets() {
+    const cssWidth = scarCanvas.getBoundingClientRect().width;
+    const wide = cssWidth >= 900;
+    insetL = (wide ? cssWidth * 0.175 : cssWidth * 0.06) * dpr;
+    insetR = (wide ? cssWidth * 0.145 : cssWidth * 0.06) * dpr;
+  }
+  const toX = x => insetL + x * (W - insetL - insetR);
+  const toY = y => 34 * dpr + y * (H - 68 * dpr);
+
+  function paintBase() {
+    scarCtx.clearRect(0, 0, W, H);
+    if (!day) return;
+    // Latent map: every route of the day, faint, waiting to be scarred.
+    scarCtx.lineJoin = "round"; scarCtx.lineCap = "round";
+    day.legs.forEach(leg => {
+      const pts = routePath(day.stations[leg.from], day.stations[leg.to]);
+      scarCtx.strokeStyle = rgba(palette.text, 0.07);
+      scarCtx.lineWidth = 1.1 * dpr;
+      scarCtx.beginPath();
+      pts.forEach((p, i) => i ? scarCtx.lineTo(toX(p.x), toY(p.y)) : scarCtx.moveTo(toX(p.x), toY(p.y)));
+      scarCtx.stroke();
+    });
+    day.stations.forEach(s => {
+      if (!s.hits) return;
+      scarCtx.strokeStyle = rgba(palette.text, 0.14);
+      scarCtx.lineWidth = 1 * dpr;
+      scarCtx.beginPath();
+      scarCtx.arc(toX(s.x), toY(s.y), (2.4 + Math.min(s.hits, 4) * 0.9) * dpr, 0, Math.PI * 2);
+      scarCtx.stroke();
+    });
+  }
+
+  // ── Audio engine ──────────────────────────────────────────────────
+  let audio = null;
+  function makeReverb(ctx, seconds, decay) {
+    const rate = ctx.sampleRate, length = Math.floor(rate * seconds);
+    const buffer = ctx.createBuffer(2, length, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = buffer.getChannelData(ch);
+      for (let i = 0; i < length; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+      }
+    }
+    const convolver = ctx.createConvolver();
+    convolver.buffer = buffer;
+    return convolver;
+  }
+  function makeNoise(ctx) {
+    const length = ctx.sampleRate * 2;
+    const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+    return buffer;
+  }
+  function saturationCurve(amount) {
+    const n = 1024, curve = new Float32Array(n);
+    for (let i = 0; i < n; i++) {
+      const x = (i / (n - 1)) * 2 - 1;
+      curve[i] = Math.tanh(x * amount) / Math.tanh(amount);
+    }
+    return curve;
+  }
+
+  function buildAudio() {
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor) throw new Error("Web Audio is not available in this browser.");
+    const ctx = new Ctor();
+
+    const master = ctx.createGain(); master.gain.value = 0.0001;
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -8; limiter.knee.value = 6; limiter.ratio.value = 12;
+    limiter.attack.value = 0.003; limiter.release.value = 0.18;
+    const drive = ctx.createWaveShaper(); drive.curve = saturationCurve(1.9); drive.oversample = "2x";
+    master.connect(drive); drive.connect(limiter); limiter.connect(ctx.destination);
+
+    // Sidechain: everything tonal ducks under the kick.
+    const duck = ctx.createGain(); duck.gain.value = 1; duck.connect(master);
+    const reverb = makeReverb(ctx, 2.6, 2.4);
+    const reverbSend = ctx.createGain(); reverbSend.gain.value = 0.34;
+    reverbSend.connect(reverb); reverb.connect(duck);
+
+    return { ctx, master, duck, reverbSend, noise: makeNoise(ctx) };
+  }
+
+  // Voices ----------------------------------------------------------
+  function kick(a, time, force) {
+    const { ctx, master, duck } = a;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.frequency.setValueAtTime(132, time);
+    osc.frequency.exponentialRampToValueAtTime(40, time + 0.07);
+    osc.frequency.exponentialRampToValueAtTime(31, time + 0.28);
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.95 * force, time + 0.006);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.34);
+    osc.connect(gain); gain.connect(master);
+    osc.start(time); osc.stop(time + 0.38);
+    // Duck the tonal bus so the track breathes like a platform.
+    duck.gain.cancelScheduledValues(time);
+    duck.gain.setValueAtTime(0.34, time);
+    duck.gain.linearRampToValueAtTime(1, time + 0.19);
+  }
+
+  function sub(a, time, freq, duration) {
+    const { ctx, duck } = a;
+    const osc = ctx.createOscillator(), gain = ctx.createGain(), filter = ctx.createBiquadFilter();
+    osc.type = "sawtooth"; osc.frequency.value = freq;
+    filter.type = "lowpass"; filter.frequency.value = 220; filter.Q.value = 6;
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.34, time + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    osc.connect(filter); filter.connect(gain); gain.connect(duck);
+    osc.start(time); osc.stop(time + duration + 0.05);
+  }
+
+  function hat(a, time, force, open) {
+    const { ctx, master, noise } = a;
+    const src = ctx.createBufferSource(); src.buffer = noise;
+    src.playbackRate.value = 1.4 + Math.random() * 0.5;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "highpass"; filter.frequency.value = open ? 5200 : 8200;
+    const gain = ctx.createGain();
+    const decay = open ? 0.16 : 0.035;
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.16 * force, time + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + decay);
+    src.connect(filter); filter.connect(gain); gain.connect(master);
+    src.start(time); src.stop(time + decay + 0.05);
+  }
+
+  // Inharmonic FM strike: the sound of a steel column being hit.
+  function steel(a, time, base, intensity) {
+    const { ctx, master, reverbSend } = a;
+    const out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, time);
+    out.gain.exponentialRampToValueAtTime(0.42 * intensity, time + 0.004);
+    out.gain.exponentialRampToValueAtTime(0.0001, time + 0.9 + intensity);
+    const bandpass = ctx.createBiquadFilter();
+    bandpass.type = "bandpass"; bandpass.frequency.value = base * 5; bandpass.Q.value = 1.4;
+    out.connect(bandpass); bandpass.connect(master); bandpass.connect(reverbSend);
+    [1, 2.37, 3.91, 5.62, 7.13].forEach((ratio, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.frequency.value = base * ratio * (1 + (Math.random() - 0.5) * 0.02 * intensity);
+      gain.gain.value = 0.7 / (i + 1.4);
+      osc.connect(gain); gain.connect(out);
+      osc.start(time); osc.stop(time + 1.9 + intensity);
+    });
+  }
+
+  // Wheel squeal / brake grind for transfer damage.
+  function grind(a, time, duration, intensity) {
+    const { ctx, master, noise, reverbSend } = a;
+    const src = ctx.createBufferSource(); src.buffer = noise; src.loop = true;
+    const filter = ctx.createBiquadFilter();
+    filter.type = "bandpass"; filter.Q.value = 14 + intensity * 16;
+    filter.frequency.setValueAtTime(900 + intensity * 500, time);
+    filter.frequency.exponentialRampToValueAtTime(2600 + intensity * 2600, time + duration * 0.7);
+    filter.frequency.exponentialRampToValueAtTime(700, time + duration);
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.13 * intensity, time + duration * 0.25);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + duration);
+    src.connect(filter); filter.connect(gain); gain.connect(master); gain.connect(reverbSend);
+    src.start(time); src.stop(time + duration + 0.05);
+  }
+
+  function pad(a, time, duration, freqs, level) {
+    const { ctx, duck, reverbSend } = a;
+    const bus = ctx.createGain();
+    bus.gain.setValueAtTime(0.0001, time);
+    bus.gain.linearRampToValueAtTime(level, time + duration * 0.35);
+    bus.gain.linearRampToValueAtTime(0.0001, time + duration);
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass"; filter.frequency.value = 1500; filter.Q.value = 0.6;
+    bus.connect(filter); filter.connect(duck); filter.connect(reverbSend);
+    freqs.forEach((f, i) => {
+      [-6, 6].forEach(cents => {
+        const osc = ctx.createOscillator(), gain = ctx.createGain();
+        osc.type = "sawtooth"; osc.frequency.value = f; osc.detune.value = cents;
+        gain.gain.value = 0.16 / (i + 1);
+        const panner = ctx.createStereoPanner();
+        panner.pan.value = (cents / 6) * (0.25 + i * 0.22);
+        osc.connect(gain); gain.connect(panner); panner.connect(bus);
+        osc.start(time); osc.stop(time + duration + 0.1);
+      });
+    });
+  }
+
+  const midi = n => 440 * Math.pow(2, (n - 69) / 12);
+
+  // ── Sequencer ─────────────────────────────────────────────────────
+  let day = null, playing = false, startedAt = 0, schedulerTimer = null;
+  let stepIndex = 0, nextStepTime = 0, pendingTransfers = [];
+  let strikes = [];   // visual echo of scheduled steel hits
+
+  function trackTimeToMinute(t) { return DAY_START + (t / TRACK_SECONDS) * DAY_MINUTES; }
+  function minuteToTrackTime(m) { return ((m - DAY_START) / DAY_MINUTES) * TRACK_SECONDS; }
+
+  function loadAt(trackTime) {
+    const hour = (trackTime / TRACK_SECONDS) * 20;
+    const i = Math.max(0, Math.min(19, Math.floor(hour)));
+    const j = Math.min(19, i + 1);
+    const k = hour - i;
+    return day.load[i] * (1 - k) + day.load[j] * k;
+  }
+
+  function scheduleStep(index, when) {
+    const stepDur = 60 / day.bpm / 4;
+    const trackTime = index * stepDur;
+    if (trackTime > TRACK_SECONDS) return;
+    const inBar = index % 16;
+    const bar = Math.floor(index / 16);
+    const load = loadAt(trackTime);
+    const chaos = day.chaos;
+    const intensity = 0.30 + load * 0.70;
+
+    // Kick: four-on-the-floor at rush, thinning out when the day is empty.
+    if (inBar % 4 === 0 || (load > 0.55 && inBar % 8 === 6)) {
+      kick(audio, when, 0.55 + intensity * 0.45);
+    }
+    // Off-grid stumble: the day's chaos knocks the grid sideways.
+    if (load > 0.3 && Math.random() < chaos * 0.16) {
+      kick(audio, when + stepDur * 0.5, 0.4 + intensity * 0.3);
+    }
+
+    // Hats track ride density directly.
+    if (inBar % 2 === 0 || Math.random() < load * 0.75) {
+      hat(audio, when, 0.4 + load * 0.85, inBar % 8 === 6);
+    }
+
+    // Sub line: root, minor third, fifth, flat second when it frays.
+    const scale = [0, 3, 5, 7, 10, chaos > 0.5 ? 1 : 12];
+    if (inBar % 8 === 0 || (load > 0.45 && inBar % 8 === 5)) {
+      const degree = scale[(bar + (inBar ? 2 : 0)) % scale.length];
+      sub(audio, when, midi(day.root + degree), stepDur * (inBar % 8 === 0 ? 3.4 : 1.6));
+    }
+
+    // Pad: one long chord per 2 bars, darker as chaos rises.
+    if (index % 32 === 0) {
+      const third = chaos > 0.55 ? 3 : (bar % 4 === 2 ? 3 : 3);
+      const top = chaos > 0.7 ? 13 : 14;
+      pad(audio, when, stepDur * 34, [
+        midi(day.root + 12), midi(day.root + 12 + third), midi(day.root + 12 + 7), midi(day.root + top + 10)
+      ], 0.10 + load * 0.13);
+    }
+
+    // Transfers land as steel strikes plus grind, on the beat they occur.
+    for (let i = pendingTransfers.length - 1; i >= 0; i--) {
+      const t = pendingTransfers[i];
+      if (t.time >= trackTime && t.time < trackTime + stepDur) {
+        const severity = Math.min(1, t.wait / 16);
+        steel(audio, when, midi(day.root + 24 + Math.floor(severity * 5)), 0.45 + severity * 0.55);
+        grind(audio, when, 0.5 + severity * 1.6, 0.35 + severity * 0.65);
+        strikes.push({ at: t.time, station: t.at, severity, born: performance.now() });
+        pendingTransfers.splice(i, 1);
+      }
+    }
+  }
+
+  function scheduler() {
+    const stepDur = 60 / day.bpm / 4;
+    while (nextStepTime < audio.ctx.currentTime + 0.14) {
+      scheduleStep(stepIndex, nextStepTime);
+      nextStepTime += stepDur;
+      stepIndex++;
+      if (stepIndex * stepDur > TRACK_SECONDS + 2) { stop(true); return; }
+    }
+  }
+
+  async function render() {
+    if (playing) { stop(false); return; }
+    $("render").disabled = true;
+    try {
+      if (!audio) audio = buildAudio();
+      await audio.ctx.resume();
+    } catch (e) {
+      console.error("Audio failed to start:", e);
+      notice("Sound could not start: " + e.message);
+      $("render").disabled = false;
+      return;
+    }
+    $("render").disabled = false;
+    paintBase();
+    strikes = [];
+    pendingTransfers = day.transfers.map(t => ({ at: t.at, wait: t.wait, time: minuteToTrackTime(t.minute) }))
+      .filter(t => t.time >= 0 && t.time <= TRACK_SECONDS);
+    stepIndex = 0;
+    nextStepTime = audio.ctx.currentTime + 0.08;
+    startedAt = nextStepTime;
+    playing = true;
+    audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
+    audio.master.gain.setValueAtTime(0.0001, audio.ctx.currentTime);
+    audio.master.gain.exponentialRampToValueAtTime(0.5, audio.ctx.currentTime + 0.6);
+    schedulerTimer = setInterval(scheduler, 25);
+    transportUI();
+  }
+
+  function stop(finished) {
+    playing = false;
+    clearInterval(schedulerTimer);
+    if (audio) {
+      const now = audio.ctx.currentTime;
+      audio.master.gain.cancelScheduledValues(now);
+      audio.master.gain.setValueAtTime(audio.master.gain.value, now);
+      audio.master.gain.exponentialRampToValueAtTime(0.0001, now + (finished ? 1.6 : 0.25));
+    }
+    transportUI();
+    if (finished) notice("Track complete. The map keeps the scar — collect the cover.");
+  }
+
+  function transportUI() {
+    $("renderIcon").setAttribute("d", playing ? "M3 2V10M9 2V10" : "M3 1.5L10 6L3 10.5Z");
+    $("renderIcon").setAttribute("stroke", playing ? "currentColor" : "none");
+    $("renderIcon").setAttribute("stroke-width", playing ? "2" : "0");
+    $("render").setAttribute("aria-label", playing ? "Stop" : "Render today");
+    $("renderLabel").textContent = playing ? "Rendering" : "Render today";
+    $("renderSub").textContent = playing ? "Live generation" : "90-second generated track";
+  }
+
+  // ── Day presentation ──────────────────────────────────────────────
+  function presentDay() {
+    $("legCount").textContent = day.legs.length;
+    $("transferCount").textContent = day.transfers.length;
+    $("chaosValue").firstChild.nodeValue = day.chaos.toFixed(2);
+    $("tempo").textContent = day.bpm + " BPM";
+    $("chaosBar").style.right = (100 - day.chaos * 100).toFixed(0) + "%";
+    const list = $("legList");
+    list.textContent = "";
+    day.legs.slice(0, 9).forEach((leg, i) => {
+      const row = document.createElement("div");
+      row.className = "leg"; row.dataset.index = String(i);
+      const time = document.createElement("span");
+      const hours = Math.floor(leg.start / 60) % 24, mins = Math.floor(leg.start % 60);
+      time.textContent = String(hours).padStart(2, "0") + ":" + String(mins).padStart(2, "0");
+      const name = document.createElement("b");
+      name.textContent = leg.line;
+      row.append(time, name);
+      list.appendChild(row);
+    });
+    paintBase();
+    drawWaveform();
+  }
+
+  function drawWaveform() {
+    const width = Math.max(1, Math.round(waveCanvas.clientWidth * dpr));
+    const height = Math.max(1, Math.round(34 * dpr));
+    if (waveCanvas.width !== width || waveCanvas.height !== height) {
+      waveCanvas.width = width; waveCanvas.height = height;
+    }
+    waveCtx.clearRect(0, 0, width, height);
+    if (!day) return;
+    const progress = playing && audio ? (audio.ctx.currentTime - startedAt) / TRACK_SECONDS : 0;
+    for (let x = 0; x < width; x += Math.max(2, Math.round(2 * dpr))) {
+      const t = x / width;
+      const value = loadAt(t * TRACK_SECONDS);
+      const h = (3 + value * (height - 8)) * 1;
+      waveCtx.fillStyle = t <= progress ? rgba(palette.accent, 0.85) : rgba(palette.text, 0.20);
+      waveCtx.fillRect(x, (height - h) / 2, Math.max(1, dpr), h);
+    }
+    if (playing) {
+      waveCtx.fillStyle = rgba(palette.accent, 1);
+      waveCtx.fillRect(progress * width, 0, Math.max(1, dpr * 1.5), height);
+    }
+  }
+
+  // ── Frame loop: scars, head, transfer blooms ──────────────────────
+  let lastFrame = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (document.hidden || !day || W === 0) return;
+    if (now - lastFrame < 1000 / 60) return;
+    lastFrame = now;
+
+    liveCtx.clearRect(0, 0, W, H);
+    const progress = playing && audio ? Math.min(1, (audio.ctx.currentTime - startedAt) / TRACK_SECONDS) : 0;
+    const trackTime = progress * TRACK_SECONDS;
+    const minute = trackTimeToMinute(trackTime);
+
+    if (playing) {
+      const hours = Math.floor(minute / 60) % 24, mins = Math.floor(minute % 60);
+      $("clock").textContent = String(hours).padStart(2, "0") + ":" + String(mins).padStart(2, "0");
+      const secs = Math.min(TRACK_SECONDS, Math.floor(trackTime));
+      $("elapsed").textContent = Math.floor(secs / 60) + ":" + String(secs % 60).padStart(2, "0") + " / 1:30";
+      const phase = minute < 7 * 60 ? "Pre-dawn" : minute < 10 * 60 ? "Morning rush"
+        : minute < 16 * 60 ? "Midday drift" : minute < 20 * 60 ? "Evening rush" : "Night lines";
+      $("phase").textContent = phase + " \u00a0/\u00a0 " + day.legs.length + " legs \u00a0/\u00a0 chaos " + day.chaos.toFixed(2);
+    }
+
+    // Active legs burn a permanent trail into the scar layer.
+    day.legs.forEach((leg, index) => {
+      const from = leg.start, to = leg.start + leg.duration;
+      const active = minute >= from && minute <= to;
+      const row = document.querySelector('.leg[data-index="' + index + '"]');
+      if (row) row.classList.toggle("on", active && playing);
+      if (!active || !playing) return;
+      const pts = routePath(day.stations[leg.from], day.stations[leg.to]);
+      const t = (minute - from) / leg.duration;
+      const head = pointAt(pts, t);
+      const colour = palette[leg.lineKey] || palette.accent;
+
+      // Scar: a soft burn under a bright core, so the trail deepens where the day repeats.
+      scarCtx.lineJoin = "round"; scarCtx.lineCap = "round";
+      const prev = pointAt(pts, Math.max(0, t - 0.02));
+      const stroke = (width, alpha) => {
+        scarCtx.strokeStyle = rgba(colour, alpha);
+        scarCtx.lineWidth = width * dpr;
+        scarCtx.beginPath();
+        scarCtx.moveTo(toX(prev.x), toY(prev.y));
+        scarCtx.lineTo(toX(head.x), toY(head.y));
+        scarCtx.stroke();
+      };
+      if (leg.mode === "walk") {
+        stroke(1.6, 0.10);
+      } else {
+        stroke(leg.mode === "lyft" ? 11 : 9, 0.030);
+        stroke(leg.mode === "lyft" ? 3.4 : 3.0, 0.16);
+        stroke(1.1, 0.10);
+      }
+
+      // Live head with glow.
+      const x = toX(head.x), y = toY(head.y);
+      const glow = liveCtx.createRadialGradient(x, y, 0, x, y, 26 * dpr);
+      glow.addColorStop(0, rgba(colour, 0.85));
+      glow.addColorStop(0.35, rgba(colour, 0.22));
+      glow.addColorStop(1, rgba(colour, 0));
+      liveCtx.fillStyle = glow;
+      liveCtx.beginPath(); liveCtx.arc(x, y, 26 * dpr, 0, Math.PI * 2); liveCtx.fill();
+      liveCtx.fillStyle = rgba(palette.bg, 0.9);
+      liveCtx.beginPath(); liveCtx.arc(x, y, 2.6 * dpr, 0, Math.PI * 2); liveCtx.fill();
+    });
+
+    // Transfer strikes: radial cracks scored into the map.
+    for (let i = strikes.length - 1; i >= 0; i--) {
+      const s = strikes[i];
+      const age = (now - s.born) / 1000;
+      const station = day.stations[s.station];
+      const x = toX(station.x), y = toY(station.y);
+      if (age < 0.05) {
+        const cracks = 4 + Math.round(s.severity * 7);
+        scarCtx.strokeStyle = rgba(palette.accent, 0.30 + s.severity * 0.35);
+        scarCtx.lineWidth = 1.1 * dpr;
+        for (let c = 0; c < cracks; c++) {
+          const angle = Math.random() * Math.PI * 2;
+          const len = (10 + Math.random() * 40 * (0.4 + s.severity)) * dpr;
+          scarCtx.beginPath();
+          scarCtx.moveTo(x, y);
+          scarCtx.lineTo(x + Math.cos(angle) * len, y + Math.sin(angle) * len);
+          scarCtx.stroke();
+        }
+      }
+      if (age < 1.4) {
+        const r = (8 + age * 90 * (0.5 + s.severity)) * dpr;
+        liveCtx.strokeStyle = rgba(palette.accent, Math.max(0, 0.6 - age / 1.4 * 0.6));
+        liveCtx.lineWidth = (2.2 - age) * dpr;
+        liveCtx.beginPath(); liveCtx.arc(x, y, r, 0, Math.PI * 2); liveCtx.stroke();
+      } else {
+        strikes.splice(i, 1);
+      }
+    }
+
+    if (playing) drawWaveform();
+    if (playing && progress >= 1) stop(true);
+  }
+
+  // ── Cover art export ──────────────────────────────────────────────
+  $("cover").addEventListener("click", () => {
+    const out = document.createElement("canvas");
+    out.width = 1600; out.height = 1600;
+    const c = out.getContext("2d");
+    const style = getComputedStyle(document.documentElement);
+    c.fillStyle = style.getPropertyValue("--cp-bg").trim();
+    c.fillRect(0, 0, out.width, out.height);
+    const scale = Math.min(1440 / scarCanvas.width, 1160 / scarCanvas.height);
+    const w = scarCanvas.width * scale, h = scarCanvas.height * scale;
+    c.drawImage(scarCanvas, (1600 - w) / 2, 210 + (1160 - h) / 2, w, h);
+    c.fillStyle = style.getPropertyValue("--cp-text").trim();
+    c.font = '300 62px "Segoe UI", sans-serif';
+    c.fillText("Midnight Transit Orchestra", 96, 132);
+    c.font = '15px Consolas, monospace';
+    c.fillStyle = style.getPropertyValue("--cp-text-soft").trim();
+    const stamp = new Date(day.seedDate || Date.now());
+    c.fillText(("STUDY 002 / " + day.legs.length + " LEGS / " + day.transfers.length +
+      " TRANSFERS / CHAOS " + day.chaos.toFixed(2) + " / " + day.bpm + " BPM").toUpperCase(), 98, 174);
+    c.fillText("BUILT WITH CLAUDE OPUS 5", 98, 1520);
+    c.textAlign = "right";
+    c.fillText("SEED " + day.seed, 1502, 1520);
+    out.toBlob(blob => {
+      if (!blob) { notice("The browser could not create the image."); return; }
+      const url = URL.createObjectURL(blob), link = document.createElement("a");
+      link.href = url; link.download = "midnight-transit-orchestra-" + day.seed + ".png"; link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      notice("Cover collected as a PNG.");
+    }, "image/png");
+  });
+
+  // ── Controls ──────────────────────────────────────────────────────
+  $("render").addEventListener("click", render);
+  $("shuffle").addEventListener("click", () => {
+    if (playing) stop(false);
+    day = buildDay(Math.floor(Math.random() * 900000) + 1);
+    presentDay();
+    $("clock").textContent = "05:00";
+    $("phase").textContent = "A different day loaded \u00a0/\u00a0 press render today";
+  });
+  $("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+    readPalette(); paintBase(); drawWaveform();
+  });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && playing) stop(false); });
+
+  // ── Boot ──────────────────────────────────────────────────────────
+  readPalette();
+  day = buildDay(todaySeed());
+  day.seedDate = Date.now();
+  resize();
+  presentDay();
+  transportUI();
+  requestAnimationFrame(frame);
+  if (reducedMotion.matches) {
+    $("phase").textContent = "Reduced motion detected \u00a0/\u00a0 rendering still available on demand";
+  }
+})();
+</script>
+</body>
+</html>

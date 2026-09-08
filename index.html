@@ -102,12 +102,13 @@
     .slide.active { animation: none; }
   }
   .lib-details { color: var(--t2); padding-left: 16px; font-size: 11px; line-height: 1.8; margin: 10px 0; }
-  #creative .lib { display: grid; grid-template-columns: 230px 1fr; column-gap: 24px; align-content: center; }
+  #creative { grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
+  #creative .lib { display: grid; grid-template-columns: 136px 1fr; column-gap: 18px; align-content: center; }
   #creative .lib > :not(img) { grid-column: 2; }
-  .noir-thumb { width: 230px; height: 190px; object-fit: contain; grid-column: 1; grid-row: 1 / 5; }
+  .noir-thumb { width: 136px; height: 158px; object-fit: contain; grid-column: 1; grid-row: 1 / 5; }
   @media (max-width: 600px) {
-    #creative .lib { grid-template-columns: 100px 1fr; column-gap: 16px; }
-    .noir-thumb { width: 100px; height: 140px; align-self: center; }
+    #creative .lib { grid-template-columns: 96px 1fr; column-gap: 14px; }
+    .noir-thumb { width: 96px; height: 130px; align-self: center; }
   }
   [hidden] { display: none !important; }
   .slides {
@@ -1121,6 +1122,22 @@ const CONFIG = {
       href: "volatility-noir.html?preset=rupture&scoutTheme=dark",
       image: "volatility-noir-thumb.png",
       model: "GPT-6 Astra",
+      public: true
+    },
+    {
+      name: "Midnight Transit Orchestra",
+      desc: "A day of rides becomes a 90-second track. Ride density sets the pulse, transfers scar the map.",
+      href: "midnight-transit-orchestra.html?scoutTheme=dark",
+      image: "midnight-transit-orchestra-thumb.png",
+      model: "Claude Opus 5",
+      public: true
+    },
+    {
+      name: "Reno Noise \u2192 Luxe Score",
+      desc: "Drag one timeline from demolition to finish and hear concrete grit resolve into architecture.",
+      href: "reno-noise-luxe-score.html?scoutTheme=dark",
+      image: "reno-noise-luxe-score-thumb.png",
+      model: "Claude Opus 5",
       public: true
     }
   ],

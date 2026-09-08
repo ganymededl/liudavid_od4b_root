@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reno Noise to Luxe Score — Study 003</title>
+<link rel="icon" href="data:,">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+button, input { font: inherit; }
+button { color: inherit; cursor: pointer; }
+button:focus-visible, input:focus-visible, canvas:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 5px; }
+button[disabled] { opacity: .45; cursor: default; }
+.mono { font-family: Consolas, "Courier New", Courier, monospace; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+.edition { min-height: 100svh; max-width: 1920px; margin: auto; display: grid; grid-template-rows: 88px minmax(520px,1fr) auto; }
+header { margin: 0 44px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--cp-border); gap: 20px; }
+.brand { display: flex; gap: 14px; align-items: center; }
+.mark { width: 31px; height: 31px; color: var(--cp-accent); }
+.brand-name { font-size: 13px; letter-spacing: .24em; font-weight: 600; }
+.submark { margin-top: 5px; color: var(--cp-text-soft); font-size: 9px; letter-spacing: .19em; }
+.top-right { display: flex; gap: 28px; align-items: center; }
+.top-right .mono { color: var(--cp-text-soft); }
+.quiet { border: 0; background: none; padding: 9px 0; display: inline-flex; gap: 9px; align-items: center; }
+.gallery { min-height: 0; position: relative; overflow: hidden; display: grid; grid-template-columns: 214px 1fr 182px; padding: 0 44px; }
+.margin-left { align-self: center; z-index: 2; padding-bottom: 42px; pointer-events: none; }
+.index { display: flex; align-items: center; gap: 10px; color: var(--cp-accent); }
+.index::after { content: ""; width: 28px; height: 1px; background: var(--cp-accent); }
+h1 { font-size: 30px; font-weight: 350; letter-spacing: -.05em; line-height: 1.05; margin: 23px 0 19px; }
+.caption { font-size: 12px; line-height: 1.8; color: var(--cp-text-muted); max-width: 162px; }
+.notation { margin-top: 45px; color: var(--cp-text-soft); font-size: 9px; line-height: 1.9; }
+.room { position: absolute; inset: 0; }
+#stage { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.phase-name {
+  position: absolute; left: 50%; top: 30px; transform: translateX(-50%);
+  font-size: 46px; font-weight: 250; letter-spacing: -.045em; color: var(--cp-text);
+  opacity: .17; pointer-events: none; white-space: nowrap;
+}
+.hint { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); color: var(--cp-text-soft); pointer-events: none; white-space: nowrap; }
+.error { position: absolute; inset: 18% 22%; display: grid; place-content: center; background: var(--cp-bg); z-index: 5; line-height: 1.8; }
+.error[hidden] { display: none; }
+.margin-right { grid-column: 3; align-self: center; z-index: 2; padding-left: 28px; border-left: 1px solid var(--cp-border); }
+.readout { margin-bottom: 22px; }
+.control-title { color: var(--cp-text-soft); display: block; }
+.value { font-size: 40px; font-weight: 250; letter-spacing: -.06em; margin-top: 3px; font-variant-numeric: tabular-nums; line-height: 1; }
+.value small { font-size: 10px; color: var(--cp-text-soft); font-weight: 400; letter-spacing: 0; margin-left: 5px; }
+.layers { border-top: 1px solid var(--cp-border); padding-top: 16px; display: grid; gap: 14px; }
+.layer .lname { display: flex; justify-content: space-between; color: var(--cp-text-soft); font-size: 9px;
+  font-family: Consolas, "Courier New", Courier, monospace; letter-spacing: .09em; text-transform: uppercase; }
+.layer .track { margin-top: 6px; height: 3px; background: var(--cp-border); position: relative; overflow: hidden; }
+.layer .track i { position: absolute; inset: 0 100% 0 0; background: var(--cp-accent); }
+.layer.grit .track i { background: var(--cp-text-muted); }
+footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-border); display: grid; grid-template-columns: 214px 1fr auto; gap: 28px; align-items: center; }
+.transport { display: flex; align-items: center; gap: 14px; }
+.round { height: 40px; width: 40px; border: 1px solid var(--cp-border-strong); border-radius: 50%; background: none; display: grid; place-items: center; flex: none; }
+.round.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+.transport small { color: var(--cp-text-soft); display: block; font-size: 9px; margin-top: 5px; }
+.scrubber { position: relative; padding-top: 4px; }
+#scrub { width: 100%; margin: 0; accent-color: var(--cp-accent); cursor: ew-resize; height: 24px; display: block; }
+.markers { position: relative; height: 30px; margin-top: 2px; }
+.marker { position: absolute; top: 0; transform: translateX(-50%); text-align: center; color: var(--cp-text-soft);
+  font-family: Consolas, "Courier New", Courier, monospace; font-size: 8px; letter-spacing: .07em; text-transform: uppercase; white-space: nowrap; }
+.marker::before { content: ""; display: block; width: 1px; height: 7px; background: var(--cp-border-strong); margin: 0 auto 5px; }
+.marker.reached { color: var(--cp-accent); }
+.marker.reached::before { background: var(--cp-accent); }
+.actions { display: flex; gap: 20px; align-items: center; }
+.actions button { font-size: 10px; }
+.status { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--cp-panel-strong);
+  border: 1px solid var(--cp-border); padding: 12px 20px; max-width: 85vw; font-size: 12px; z-index: 10; border-radius: .625rem; }
+.status:empty { display: none; }
+@media (min-height: 820px) { .edition { grid-template-rows: 88px minmax(620px,1fr) auto; } }
+@media (max-width: 980px) {
+  header, footer { margin: 0 24px; } .gallery { padding: 0 24px; grid-template-columns: 150px 1fr 150px; }
+  .margin-right { padding-left: 18px; } h1 { font-size: 25px; } .phase-name { font-size: 32px; }
+  .top-right { gap: 16px; } .top-right > span.mono { display: none; }
+  footer { grid-template-columns: 150px 1fr; } .actions { grid-column: 1 / -1; justify-content: flex-end; }
+  .caption { max-width: 130px; }
+  .marker { font-size: 7px; } .marker.dense { display: none; }
+}
+@media (max-width: 620px) {
+  .edition { display: block; } header { height: 74px; margin: 0 18px; }
+  .brand-name { font-size: 10px; letter-spacing: .16em; } .mark { width: 25px; }
+  .gallery { display: block; height: 640px; padding: 0 18px; }
+  .room { top: 28px; bottom: 138px; }
+  .margin-left { position: absolute; top: 16px; left: 18px; padding: 0; }
+  h1 { font-size: 22px; margin: 12px 0; } .caption, .notation { display: none; }
+  .phase-name { font-size: 26px; top: 8px; }
+  .margin-right { position: absolute; left: 18px; right: 18px; bottom: 14px; border-left: 0; border-top: 1px solid var(--cp-border);
+    padding: 14px 0 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; align-items: start; }
+  .readout { margin: 0; } .value { font-size: 26px; } .layers { border: 0; padding: 0; }
+  footer { margin: 0 18px; grid-template-columns: 1fr; gap: 12px; }
+  .hint { bottom: 4px; font-size: 8px; }
+  .marker { display: none; } .marker.edge { display: block; }
+}
+</style>
+</head>
+<body>
+<main class="edition">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M3 27L16 5L29 27" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M9 27L16 15L23 27" stroke="currentColor" stroke-width="1.2"/>
+      </svg>
+      <div><div class="brand-name">RENO NOISE &rarr; LUXE SCORE</div><div class="submark mono">An instrument for the build</div></div>
+    </div>
+    <div class="top-right">
+      <span class="mono">Study 003 / Built with Claude Opus 5</span>
+      <button id="mute" class="quiet mono" aria-pressed="false">
+        <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M3 8V12H6L11 16V4L6 8H3ZM14 6Q19 10 14 14" stroke="currentColor" stroke-width="1.2"/></svg>
+        <span>Sound off</span>
+      </button>
+    </div>
+  </header>
+
+  <section class="gallery" aria-label="Renovation morphing from concrete grain to polished geometry">
+    <div class="room">
+      <canvas id="stage" aria-label="A room that morphs from demolition concrete to polished architecture as the timeline advances"></canvas>
+      <div class="phase-name" id="phaseName">Demolition</div>
+      <div class="hint mono" id="hint">Drag the timeline &nbsp;/&nbsp; demo to finish</div>
+      <div id="error" class="error" role="alert" hidden></div>
+    </div>
+
+    <aside class="margin-left">
+      <div class="index mono">Study 003</div>
+      <h1>Grit into<br>geometry.</h1>
+      <p class="caption">One timeline drives the room<br>and the score at once.</p>
+      <div class="notation mono">
+        Raymarched room<br>Concrete / stone / rose<br><br>
+        Built with Claude Opus 5<br>No sampled audio.
+      </div>
+    </aside>
+
+    <aside class="margin-right" aria-label="Score readouts">
+      <div class="readout">
+        <span class="control-title mono">Completion</span>
+        <div class="value"><output id="pct" for="scrub">0</output><small>%</small></div>
+      </div>
+      <div class="layers">
+        <div class="layer grit">
+          <div class="lname"><span>Demolition grit</span><span id="gritValue">100</span></div>
+          <div class="track"><i id="gritBar"></i></div>
+        </div>
+        <div class="layer">
+          <div class="lname"><span>Resolved score</span><span id="luxeValue">0</span></div>
+          <div class="track"><i id="luxeBar"></i></div>
+        </div>
+        <div class="layer">
+          <div class="lname"><span>Surface polish</span><span id="polishValue">5</span></div>
+          <div class="track"><i id="polishBar"></i></div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <footer>
+    <div class="transport">
+      <button id="play" class="round primary" aria-label="Play the renovation">
+        <svg width="13" height="13" viewBox="0 0 12 12" aria-hidden="true"><path id="playIcon" d="M3 1.5L10 6L3 10.5Z" fill="currentColor"/></svg>
+      </button>
+      <div class="mono"><span id="playLabel">Play the renovation</span><small id="playSub">75 seconds, demo to finish</small></div>
+    </div>
+    <div class="scrubber">
+      <input id="scrub" type="range" min="0" max="1000" value="0" aria-label="Renovation timeline from demolition to finish">
+      <div class="markers" id="markers"></div>
+    </div>
+    <div class="actions">
+      <button id="theme" class="quiet mono">Light / dark</button>
+      <button id="frame" class="quiet mono">Collect frame <span aria-hidden="true">&#8599;</span></button>
+    </div>
+  </footer>
+</main>
+<div id="status" class="status" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const canvas = $("stage");
+  const gl = canvas.getContext("webgl", { antialias: false, alpha: false, preserveDrawingBuffer: true });
+  const statusEl = $("status");
+  let noticeTimer;
+  function notice(message) {
+    statusEl.textContent = message;
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => { statusEl.textContent = ""; }, 6000);
+  }
+  function fail(message) {
+    $("error").hidden = false;
+    $("error").textContent = message;
+    ["play", "mute", "frame"].forEach(id => { $(id).disabled = true; });
+  }
+  if (!gl) {
+    fail("This piece needs WebGL. Enable graphics acceleration in your browser and reload.");
+    return;
+  }
+
+  const MILESTONES = [
+    { at: 0.00, label: "Permits", key: true },
+    { at: 0.13, label: "Demolition", key: true },
+    { at: 0.28, label: "Rough-in", dense: true },
+    { at: 0.42, label: "Drywall", dense: true },
+    { at: 0.56, label: "Tile", dense: true },
+    { at: 0.70, label: "Paint", dense: true },
+    { at: 0.84, label: "Cabinets", key: true },
+    { at: 1.00, label: "Finish", key: true }
+  ];
+
+  // ── Shaders ───────────────────────────────────────────────────────
+  const vertexSource = `
+    attribute vec2 aPosition;
+    varying vec2 vUV;
+    void main() { vUV = aPosition * 0.5 + 0.5; gl_Position = vec4(aPosition, 0.0, 1.0); }
+  `;
+  const fragmentSource = `
+    precision highp float;
+    varying vec2 vUV;
+    uniform vec2 uResolution;
+    uniform float uTime;
+    uniform float uMorph;
+    uniform vec3 uPaper, uInk, uRose, uLamp;
+    uniform vec3 uConcrete, uFloorFin, uWallFin, uStoneFin;
+
+    float hash(vec3 p) {
+      p = fract(p * 0.3183099 + 0.1);
+      p *= 17.0;
+      return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+    }
+    float noise(vec3 x) {
+      vec3 i = floor(x), f = fract(x);
+      f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+                     mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                 mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+                     mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
+    }
+    float fbm(vec3 p) {
+      float amplitude = 0.5, sum = 0.0;
+      for (int i = 0; i < 4; i++) { sum += amplitude * noise(p); p *= 2.04; amplitude *= 0.5; }
+      return sum;
+    }
+    float sdBox(vec3 p, vec3 b) {
+      vec3 q = abs(p) - b;
+      return length(max(q, 0.0)) + min(max(q.x, max(q.y, q.z)), 0.0);
+    }
+    float sdRoundBox(vec3 p, vec3 b, float r) { return sdBox(p, b - r) - r; }
+    vec2 nearer(vec2 a, vec2 b) { return a.x < b.x ? a : b; }
+    mat2 rot(float a) { return mat2(cos(a), -sin(a), sin(a), cos(a)); }
+
+    vec2 map(vec3 p) {
+      float m = uMorph;
+      vec2 res = vec2(p.y, 0.0);
+      res = nearer(res, vec2(p.z + 4.4, 1.0));
+      // The island gains height and chamfer as the work resolves.
+      float ih = mix(0.34, 0.47, m);
+      res = nearer(res, vec2(sdRoundBox(p - vec3(0.0, ih, 0.0), vec3(1.5, ih, 0.74), mix(0.012, 0.085, m)), 2.0));
+      // Wall cabinets slide up and straighten.
+      float cy = mix(1.18, 1.98, smoothstep(0.30, 0.88, m));
+      float tilt = (1.0 - smoothstep(0.30, 0.92, m)) * 0.13;
+      vec3 a = p - vec3(-0.98, cy, -4.06);
+      a.xy = rot(tilt) * a.xy;
+      res = nearer(res, vec2(sdRoundBox(a, vec3(0.74, 0.33, 0.30), mix(0.008, 0.045, m)), 2.0));
+      vec3 b = p - vec3(0.98, cy, -4.06);
+      b.xy = rot(-tilt) * b.xy;
+      res = nearer(res, vec2(sdRoundBox(b, vec3(0.74, 0.33, 0.30), mix(0.008, 0.045, m)), 2.0));
+      // Rubble on the floor shrinks away through the early phases.
+      float debris = 1.0 - smoothstep(0.10, 0.62, m);
+      for (int i = 0; i < 6; i++) {
+        float fi = float(i);
+        float s = (0.10 + 0.10 * fract(fi * 0.41)) * debris;
+        if (s > 0.004) {
+          vec3 c = vec3(sin(fi * 2.71) * 2.35, s, cos(fi * 1.93) * 1.5 - 1.1);
+          vec3 q = p - c;
+          q.xz = rot(fi) * q.xz;
+          res = nearer(res, vec2(sdBox(q, vec3(s, s, s * 0.82)), 3.0));
+        }
+      }
+      return res;
+    }
+    vec3 normalAt(vec3 p) {
+      vec2 e = vec2(0.0016, 0.0);
+      return normalize(vec3(
+        map(p + e.xyy).x - map(p - e.xyy).x,
+        map(p + e.yxy).x - map(p - e.yxy).x,
+        map(p + e.yyx).x - map(p - e.yyx).x));
+    }
+    float shadow(vec3 origin, vec3 direction) {
+      float result = 1.0, t = 0.05;
+      for (int i = 0; i < 22; i++) {
+        float h = map(origin + direction * t).x;
+        result = min(result, 9.0 * h / t);
+        t += clamp(h, 0.03, 0.42);
+        if (result < 0.005 || t > 9.0) break;
+      }
+      return clamp(result, 0.0, 1.0);
+    }
+    float marchDist(vec3 ro, vec3 rd, out float material) {
+      float t = 0.02;
+      material = -1.0;
+      for (int i = 0; i < 52; i++) {
+        vec2 h = map(ro + rd * t);
+        if (h.x < 0.0022 * t) { material = h.y; return t; }
+        t += h.x * 0.9;
+        if (t > 20.0) break;
+      }
+      return t;
+    }
+    void surface(vec3 pos, float material, float m, out vec3 albedo, out float rough) {
+      float grain = fbm(pos * 12.0);
+      float pits = smoothstep(0.44, 0.80, fbm(pos * 30.0));
+      float veining = smoothstep(0.40, 0.66, fbm(pos * vec3(4.5, 13.0, 4.5)));
+      vec3 raw = uConcrete * (0.70 + grain * 0.66) - pits * 0.045;
+      vec3 finished;
+      if (material < 0.5) {
+        finished = uFloorFin * (0.96 + veining * 0.08);
+        rough = mix(0.93, 0.07, m);
+      } else if (material < 1.5) {
+        finished = uWallFin * (0.96 + veining * 0.08);
+        rough = mix(0.95, 0.62, m);
+      } else if (material < 2.5) {
+        finished = uStoneFin * (0.86 + veining * 0.30);
+        rough = mix(0.92, 0.17, m);
+      } else {
+        finished = uConcrete * (0.80 + grain * 0.30);
+        rough = 0.95;
+      }
+      albedo = mix(raw, finished, smoothstep(0.05, 0.95, m));
+    }
+    float softbox(vec3 r, vec3 direction, float exponent) {
+      return pow(max(dot(r, normalize(direction)), 0.0), exponent);
+    }
+    vec3 studio(vec3 r) {
+      float up = smoothstep(-0.7, 0.9, r.y);
+      vec3 c = mix(uInk * 0.16, uPaper * 0.72, up);
+      c += uLamp * softbox(r, vec3(-0.35, 1.0, 0.35), 8.0) * 0.95;
+      c += uLamp * softbox(r, vec3(1.0, 0.35, 0.55), 16.0) * 0.55;
+      c += uRose * softbox(r, vec3(-1.0, -0.15, 0.5), 10.0) * 0.55;
+      return c;
+    }
+
+    void main() {
+      float m = uMorph;
+      vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution) / uResolution.y;
+      float angle = 0.30 + sin(uTime * 0.075) * 0.26;
+      vec3 target = vec3(0.0, 0.70, -0.55);
+      vec3 ro = target + vec3(sin(angle) * 6.5, 1.62 + sin(uTime * 0.05) * 0.14, cos(angle) * 6.5);
+      vec3 forward = normalize(target - ro);
+      vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), forward));
+      vec3 up = cross(forward, right);
+      vec3 rd = normalize(uv.x * right + uv.y * up + 1.72 * forward);
+      vec3 keyDir = normalize(vec3(-0.55, 0.86, 0.46));
+
+      float material = -1.0;
+      float t = 0.02;
+      for (int i = 0; i < 86; i++) {
+        vec2 h = map(ro + rd * t);
+        if (h.x < 0.0016 * t) { material = h.y; break; }
+        t += h.x * 0.86;
+        if (t > 24.0) break;
+      }
+
+      vec3 colour;
+      if (material < 0.0) {
+        colour = mix(uInk * 0.30, uPaper * 0.62, smoothstep(-0.30, 0.60, rd.y));
+      } else {
+        vec3 pos = ro + rd * t;
+        vec3 n = normalAt(pos);
+        vec3 albedo; float rough;
+        surface(pos, material, m, albedo, rough);
+        // Site dust roughens the surface normal while the work is raw.
+        n = normalize(n + (vec3(fbm(pos * 24.0), fbm(pos * 24.0 + 11.0), fbm(pos * 24.0 + 23.0)) - 0.5) * (1.0 - m) * 0.38);
+
+        float diffuse = max(dot(n, keyDir), 0.0);
+        float shade = shadow(pos + n * 0.02, keyDir);
+        float ambient = 0.13 + 0.17 * smoothstep(-0.4, 1.0, n.y);
+        float fill = max(dot(n, normalize(vec3(0.85, 0.25, 0.55))), 0.0) * 0.13;
+        vec3 r = reflect(rd, n);
+
+        // A real mirror bounce is what sells the finished surfaces.
+        vec3 mirror = studio(r);
+        if (rough < 0.46) {
+          float rmat;
+          vec3 rro = pos + n * 0.03;
+          float rt = marchDist(rro, r, rmat);
+          if (rmat >= 0.0) {
+            vec3 rp = rro + r * rt;
+            vec3 rn = normalAt(rp);
+            vec3 ralbedo; float rrough;
+            surface(rp, rmat, m, ralbedo, rrough);
+            vec3 bounce = ralbedo * (0.42 + max(dot(rn, keyDir), 0.0) * 0.85)
+                        + studio(reflect(r, rn)) * (1.0 - rrough) * 0.55;
+            mirror = mix(bounce, mirror, clamp(rt * 0.055, 0.0, 1.0));
+          }
+        }
+
+        float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 5.0);
+        float specular = (1.0 - rough) * (0.10 + 0.90 * fresnel);
+        colour = albedo * (ambient + fill + diffuse * shade * 1.45);
+        colour += mirror * specular * 0.95;
+        colour += uLamp * pow(max(dot(r, keyDir), 0.0), mix(14.0, 180.0, m)) * (1.0 - rough) * 0.55;
+
+        // A rose light line wakes under the island as the finish lands.
+        float strip = exp(-abs(pos.y - 0.05) * 34.0) * exp(-max(0.0, length(pos.xz * vec2(0.60, 1.25)) - 1.62) * 4.6);
+        colour += uRose * strip * smoothstep(0.55, 1.0, m) * 1.0;
+        colour *= 0.74 + 0.26 * clamp(1.0 - t * 0.030, 0.0, 1.0);
+      }
+
+      // Site dust and film grain clear as the work finishes.
+      float dust = hash(vec3(gl_FragCoord.xy, floor(uTime * 24.0)));
+      colour += (dust - 0.5) * (0.020 + 0.075 * (1.0 - m));
+      float motes = smoothstep(0.9968, 1.0, hash(vec3(floor(gl_FragCoord.xy * 0.55), floor(uTime * 9.0))));
+      colour += uLamp * motes * (1.0 - m) * 0.45;
+
+      colour *= 1.15 * (1.0 - 0.38 * pow(length(uv * vec2(0.78, 1.0)), 2.1));
+      colour = colour / (colour + vec3(0.62));
+      colour = pow(max(colour, 0.0), vec3(0.80));
+      gl_FragColor = vec4(colour, 1.0);
+    }
+  `;
+
+  function compile(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      const log = gl.getShaderInfoLog(shader);
+      gl.deleteShader(shader);
+      throw new Error(log);
+    }
+    return shader;
+  }
+  let program;
+  try {
+    program = gl.createProgram();
+    const vs = compile(gl.VERTEX_SHADER, vertexSource);
+    const fs = compile(gl.FRAGMENT_SHADER, fragmentSource);
+    gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program));
+    gl.deleteShader(vs); gl.deleteShader(fs);
+  } catch (e) {
+    console.error("Room shader initialization failed:", e);
+    fail("The room could not initialize its shaders. " + e.message);
+    return;
+  }
+  gl.useProgram(program);
+  const buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+  const location = gl.getAttribLocation(program, "aPosition");
+  gl.enableVertexAttribArray(location);
+  gl.vertexAttribPointer(location, 2, gl.FLOAT, false, 0, 0);
+  const uniforms = {};
+  ["uResolution", "uTime", "uMorph", "uPaper", "uInk", "uRose", "uLamp",
+   "uConcrete", "uFloorFin", "uWallFin", "uStoneFin"].forEach(name => {
+    uniforms[name] = gl.getUniformLocation(program, name);
+  });
+
+  function colours() {
+    const style = getComputedStyle(document.documentElement);
+    const rgb = name => {
+      const hex = style.getPropertyValue(name).trim();
+      return [1, 3, 5].map(k => parseInt(hex.slice(k, k + 2), 16) / 255);
+    };
+    const paper = rgb("--cp-bg"), ink = rgb("--cp-text"), rose = rgb("--cp-accent"), fg = rgb("--cp-accent-fg");
+    // Materials keep the theme's hue but use fixed luminance targets so the room always reads with contrast.
+    const blend = (t) => paper.map((v, i) => v * (1 - t) + ink[i] * t);
+    const luminance = c => 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    const at = (c, target) => {
+      const l = Math.max(luminance(c), 0.001);
+      return c.map(v => Math.min(1, v * target / l));
+    };
+    gl.uniform3fv(uniforms.uPaper, paper);
+    gl.uniform3fv(uniforms.uInk, ink);
+    gl.uniform3fv(uniforms.uRose, rose);
+    gl.uniform3fv(uniforms.uLamp, fg[0] > 0.5 ? fg : ink);
+    gl.uniform3fv(uniforms.uConcrete, at(blend(0.26), 0.23));
+    gl.uniform3fv(uniforms.uFloorFin, at(blend(0.10), 0.27));
+    gl.uniform3fv(uniforms.uWallFin, at(blend(0.16), 0.42));
+    gl.uniform3fv(uniforms.uStoneFin, at(blend(0.42), 0.125));
+  }
+  colours();
+
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width < 2 || rect.height < 2) return;
+    // Raymarching is expensive; render below device resolution and let the grain hide it.
+    const scale = Math.min(window.devicePixelRatio || 1, 1) * 0.72;
+    canvas.width = Math.max(2, Math.round(rect.width * scale));
+    canvas.height = Math.max(2, Math.round(rect.height * scale));
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(uniforms.uResolution, canvas.width, canvas.height);
+  }
+  new ResizeObserver(resize).observe(canvas);
+
+  // ── Audio: grit crossfading into a resolved score ─────────────────
+  let audio = null, soundOn = false;
+  function makeReverb(ctx, seconds, decay) {
+    const rate = ctx.sampleRate, length = Math.floor(rate * seconds);
+    const impulse = ctx.createBuffer(2, length, rate);
+    for (let ch = 0; ch < 2; ch++) {
+      const data = impulse.getChannelData(ch);
+      for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay);
+    }
+    const convolver = ctx.createConvolver();
+    convolver.buffer = impulse;
+    return convolver;
+  }
+  function makeNoise(ctx) {
+    const length = ctx.sampleRate * 2;
+    const noise = ctx.createBuffer(1, length, ctx.sampleRate);
+    const data = noise.getChannelData(0);
+    for (let i = 0; i < length; i++) data[i] = Math.random() * 2 - 1;
+    return noise;
+  }
+
+  function buildAudio() {
+    const Ctor = window.AudioContext || window.webkitAudioContext;
+    if (!Ctor) throw new Error("Web Audio is not available in this browser.");
+    const ctx = new Ctor();
+    const master = ctx.createGain(); master.gain.value = 0.0001;
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -10; limiter.ratio.value = 10; limiter.attack.value = 0.004; limiter.release.value = 0.2;
+    master.connect(limiter); limiter.connect(ctx.destination);
+
+    // The room tone opens up as the finish work lands.
+    const tone = ctx.createBiquadFilter();
+    tone.type = "lowpass"; tone.frequency.value = 600; tone.Q.value = 0.5;
+    tone.connect(master);
+
+    const reverb = makeReverb(ctx, 3.2, 2.6);
+    const send = ctx.createGain(); send.gain.value = 0.05;
+    send.connect(reverb); reverb.connect(master);
+
+    const gritBus = ctx.createGain(); gritBus.gain.value = 1;
+    gritBus.connect(tone);
+    const luxeBus = ctx.createGain(); luxeBus.gain.value = 0.0001;
+    luxeBus.connect(tone); luxeBus.connect(send);
+
+    // Dust bed: broadband site noise, always present under the grit.
+    const noise = makeNoise(ctx);
+    const bed = ctx.createBufferSource(); bed.buffer = noise; bed.loop = true;
+    const bedFilter = ctx.createBiquadFilter();
+    bedFilter.type = "bandpass"; bedFilter.frequency.value = 780; bedFilter.Q.value = 0.9;
+    const bedGain = ctx.createGain(); bedGain.gain.value = 0.10;
+    bed.connect(bedFilter); bedFilter.connect(bedGain); bedGain.connect(gritBus);
+    bed.start();
+
+    // Sustained pad: four voices that stop detuning as the score resolves.
+    const padBus = ctx.createGain(); padBus.gain.value = 0.16;
+    padBus.connect(luxeBus);
+    const padVoices = [0, 7, 12, 16].map((semitone, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain(), panner = ctx.createStereoPanner();
+      osc.type = i > 2 ? "triangle" : "sawtooth";
+      osc.frequency.value = 55 * Math.pow(2, semitone / 12);
+      gain.gain.value = 0.22 / (i * 0.5 + 1);
+      panner.pan.value = (i - 1.5) * 0.34;
+      osc.connect(gain); gain.connect(panner); panner.connect(padBus);
+      osc.start();
+      return { osc, gain, semitone };
+    });
+
+    return { ctx, master, tone, send, gritBus, luxeBus, bedGain, padVoices, noise };
+  }
+
+  // Impact: a hammer or a tile cut, depending on how far along the work is.
+  function impact(a, time, hardness, pitch) {
+    const { ctx, gritBus, noise } = a;
+    const src = ctx.createBufferSource(); src.buffer = noise;
+    src.playbackRate.value = 0.7 + Math.random() * 1.4;
+    const band = ctx.createBiquadFilter();
+    band.type = "bandpass";
+    band.frequency.setValueAtTime(pitch * (1.4 + hardness), time);
+    band.frequency.exponentialRampToValueAtTime(pitch * 0.55, time + 0.16);
+    band.Q.value = 2.2 + hardness * 9.0;
+    const gain = ctx.createGain();
+    const decay = 0.08 + (1 - hardness) * 0.34;
+    gain.gain.setValueAtTime(0.0001, time);
+    gain.gain.exponentialRampToValueAtTime(0.42, time + 0.004);
+    gain.gain.exponentialRampToValueAtTime(0.0001, time + decay);
+    src.connect(band); band.connect(gain); gain.connect(gritBus);
+    src.start(time); src.stop(time + decay + 0.05);
+
+    const thud = ctx.createOscillator(), thudGain = ctx.createGain();
+    thud.frequency.setValueAtTime(pitch * 0.7, time);
+    thud.frequency.exponentialRampToValueAtTime(pitch * 0.28, time + 0.12);
+    thudGain.gain.setValueAtTime(0.0001, time);
+    thudGain.gain.exponentialRampToValueAtTime(0.36, time + 0.006);
+    thudGain.gain.exponentialRampToValueAtTime(0.0001, time + 0.24);
+    thud.connect(thudGain); thudGain.connect(gritBus);
+    thud.start(time); thud.stop(time + 0.3);
+  }
+
+  // Tuned bell: the finished-surface voice.
+  function bell(a, time, freq, level) {
+    const { ctx, luxeBus, send } = a;
+    const out = ctx.createGain();
+    out.gain.setValueAtTime(0.0001, time);
+    out.gain.exponentialRampToValueAtTime(level, time + 0.008);
+    out.gain.exponentialRampToValueAtTime(0.0001, time + 2.2);
+    const panner = ctx.createStereoPanner();
+    panner.pan.value = (Math.random() - 0.5) * 0.8;
+    out.connect(panner); panner.connect(luxeBus); panner.connect(send);
+    [1, 2.01, 3.02, 4.5].forEach((ratio, i) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.type = "sine"; osc.frequency.value = freq * ratio;
+      gain.gain.value = 0.5 / (i + 1.3);
+      osc.connect(gain); gain.connect(out);
+      osc.start(time); osc.stop(time + 2.4);
+    });
+  }
+
+  const SCALE = [0, 3, 5, 7, 10, 12, 15];
+  const PROGRESSION = [0, -4, 3, 5];   // resolves back home by the last bar
+
+  let step = 0, nextStep = 0, schedulerTimer = null;
+  function scheduleStep(index, when) {
+    const p = morph;
+    const stepDur = 60 / 96 / 2;
+    const bar = Math.floor(index / 8);
+
+    // Grit: irregular early, sparse and quantised late.
+    const gritRate = 0.85 * (1 - p) + 0.06;
+    if (Math.random() < gritRate) {
+      const jitter = (Math.random() - 0.5) * stepDur * 0.8 * (1 - p);
+      impact(audio, when + Math.max(0, jitter), 0.18 + p * 0.75, 150 + Math.random() * 380 + p * 620);
+    }
+    // Chord changes track the progression and reduce detune as the work lands.
+    if (index % 8 === 0) {
+      const root = 55 * Math.pow(2, PROGRESSION[bar % PROGRESSION.length] / 12);
+      audio.padVoices.forEach((voice, i) => {
+        const target = root * Math.pow(2, voice.semitone / 12);
+        voice.osc.frequency.setTargetAtTime(target, audio.ctx.currentTime, 0.25);
+        voice.osc.detune.setTargetAtTime((i % 2 ? 1 : -1) * (1 - p) * 46, audio.ctx.currentTime, 0.3);
+      });
+    }
+    // Bells only appear once there are real surfaces to ring.
+    if (p > 0.5 && index % 2 === 0 && Math.random() < (p - 0.5) * 1.4) {
+      const root = 220 * Math.pow(2, PROGRESSION[bar % PROGRESSION.length] / 12);
+      bell(audio, when, root * Math.pow(2, SCALE[Math.floor(Math.random() * SCALE.length)] / 12), 0.05 + (p - 0.5) * 0.16);
+    }
+  }
+  function scheduler() {
+    const stepDur = 60 / 96 / 2;
+    while (nextStep < audio.ctx.currentTime + 0.14) {
+      scheduleStep(step, nextStep);
+      nextStep += stepDur;
+      step++;
+    }
+  }
+
+  function applyAudioMorph() {
+    if (!audio) return;
+    const now = audio.ctx.currentTime, p = morph;
+    audio.tone.frequency.setTargetAtTime(520 + Math.pow(p, 1.5) * 12000, now, 0.25);
+    audio.gritBus.gain.setTargetAtTime(Math.max(0.0001, 0.95 * (1 - p) + 0.04), now, 0.25);
+    audio.luxeBus.gain.setTargetAtTime(Math.max(0.0001, Math.pow(p, 1.3) * 0.95), now, 0.25);
+    audio.bedGain.gain.setTargetAtTime(Math.max(0.0001, 0.13 * (1 - p)), now, 0.3);
+    audio.send.gain.setTargetAtTime(0.05 + p * 0.34, now, 0.3);
+  }
+
+  // ── Timeline state ────────────────────────────────────────────────
+  let morph = 0, autoPlaying = false, lastTick = 0;
+  const DURATION = 75;
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+
+  function phaseFor(p) {
+    let current = MILESTONES[0].label;
+    MILESTONES.forEach(mark => { if (p >= mark.at - 0.001) current = mark.label; });
+    return current;
+  }
+  function presentMorph() {
+    const percent = Math.round(morph * 100);
+    $("pct").value = String(percent);
+    $("scrub").value = String(Math.round(morph * 1000));
+    $("phaseName").textContent = phaseFor(morph);
+    const grit = Math.round((1 - morph) * 100);
+    const polish = Math.round(5 + Math.pow(morph, 1.4) * 95);
+    $("gritValue").textContent = grit;
+    $("luxeValue").textContent = percent;
+    $("polishValue").textContent = polish;
+    $("gritBar").style.right = (100 - grit) + "%";
+    $("luxeBar").style.right = (100 - percent) + "%";
+    $("polishBar").style.right = (100 - polish) + "%";
+    document.querySelectorAll(".marker").forEach(el => {
+      el.classList.toggle("reached", morph >= Number(el.dataset.at) - 0.001);
+    });
+    applyAudioMorph();
+  }
+
+  const markersEl = $("markers");
+  MILESTONES.forEach(mark => {
+    const el = document.createElement("div");
+    el.className = "marker" + (mark.key ? " key" : "") + (mark.dense ? " dense" : "")
+      + (mark.at === 0 || mark.at === 1 ? " edge" : "");
+    el.style.left = (mark.at * 100).toFixed(1) + "%";
+    if (mark.at === 0) { el.style.left = "0"; el.style.transform = "none"; el.style.textAlign = "left"; }
+    if (mark.at === 1) { el.style.left = "100%"; el.style.transform = "translateX(-100%)"; el.style.textAlign = "right"; }
+    el.dataset.at = String(mark.at);
+    el.textContent = mark.label;
+    markersEl.appendChild(el);
+  });
+
+  $("scrub").addEventListener("input", e => {
+    morph = Number(e.target.value) / 1000;
+    if (autoPlaying) { autoPlaying = false; transportUI(); }
+    presentMorph();
+  });
+
+  function transportUI() {
+    $("playIcon").setAttribute("d", autoPlaying ? "M3 2V10M9 2V10" : "M3 1.5L10 6L3 10.5Z");
+    $("playIcon").setAttribute("stroke", autoPlaying ? "currentColor" : "none");
+    $("playIcon").setAttribute("stroke-width", autoPlaying ? "2" : "0");
+    $("play").setAttribute("aria-label", autoPlaying ? "Pause the renovation" : "Play the renovation");
+    $("playLabel").textContent = autoPlaying ? "Building" : "Play the renovation";
+    $("playSub").textContent = autoPlaying ? phaseFor(morph) : "75 seconds, demo to finish";
+  }
+
+  async function enableSound() {
+    if (!audio) audio = buildAudio();
+    await audio.ctx.resume();
+    soundOn = true;
+    audio.master.gain.cancelScheduledValues(audio.ctx.currentTime);
+    audio.master.gain.setTargetAtTime(0.42, audio.ctx.currentTime, 0.2);
+    applyAudioMorph();
+    if (!schedulerTimer) {
+      nextStep = audio.ctx.currentTime + 0.08;
+      schedulerTimer = setInterval(scheduler, 25);
+    }
+    soundUI();
+  }
+  function disableSound() {
+    soundOn = false;
+    if (audio) audio.master.gain.setTargetAtTime(0.0001, audio.ctx.currentTime, 0.12);
+    soundUI();
+  }
+  function soundUI() {
+    $("mute").setAttribute("aria-pressed", String(soundOn));
+    $("mute").querySelector("span").textContent = soundOn ? "Sound on" : "Sound off";
+  }
+
+  $("mute").addEventListener("click", async () => {
+    $("mute").disabled = true;
+    try {
+      if (soundOn) disableSound(); else await enableSound();
+    } catch (e) {
+      console.error("Audio failed:", e);
+      notice("Sound could not start: " + e.message);
+    } finally { $("mute").disabled = false; }
+  });
+
+  $("play").addEventListener("click", async () => {
+    autoPlaying = !autoPlaying;
+    if (autoPlaying) {
+      if (morph >= 0.999) morph = 0;
+      lastTick = performance.now();
+      try { if (!soundOn) await enableSound(); }
+      catch (e) { console.error("Audio failed:", e); notice("Playing without sound: " + e.message); }
+    }
+    transportUI();
+    presentMorph();
+  });
+
+  $("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+    colours();
+  });
+
+  $("frame").addEventListener("click", () => {
+    const out = document.createElement("canvas");
+    out.width = 1800; out.height = 1400;
+    const c = out.getContext("2d");
+    const style = getComputedStyle(document.documentElement);
+    c.fillStyle = style.getPropertyValue("--cp-bg").trim();
+    c.fillRect(0, 0, out.width, out.height);
+    const scale = Math.min(1660 / canvas.width, 1120 / canvas.height);
+    const w = canvas.width * scale, h = canvas.height * scale;
+    c.imageSmoothingQuality = "high";
+    c.drawImage(canvas, (1800 - w) / 2, 180 + (1120 - h) / 2, w, h);
+    c.fillStyle = style.getPropertyValue("--cp-text").trim();
+    c.font = '300 54px "Segoe UI", sans-serif';
+    c.fillText("Reno Noise \u2192 Luxe Score", 84, 106);
+    c.font = "15px Consolas, monospace";
+    c.fillStyle = style.getPropertyValue("--cp-text-soft").trim();
+    c.fillText(("STUDY 003 / " + phaseFor(morph) + " / " + Math.round(morph * 100) + "% COMPLETE").toUpperCase(), 86, 146);
+    c.fillText("BUILT WITH CLAUDE OPUS 5", 86, 1330);
+    out.toBlob(blob => {
+      if (!blob) { notice("The browser could not create the image."); return; }
+      const url = URL.createObjectURL(blob), link = document.createElement("a");
+      link.href = url;
+      link.download = "reno-noise-luxe-score-" + Math.round(morph * 100) + ".png";
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      notice("Frame collected as a PNG.");
+    }, "image/png");
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) {
+      if (autoPlaying) { autoPlaying = false; transportUI(); }
+      if (soundOn) disableSound();
+    }
+    lastTick = performance.now();
+  });
+  canvas.addEventListener("webglcontextlost", e => {
+    e.preventDefault();
+    lost = true;
+    if (soundOn) disableSound();
+    fail("The browser lost its graphics context. Reload this page to restore the room.");
+  });
+
+  // ── Frame loop ────────────────────────────────────────────────────
+  let clock = 0, previous = 0, lost = false;
+  function render(now) {
+    if (lost) return;
+    requestAnimationFrame(render);
+    if (document.hidden) { previous = now; return; }
+    const dt = previous ? Math.min((now - previous) / 1000, 0.05) : 0;
+    previous = now;
+    if (!reducedMotion.matches) clock += dt;
+
+    if (autoPlaying) {
+      morph = Math.min(1, morph + dt / DURATION);
+      presentMorph();
+      if (morph >= 1) {
+        autoPlaying = false;
+        notice("Finish reached. Scrub back to hear the room come apart.");
+      }
+      transportUI();
+    }
+
+    gl.uniform1f(uniforms.uTime, clock);
+    gl.uniform1f(uniforms.uMorph, morph);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  resize();
+  presentMorph();
+  transportUI();
+  soundUI();
+  requestAnimationFrame(render);
+  if (reducedMotion.matches) $("hint").textContent = "Reduced motion \u00a0/\u00a0 drag the timeline to move the room";
+})();
+</script>
+</body>
+</html>
