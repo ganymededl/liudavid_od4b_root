@@ -5,336 +5,328 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Mini Soundtrack Lab</title>
   <style>
-    :root {
-      --bg: #0f1020;
-      --panel: #1a1c34;
-      --text: #f4f6ff;
-      --muted: #b7bddf;
-      --accent: #ff5ea8;
-      --accent2: #7c4dff;
-      --ok: #39d98a;
-      --border: rgba(255,255,255,0.12);
+    :root{
+      --bg:#090b16; --panel:#11162b; --text:#eef2ff; --muted:#98a4d9;
+      --line:rgba(255,255,255,.14); --a:#ff5ea8; --b:#6c63ff; --ok:#42d39c;
     }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Inter, Arial, sans-serif;
-      background: radial-gradient(circle at 20% 0%, #272a52 0%, var(--bg) 45%);
-      color: var(--text);
-      min-height: 100vh;
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--text); background:radial-gradient(circle at 20% 0,#20284f 0,var(--bg) 46%);
+      font-family:Inter,"Segoe UI",system-ui,sans-serif; min-height:100vh;
     }
-    .wrap {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 28px 18px 36px;
+    .wrap{max-width:1100px;margin:0 auto;padding:24px 16px 34px}
+    h1{margin:0 0 8px;font-size:clamp(1.7rem,4vw,2.4rem)}
+    .sub{margin:0 0 16px;color:var(--muted)}
+    .grid{display:grid;gap:14px;grid-template-columns:1fr}
+    @media(min-width:980px){.grid{grid-template-columns:1.1fr 1fr}}
+    .panel{
+      background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(255,255,255,.02));
+      border:1px solid var(--line); border-radius:14px; padding:14px;
     }
-    h1 {
-      margin: 0 0 8px;
-      font-size: clamp(1.8rem, 4vw, 2.4rem);
+    .row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    @media(max-width:800px){.row{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    label{display:block;font-size:.82rem;color:var(--muted);margin:0 0 6px}
+    select,input[type=range],button{
+      width:100%;padding:10px 11px;border-radius:10px;border:1px solid var(--line);
+      background:#0d1225;color:var(--text)
     }
-    .sub {
-      margin: 0 0 22px;
-      color: var(--muted);
+    button{cursor:pointer;background:linear-gradient(135deg,var(--a),var(--b));font-weight:700}
+    button.alt{background:#151d3a}
+    .cta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+    @media(max-width:800px){.cta{grid-template-columns:1fr}}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:.83rem}
+    .dot{width:10px;height:10px;border-radius:999px;display:inline-block;margin-right:6px}
+    .score{margin-top:9px;color:var(--ok);font-weight:700}
+    .matrix{
+      margin-top:12px;display:grid;grid-template-columns:repeat(16,1fr);gap:5px
     }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 16px;
+    .step{
+      border:1px solid var(--line);background:#0f1530;height:34px;border-radius:7px;cursor:pointer;
+      transition:transform .05s ease,background .14s ease,border-color .14s ease;
     }
-    @media (min-width: 900px) {
-      .grid { grid-template-columns: 1fr 1fr; }
+    .step:hover{transform:translateY(-1px)}
+    .step.on-k{background:rgba(255,94,168,.35);border-color:#ff72b6}
+    .step.on-s{background:rgba(108,99,255,.36);border-color:#8e89ff}
+    .step.on-h{background:rgba(66,211,156,.33);border-color:#65e0b2}
+    .step.playing{outline:2px solid #fff}
+    canvas{
+      width:100%;max-width:500px;aspect-ratio:1/1;background:#0a0f21;border:1px solid var(--line);
+      border-radius:12px;display:block
     }
-    .panel {
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      backdrop-filter: blur(6px);
-    }
-    label {
-      display: block;
-      font-size: 0.92rem;
-      color: var(--muted);
-      margin-bottom: 6px;
-    }
-    select, button {
-      width: 100%;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      padding: 10px 12px;
-      font-size: 0.95rem;
-    }
-    select {
-      background: #101228;
-      color: var(--text);
-      margin-bottom: 10px;
-    }
-    .btn-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    button {
-      cursor: pointer;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #fff;
-      font-weight: 600;
-    }
-    button.secondary {
-      background: #131630;
-      color: var(--text);
-    }
-    .meta {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-    ol {
-      margin: 10px 0 0 20px;
-      padding: 0;
-      line-height: 1.45;
-    }
-    ol li { margin: 5px 0; }
-    a { color: #9ed1ff; }
-    .total {
-      margin-top: 10px;
-      font-weight: 700;
-      color: var(--ok);
-    }
-    .canvas-wrap {
-      display: grid;
-      gap: 10px;
-      justify-items: start;
-    }
-    canvas {
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      width: min(100%, 420px);
-      aspect-ratio: 1 / 1;
-      background: #111;
-    }
-    .small {
-      font-size: 0.85rem;
-      color: var(--muted);
-    }
+    .small{font-size:.84rem;color:var(--muted)}
+    .title{font-size:1.04rem;font-weight:700;margin:0 0 8px}
+    .mono{font-family:ui-monospace,Consolas,monospace}
   </style>
 </head>
 <body>
   <main class="wrap">
     <h1>Mini Soundtrack Lab</h1>
-    <p class="sub">Generate a quick 20-minute mood playlist and export a matching cover image. Public page, no sign-in needed.</p>
-
-    <div class="grid">
-      <section class="panel">
-        <label for="mood">Mood</label>
-        <select id="mood">
-          <option value="focus">Deep Focus</option>
-          <option value="drive">Night Drive</option>
-          <option value="chaos">Chaos Mode</option>
-          <option value="reset">Sunday Reset</option>
-        </select>
-        <label for="duration">Target duration</label>
-        <select id="duration">
-          <option value="20">20 minutes</option>
-          <option value="25">25 minutes</option>
-          <option value="30">30 minutes</option>
-        </select>
-        <div class="btn-row">
-          <button id="build">Build Playlist</button>
-          <button class="secondary" id="copy">Copy Tracklist</button>
-        </div>
-        <p class="meta" id="meta">Pick a mood and generate.</p>
-        <ol id="list"></ol>
-        <div class="total" id="total"></div>
-      </section>
-
-      <section class="panel">
-        <div class="canvas-wrap">
-          <canvas id="cover" width="1000" height="1000"></canvas>
-          <div class="btn-row" style="width:100%;">
-            <button id="redraw">Redraw Cover</button>
-            <button class="secondary" id="download">Download PNG</button>
+    <p class="sub">Original browser synth + beat sketchpad. Generates audio and art in real time — no external playlist links.</p>
+    <section class="grid">
+      <div class="panel">
+        <p class="title">Composer controls</p>
+        <div class="row">
+          <div>
+            <label for="mood">Mood</label>
+            <select id="mood">
+              <option value="focus">Deep Focus</option>
+              <option value="night">Night Drive</option>
+              <option value="chaos">Chaos Mode</option>
+              <option value="reset">Sunday Reset</option>
+            </select>
           </div>
-          <p class="small">Tip: Use the generated title as your playlist name in Spotify/YouTube/Apple Music.</p>
-          <div class="small" id="coverTitle"></div>
+          <div>
+            <label for="tempo">Tempo (BPM)</label>
+            <input id="tempo" type="range" min="72" max="164" value="104">
+          </div>
+          <div>
+            <label for="swing">Swing</label>
+            <input id="swing" type="range" min="0" max="0.32" step="0.01" value="0.08">
+          </div>
+          <div>
+            <label for="density">Density</label>
+            <input id="density" type="range" min="0.2" max="1" step="0.05" value="0.65">
+          </div>
         </div>
-      </section>
-    </div>
+        <div class="cta">
+          <button id="startStop">Start Audio</button>
+          <button class="alt" id="regen">Regenerate Pattern</button>
+          <button class="alt" id="capture">Download Cover PNG</button>
+        </div>
+        <div class="legend">
+          <span><i class="dot" style="background:#ff72b6"></i>Kick</span>
+          <span><i class="dot" style="background:#8e89ff"></i>Snare</span>
+          <span><i class="dot" style="background:#65e0b2"></i>Hat</span>
+        </div>
+        <div class="matrix" id="matrix" aria-label="16-step drum grid"></div>
+        <div class="score" id="meta"></div>
+      </div>
+      <div class="panel">
+        <p class="title">Live cover art</p>
+        <canvas id="viz" width="1000" height="1000"></canvas>
+        <p class="small" id="seedLine"></p>
+        <p class="small mono" id="preset"></p>
+      </div>
+    </section>
   </main>
-
   <script>
-    const TRACKS = {
-      focus: [
-        { t: "Lo-fi focus beat", m: 3.6, q: "lofi focus beats no lyrics" },
-        { t: "Ambient piano study", m: 4.2, q: "ambient piano study music" },
-        { t: "Coding synth pulse", m: 3.9, q: "coding synthwave instrumental" },
-        { t: "Neon rain ambience", m: 5.0, q: "rain ambience with soft synth" },
-        { t: "Minimal deep work", m: 4.4, q: "minimal deep work soundtrack" },
-        { t: "Calm drum loop", m: 2.8, q: "chill drum loop instrumental" }
-      ],
-      drive: [
-        { t: "Midnight synthwave", m: 4.6, q: "midnight synthwave driving mix" },
-        { t: "City lights remix", m: 3.8, q: "city lights synth instrumental" },
-        { t: "Electric horizon", m: 4.1, q: "retro electric horizon music" },
-        { t: "After-hours bassline", m: 3.7, q: "night drive bass instrumental" },
-        { t: "Neon tunnel", m: 5.2, q: "neon tunnel synthwave track" },
-        { t: "Fast lane", m: 2.9, q: "fast lane electronic instrumental" }
-      ],
-      chaos: [
-        { t: "Glitch sprint", m: 3.1, q: "glitch hop intense instrumental" },
-        { t: "Boss fight energy", m: 4.0, q: "boss fight electronic music" },
-        { t: "Breakcore sparks", m: 2.7, q: "breakcore instrumental playlist" },
-        { t: "Overclock mode", m: 3.4, q: "overclock gaming soundtrack" },
-        { t: "Pulse overload", m: 4.9, q: "high energy edm instrumental" },
-        { t: "Laser run", m: 2.6, q: "cyberpunk laser run soundtrack" }
-      ],
-      reset: [
-        { t: "Sunday morning jazzhop", m: 4.4, q: "sunday morning jazzhop instrumental" },
-        { t: "Acoustic calm", m: 3.5, q: "acoustic calm instrumental" },
-        { t: "Coffeehouse groove", m: 3.8, q: "coffeehouse groove no vocals" },
-        { t: "Soft sunrise keys", m: 4.1, q: "soft piano sunrise instrumental" },
-        { t: "Warm afternoon tape", m: 4.7, q: "warm lofi tape instrumental" },
-        { t: "Breeze and strings", m: 3.2, q: "light strings chill instrumental" }
-      ]
+    const $ = (id) => document.getElementById(id);
+    const el = {
+      mood: $("mood"), tempo: $("tempo"), swing: $("swing"), density: $("density"),
+      startStop: $("startStop"), regen: $("regen"), capture: $("capture"),
+      matrix: $("matrix"), meta: $("meta"), seedLine: $("seedLine"), preset: $("preset"),
+      viz: $("viz")
+    };
+    const ctx2d = el.viz.getContext("2d");
+
+    let audioCtx, master, analyser;
+    let running = false, step = 0, nextTick = 0, timer;
+    let mood = "focus", bpm = 104, swing = 0.08, density = 0.65;
+    let seed = Math.floor(Math.random() * 1e9);
+    const grid = Array.from({ length: 16 }, () => ({ k: 0, s: 0, h: 0 }));
+    const melody = [];
+
+    function rngFactory(s) { let x = s >>> 0; return () => ((x = (1664525 * x + 1013904223) >>> 0) / 4294967296); }
+    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+    function pick(arr, r) { return arr[Math.floor(r() * arr.length)]; }
+
+    const MOODS = {
+      focus: { scale:[0,3,7,10], root:46, palette:["#58a6ff","#8f7bff","#70e3c1"], hatEvery:2 },
+      night: { scale:[0,2,5,7,10], root:42, palette:["#ff4fa3","#5f8dff","#ffc04f"], hatEvery:2 },
+      chaos: { scale:[0,1,3,6,10], root:48, palette:["#ff6b6b","#9b6bff","#4ef0ad"], hatEvery:1 },
+      reset: { scale:[0,4,7,9], root:50, palette:["#7be0ff","#9ef3dd","#f4f8ff"], hatEvery:4 }
     };
 
-    const PALETTES = {
-      focus: ["#3a86ff", "#8338ec", "#06d6a0"],
-      drive: ["#ff006e", "#3a86ff", "#ffbe0b"],
-      chaos: ["#ef476f", "#ffd166", "#06d6a0"],
-      reset: ["#7bdff2", "#b2f7ef", "#eff7f6"]
-    };
+    function midiToHz(m){ return 440 * Math.pow(2,(m - 69) / 12); }
 
-    const moodEl = document.getElementById("mood");
-    const durationEl = document.getElementById("duration");
-    const listEl = document.getElementById("list");
-    const metaEl = document.getElementById("meta");
-    const totalEl = document.getElementById("total");
-    const coverEl = document.getElementById("cover");
-    const coverTitleEl = document.getElementById("coverTitle");
-    const ctx = coverEl.getContext("2d");
-    let lastTracks = [];
-    let lastMood = "focus";
-    let lastDuration = 20;
-
-    function shuffle(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    function buildPlaylist() {
-      const mood = moodEl.value;
-      const target = Number(durationEl.value);
-      const source = shuffle(TRACKS[mood]);
-      const chosen = [];
-      let total = 0;
-      const max = target + 2.5;
-
-      for (const tr of source) {
-        if (total + tr.m <= max || chosen.length < 3) {
-          chosen.push(tr);
-          total += tr.m;
-        }
-        if (total >= target - 1.5 && chosen.length >= 4) break;
-      }
-      while (total < target - 1.5) {
-        const extra = source[Math.floor(Math.random() * source.length)];
-        if (total + extra.m > max) break;
-        chosen.push(extra);
-        total += extra.m;
-      }
-
-      listEl.innerHTML = "";
-      chosen.forEach((tr) => {
-        const li = document.createElement("li");
-        const q = encodeURIComponent(tr.q);
-        li.innerHTML = `${tr.t} (${tr.m.toFixed(1)}m) — <a href="https://www.youtube.com/results?search_query=${q}" target="_blank" rel="noopener">open</a>`;
-        listEl.appendChild(li);
-      });
-
-      const title = `${moodEl.options[moodEl.selectedIndex].text} · ${target}-Minute Mix`;
-      metaEl.textContent = title;
-      totalEl.textContent = `Total runtime: ${total.toFixed(1)} minutes`;
-      lastTracks = chosen;
-      lastMood = mood;
-      lastDuration = target;
-      drawCover();
-    }
-
-    function drawCover() {
-      const mood = lastMood;
-      const palette = PALETTES[mood];
-      const title = `${moodEl.options[moodEl.selectedIndex].text.toUpperCase()} MIX`;
-      const stamp = `${lastDuration} MIN`;
-
-      const g = ctx.createLinearGradient(0, 0, 1000, 1000);
-      g.addColorStop(0, palette[0]);
-      g.addColorStop(0.55, palette[1]);
-      g.addColorStop(1, palette[2]);
-      ctx.fillStyle = g;
-      ctx.fillRect(0, 0, 1000, 1000);
-
+    function buildPattern() {
+      const r = rngFactory(seed);
+      const cfg = MOODS[mood];
       for (let i = 0; i < 16; i++) {
-        ctx.fillStyle = `rgba(255,255,255,${(Math.random() * 0.18).toFixed(2)})`;
-        const x = Math.random() * 1000;
-        const y = Math.random() * 1000;
-        const w = 80 + Math.random() * 280;
-        const h = 80 + Math.random() * 280;
-        if (i % 2 === 0) ctx.fillRect(x, y, w, h);
-        else {
-          ctx.beginPath();
-          ctx.arc(x, y, 40 + Math.random() * 140, 0, Math.PI * 2);
-          ctx.fill();
-        }
+        grid[i].k = (i % 4 === 0) || (r() < 0.08 * density) ? 1 : 0;
+        grid[i].s = (i % 8 === 4) || (r() < 0.06 * density) ? 1 : 0;
+        grid[i].h = (i % cfg.hatEvery === 0 && r() < 0.95) || (r() < 0.12 * density) ? 1 : 0;
       }
-
-      ctx.fillStyle = "rgba(0,0,0,0.28)";
-      ctx.fillRect(70, 700, 860, 220);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "700 72px Segoe UI, Arial";
-      ctx.fillText(title, 100, 785);
-      ctx.font = "500 34px Segoe UI, Arial";
-      ctx.fillText(stamp, 100, 840);
-      ctx.fillText("MINI SOUNDTRACK LAB", 100, 885);
-
-      coverTitleEl.textContent = `${title} (${stamp})`;
+      grid[15].k = r() < 0.5 ? 1 : grid[15].k;
+      melody.length = 0;
+      for (let i = 0; i < 16; i++) {
+        if (r() < density * 0.74) {
+          const note = cfg.root + pick(cfg.scale, r) + (r() < 0.18 ? 12 : 0);
+          melody.push(note);
+        } else melody.push(null);
+      }
+      renderMatrix();
+      updateMeta();
+      draw(true);
     }
 
-    document.getElementById("build").addEventListener("click", buildPlaylist);
-    document.getElementById("redraw").addEventListener("click", drawCover);
+    function renderMatrix() {
+      el.matrix.innerHTML = "";
+      for (let i = 0; i < 16; i++) {
+        const b = document.createElement("button");
+        b.className = "step";
+        b.title = `Step ${i + 1}`;
+        const g = grid[i];
+        if (g.k) b.classList.add("on-k");
+        if (g.s) b.classList.add("on-s");
+        if (g.h) b.classList.add("on-h");
+        b.addEventListener("click", () => {
+          const mode = (g.k ? 1 : 0) + (g.s ? 2 : 0) + (g.h ? 4 : 0);
+          const next = (mode + 1) % 8;
+          g.k = !!(next & 1); g.s = !!(next & 2); g.h = !!(next & 4);
+          renderMatrix();
+        });
+        el.matrix.appendChild(b);
+      }
+    }
 
-    document.getElementById("download").addEventListener("click", () => {
+    function updateMeta() {
+      const active = grid.reduce((n,g)=>n + g.k + g.s + g.h,0);
+      const cfg = MOODS[mood];
+      el.meta.textContent = `${el.mood.options[el.mood.selectedIndex].text} · ${bpm} BPM · ${Math.round(density*100)}% density · ${active} drum hits`;
+      el.seedLine.textContent = `Seed ${seed} · palette ${cfg.palette.join(" / ")}`;
+      el.preset.textContent = `preset=${JSON.stringify({ mood, bpm, swing, density, seed })}`;
+    }
+
+    function setupAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      master = audioCtx.createGain(); master.gain.value = 0.7; master.connect(audioCtx.destination);
+      analyser = audioCtx.createAnalyser(); analyser.fftSize = 256; master.connect(analyser);
+    }
+
+    function env(gain, t, a, d, peak) {
+      gain.gain.cancelScheduledValues(t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.linearRampToValueAtTime(peak, t + a);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+    }
+
+    function kick(t) {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+      o.type = "sine"; o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(46, t + 0.12);
+      env(g, t, 0.001, 0.22, 0.95); o.connect(g).connect(master); o.start(t); o.stop(t + 0.24);
+    }
+    function snare(t) {
+      const b = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
+      const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length);
+      const n = audioCtx.createBufferSource(), f = audioCtx.createBiquadFilter(), g = audioCtx.createGain();
+      n.buffer = b; f.type = "highpass"; f.frequency.value = 1800; env(g, t, 0.001, 0.14, 0.52);
+      n.connect(f).connect(g).connect(master); n.start(t); n.stop(t + 0.18);
+    }
+    function hat(t) {
+      const o = audioCtx.createOscillator(), g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
+      o.type = "square"; o.frequency.value = 9000; f.type = "highpass"; f.frequency.value = 7000;
+      env(g, t, 0.001, 0.045, 0.18); o.connect(f).connect(g).connect(master); o.start(t); o.stop(t + 0.05);
+    }
+    function lead(t, note) {
+      if (note == null) return;
+      const hz = midiToHz(note);
+      const o1 = audioCtx.createOscillator(), o2 = audioCtx.createOscillator(), g = audioCtx.createGain(), f = audioCtx.createBiquadFilter();
+      o1.type = "sawtooth"; o2.type = "triangle"; o1.frequency.value = hz; o2.frequency.value = hz * 0.503;
+      f.type = "lowpass"; f.frequency.setValueAtTime(600 + density * 1600, t);
+      env(g, t, 0.01, 0.26, 0.22 + density * 0.15);
+      o1.connect(f); o2.connect(f); f.connect(g).connect(master);
+      o1.start(t); o2.start(t); o1.stop(t + 0.31); o2.stop(t + 0.31);
+    }
+
+    function scheduleTick() {
+      const secPerBeat = 60 / bpm;
+      const stepDur = secPerBeat / 4;
+      while (nextTick < audioCtx.currentTime + 0.1) {
+        const s = step % 16;
+        const when = nextTick + ((s % 2 === 1) ? swing * stepDur : 0);
+        if (grid[s].k) kick(when);
+        if (grid[s].s) snare(when);
+        if (grid[s].h) hat(when);
+        lead(when, melody[s]);
+        highlight(s);
+        nextTick += stepDur;
+        step++;
+      }
+    }
+
+    function highlight(s){
+      [...el.matrix.children].forEach((c,i)=>c.classList.toggle("playing",i===s));
+    }
+
+    function start() {
+      setupAudio();
+      audioCtx.resume();
+      running = true;
+      step = 0;
+      nextTick = audioCtx.currentTime + 0.06;
+      timer = setInterval(scheduleTick, 25);
+      el.startStop.textContent = "Stop Audio";
+    }
+    function stop() {
+      running = false;
+      clearInterval(timer);
+      el.startStop.textContent = "Start Audio";
+      [...el.matrix.children].forEach((c)=>c.classList.remove("playing"));
+    }
+
+    function draw(resetBg = false){
+      const cfg = MOODS[mood];
+      if (resetBg) {
+        const g = ctx2d.createLinearGradient(0,0,1000,1000);
+        g.addColorStop(0,cfg.palette[0]); g.addColorStop(.5,cfg.palette[1]); g.addColorStop(1,cfg.palette[2]);
+        ctx2d.fillStyle = g; ctx2d.fillRect(0,0,1000,1000);
+      } else {
+        ctx2d.fillStyle = "rgba(5,8,20,.18)";
+        ctx2d.fillRect(0,0,1000,1000);
+      }
+      const bins = new Uint8Array((analyser && analyser.frequencyBinCount) || 128);
+      if (analyser) analyser.getByteFrequencyData(bins);
+      const e = bins.reduce((a,b)=>a+b,0) / (bins.length * 255) || 0.2;
+      for (let i=0;i<48;i++){
+        const a = i / 48 * Math.PI * 2;
+        const amp = 200 + e * 220 + (melody[i % 16] ? 60 : 0);
+        const x = 500 + Math.cos(a + performance.now() * 0.0003) * amp;
+        const y = 500 + Math.sin(a + performance.now() * 0.0003) * amp;
+        ctx2d.beginPath();
+        ctx2d.fillStyle = cfg.palette[i % 3] + "66";
+        ctx2d.arc(x,y,10 + e * 40,0,Math.PI*2);
+        ctx2d.fill();
+      }
+      ctx2d.fillStyle = "rgba(0,0,0,.34)";
+      ctx2d.fillRect(65,760,870,180);
+      ctx2d.fillStyle = "#fff";
+      ctx2d.font = "700 66px Segoe UI";
+      ctx2d.fillText(el.mood.options[el.mood.selectedIndex].text.toUpperCase(), 92, 840);
+      ctx2d.font = "500 34px Segoe UI";
+      ctx2d.fillText(`${bpm} BPM · SWING ${swing.toFixed(2)} · SEED ${seed}`, 92, 898);
+      requestAnimationFrame(() => draw(false));
+    }
+
+    function syncControls(){
+      mood = el.mood.value;
+      bpm = Number(el.tempo.value);
+      swing = Number(el.swing.value);
+      density = Number(el.density.value);
+      updateMeta();
+    }
+
+    el.mood.addEventListener("change", ()=>{ syncControls(); buildPattern(); });
+    el.tempo.addEventListener("input", syncControls);
+    el.swing.addEventListener("input", syncControls);
+    el.density.addEventListener("input", ()=>{ syncControls(); buildPattern(); });
+    el.regen.addEventListener("click", ()=>{
+      seed = Math.floor(Math.random() * 1e9);
+      syncControls();
+      buildPattern();
+    });
+    el.startStop.addEventListener("click", ()=> running ? stop() : start());
+    el.capture.addEventListener("click", ()=>{
       const a = document.createElement("a");
-      const slug = moodEl.value + "-" + lastDuration + "min-cover.png";
-      a.href = coverEl.toDataURL("image/png");
-      a.download = slug;
+      a.href = el.viz.toDataURL("image/png");
+      a.download = `soundtrack-${mood}-${seed}.png`;
       a.click();
     });
 
-    document.getElementById("copy").addEventListener("click", async () => {
-      if (!lastTracks.length) {
-        metaEl.textContent = "Build a playlist first, then copy it.";
-        return;
-      }
-      const text = [
-        `${moodEl.options[moodEl.selectedIndex].text} · ${lastDuration}-Minute Mix`,
-        ...lastTracks.map((t, i) => `${i + 1}. ${t.t} (${t.m.toFixed(1)}m)`),
-      ].join("\n");
-      try {
-        await navigator.clipboard.writeText(text);
-        metaEl.textContent = "Tracklist copied to clipboard.";
-      } catch {
-        metaEl.textContent = "Clipboard blocked in this browser — copy manually from the list.";
-      }
-    });
-
-    buildPlaylist();
+    syncControls();
+    buildPattern();
+    draw(true);
   </script>
 </body>
 </html>
