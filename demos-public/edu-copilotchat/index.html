@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Copilot Chat for Education — Prompt Generation Tool</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --ink-soft:#4a4a4a;
+    --line:#e5e5e5;
+    --surface:#ffffff;
+    --surface-alt:#f7f5f0;
+    --brand:#3a2d1a;
+    --brand-2:#7a5a2a;
+    --accent:#a8743a;
+    --accent-soft:#f5ead9;
+    --good:#107c41;
+    --warn:#8a6d3b;
+    --warn-bg:#fff8e6;
+    --shadow:0 1px 2px rgba(58,45,26,.06), 0 6px 20px rgba(58,45,26,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Segoe UI Variable Text",-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--surface-alt);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+  }
+
+  /* Ambient background video stage — two layered videos that crossfade back-to-back */
+  .bg-stage{
+    position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;
+    background:linear-gradient(135deg,#f5ead9 0%,#f7f5f0 60%,#ede2cf 100%);
+  }
+  .bg-stage video{
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:100vw;height:56.25vw;
+    min-height:100vh;min-width:177.78vh;
+    border:0;
+    object-fit:cover;
+    opacity:0;
+    filter:saturate(.92) blur(.5px);
+    transition:opacity 1.2s ease;
+  }
+  .bg-stage video.active{opacity:.28}
+  .bg-tint{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(ellipse at top left, rgba(168,116,58,.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(122,90,42,.10), transparent 55%),
+      linear-gradient(180deg, rgba(247,245,240,.72) 0%, rgba(247,245,240,.62) 50%, rgba(247,245,240,.82) 100%);
+  }
+
+  /* Toggle cluster bottom-right */
+  .bg-controls{
+    position:fixed;bottom:14px;right:14px;z-index:50;
+    display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;
+    max-width:calc(100vw - 28px);
+  }
+  .bg-toggle{
+    background:rgba(255,255,255,.92);border:1px solid var(--line);
+    color:var(--ink-soft);font:inherit;font-size:11px;font-weight:600;
+    padding:7px 12px;border-radius:999px;cursor:pointer;
+    backdrop-filter:saturate(1.1) blur(6px);
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .bg-toggle:hover{color:var(--ink);border-color:#d8c6a4}
+  .bg-toggle .dotled{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+  .bg-toggle.off .dotled{background:#c44a4a}
+  body.bg-off .bg-stage video{opacity:0 !important}
+
+  /* EDU dark mode — warm slate/amber */
+  body.edu-mode{
+    --ink:#f0e6d2;
+    --ink-soft:#c2b08e;
+    --line:#3a2d1a;
+    --surface:#1f1810;
+    --surface-alt:#15100a;
+    --brand:#ffffff;
+    --brand-2:#e8b566;
+    --accent:#d49a4f;
+    --accent-soft:#2a200f;
+    --good:#3fd27a;
+    --warn:#ffc857;
+    --warn-bg:#2a2416;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4);
+    background:var(--surface-alt);
+  }
+  body.edu-mode .bg-stage{
+    background:linear-gradient(135deg,#0a0805 0%,#15100a 60%,#1a1308 100%);
+  }
+  body.edu-mode .bg-stage video.active{
+    opacity:.38;filter:saturate(1) blur(.3px);
+  }
+  body.edu-mode .bg-tint{
+    background:
+      radial-gradient(ellipse at top left, rgba(168,116,58,.22), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(122,90,42,.30), transparent 55%),
+      linear-gradient(180deg, rgba(21,16,10,.55) 0%, rgba(21,16,10,.40) 50%, rgba(21,16,10,.70) 100%);
+  }
+  body.edu-mode .role-card,
+  body.edu-mode .prompt-card,
+  body.edu-mode .limits,
+  body.edu-mode .scope{
+    background:var(--surface);border-color:var(--line);
+  }
+  body.edu-mode .prompt-head{
+    background:linear-gradient(0deg, rgba(168,116,58,.08), rgba(0,0,0,0));
+  }
+  body.edu-mode .prompt-text{
+    background:#1a130a;border-color:#3a2d1a;color:#e8d9bb;
+  }
+  body.edu-mode .copy-btn{background:#a8743a}
+  body.edu-mode .copy-btn:hover{background:#c4904f}
+  body.edu-mode .role-name{color:#ffffff}
+  body.edu-mode h1, body.edu-mode h2.role-title, body.edu-mode .limits h3{color:#ffffff}
+  body.edu-mode .brand-title{color:#ffffff}
+  body.edu-mode .eyebrow{background:rgba(232,181,102,.15);color:#e8b566}
+  body.edu-mode .cta{
+    background:linear-gradient(135deg,#a8743a 0%,#5a3e1c 100%);
+    border:1px solid #3a2d1a;
+  }
+  body.edu-mode .cta a.btn{background:#ffd100;color:#3a2d1a}
+  body.edu-mode .cta a.btn:hover{background:#ffe14d}
+  body.edu-mode .limits-grid div::before{border-color:#ff8080;
+    background:linear-gradient(45deg,transparent 45%,#ff8080 45%,#ff8080 55%,transparent 55%),
+               linear-gradient(-45deg,transparent 45%,#ff8080 45%,#ff8080 55%,transparent 55%);}
+  body.edu-mode .limits-badge{
+    background:rgba(255,200,87,.15);color:#ffc857;border-color:#5c4a1a;
+  }
+  body.edu-mode .bg-toggle{
+    background:rgba(31,24,16,.88);color:#c2b08e;border-color:#3a2d1a;
+  }
+  body.edu-mode .bg-toggle:hover{color:#fff;border-color:#d49a4f}
+  body.edu-mode footer.foot{color:#8a7a5a}
+  body.edu-mode .back{color:#e8b566}
+  body.edu-mode .top-meta, body.edu-mode .top-meta strong{color:#c2b08e}
+  body.edu-mode .top-meta strong{color:#fff}
+  body.edu-mode header.top{border-color:#3a2d1a}
+  body.edu-mode .scope-item strong{color:#fff}
+  body.edu-mode .role-cta{color:#e8b566}
+
+  .page{max-width:1120px;margin:0 auto;padding:32px 24px 80px}
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:32px;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-mark{
+    width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;
+  }
+  .brand-mark span{display:block;border-radius:2px}
+  .brand-mark span:nth-child(1){background:#f25022}
+  .brand-mark span:nth-child(2){background:#7fba00}
+  .brand-mark span:nth-child(3){background:#00a4ef}
+  .brand-mark span:nth-child(4){background:#ffb900}
+  .brand-title{font-weight:600;color:var(--brand);letter-spacing:.1px}
+  .brand-sub{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .top-meta{font-size:12px;color:var(--ink-soft);text-align:right}
+  .top-meta strong{color:var(--brand);font-weight:600}
+
+  .hero{margin-bottom:28px}
+  .eyebrow{
+    display:inline-block;font-size:12px;font-weight:600;letter-spacing:.8px;
+    color:var(--brand-2);text-transform:uppercase;background:var(--accent-soft);
+    padding:4px 10px;border-radius:999px;margin-bottom:14px;
+  }
+  h1{font-size:30px;line-height:1.2;margin:0 0 10px;color:var(--brand);font-weight:600}
+  .lede{font-size:16px;color:var(--ink-soft);max-width:760px;margin:0}
+
+  .scope{
+    display:flex;flex-wrap:wrap;gap:12px;margin:22px 0 0;
+    padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:8px;
+  }
+  .scope-item{font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:8px}
+  .scope-item strong{color:var(--ink);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--good);display:inline-block}
+
+  h2.section{
+    font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-soft);
+    font-weight:600;margin:36px 0 14px;
+  }
+
+  /* Role selection */
+  .roles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media (max-width:1020px){.roles{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:600px){.roles{grid-template-columns:1fr}}
+  .role-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;text-align:left;
+    cursor:pointer;transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    box-shadow:var(--shadow);font:inherit;color:inherit;
+  }
+  .role-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(58,45,26,.12);border-color:#d8c6a4}
+  .role-icon{
+    width:42px;height:42px;border-radius:8px;background:var(--accent-soft);
+    color:var(--brand);font-weight:700;display:grid;place-items:center;font-size:14px;margin-bottom:14px;
+    letter-spacing:.5px;
+  }
+  .role-name{font-size:16px;font-weight:600;color:var(--brand);margin:0 0 6px}
+  .role-blurb{font-size:13px;color:var(--ink-soft);margin:0 0 14px;line-height:1.45}
+  .role-cta{font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.3px}
+  .role-cta::after{content:" →"}
+
+  /* Role detail view (hidden until selected) */
+  .roles-wrap.hidden{display:none}
+  .detail{display:none}
+  .detail.active{display:block}
+  .back{
+    background:none;border:0;color:var(--accent);font:inherit;font-size:13px;font-weight:600;
+    cursor:pointer;padding:0;margin-bottom:16px;
+  }
+  .back::before{content:"← "}
+  h2.role-title{font-size:24px;color:var(--brand);font-weight:600;margin:0 0 6px}
+  .role-subtitle{font-size:15px;color:var(--ink-soft);margin:0 0 28px;max-width:780px}
+
+  /* Prompt card */
+  .prompt-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;
+    margin-bottom:18px;box-shadow:var(--shadow);overflow:hidden;
+  }
+  .prompt-head{
+    display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);
+    background:linear-gradient(0deg, rgba(168,116,58,.04), rgba(0,0,0,0));
+  }
+  .prompt-num{
+    font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+    color:var(--accent);background:var(--accent-soft);padding:4px 8px;border-radius:4px;flex-shrink:0;
+  }
+  .prompt-title{font-size:15px;font-weight:600;color:var(--brand);margin:0;flex:1}
+  .copy-btn{
+    background:var(--accent);color:#fff;border:0;border-radius:6px;
+    padding:8px 14px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;
+    transition:background .15s ease;flex-shrink:0;
+  }
+  .copy-btn:hover{background:var(--brand-2)}
+  .copy-btn.copied{background:var(--good)}
+  .prompt-body{padding:18px}
+  .prompt-text{
+    background:#faf6ee;border:1px solid #e7dcc6;border-radius:6px;
+    padding:14px 16px;font-family:"Cascadia Code","Consolas","Monaco",monospace;
+    font-size:13px;line-height:1.55;color:#3a2d1a;white-space:pre-wrap;word-wrap:break-word;
+    margin:0 0 16px;max-height:none;overflow:visible;
+  }
+  .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:8px}
+  @media (max-width:680px){.meta-row{grid-template-columns:1fr}}
+  .meta-block h4{
+    font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);
+    font-weight:600;margin:0 0 6px;
+  }
+  .meta-block p{font-size:13px;color:var(--ink);margin:0;line-height:1.5}
+
+  /* Limits section */
+  .limits{
+    background:#fff;border:1px solid var(--line);border-radius:10px;
+    padding:24px;margin-top:40px;box-shadow:var(--shadow);
+  }
+  .limits-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .limits h3{margin:0;color:var(--brand);font-size:18px;font-weight:600}
+  .limits h3 em{font-style:italic;color:var(--accent)}
+  .limits-intro{color:var(--ink-soft);font-size:14px;margin:0 0 16px;max-width:820px;line-height:1.55}
+  .limits-subhead{font-size:12px;text-transform:uppercase;letter-spacing:.8px;color:var(--ink-soft);
+    font-weight:600;margin:18px 0 12px;}
+  .limits-grid{
+    display:grid;grid-template-columns:repeat(2,1fr);gap:10px 22px;font-size:13px;color:var(--ink);
+  }
+  @media (max-width:680px){.limits-grid{grid-template-columns:1fr}}
+  .limits-grid div{padding-left:22px;position:relative;line-height:1.5}
+  .limits-grid div::before{
+    content:"";position:absolute;left:0;top:6px;width:12px;height:12px;border:1.5px solid #c44a4a;
+    border-radius:50%;
+    background:linear-gradient(45deg,transparent 45%,#c44a4a 45%,#c44a4a 55%,transparent 55%),
+               linear-gradient(-45deg,transparent 45%,#c44a4a 45%,#c44a4a 55%,transparent 55%);
+  }
+  .limits-grid div em{color:var(--ink-soft);font-style:italic}
+
+  /* CTA section */
+  .cta{
+    margin-top:36px;padding:24px 28px;border-radius:10px;
+    background:linear-gradient(135deg,#a8743a 0%,#7a5a2a 100%);
+    color:#fff;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;
+  }
+  .cta h3{margin:0 0 6px;font-size:18px;font-weight:600}
+  .cta p{margin:0;font-size:14px;opacity:.92;max-width:560px}
+  .cta a.btn{
+    background:#fff;color:var(--brand);padding:11px 22px;border-radius:6px;text-decoration:none;
+    font-size:14px;font-weight:600;white-space:nowrap;transition:background .15s ease;
+  }
+  .cta a.btn:hover{background:#f5ead9}
+
+  footer.foot{
+    margin-top:28px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--brand);color:#fff;padding:10px 18px;border-radius:6px;font-size:14px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:99;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Ambient background videos. TWO videos crossfade back-to-back with a 5-second gap between them.
+     Local files — works offline from any host (SharePoint, GitHub Pages, file://). -->
+<div class="bg-stage" aria-hidden="true">
+  <video id="bgVideoA" class="active" muted loop="false" playsinline preload="auto" tabindex="-1">
+    <source src="edu_prof.mp4" type="video/mp4">
+  </video>
+  <video id="bgVideoB" muted loop="false" playsinline preload="auto" tabindex="-1">
+    <source src="edu_students.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- Audio elements — short, OneDrive-safe filenames with edu_ prefix. -->
+<audio id="audBell" preload="auto"><source src="edu_bell.mp3" type="audio/mpeg"></audio>
+<audio id="audLaugh" preload="auto"><source src="edu_laugh.mp3" type="audio/mpeg"></audio>
+<audio id="audWalla" preload="auto"><source src="edu_crowdteenager.mp3" type="audio/mpeg"></audio>
+<audio id="audKeys" preload="auto"><source src="edu_keyboard.mp3" type="audio/mpeg"></audio>
+<audio id="audPencil" preload="auto"><source src="edu_pencil.mp3" type="audio/mpeg"></audio>
+
+<div class="bg-tint" aria-hidden="true"></div>
+<div class="bg-controls" role="toolbar" aria-label="Background controls">
+  <button class="bg-toggle" id="modeToggle" aria-label="Toggle EDU dark mode">
+    <span class="dotled" style="background:#a8743a"></span><span id="modeLabel">EDU mode</span>
+  </button>
+  <button class="bg-toggle" id="bellBtn" aria-label="Play school bell and a random classroom sound">
+    <span>&#x1F514;</span><span>Class is in session</span>
+  </button>
+  <button class="bg-toggle" id="audioToggle" aria-label="Stop classroom audio">
+    <span class="dotled off" id="audioDot"></span><span id="audioLabel">Stop sound</span>
+  </button>
+  <button class="bg-toggle" id="bgToggle" aria-label="Toggle background video">
+    <span class="dotled" id="bgDot"></span><span id="bgLabel">Pause video</span>
+  </button>
+</div>
+
+<div class="page">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div>
+        <div class="brand-title">Microsoft Copilot Chat</div>
+        <div class="brand-sub">For Education &middot; K-12 &amp; Higher Ed</div>
+      </div>
+    </div>
+    <div class="top-meta">
+      Prompt Generation Tool<br>
+      <strong>Prepared for Education</strong>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow">Interactive Guide</span>
+    <h1>See exactly what Copilot Chat does for your back office.</h1>
+    <p class="lede">Pick a role below. You&rsquo;ll see three realistic prompts a school district or campus staff member could type today &mdash; no training required &mdash; along with what a good response looks like. Every example works with your existing Copilot Chat license. Nothing here requires extra add-ons.</p>
+
+    <div class="scope" role="note" aria-label="What's included">
+      <div class="scope-item"><span class="dot"></span><strong>Works in Commercial &amp; GCC</strong></div>
+      <div class="scope-item"><span class="dot"></span><strong>Enterprise Data Protection (EDP)</strong> &mdash; prompts aren&rsquo;t used to train models</div>
+      <div class="scope-item"><span class="dot"></span><strong>No add-ons required</strong> &mdash; works with the Copilot Chat license you already have</div>
+    </div>
+  </section>
+
+  <!-- Role picker -->
+  <div class="roles-wrap" id="rolesWrap">
+    <h2 class="section">Choose a role to explore</h2>
+    <div class="roles">
+      <button class="role-card" data-role="registrar" aria-label="Explore registrar and student records use cases">
+        <div class="role-icon">REG</div>
+        <h3 class="role-name">Registrar / Student Records</h3>
+        <p class="role-blurb">Transcripts, enrollment letters, FERPA-aware responses to families.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+      <button class="role-card" data-role="admin" aria-label="Explore principal and dean use cases">
+        <div class="role-icon">ADM</div>
+        <h3 class="role-name">Principal / Dean of Students</h3>
+        <p class="role-blurb">Parent communications, staff memos, incident summaries, board updates.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+      <button class="role-card" data-role="advisor" aria-label="Explore academic advisor and counselor use cases">
+        <div class="role-icon">ADV</div>
+        <h3 class="role-name">Academic Advisor / Counselor</h3>
+        <p class="role-blurb">Outreach drafts, course plan explanations, referral letters.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+      <button class="role-card" data-role="hr" aria-label="Explore HR and operations use cases">
+        <div class="role-icon">HR</div>
+        <h3 class="role-name">HR / Operations Coordinator</h3>
+        <p class="role-blurb">Job posts, onboarding checklists, policy rewrites, vendor letters.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Registrar -->
+  <div class="detail" id="detail-registrar">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Registrar / Student Records</h2>
+    <p class="role-subtitle">Three prompts a registrar or records clerk could realistically type between calls &mdash; turning repetitive correspondence into something they can review and send in minutes, not hours.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Draft a FERPA-aware response to a third-party records request</h3>
+        <button class="copy-btn" data-copy="r-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="r-1">Draft a short, polite response to the records request below. The requester is not the student and not a parent of a minor student. Explain in plain English that under FERPA we cannot release education records without written consent from the eligible student (or parent if the student is a minor), describe how they can obtain a signed consent form, and give them one clear next step. Tone: helpful, neutral, not bureaucratic. Under 200 words.
+
+Request:
+[paste the request here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Produces a defensible, FERPA-aligned response that explains the limit without sounding obstructive, and gives the requester a real path forward.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A 200-word reply, plain English, no legal jargon, with one clear next step (the consent form) and a tone that doesn&rsquo;t make the requester feel stonewalled.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Turn an unofficial transcript into a clean enrollment verification letter</h3>
+        <button class="copy-btn" data-copy="r-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="r-2">Using the transcript and student details below, draft an enrollment verification letter on behalf of the registrar&rsquo;s office. Include: student full name, student ID, current enrollment status (full-time / part-time / withdrawn), current term and credit load, expected graduation term, and degree program. Use a formal letter format with placeholders for the registrar&rsquo;s signature block. Do not include any grade information or GPA. Do not invent any field that isn&rsquo;t in the data below &mdash; if something is missing, leave a clearly labeled placeholder like [TO CONFIRM].
+
+Student data:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Converts raw student record data into a properly formatted verification letter that scholarship boards, employers, and immigration officials actually accept.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A clean letter with all six required fields, no grade or GPA leakage, and honest [TO CONFIRM] placeholders where the source data is incomplete &mdash; never a guess presented as fact.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Explain a registration hold in a way the student can actually act on</h3>
+        <button class="copy-btn" data-copy="r-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="r-3">Rewrite the registration hold notice below into a short student-facing email. Tell the student, in plain English: (1) what the hold means, (2) why it&rsquo;s on their account, (3) the exact office or person to contact to clear it, (4) what they need to bring or do, and (5) when registration opens so they know the deadline. Keep it under 150 words. Be warm but specific &mdash; no &ldquo;please consult the appropriate office&rdquo; non-answers.
+
+Hold notice:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Translates a system-generated registration hold into a useful email that actually tells the student where to go and what to do.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Under 150 words, five concrete pieces of information (what / why / who / how / when), and a tone that helps the student fix it instead of running them in circles.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Principal / Dean -->
+  <div class="detail" id="detail-admin">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Principal / Dean of Students</h2>
+    <p class="role-subtitle">Three prompts for the building or campus leader running the day &mdash; parent emails, staff memos, and the kinds of write-ups that always seem to need doing at 5:30pm.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Turn rough notes into a clean parent communication about a school incident</h3>
+        <button class="copy-btn" data-copy="a-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="a-1">Using the notes below, draft a parent-facing email about a school incident. The email should: open with one calm sentence stating that the school is safe and what generally happened (no names), explain in two or three sentences what staff did in response, state what the school is doing next, and close with one point of contact for questions. Do not include the names of any students, staff, or families. Do not speculate about cause. If something in the notes is unconfirmed, leave it out rather than soften it. Under 300 words, written for a wide range of reading levels.
+
+Notes:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Converts an administrator&rsquo;s raw incident notes into a parent communication that is calm, accurate, and legally cautious &mdash; the kind of email you can actually send before going home.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Under 300 words, no names, no speculation, accessible reading level, four clear beats (what / response / next / contact) &mdash; ready for a quick read by the superintendent or comms office before it goes out.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Draft a Friday staff memo from a short list of items</h3>
+        <button class="copy-btn" data-copy="a-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="a-2">Draft a Friday staff memo based on the bullet list below. Order it: safety / facilities first, instructional items second, calendar reminders third, shout-outs last. Keep it warm but efficient &mdash; this is read by busy people on a Friday afternoon. Use short sentences and clear subheads. Don&rsquo;t add anything that isn&rsquo;t in the list. Under 500 words.
+
+Items:
+- [paste your bullets here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Takes the principal&rsquo;s quick list of weekly items and turns it into a memo that actually gets read, in the order staff need to see things.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Under 500 words, four clear sections in the right priority order, warm but tight, nothing invented, ready to drop into Outlook or the staff intranet on a Friday at 3pm.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Prepare a one-page board update from this week&rsquo;s activity</h3>
+        <button class="copy-btn" data-copy="a-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="a-3">Summarize the activity below into a one-page board update from the principal. Structure it as:
+- Headline: one sentence that captures the week
+- Academic progress (2-3 bullets)
+- Student well-being &amp; climate (2-3 bullets)
+- Operations / facilities (1-2 bullets)
+- One thing the board can help with
+
+Tone: confident, honest, no jargon. Don&rsquo;t inflate anything. If a number is missing or unclear, say so rather than smooth it over.
+
+Week&rsquo;s activity:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Turns a week&rsquo;s worth of small wins and rough edges into the kind of one-page update a board can actually read in 90 seconds before the meeting.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>One page, five clearly labeled sections, honest where the data is thin, and one concrete ask of the board &mdash; not a victory lap, not a vent session.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Advisor / Counselor -->
+  <div class="detail" id="detail-advisor">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Academic Advisor / Counselor</h2>
+    <p class="role-subtitle">Three prompts for the advisor or counselor with a caseload of 200+ &mdash; outreach drafts, course-plan explanations, and referral letters that all need to sound human.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Draft an early-alert outreach email to an at-risk student</h3>
+        <button class="copy-btn" data-copy="v-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="v-1">Draft a short outreach email to a student who has been flagged in our early-alert system. The email should: (1) open warmly, no alarm language, (2) name the specific concern in one sentence (attendance, missed assignments, low grades &mdash; whichever applies below), (3) offer two concrete next steps including a link to book a 15-minute meeting, (4) close with one sentence that signals we&rsquo;re on their side. No shame. No &ldquo;we are concerned about your performance.&rdquo; Under 150 words.
+
+Student situation:
+[paste the alert details here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Replaces the cold, generic &ldquo;you have been flagged&rdquo; email with something the student might actually open and respond to.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Under 150 words, names the specific concern without shaming, offers two real next steps, and ends in a way that makes the student feel supported rather than tracked.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Explain a degree audit or course plan in plain English</h3>
+        <button class="copy-btn" data-copy="v-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="v-2">Look at the degree audit / course plan below and write a plain-English summary for the student. Cover: where they are right now (credits completed, GPA only if shown), what they still need to graduate, the two or three smartest course choices for next term given prerequisites, and one risk to watch (a course that&rsquo;s offered only once a year, a hidden prereq, a credit cap, etc.). Keep it under 250 words and write as if you&rsquo;re sitting across the desk from a first-generation college student. No jargon, no acronyms without defining them once.
+
+Audit / plan:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Turns a dense degree audit into a one-screen explanation the student can actually use to make next-term choices.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Under 250 words, four beats (now / needed / smart picks / risk), no unexplained acronyms, written like a real advisor explaining it &mdash; not a system spitting it out.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Write a strong, specific recommendation or referral letter</h3>
+        <button class="copy-btn" data-copy="v-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="v-3">Using the bullet points below, draft a one-page recommendation letter for a student applying to [SCHOLARSHIP / PROGRAM / TRANSFER &mdash; specify]. Structure: opening that says how I know the student and for how long, two specific stories that show their growth or character (use the bullets below &mdash; don&rsquo;t invent details), one short paragraph on academic readiness, and a closing endorsement. Avoid clich&eacute;s like &ldquo;hard-working&rdquo; and &ldquo;dedicated&rdquo; unless I can back them with a concrete example. Formal but warm.
+
+Bullet points about the student:
+- [paste your notes here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Turns the advisor&rsquo;s real observations about a student into a recommendation letter that actually sounds like it was written by someone who knows them.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>One page, two specific stories tied to the bullets, no fabricated detail, no clich&eacute;s without evidence, and a closing that reads like a real endorsement &mdash; ready for a final sanity check and a signature.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- HR / Operations -->
+  <div class="detail" id="detail-hr">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">HR / Operations Coordinator</h2>
+    <p class="role-subtitle">Three prompts for the HR or ops coordinator who lives in Outlook and SharePoint &mdash; postings, onboarding, policy work, and vendor correspondence that all need to be both fast and correct.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Turn a hiring manager&rsquo;s rough notes into a polished job posting</h3>
+        <button class="copy-btn" data-copy="h-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="h-1">Using the hiring manager&rsquo;s notes below, draft a job posting for [POSITION TITLE]. Include: a 2-3 sentence about-the-role summary, key responsibilities (5-7 bullets), required qualifications, preferred qualifications, and a closing paragraph about the district / institution that emphasizes mission and student impact. Use inclusive, plain language. Avoid degree requirements that aren&rsquo;t actually necessary for the job. Don&rsquo;t invent anything &mdash; if the manager&rsquo;s notes leave something out, put [TO CONFIRM] there.
+
+Hiring manager notes:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Saves the HR coordinator the back-and-forth of getting a hiring manager&rsquo;s rough notes into a postable, inclusive job description.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A complete five-section posting, inclusive language, honest [TO CONFIRM] placeholders, no inflated degree gates, ready for hiring manager review and approval before posting.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Build a Day-1 to Day-30 onboarding checklist for a new hire</h3>
+        <button class="copy-btn" data-copy="h-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="h-2">Build a Day-1 to Day-30 onboarding checklist for a new [ROLE] in our [K-12 DISTRICT / HIGHER ED DEPARTMENT &mdash; specify]. Organize it by: Before Day 1 (manager / IT / facilities prep), Day 1 (welcome, accounts, key tour), Week 1 (training, first 1:1, required compliance modules), Weeks 2-4 (shadowing, first independent tasks, 30-day check-in). Format as a checklist with an owner column (Manager / IT / HR / New Hire). Don&rsquo;t invent compliance trainings that may not exist at our institution &mdash; mark those as [DISTRICT-SPECIFIC: confirm with HR].</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Generates a structured, ownership-clear onboarding checklist that the coordinator can hand to a hiring manager or paste into a SharePoint template.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Four phases, every line has an owner, compliance items honestly flagged as &ldquo;confirm with HR&rdquo; rather than fabricated, and the whole thing reads like a real plan, not a generic template.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Rewrite a dense policy paragraph for the staff handbook</h3>
+        <button class="copy-btn" data-copy="h-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="h-3">Rewrite the policy paragraph below for the staff handbook. Keep every rule and obligation intact &mdash; do not change the substance. Make it: shorter, written at roughly an 8th-grade reading level, structured with one clear &ldquo;what you must do&rdquo; sentence followed by short bullets for the specifics, and ending with one line on who to contact with questions. If the original is ambiguous about a rule, flag it at the end as [AMBIGUITY: paragraph X says this could be read two ways] rather than picking an interpretation.
+
+Original policy:
+[paste here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Translates legalese policy language into something staff will actually read and follow &mdash; without quietly changing what the policy requires.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Same rules, shorter and clearer, structured for a quick read, with any ambiguities surfaced for HR or Legal to resolve rather than papered over by Copilot.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Limits -->
+  <section class="limits" id="limits">
+    <div class="limits-head">
+      <h3>What Copilot Chat will <em>not</em> do with the Basic license</h3>
+    </div>
+    <p class="limits-intro">With the Copilot Chat Basic license only &mdash; no add-ons &mdash; the boundaries below describe where Copilot Chat stops on its own and where supervisory, HR, or legal review takes over.</p>
+    <p class="limits-intro">Copilot Chat is a general-purpose reasoning and writing assistant protected by Enterprise Data Protection. It is <strong>not</strong> grounded in your SIS, LMS, or HRIS, and this prompt set is intentionally scoped to <strong>internal-first drafts that go through normal review</strong> before anything goes to a family, board, or external party.</p>
+    <h4 class="limits-subhead">What Copilot Chat will not do with the license alone</h4>
+    <div class="limits-grid">
+      <div>Won&rsquo;t read a staff member&rsquo;s Outlook mailbox or calendar</div>
+      <div>Won&rsquo;t read Teams chats, channels, or meeting transcripts</div>
+      <div>Won&rsquo;t search or summarize SharePoint or OneDrive files automatically</div>
+      <div>Won&rsquo;t connect to PowerSchool, Banner, Workday, Canvas, or any SIS/LMS/HRIS</div>
+      <div>Won&rsquo;t retrieve real-time grade data, attendance records, or IEP files <em>(public web data still accessible)</em></div>
+      <div>Won&rsquo;t draft public-facing communications about named students, families, or staff <em>(not a system constraint, FERPA &amp; governance decision)</em></div>
+      <div>Won&rsquo;t produce final disciplinary letters, IEP documents, or HR investigation findings <em>(not a system constraint, model can draft, humans must finalize)</em></div>
+      <div>Won&rsquo;t make admission, eligibility, or financial aid determinations <em>(not a system constraint, advisory limitation)</em></div>
+      <div>Won&rsquo;t replace HR, Title IX, or counsel review of any sensitive draft before it&rsquo;s sent <em>(not a system constraint, human oversight requirement)</em></div>
+      <div>Won&rsquo;t retain your prompts to train foundation models <em>(EDP protection)</em></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div>
+      <h3>Ready to see this in your environment?</h3>
+      <p>We&rsquo;ll run a 45-minute live demo against your tenant with your team&rsquo;s real-world scenarios &mdash; no configuration required on your side.</p>
+    </div>
+    <a class="btn" href="https://outlook.office.com/book/BookTimeWithLiudavid@bookings.microsoft.com/?ismsaljsauthenabled" target="_blank" rel="noopener">Book a live demo</a>
+  </section>
+
+  <footer class="foot">
+    <div>Example prompts only. Always apply your institution&rsquo;s policy on AI-assisted writing, FERPA, and supervisory review.</div>
+    <div>Built by DSL for Team Kristen &middot; v1.1 &middot; offline</div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Prompt copied to clipboard</div>
+
+<script>
+  // ============================================================
+  // Role picker
+  // ============================================================
+  const rolesWrap = document.getElementById('rolesWrap');
+  const details = {
+    registrar: document.getElementById('detail-registrar'),
+    admin: document.getElementById('detail-admin'),
+    advisor: document.getElementById('detail-advisor'),
+    hr: document.getElementById('detail-hr')
+  };
+
+  document.querySelectorAll('.role-card').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const r = btn.dataset.role;
+      rolesWrap.classList.add('hidden');
+      Object.values(details).forEach(d=>d.classList.remove('active'));
+      details[r].classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  document.querySelectorAll('[data-back]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      Object.values(details).forEach(d=>d.classList.remove('active'));
+      rolesWrap.classList.remove('hidden');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  // ============================================================
+  // Toast
+  // ============================================================
+  const toast = document.getElementById('toast');
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>toast.classList.remove('show'), 1600);
+  }
+
+  // ============================================================
+  // Dual-video crossfade — each clip plays to its natural end, then
+  // fades out, waits 5 seconds, then the other video fades in & plays.
+  // ============================================================
+  const vidA = document.getElementById('bgVideoA');
+  const vidB = document.getElementById('bgVideoB');
+  const bgToggle = document.getElementById('bgToggle');
+  const bgDot = document.getElementById('bgDot');
+  const bgLabel = document.getElementById('bgLabel');
+
+  // Defensive: belt-and-suspenders force loop=false on both videos at runtime
+  // (some browsers ignore loop="false" attribute and treat presence as truthy).
+  vidA.loop = false;
+  vidB.loop = false;
+
+  let activeVid = vidA;
+  let inactiveVid = vidB;
+  let cycleTimer = null;
+  let videoPlaying = true;
+
+  // Called when the currently-active video finishes playing through to its end.
+  function onClipEnded(){
+    if(!videoPlaying) return;
+    // Fade out the clip that just ended
+    activeVid.classList.remove('active');
+    // After the 1.2s fade transition + 5s gap, swap in the other video.
+    cycleTimer = setTimeout(()=>{
+      if(!videoPlaying) return;
+      // Pause + rewind the one that just faded
+      try{ activeVid.pause(); activeVid.currentTime = 0; }catch(e){}
+      // Swap references
+      const tmp = activeVid;
+      activeVid = inactiveVid;
+      inactiveVid = tmp;
+      // Start the new active clip from the top, fade it in.
+      activeVid.currentTime = 0;
+      activeVid.play().catch(()=>{});
+      activeVid.classList.add('active');
+    }, 1200 + 5000); // 1.2s fade-out + 5s gap before next clip starts
+  }
+
+  // Wire each video's ended event ONCE — fires every time the clip finishes.
+  vidA.addEventListener('ended', onClipEnded);
+  vidB.addEventListener('ended', onClipEnded);
+
+  function startVideoCycle(){
+    videoPlaying = true;
+    activeVid.play().catch(()=>{});
+    activeVid.classList.add('active');
+    // No timer needed — the 'ended' handler will fire when the clip naturally finishes.
+  }
+
+  function stopVideoCycle(){
+    videoPlaying = false;
+    if(cycleTimer){ clearTimeout(cycleTimer); cycleTimer = null; }
+    try{ vidA.pause(); vidB.pause(); }catch(e){}
+    vidA.classList.remove('active');
+    vidB.classList.remove('active');
+  }
+
+  // Kick off on load
+  window.addEventListener('load', ()=>{
+    // Some browsers need an autoplay nudge after DOM ready
+    startVideoCycle();
+  });
+
+  // Pause / Resume background video
+  if(bgToggle){
+    bgToggle.addEventListener('click',()=>{
+      const turningOff = !document.body.classList.contains('bg-off');
+      document.body.classList.toggle('bg-off', turningOff);
+      bgToggle.classList.toggle('off', turningOff);
+      bgLabel.textContent = turningOff ? 'Resume video' : 'Pause video';
+      if(turningOff){
+        stopVideoCycle();
+      } else {
+        startVideoCycle();
+      }
+    });
+  }
+
+  // ============================================================
+  // "Class is in session" button — starts a CONTINUOUS background loop.
+  // Bell plays first. When any clip ends, a different random clip plays.
+  // Runs forever until user clicks "Stop sound".
+  //
+  // Defenses against the bugs hit in earlier versions:
+  //   1. Overlap: explicitly pause + reset the prior clip before play.
+  //   2. Recursive re-pick: random picker excludes the current clip and
+  //      any clips marked unavailable due to load errors.
+  //   3. Double 'ended' fire: a monotonic playId invalidates stale handlers.
+  //   4. Missing/broken file: 'error' event marks the clip unavailable
+  //      and a watchdog timeout force-advances if a clip never fires
+  //      'ended' (e.g. file is 404, decoder hangs).
+  // ============================================================
+  const bellBtn = document.getElementById('bellBtn');
+  const audioToggle = document.getElementById('audioToggle');
+  const audioDot = document.getElementById('audioDot');
+  const audioLabel = document.getElementById('audioLabel');
+
+  const allClips = [
+    document.getElementById('audBell'),
+    document.getElementById('audLaugh'),
+    document.getElementById('audWalla'),
+    document.getElementById('audKeys'),
+    document.getElementById('audPencil')
+  ];
+
+  // Mark any clip that fails to load as unavailable. The loop will skip
+  // it. This prevents a single missing file (e.g. OneDrive truncating a
+  // filename) from killing the entire audio cycle.
+  allClips.forEach(c => {
+    c.addEventListener('error', () => {
+      console.warn('audio file failed to load, marking unavailable:', c.id, c.currentSrc);
+      c.dataset.broken = '1';
+    });
+  });
+
+  let audioOn = false;
+  let currentClip = null;
+  let playId = 0;
+  let watchdog = null;
+
+  function pickRandomClipExcluding(exclude){
+    const pool = allClips.filter(c => c !== exclude && c.dataset.broken !== '1');
+    if(pool.length === 0){
+      // All other clips are broken — fall back to anything that works
+      const fallback = allClips.filter(c => c.dataset.broken !== '1');
+      if(fallback.length === 0) return null; // catastrophe — give up
+      return fallback[Math.floor(Math.random() * fallback.length)];
+    }
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function clearWatchdog(){
+    if(watchdog){ clearTimeout(watchdog); watchdog = null; }
+  }
+
+  function playClip(clip){
+    if(!audioOn) return;
+    if(!clip){
+      // No clip available — the loop has run out of working files.
+      console.warn('no playable audio files available, stopping loop');
+      stopAudio();
+      return;
+    }
+
+    // Stop whatever was playing so we don't overlap pipelines.
+    if(currentClip && currentClip !== clip){
+      try{ currentClip.pause(); currentClip.currentTime = 0; }catch(e){}
+    }
+
+    currentClip = clip;
+    const myPlayId = ++playId;
+    clearWatchdog();
+
+    const advance = () => {
+      if(myPlayId !== playId) return; // stale
+      if(!audioOn) return;
+      clearWatchdog();
+      playClip(pickRandomClipExcluding(clip));
+    };
+
+    // Primary trigger: clip ends naturally
+    clip.addEventListener('ended', advance, { once: true });
+
+    try{ clip.currentTime = 0; }catch(e){}
+    const p = clip.play();
+    if(p && p.catch){
+      p.catch(err => {
+        console.warn('audio play interrupted:', clip.id, err && err.name);
+        // If play() rejected outright, advance to the next clip after a beat
+        if(myPlayId === playId && audioOn){
+          setTimeout(advance, 500);
+        }
+      });
+    }
+
+    // Watchdog safety net: if the clip never fires 'ended' (broken file,
+    // hung decoder, audio context suspended in background tab), force the
+    // loop forward after the clip's known duration + a buffer.
+    // We can't rely on duration being known yet, so use a generous default
+    // and re-arm if needed.
+    const maxDuration = (clip.duration && isFinite(clip.duration)) ? clip.duration : 15;
+    const watchdogMs = (maxDuration * 1000) + 3000;
+    watchdog = setTimeout(() => {
+      if(myPlayId !== playId) return;
+      if(!audioOn) return;
+      console.warn('watchdog fired for', clip.id, '— forcing advance');
+      advance();
+    }, watchdogMs);
+  }
+
+  function stopAudio(){
+    audioOn = false;
+    playId++;
+    clearWatchdog();
+    allClips.forEach(c => {
+      try{ c.pause(); c.currentTime = 0; }catch(e){}
+    });
+    currentClip = null;
+    if(audioDot) audioDot.classList.add('off');
+    if(audioLabel) audioLabel.textContent = 'Stop sound';
+  }
+
+  function startAudio(){
+    stopAudio();
+    audioOn = true;
+    if(audioDot) audioDot.classList.remove('off');
+    if(audioLabel) audioLabel.textContent = 'Stop sound';
+    playClip(allClips[0]);
+  }
+
+  if(bellBtn){
+    bellBtn.addEventListener('click', startAudio);
+  }
+  if(audioToggle){
+    audioToggle.addEventListener('click', stopAudio);
+  }
+
+  // ============================================================
+  // EDU dark / light mode toggle — preference persisted
+  // ============================================================
+  const modeToggle = document.getElementById('modeToggle');
+  const modeLabel = document.getElementById('modeLabel');
+  function applyMode(isDark){
+    document.body.classList.toggle('edu-mode', isDark);
+    if(modeLabel) modeLabel.textContent = isDark ? 'Light mode' : 'EDU mode';
+  }
+  try{
+    const saved = localStorage.getItem('eduMode');
+    if(saved === '1') applyMode(true);
+  }catch(e){}
+  if(modeToggle){
+    modeToggle.addEventListener('click',()=>{
+      const next = !document.body.classList.contains('edu-mode');
+      applyMode(next);
+      try{ localStorage.setItem('eduMode', next ? '1' : '0'); }catch(e){}
+    });
+  }
+
+  // ============================================================
+  // Copy buttons
+  // ============================================================
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.copy;
+      const text = document.getElementById(id).innerText;
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        showToast('Prompt copied to clipboard');
+        setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+      } catch(e){
+        showToast('Copy failed — select the text manually');
+      }
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Copilot Chat for NYPD — Prompt Generation Tool</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --ink-soft:#4a4a4a;
+    --line:#e5e5e5;
+    --surface:#ffffff;
+    --surface-alt:#f6f8fb;
+    --brand:#0a2540;
+    --brand-2:#1f4e8c;
+    --accent:#2b6cb0;
+    --accent-soft:#e8f0fb;
+    --good:#107c41;
+    --warn:#8a6d3b;
+    --warn-bg:#fff8e6;
+    --shadow:0 1px 2px rgba(10,37,64,.06), 0 6px 20px rgba(10,37,64,.08);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Segoe UI Variable Text",-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--surface-alt);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+  }
+
+  /* Ambient background video (online-only; falls back to gradient if blocked) */
+  .bg-stage{
+    position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;
+    background:linear-gradient(135deg,#eaf0f8 0%,#f6f8fb 60%,#e8eef7 100%);
+  }
+  .bg-stage iframe, .bg-stage video{
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:100vw;height:56.25vw;           /* 16:9 based on width */
+    min-height:100vh;min-width:177.78vh;  /* 16:9 based on height */
+    border:0;
+    object-fit:cover;
+    opacity:.32;
+    filter:saturate(.95) blur(.5px);
+    transition:opacity .6s ease, filter .4s ease;
+  }
+  .bg-tint{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(ellipse at top left, rgba(10,37,64,.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(31,78,140,.10), transparent 55%),
+      linear-gradient(180deg, rgba(246,248,251,.72) 0%, rgba(246,248,251,.62) 50%, rgba(246,248,251,.80) 100%);
+  }
+  /* Toggle cluster bottom-right */
+  .bg-controls{
+    position:fixed;bottom:14px;right:14px;z-index:50;
+    display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;
+    max-width:calc(100vw - 28px);
+  }
+  .bg-toggle{
+    background:rgba(255,255,255,.92);border:1px solid var(--line);
+    color:var(--ink-soft);font:inherit;font-size:11px;font-weight:600;
+    padding:7px 12px;border-radius:999px;cursor:pointer;
+    backdrop-filter:saturate(1.1) blur(6px);
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .bg-toggle:hover{color:var(--ink);border-color:#c9d6e6}
+  .bg-toggle .dotled{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+  .bg-toggle.off .dotled{background:#c44a4a}
+  body.bg-off .bg-stage iframe, body.bg-off .bg-stage video{opacity:0}
+
+  /* NYPD mode (dark, NYPD-blue accent) */
+  body.nypd-mode{
+    --ink:#e8eef7;
+    --ink-soft:#9fb0c9;
+    --line:#1c3a6c;
+    --surface:#0e2347;
+    --surface-alt:#061530;
+    --brand:#ffffff;
+    --brand-2:#6ea8e8;
+    --accent:#5b9bd5;
+    --accent-soft:#122a52;
+    --good:#3fd27a;
+    --warn:#ffc857;
+    --warn-bg:#2a2416;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4);
+    background:var(--surface-alt);
+  }
+  body.nypd-mode .bg-stage{
+    background:linear-gradient(135deg,#030a1e 0%,#061530 60%,#0a1f42 100%);
+  }
+  body.nypd-mode .bg-stage iframe, body.nypd-mode .bg-stage video{
+    opacity:.42;filter:saturate(1) blur(.3px);
+  }
+  body.nypd-mode .bg-tint{
+    background:
+      radial-gradient(ellipse at top left, rgba(0,61,165,.22), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(0,30,80,.30), transparent 55%),
+      linear-gradient(180deg, rgba(6,21,48,.55) 0%, rgba(6,21,48,.40) 50%, rgba(6,21,48,.70) 100%);
+  }
+  body.nypd-mode .role-card,
+  body.nypd-mode .prompt-card,
+  body.nypd-mode .limits,
+  body.nypd-mode .scope{
+    background:var(--surface);border-color:var(--line);
+  }
+  body.nypd-mode .prompt-head{
+    background:linear-gradient(0deg, rgba(0,61,165,.08), rgba(0,0,0,0));
+  }
+  body.nypd-mode .prompt-text{
+    background:#0a1c3d;border-color:#1c3a6c;color:#d5dfef;
+  }
+  body.nypd-mode .copy-btn{background:#003da5}
+  body.nypd-mode .copy-btn:hover{background:#1a57c4}
+  body.nypd-mode .role-name{color:#ffffff}
+  body.nypd-mode h1, body.nypd-mode h2.role-title, body.nypd-mode .limits h3{color:#ffffff}
+  body.nypd-mode .brand-title{color:#ffffff}
+  body.nypd-mode .eyebrow{background:rgba(91,155,213,.15);color:#8fb8e3}
+  body.nypd-mode .cta{
+    background:linear-gradient(135deg,#003da5 0%,#001f4d 100%);
+    border:1px solid #1c3a6c;
+  }
+  body.nypd-mode .cta a.btn{background:#ffd100;color:#001f4d}
+  body.nypd-mode .cta a.btn:hover{background:#ffe14d}
+  body.nypd-mode .limits-grid div::before{border-color:#ff8080;
+    background:linear-gradient(45deg,transparent 45%,#ff8080 45%,#ff8080 55%,transparent 55%),
+               linear-gradient(-45deg,transparent 45%,#ff8080 45%,#ff8080 55%,transparent 55%);}
+  body.nypd-mode .limits-badge{
+    background:rgba(255,200,87,.15);color:#ffc857;border-color:#5c4a1a;
+  }
+  body.nypd-mode .bg-toggle{
+    background:rgba(14,35,71,.88);color:#9fb0c9;border-color:#1c3a6c;
+  }
+  body.nypd-mode .bg-toggle:hover{color:#fff;border-color:#5b9bd5}
+  body.nypd-mode footer.foot{color:#6a7d99}
+  body.nypd-mode .back{color:#6ea8e8}
+  body.nypd-mode .top-meta, body.nypd-mode .top-meta strong{color:#9fb0c9}
+  body.nypd-mode .top-meta strong{color:#fff}
+  body.nypd-mode header.top{border-color:#1c3a6c}
+  body.nypd-mode .scope-item strong{color:#fff}
+  body.nypd-mode .role-cta{color:#6ea8e8}
+  .page{max-width:1120px;margin:0 auto;padding:32px 24px 80px}
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:32px;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .brand-mark{
+    width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;
+  }
+  .brand-mark span{display:block;border-radius:2px}
+  .brand-mark span:nth-child(1){background:#f25022}
+  .brand-mark span:nth-child(2){background:#7fba00}
+  .brand-mark span:nth-child(3){background:#00a4ef}
+  .brand-mark span:nth-child(4){background:#ffb900}
+  .brand-title{font-weight:600;color:var(--brand);letter-spacing:.1px}
+  .brand-sub{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .top-meta{font-size:12px;color:var(--ink-soft);text-align:right}
+  .top-meta strong{color:var(--brand);font-weight:600}
+
+  .hero{margin-bottom:28px}
+  .eyebrow{
+    display:inline-block;font-size:12px;font-weight:600;letter-spacing:.8px;
+    color:var(--brand-2);text-transform:uppercase;background:var(--accent-soft);
+    padding:4px 10px;border-radius:999px;margin-bottom:14px;
+  }
+  h1{font-size:30px;line-height:1.2;margin:0 0 10px;color:var(--brand);font-weight:600}
+  .lede{font-size:16px;color:var(--ink-soft);max-width:760px;margin:0}
+
+  .scope{
+    display:flex;flex-wrap:wrap;gap:12px;margin:22px 0 0;
+    padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:8px;
+  }
+  .scope-item{font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:8px}
+  .scope-item strong{color:var(--ink);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--good);display:inline-block}
+
+  h2.section{
+    font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-soft);
+    font-weight:600;margin:36px 0 14px;
+  }
+
+  /* Role selection */
+  .roles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  @media (max-width:1020px){.roles{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.roles{grid-template-columns:1fr}}
+  .role-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    text-align:left;font:inherit;color:inherit;
+  }
+  .role-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#c9d6e6}
+  .role-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .role-icon{
+    width:40px;height:40px;border-radius:8px;background:var(--accent-soft);
+    display:flex;align-items:center;justify-content:center;color:var(--brand-2);
+    font-weight:700;font-size:13px;margin-bottom:12px;letter-spacing:.5px;
+  }
+  .role-name{font-size:16px;font-weight:600;color:var(--brand);margin:0 0 6px;line-height:1.3}
+  .role-blurb{font-size:13.5px;color:var(--ink-soft);margin:0 0 14px}
+  .role-cta{font-size:13px;color:var(--accent);font-weight:600}
+  .role-cta::after{content:" \2192";margin-left:2px}
+
+  /* Detail view */
+  .detail{display:none}
+  .detail.active{display:block}
+  .roles-wrap.hidden{display:none}
+
+  .back{
+    background:none;border:none;color:var(--accent);font:inherit;font-size:14px;
+    cursor:pointer;padding:4px 0;margin-bottom:10px;
+  }
+  .back::before{content:"\2190 \00a0"}
+  .back:hover{text-decoration:underline}
+
+  .detail h2.role-title{font-size:24px;color:var(--brand);margin:4px 0 4px;font-weight:600}
+  .detail .role-subtitle{color:var(--ink-soft);margin:0 0 22px;font-size:15px}
+
+  .prompt-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:16px;overflow:hidden;
+  }
+  .prompt-head{
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:linear-gradient(0deg,#fafcfe,#fff);
+  }
+  .prompt-num{
+    font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--brand-2);font-weight:600;
+  }
+  .prompt-title{font-size:15px;font-weight:600;color:var(--ink);margin:0;flex:1;padding:0 8px}
+  .copy-btn{
+    background:var(--brand);color:#fff;border:none;padding:8px 14px;border-radius:6px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+  }
+  .copy-btn:hover{background:var(--brand-2)}
+  .copy-btn.copied{background:var(--good)}
+  .copy-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .prompt-body{padding:16px 18px}
+  .prompt-text{
+    background:#f6f8fb;border:1px solid #e2e8f0;border-radius:6px;padding:14px 16px;
+    font-family:"Consolas","SF Mono",Menlo,monospace;font-size:13px;line-height:1.55;
+    color:#1a1a1a;white-space:pre-wrap;margin:0;
+  }
+  .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  @media (max-width:700px){.meta-row{grid-template-columns:1fr}}
+  .meta-block h4{
+    margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.8px;
+    color:var(--ink-soft);font-weight:600;
+  }
+  .meta-block p{margin:0;font-size:14px;color:var(--ink)}
+
+  /* Limits */
+  .limits{
+    margin-top:40px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:24px 26px;
+  }
+  .limits-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .limits-badge{
+    background:var(--warn-bg);color:var(--warn);border:1px solid #f0e0b0;
+    padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.8px;
+  }
+  .limits h3{margin:0;font-size:18px;color:var(--brand);font-weight:600}
+  .limits-intro{margin:0 0 14px;color:var(--ink-soft);font-size:14px}
+  .limits-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+  @media (max-width:700px){.limits-grid{grid-template-columns:1fr}}
+  .limits-grid div{font-size:14px;color:var(--ink);padding-left:22px;position:relative}
+  .limits-grid div::before{
+    content:"";position:absolute;left:0;top:7px;width:10px;height:10px;
+    border:1.5px solid #c44a4a;border-radius:2px;
+    background:linear-gradient(45deg,transparent 45%,#c44a4a 45%,#c44a4a 55%,transparent 55%),
+               linear-gradient(-45deg,transparent 45%,#c44a4a 45%,#c44a4a 55%,transparent 55%);
+  }
+  .limits-note{margin:16px 0 0;font-size:13px;color:var(--ink-soft);font-style:italic}
+  .limits-subhead{
+    margin:18px 0 12px;font-size:14px;color:var(--ink);font-weight:600;
+    text-transform:uppercase;letter-spacing:.6px;
+  }
+  body.nypd-mode .limits-subhead{color:#fff}
+  .limits-grid div em{font-style:italic;color:var(--ink-soft);font-weight:400}
+  body.nypd-mode .limits-grid div em{color:#9fb0c9}
+
+  /* CTA */
+  .cta{
+    margin-top:28px;padding:28px;border-radius:12px;
+    background:linear-gradient(135deg,#0a2540 0%,#1f4e8c 100%);
+    color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+  .cta h3{margin:0 0 6px;font-size:20px;font-weight:600}
+  .cta p{margin:0;color:#c9dcf2;font-size:14px;max-width:520px}
+  .cta a.btn{
+    background:#fff;color:var(--brand);text-decoration:none;padding:12px 22px;border-radius:6px;
+    font-weight:600;font-size:15px;white-space:nowrap;
+  }
+  .cta a.btn:hover{background:#eef4fb}
+
+  footer.foot{
+    margin-top:28px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--brand);color:#fff;padding:10px 18px;border-radius:6px;font-size:14px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:99;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- Ambient background video. Streams from Azure Blob Storage.
+     If the file is missing or blocked, the gradient shows and the page still works normally. -->
+<div class="bg-stage" aria-hidden="true">
+<video id="bgVideo" autoplay muted loop playsinline preload="auto" tabindex="-1">
+    <source src="NYPDOfflineHTML_AudioBG_web.mp4" type="video/mp4">
+  </video>
+</div>
+<!-- Law & Order theme. Streams from Azure Blob Storage (same container as the background video).
+     REPLACE THE src BELOW with the SAS URL for law-order-theme.mp3 after upload. -->
+<audio id="dunSound" loop preload="auto">
+  <source src="nypdlo.mp3" type="audio/mpeg">
+</audio>
+
+<div class="bg-tint" aria-hidden="true"></div>
+<div class="bg-controls" role="toolbar" aria-label="Background controls">
+  <button class="bg-toggle" id="modeToggle" aria-label="Toggle NYPD mode">
+    <span class="dotled" style="background:#003da5"></span><span id="modeLabel">NYPD mode</span>
+  </button>
+  <button class="bg-toggle" id="dunBtn" aria-label="Play Law and Order theme">
+    <span>&#9836;</span><span>NYPD Tune</span>
+  </button>
+  <button class="bg-toggle" id="audioToggle" aria-label="Toggle audio">
+    <span class="dotled off" id="audioDot"></span><span id="audioLabel">Unmute</span>
+  </button>
+  <button class="bg-toggle" id="bgToggle" aria-label="Toggle background video">
+    <span class="dotled" id="bgDot"></span><span id="bgLabel">Pause video</span>
+  </button>
+</div>
+
+<div class="page">
+
+  <header class="top">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div>
+        <div class="brand-title">Microsoft Copilot Chat</div>
+        <div class="brand-sub">For NYPD &middot; GCC</div>
+      </div>
+    </div>
+    <div class="top-meta">
+      Prompt Generation Tool<br>
+      <strong>Prepared for NYPD</strong>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow">Interactive Guide</span>
+    <h1>See exactly what Copilot Chat does for your people.</h1>
+    <p class="lede">Pick a role below. You'll see three realistic prompts an NYPD member could type today &mdash; no training required &mdash; along with what a good response looks like. Every example works with your existing Copilot Chat license. Nothing here requires extra add-ons.</p>
+
+    <div class="scope" role="note" aria-label="What's included">
+      <div class="scope-item"><span class="dot"></span><strong>Runs in GCC</strong></div>
+      <div class="scope-item"><span class="dot"></span><strong>Enterprise Data Protection (EDP)</strong> &mdash; prompts aren't used to train models</div>
+      <div class="scope-item"><span class="dot"></span><strong>No add-ons required</strong> &mdash; works with the Copilot Chat license you already have</div>
+    </div>
+  </section>
+
+  <!-- Role picker -->
+  <div class="roles-wrap" id="rolesWrap">
+    <h2 class="section">Choose a role to explore</h2>
+    <div class="roles">
+      <button class="role-card" data-role="officer" aria-label="Explore police officer use cases">
+        <div class="role-icon">PO</div>
+        <h3 class="role-name">Police Officer (Sector)</h3>
+        <p class="role-blurb">On post and in the RMP. Activity Logs, statutes, community contacts.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+      <button class="role-card" data-role="desk" aria-label="Explore desk officer and platoon commander use cases">
+        <div class="role-icon">DO</div>
+        <h3 class="role-name">Desk Officer / Platoon&nbsp;Commander</h3>
+        <p class="role-blurb">Running the tour from the stationhouse. Roll calls, mutual aid, tour recaps.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+      <button class="role-card" data-role="ico" aria-label="Explore integrity control and operations lieutenant use cases">
+        <div class="role-icon">ICO</div>
+        <h3 class="role-name">Integrity Control / Operations&nbsp;Lt.</h3>
+        <p class="role-blurb">Precinct admin. Interim Orders, CompStat prep, FOIL responses.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+      <button class="role-card" data-role="detective" aria-label="Explore precinct detective use cases">
+        <div class="role-icon">DET</div>
+        <h3 class="role-name">Precinct Detective</h3>
+        <p class="role-blurb">Precinct Detective Squad. Interview prep, case chronologies, follow-ups.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Police Officer -->
+  <div class="detail" id="detail-officer">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Police Officer (Sector)</h2>
+    <p class="role-subtitle">Three prompts a sector officer could realistically type between jobs &mdash; from the RMP laptop, a Department-issued phone, or at the desk after tour.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Turn rough notes into a clean Activity Log narrative</h3>
+        <button class="copy-btn" data-copy="o-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="o-1">Rewrite the notes below into a clear, objective Activity Log narrative. Use past tense, third person, and neutral professional language. Keep every fact. Remove opinions, slang, and filler. Put events in the order they happened. Flag anything that reads like an assumption rather than an observation so I can review it before I finalize the entry.
+
+Notes:
+[paste your notes here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Takes raw on-post notes and shapes them into the tone and structure your digital Activity Log already expects, without changing any facts.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A tight narrative in past tense and third person, events in time order, no slang, with anything that reads like an assumption called out separately for the officer to verify.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Explain a NYS statute in plain English before a citizen contact</h3>
+        <button class="copy-btn" data-copy="o-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="o-2">Explain NYS Vehicle and Traffic Law Section 1111(d) — failure to stop at a steady red signal — in plain English, as if briefing a new officer at roll call. Tell me:
+1. What the violation actually is, in one sentence.
+2. The elements that have to be present to issue a summons.
+3. Two or three common real-world examples in a NYC setting.
+4. One thing officers frequently get wrong about it.
+
+Keep it under 200 words.</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Gives the officer a quick, plain-language refresher on a NYS statute so they're confident explaining it to a motorist or pedestrian.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A four-part answer under 200 words: one-sentence definition, bulleted elements, concrete NYC examples, and a common pitfall &mdash; readable in under a minute.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Prepare respectful talking points for a sensitive community interaction</h3>
+        <button class="copy-btn" data-copy="o-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="o-3">Give me five short talking points I can use to respectfully explain to a resident why I can't share details about an ongoing investigation on their block. The resident is worried about their family's safety. Tone should be calm, empathetic, and non-confrontational. Each talking point should be one or two sentences, plain spoken, no legal jargon.</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Prepares an officer with ready-to-say language for a hard doorstep conversation &mdash; acknowledging concern without compromising the case.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Five short, human talking points an officer could actually say out loud: acknowledges the concern, explains the limit plainly, offers a next step, and never sounds scripted.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Desk Officer / Platoon Commander -->
+  <div class="detail" id="detail-desk">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Desk Officer / Platoon Commander</h2>
+    <p class="role-subtitle">Three prompts for the supervisor running the tour &mdash; moving fast, keeping it clean, and communicating up, down, and across.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Draft a roll call from a short list of items</h3>
+        <button class="copy-btn" data-copy="d-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="d-1">Draft a five-minute roll call based on the items below. Order it safety alerts first, assignments second, administrative notes last. Keep the whole thing under 400 words and written for reading out loud. Use short sentences. Don't add anything that isn't in the list.
+
+Items:
+- [paste your bullets here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Takes the platoon commander's quick bullet list and turns it into a clean roll call script that reads aloud well at the start of tour.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A single-page roll call under 400 words, ordered safety &rarr; assignments &rarr; admin, in short spoken sentences &mdash; nothing invented, nothing padded.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Write a mutual aid request to a neighboring command</h3>
+        <button class="copy-btn" data-copy="d-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="d-2">Draft a short, professional email to a neighboring precinct or PSA requesting mutual aid for a planned community event. Include: purpose of the event, date and hours, expected crowd size, the specific resources we're asking for, a polite ask for a single point of contact on their side, and a thank-you. Keep the tone collegial, not formal. Under 250 words.
+
+Event details:
+[paste details here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Produces a ready-to-send mutual aid request that covers the six things the other command actually needs to decide quickly.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A polished email under 250 words with a clear subject line, the six required pieces of information, and a tone that sounds like one supervisor writing to another.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Turn raw notes into a clean end-of-tour recap</h3>
+        <button class="copy-btn" data-copy="d-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="d-3">Turn these notes into a clean chronological end-of-tour recap for the incoming platoon commander. Use 24-hour time. One event per line. Objective, neutral language — no opinions or conclusions. If times are missing or unclear, list the entry as "time not confirmed" rather than guessing. End with a short bulleted list of anything the next tour needs to pick up on.
+
+Notes:
+[paste notes here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Converts messy tour notes into a defensible handoff the relieving commander can actually use.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A clean chronological list in 24-hour time with one event per line, honest flags where data is missing, and a short list of carryovers &mdash; never a guess presented as fact.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Integrity Control / Operations Lt -->
+  <div class="detail" id="detail-ico">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Integrity Control Officer / Operations Lieutenant</h2>
+    <p class="role-subtitle">Three prompts for the lieutenant running the administrative side of the precinct &mdash; Interim Orders, CompStat prep, and public-facing correspondence.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Summarize an Interim Order into a one-page command brief</h3>
+        <button class="copy-btn" data-copy="i-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="i-1">Summarize the Interim Order below into a one-page brief for the precinct command. Structure it as:
+- Order number and effective date
+- What changed from the prior Patrol Guide language (plain English)
+- Who this affects day-to-day (patrol, detectives, supervisors)
+- Three things supervisors need to do differently starting now
+- Anything I should flag back to the Legal Bureau or the Police Academy
+
+Keep it to one page. No jargon. If something in the order is ambiguous, call it out rather than paper over it.
+
+Order:
+[paste the Interim Order text here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Compresses a dense Interim Order into a one-page command brief that answers the questions the CO and XO always ask first.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A single page, plain English, five clearly labeled sections, with ambiguities flagged for Legal or the Academy instead of smoothed over.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Draft CompStat talking points from a set of numbers</h3>
+        <button class="copy-btn" data-copy="i-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="i-2">Turn the numbers below into a short set of CompStat talking points for my CO. I need:
+- Two sentences on what the numbers show (up, down, flat, against what baseline)
+- Three sentences on what we are doing about it (deployment, outreach, enforcement)
+- One sentence on what we'd ask the Borough for
+
+Use plain, confident language. Do not speculate beyond what the numbers support. Under 200 words total.
+
+Numbers:
+[paste the category totals and comparisons here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Turns raw crime category numbers into a crisp, honest briefing script the CO can actually deliver under CompStat pressure.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Under 200 words, six sentences split the way the prompt asks, grounded only in the numbers provided, with one clear ask to the Borough.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Write a courteous response to a FOIL request</h3>
+        <button class="copy-btn" data-copy="i-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="i-3">Draft a professional response letter to a Freedom of Information Law (FOIL) request. Use a courteous, formal tone. Include: acknowledgment of the request and date received, what records we are providing, what records we are withholding and the general reason (without disclosing protected content), how to appeal to the NYPD Records Access Appeals Officer, and a point of contact. Do not speculate about motives. Keep it under one page.
+
+Details:
+- Requester: [name]
+- Date received: [date]
+- Records requested: [topic]
+- Providing: [list]
+- Withholding: [list] under [exemption, e.g., Public Officers Law § 87(2)(e)]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Produces a respectful, legally careful FOIL response that covers the standard elements without sounding defensive.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>One page, formal but human, acknowledges &amp; lists what's provided, explains withholdings without oversharing, gives appeal rights and a contact &mdash; ready for Legal review.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Precinct Detective -->
+  <div class="detail" id="detail-detective">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title">Precinct Detective</h2>
+    <p class="role-subtitle">Three prompts for the Precinct Detective Squad &mdash; including the domestic violence investigators now posted at every command &mdash; between knocks, interviews, and paperwork.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Prepare witness interview questions for a nervous witness</h3>
+        <button class="copy-btn" data-copy="x-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="x-1">Help me prepare an interview outline for a witness to a commercial robbery. The witness is nervous and speaks English as a second language. Draft ten open-ended questions, starting with non-threatening context questions (who they are, where they were, what their day looked like) and moving toward specifics (what they saw, heard, and did). Keep each question to one idea, plain language, short sentences. At the end, give me three follow-up probes I can use if answers are vague.</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Builds a trauma-aware, ESL-friendly interview outline so a detective walks in with a plan instead of improvising under pressure.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>Ten open-ended questions in a clear arc from rapport to specifics, all plain English and one idea each, plus three concrete probes for vague answers.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Turn investigative notes into a case chronology for the ADA</h3>
+        <button class="copy-btn" data-copy="x-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="x-2">Turn the notes below into a clean case chronology I can share with the ADA. Use neutral language. Date and 24-hour time on every entry. After each fact, put a short source tag in parentheses — (witness), (video), (911 call), (physical evidence), (officer observation). At the end, give me a short list of gaps that still need to be closed before the case is trial-ready.
+
+Notes:
+[paste your investigative notes here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Organizes messy investigative notes into a source-tagged chronology the ADA can read quickly &mdash; and makes the remaining gaps obvious.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A dated, time-stamped timeline in neutral tone, each fact tagged to its source, followed by a short honest list of what still needs to be verified or obtained.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Rewrite notes as a clean follow-up report</h3>
+        <button class="copy-btn" data-copy="x-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="x-3">Rewrite the notes below as an investigative follow-up report. Past tense, third person, objective tone. Cover who, what, where, when, and how in that order. Keep every fact. Remove opinions. Flag anything that reads as speculation or hearsay so I can verify before I file. End with a one-line status: "Open — further investigation" or "Closed — pending review."
+
+Notes:
+[paste your follow-up notes here]</pre>
+        <div class="meta-row">
+          <div class="meta-block">
+            <h4>What it does</h4>
+            <p>Gets a detective's rough notes into the shape and tone a supervisor expects for a follow-up report &mdash; so the detective's time goes into the case, not the formatting.</p>
+          </div>
+          <div class="meta-block">
+            <h4>What good output looks like</h4>
+            <p>A disciplined past-tense, third-person narrative covering the five W's, speculation flagged separately, and a clean one-line status at the bottom.</p>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- Limits -->
+  <section class="limits" id="limits">
+    <div class="limits-head">
+      <h3>What Copilot Chat will <em>not</em> do with the Basic license</h3>
+    </div>
+    <p class="limits-intro">With the Copilot Chat Basic license only &mdash; no add-ons &mdash; the boundaries below describe where Copilot Chat stops on its own and where supervisory or Legal Bureau review takes over.</p>
+    <p class="limits-intro">Copilot Chat is a general-purpose reasoning and writing assistant protected by Enterprise Data Protection. It is <strong>not</strong> grounded in your systems, and this prompt set is intentionally scoped to <strong>internal-first artifacts that go through normal review</strong> before anything external happens.</p>
+    <h4 class="limits-subhead">What Copilot Chat will not do with the license alone</h4>
+    <div class="limits-grid">
+      <div>Won't read an officer's Outlook mailbox or calendar</div>
+      <div>Won't read Teams chats, channels, or meeting transcripts</div>
+      <div>Won't search or summarize SharePoint or OneDrive files automatically</div>
+      <div>Won't connect to CAD, RMS, DAS, eSummons, or any case-management system</div>
+      <div>Won't retrieve real-time crime data, CompStat numbers, or arrest records <em>(public web data still accessible)</em></div>
+      <div>Won't draft public-facing communications involving named complainants, victims, or subjects <em>(not a system constraint, governance/policy decision)</em></div>
+      <div>Won't produce arrest reports, complaint reports, or use-of-force statements <em>(not a system constraint, model can generate this content)</em></div>
+      <div>Won't perform probable cause determinations or disciplinary documentation <em>(not a system constraint, advisory limitation)</em></div>
+      <div>Won't replace supervisory or Legal Bureau review of any report before it's filed or sent <em>(not a system constraint, human oversight requirement)</em></div>
+      <div>Won't retain your prompts to train foundation models <em>(EDP protection)</em></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div>
+      <h3>Ready to see this in your environment?</h3>
+      <p>We'll run a 45-minute live demo against your GCC tenant with your team's real-world scenarios &mdash; no configuration required on your side.</p>
+    </div>
+    <a class="btn" href="https://outlook.office.com/book/BookTimeWithLiudavid@bookings.microsoft.com/?ismsaljsauthenabled" target="_blank" rel="noopener">Book a live demo</a>
+  </section>
+
+  <footer class="foot">
+    <div>Example prompts only. Always apply NYPD policy on AI-assisted writing, supervisory review, and records handling.</div>
+    <div>v3.0 &middot; offline</div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Prompt copied to clipboard</div>
+
+<script>
+  const rolesWrap = document.getElementById('rolesWrap');
+  const details = {
+    officer: document.getElementById('detail-officer'),
+    desk: document.getElementById('detail-desk'),
+    ico: document.getElementById('detail-ico'),
+    detective: document.getElementById('detail-detective')
+  };
+
+  document.querySelectorAll('.role-card').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const r = btn.dataset.role;
+      rolesWrap.classList.add('hidden');
+      Object.values(details).forEach(d=>d.classList.remove('active'));
+      details[r].classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  document.querySelectorAll('[data-back]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      Object.values(details).forEach(d=>d.classList.remove('active'));
+      rolesWrap.classList.remove('hidden');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  const toast = document.getElementById('toast');
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>toast.classList.remove('show'), 1600);
+  }
+
+  // Background video toggle (single handler — pauses the actual video element, not just the class)
+  const bgToggle = document.getElementById('bgToggle');
+  const bgDot = document.getElementById('bgDot');
+  const bgLabel = document.getElementById('bgLabel');
+
+  // NYPD Tune — autoplay on load, loop continuously
+  const dunBtn = document.getElementById('dunBtn');
+  const dunSound = document.getElementById('dunSound');
+  const audioToggle = document.getElementById('audioToggle');
+  const audioDot = document.getElementById('audioDot');
+  const audioLabel = document.getElementById('audioLabel');
+  const bgVideo = document.getElementById('bgVideo');
+
+  function setMuteState(muted){
+    if(!dunSound) return;
+    dunSound.muted = muted;
+    if(audioDot) audioDot.classList.toggle('off', muted);
+    if(audioLabel) audioLabel.textContent = muted ? 'Unmute' : 'Mute';
+  }
+
+  // Play immediately — script is at bottom of body so DOM is ready.
+  // On file:// this works in Chrome/Edge without user interaction.
+  // If browser blocks unmuted play, fall back to muted so it still loops.
+
+
+  // NYPD Tune button — restart from top, unmute
+  if(dunBtn && dunSound){
+    dunBtn.addEventListener('click',()=>{
+      dunSound.currentTime = 0;
+      dunSound.muted = false;
+      dunSound.play().catch(()=>{});
+      setMuteState(false);
+    });
+  }
+
+  // Mute / Unmute toggle
+  if(audioToggle && dunSound){
+    audioToggle.addEventListener('click',()=>{
+      const nowMuted = !dunSound.muted;
+      setMuteState(nowMuted);
+      if(!nowMuted) dunSound.play().catch(()=>{});
+    });
+  }
+  // Pause/Resume needs to actually stop the local video (not just hide it)
+if(bgToggle && bgVideo){
+  bgToggle.addEventListener('click',()=>{
+    const turningOff = !document.body.classList.contains('bg-off');
+    document.body.classList.toggle('bg-off', turningOff);
+    bgToggle.classList.toggle('off', turningOff);
+    bgLabel.textContent = turningOff ? 'Resume video' : 'Pause video';
+
+    if(turningOff){
+      bgVideo.pause();
+    } else {
+      bgVideo.play().catch(()=>{});
+    }
+  });
+}
+
+  // NYPD / Light mode toggle — preference persisted in localStorage
+  const modeToggle = document.getElementById('modeToggle');
+  const modeLabel = document.getElementById('modeLabel');
+  function applyMode(isNypd){
+    document.body.classList.toggle('nypd-mode', isNypd);
+    if(modeLabel) modeLabel.textContent = isNypd ? 'Light mode' : 'NYPD mode';
+  }
+  try{
+    const saved = localStorage.getItem('nypdMode');
+    if(saved === '1') applyMode(true);
+  }catch(e){}
+  if(modeToggle){
+    modeToggle.addEventListener('click',()=>{
+      const next = !document.body.classList.contains('nypd-mode');
+      applyMode(next);
+      try{ localStorage.setItem('nypdMode', next ? '1' : '0'); }catch(e){}
+    });
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.copy;
+      const text = document.getElementById(id).innerText;
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        showToast('Prompt copied to clipboard');
+        setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+      } catch(e){
+        showToast('Copy failed — select the text manually');
+      }
+    });
+  });
+</script>
+</body>
+</html>

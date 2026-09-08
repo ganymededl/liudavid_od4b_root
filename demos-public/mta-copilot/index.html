@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft Copilot Chat for MTA — Prompt Generation Tool</title>
+<style>
+  :root{
+    --ink:#1a1a1a;
+    --ink-soft:#4a4a4a;
+    --line:#e5e5e5;
+    --surface:#ffffff;
+    --surface-alt:#f6f8fb;
+    --brand:#0039A6;
+    --brand-2:#1a57c4;
+    --accent:#0039A6;
+    --accent-soft:#e6edfa;
+    --good:#00933C;
+    --warn:#8a6d3b;
+    --warn-bg:#fff8e6;
+    --shadow:0 1px 2px rgba(0,57,166,.08), 0 6px 20px rgba(0,57,166,.10);
+
+    /* Official NYC subway line colors */
+    --line-red:#EE352E;        /* 1 / 2 / 3 */
+    --line-green:#00933C;      /* 4 / 5 / 6 */
+    --line-purple:#B933AD;     /* 7 */
+    --line-blue:#0039A6;       /* A / C / E */
+    --line-orange:#FF6319;     /* B / D / F / M */
+    --line-lightgreen:#6CBE45; /* G */
+    --line-brown:#996633;      /* J / Z */
+    --line-yellow:#FCCC0A;     /* N / Q / R / W */
+    --line-gray:#808183;       /* L  */
+    --line-shuttle:#6D6E71;    /* S (Shuttle) */
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Segoe UI Variable Text",-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;
+    color:var(--ink);
+    background:var(--surface-alt);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    position:relative;
+    min-height:100vh;
+  }
+
+  /* Ambient background video */
+  .bg-stage{
+    position:fixed;inset:0;z-index:-2;overflow:hidden;pointer-events:none;
+    background:linear-gradient(135deg,#eaf0f8 0%,#f6f8fb 60%,#e8eef7 100%);
+  }
+  .bg-stage iframe, .bg-stage video{
+    position:absolute;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    width:100vw;height:56.25vw;
+    min-height:100vh;min-width:177.78vh;
+    border:0;
+    object-fit:cover;
+    opacity:.34;
+    filter:saturate(.98) blur(.5px);
+    transition:opacity .6s ease, filter .4s ease;
+  }
+  .bg-tint{
+    position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background:
+      radial-gradient(ellipse at top left, rgba(0,57,166,.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(252,204,10,.10), transparent 55%),
+      linear-gradient(180deg, rgba(246,248,251,.70) 0%, rgba(246,248,251,.58) 50%, rgba(246,248,251,.78) 100%);
+  }
+
+  /* Toggle cluster bottom-right */
+  .bg-controls{
+    position:fixed;bottom:14px;right:14px;z-index:50;
+    display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;
+    max-width:calc(100vw - 28px);
+  }
+  .bg-toggle{
+    background:rgba(255,255,255,.92);border:1px solid var(--line);
+    color:var(--ink-soft);font:inherit;font-size:11px;font-weight:600;
+    padding:7px 12px;border-radius:999px;cursor:pointer;
+    backdrop-filter:saturate(1.1) blur(6px);
+    display:inline-flex;align-items:center;gap:6px;
+    transition:background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .bg-toggle:hover{color:var(--ink);border-color:#b9c8df}
+  .bg-toggle .dotled{width:7px;height:7px;border-radius:50%;background:var(--good);display:inline-block}
+  .bg-toggle.off .dotled{background:#c44a4a}
+  body.bg-off .bg-stage iframe, body.bg-off .bg-stage video{opacity:0}
+
+  /* MTA mode (dark) */
+  body.mta-mode{
+    --ink:#e8eef7;
+    --ink-soft:#9fb0c9;
+    --line:#1c3a6c;
+    --surface:#0e2347;
+    --surface-alt:#061530;
+    --brand:#ffffff;
+    --brand-2:#6ea8e8;
+    --accent:#5b9bd5;
+    --accent-soft:#122a52;
+    --good:#3fd27a;
+    --warn:#ffc857;
+    --warn-bg:#2a2416;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.4);
+    background:var(--surface-alt);
+  }
+  body.mta-mode .bg-stage{
+    background:linear-gradient(135deg,#030a1e 0%,#061530 60%,#0a1f42 100%);
+  }
+  body.mta-mode .bg-stage iframe, body.mta-mode .bg-stage video{
+    opacity:.46;filter:saturate(1.05) blur(.3px);
+  }
+  body.mta-mode .bg-tint{
+    background:
+      radial-gradient(ellipse at top left, rgba(0,57,166,.24), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(252,204,10,.10), transparent 55%),
+      linear-gradient(180deg, rgba(6,21,48,.55) 0%, rgba(6,21,48,.40) 50%, rgba(6,21,48,.70) 100%);
+  }
+  body.mta-mode .role-card,
+  body.mta-mode .prompt-card,
+  body.mta-mode .limits,
+  body.mta-mode .scope{
+    background:var(--surface);border-color:var(--line);
+  }
+  body.mta-mode .prompt-head{
+    background:linear-gradient(0deg, rgba(0,57,166,.10), rgba(0,0,0,0));
+  }
+  body.mta-mode .prompt-text{
+    background:#0a1c3d;border-color:#1c3a6c;color:#d5dfef;
+  }
+  body.mta-mode .copy-btn{background:#0039A6}
+  body.mta-mode .copy-btn:hover{background:#1a57c4}
+  body.mta-mode .role-name{color:#ffffff}
+  body.mta-mode h1, body.mta-mode h2.role-title, body.mta-mode .limits h3{color:#ffffff}
+  body.mta-mode .brand-title{color:#ffffff}
+  body.mta-mode .eyebrow{background:rgba(91,155,213,.15);color:#8fb8e3}
+  body.mta-mode .cta{
+    background:linear-gradient(135deg,#0039A6 0%,#001f4d 100%);
+    border:1px solid #1c3a6c;
+  }
+  body.mta-mode .cta a.btn{background:#FCCC0A;color:#001f4d}
+  body.mta-mode .cta a.btn:hover{background:#ffe14d}
+  body.mta-mode .limits-grid div::before{border-color:#ff8080;
+    background:linear-gradient(45deg,transparent 45%,#ff8080 45%,#ff8080 55%,transparent 55%),
+               linear-gradient(-45deg,transparent 45%,#ff8080 45%,#ff8080 55%,transparent 55%);}
+  body.mta-mode .limits-badge{
+    background:rgba(255,200,87,.15);color:#ffc857;border-color:#5c4a1a;
+  }
+  body.mta-mode .bg-toggle{
+    background:rgba(14,35,71,.88);color:#9fb0c9;border-color:#1c3a6c;
+  }
+  body.mta-mode .bg-toggle:hover{color:#fff;border-color:#5b9bd5}
+  body.mta-mode footer.foot{color:#6a7d99}
+  body.mta-mode .back{color:#6ea8e8}
+  body.mta-mode .top-meta, body.mta-mode .top-meta strong{color:#9fb0c9}
+  body.mta-mode .top-meta strong{color:#fff}
+  body.mta-mode header.top{border-color:#1c3a6c}
+  body.mta-mode .scope-item strong{color:#fff}
+  body.mta-mode .role-cta{color:#6ea8e8}
+  body.mta-mode .built-by{color:#9fb0c9}
+  body.mta-mode .built-by strong{color:#fff}
+  body.mta-mode .limits-subhead{color:#fff}
+  body.mta-mode .limits-grid em{color:#9fb0c9}
+
+  .page{max-width:1180px;margin:0 auto;padding:32px 24px 80px}
+  header.top{
+    display:flex;align-items:center;justify-content:space-between;
+    padding-bottom:20px;border-bottom:1px solid var(--line);margin-bottom:32px;
+    gap:20px;flex-wrap:wrap;
+  }
+  /* MTA roundel logo */
+  .mta-logo{
+    width:52px;height:52px;border-radius:50%;
+    background:#0039A6;
+    display:flex;align-items:center;justify-content:center;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight:900;font-size:18px;font-style:italic;letter-spacing:-.5px;
+    color:#fff;
+    box-shadow:0 2px 6px rgba(0,57,166,.35);
+    flex-shrink:0;
+  }
+  .brand-mark{
+    width:28px;height:28px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:2px;
+    flex-shrink:0;
+  }
+  .brand-mark span{display:block;border-radius:2px}
+  .brand-mark span:nth-child(1){background:#f25022}
+  .brand-mark span:nth-child(2){background:#7fba00}
+  .brand-mark span:nth-child(3){background:#00a4ef}
+  .brand-mark span:nth-child(4){background:#ffb900}
+  .brand-stack{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .brand-divider{width:1px;height:36px;background:var(--line)}
+  .brand-title{font-weight:600;color:var(--brand);letter-spacing:.1px;font-size:15px}
+  .brand-sub{font-size:12px;color:var(--ink-soft);margin-top:2px}
+  .top-meta{font-size:12px;color:var(--ink-soft);text-align:right}
+  .top-meta strong{color:var(--brand);font-weight:600}
+
+  .hero{margin-bottom:28px}
+  .eyebrow{
+    display:inline-block;font-size:12px;font-weight:600;letter-spacing:.8px;
+    color:var(--brand-2);text-transform:uppercase;background:var(--accent-soft);
+    padding:4px 10px;border-radius:999px;margin-bottom:14px;
+  }
+  h1{font-size:30px;line-height:1.2;margin:0 0 10px;color:var(--brand);font-weight:600}
+  .lede{font-size:16px;color:var(--ink-soft);max-width:820px;margin:0}
+
+  .scope{
+    display:flex;flex-direction:column;gap:8px;margin:22px 0 0;
+    padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:8px;
+  }
+  .scope-item{font-size:13.5px;color:var(--ink-soft);display:flex;align-items:center;gap:10px;line-height:1.45}
+  .scope-item strong{color:var(--ink);font-weight:600}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--good);display:inline-block}
+
+  h2.section{
+    font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink-soft);
+    font-weight:600;margin:36px 0 14px;
+  }
+
+  /* Role grid — 3 columns desktop, 2 tablet, 1 mobile */
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media (max-width:980px){.roles{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){.roles{grid-template-columns:1fr}}
+  .role-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px;cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+    text-align:left;font:inherit;color:inherit;
+    position:relative;overflow:hidden;
+  }
+  .role-card::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:4px;
+    background:var(--card-accent,var(--accent));
+  }
+  .role-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#b9c8df}
+  .role-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  /* Subway-bullet style icons — official MTA roundel proportions */
+  .role-icon{
+    width:46px;height:46px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:900;font-size:22px;font-style:italic;
+    margin-bottom:14px;letter-spacing:-1px;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    box-shadow:0 2px 6px rgba(0,0,0,.18);
+  }
+  /* Real MTA bullet color rules: yellow line uses BLACK text, all others white */
+  .icon-shuttle{background:var(--line-shuttle);color:#fff}    /* S */
+  .icon-blue   {background:var(--line-blue);color:#fff}       /* C */
+  .icon-yellow {background:var(--line-yellow);color:#000}     /* Q (yellow bullets are black-on-yellow) */
+  .icon-orange {background:var(--line-orange);color:#fff}     /* F */
+  .icon-lgreen {background:var(--line-lightgreen);color:#fff} /* G */
+  .icon-purple {background:var(--line-purple);color:#fff}     /* 7 */
+
+  .role-name{font-size:16px;font-weight:600;color:var(--brand);margin:0 0 6px;line-height:1.3}
+  .role-blurb{font-size:13.5px;color:var(--ink-soft);margin:0 0 14px}
+  .role-cta{font-size:13px;color:var(--accent);font-weight:600}
+  .role-cta::after{content:" \2192";margin-left:2px}
+
+  /* Detail view */
+  .detail{display:none}
+  .detail.active{display:block}
+  .roles-wrap.hidden{display:none}
+
+  .back{
+    background:none;border:none;color:var(--accent);font:inherit;font-size:14px;
+    cursor:pointer;padding:4px 0;margin-bottom:10px;
+  }
+  .back::before{content:"\2190 \00a0"}
+  .back:hover{text-decoration:underline}
+
+  .detail h2.role-title{
+    font-size:24px;color:var(--brand);margin:4px 0 4px;font-weight:600;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .detail .role-title-bullet{
+    width:38px;height:38px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    font-weight:900;font-size:18px;font-style:italic;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    box-shadow:0 2px 5px rgba(0,0,0,.2);flex-shrink:0;
+    letter-spacing:-1px;
+  }
+  .detail .role-subtitle{color:var(--ink-soft);margin:0 0 22px;font-size:15px}
+
+  .prompt-card{
+    background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:16px;overflow:hidden;
+  }
+  .prompt-head{
+    padding:14px 18px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    background:linear-gradient(0deg,#fafcfe,#fff);
+  }
+  .prompt-num{
+    font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--brand-2);font-weight:700;
+    background:var(--accent-soft);padding:3px 9px;border-radius:999px;
+  }
+  .prompt-title{font-size:15px;font-weight:600;color:var(--ink);margin:0;flex:1;padding:0 8px}
+  .copy-btn{
+    background:var(--brand);color:#fff;border:none;padding:8px 14px;border-radius:6px;
+    font:inherit;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;
+  }
+  .copy-btn:hover{background:var(--brand-2)}
+  .copy-btn.copied{background:var(--good)}
+  .copy-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .prompt-body{padding:16px 18px}
+  .prompt-text{
+    background:#f6f8fb;border:1px solid #e2e8f0;border-radius:6px;padding:14px 16px;
+    font-family:"Consolas","SF Mono",Menlo,monospace;font-size:13px;line-height:1.55;
+    color:#1a1a1a;white-space:pre-wrap;margin:0;
+  }
+  .meta-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+  @media (max-width:700px){.meta-row{grid-template-columns:1fr}}
+  .meta-block h4{
+    margin:0 0 4px;font-size:12px;text-transform:uppercase;letter-spacing:.8px;
+    color:var(--ink-soft);font-weight:600;
+  }
+  .meta-block p{margin:0;font-size:14px;color:var(--ink)}
+
+  /* Limits */
+  .limits{
+    margin-top:40px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:24px 26px;
+  }
+  .limits-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .limits-badge{
+    background:var(--warn-bg);color:var(--warn);border:1px solid #f0e0b0;
+    padding:4px 10px;border-radius:999px;font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.8px;
+  }
+  .limits h3{margin:0;font-size:18px;color:var(--brand);font-weight:600}
+  .limits-intro{margin:0 0 12px;color:var(--ink-soft);font-size:14px;line-height:1.55}
+  .limits-subhead{
+    margin:18px 0 12px;font-size:14px;font-weight:600;color:var(--ink);
+    text-transform:none;letter-spacing:0;
+  }
+  .limits-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+  @media (max-width:700px){.limits-grid{grid-template-columns:1fr}}
+  .limits-grid div{font-size:14px;color:var(--ink);padding-left:22px;position:relative;line-height:1.5}
+  .limits-grid em{color:var(--ink-soft);font-style:italic;font-size:13px}
+  .limits-grid div::before{
+    content:"";position:absolute;left:0;top:7px;width:10px;height:10px;
+    border:1.5px solid #c44a4a;border-radius:2px;
+    background:linear-gradient(45deg,transparent 45%,#c44a4a 45%,#c44a4a 55%,transparent 55%),
+               linear-gradient(-45deg,transparent 45%,#c44a4a 45%,#c44a4a 55%,transparent 55%);
+  }
+  .limits-note{margin:16px 0 0;font-size:13px;color:var(--ink-soft);font-style:italic}
+
+  /* CTA */
+  .cta{
+    margin-top:28px;padding:28px;border-radius:12px;
+    background:linear-gradient(135deg,#0039A6 0%,#1a57c4 100%);
+    color:#fff;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  }
+  .cta h3{margin:0 0 6px;font-size:20px;font-weight:600}
+  .cta p{margin:0;color:#d6e3f5;font-size:14px;max-width:520px}
+  .cta a.btn{
+    background:#FCCC0A;color:#0a2540;text-decoration:none;padding:12px 22px;border-radius:6px;
+    font-weight:700;font-size:15px;white-space:nowrap;
+  }
+  .cta a.btn:hover{background:#ffe14d}
+
+  footer.foot{
+    margin-top:28px;padding-top:18px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+  .built-by{
+    margin-top:18px;text-align:center;font-size:13px;color:var(--ink-soft);
+    padding:10px 0;
+  }
+  .built-by strong{color:var(--brand);font-weight:600}
+  .built-by .heart{color:#EE352E;display:inline-block;margin:0 2px}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--brand);color:#fff;padding:10px 18px;border-radius:6px;font-size:14px;
+    opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:99;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body class="mta-mode">
+
+<!-- Ambient background video. Place MTA14thstreet2160_24fps.mp4 next to this file or in ./input/. -->
+<div class="bg-stage" aria-hidden="true">
+  <video
+    id="bgVideo"
+    autoplay muted loop playsinline preload="auto"
+    tabindex="-1">
+    <source src="./mta-bg.mp4" type="video/mp4">
+    <source src="./MTA14thstreet2160_24fps.mp4" type="video/mp4">
+  </video>
+</div>
+
+<!-- MTA subway announcements — picks randomly from the pool below, 5-second gap between plays.
+     Drop mta-1.mp3 through mta-5.mp3 next to this HTML (or in ./input/). Add or remove entries
+     in the doorClips array in the script below to change the pool. -->
+<audio id="doorSound" preload="auto"></audio>
+
+<div class="bg-tint" aria-hidden="true"></div>
+<div class="bg-controls" role="toolbar" aria-label="Background controls">
+  <button class="bg-toggle" id="modeToggle" aria-label="Toggle MTA mode">
+    <span class="dotled" style="background:#0039A6"></span><span id="modeLabel">MTA mode</span>
+  </button>
+  <button class="bg-toggle" id="doorBtn" aria-label="Play subway doors announcement">
+    <span>&#9836;</span><span>Doors</span>
+  </button>
+  <button class="bg-toggle" id="audioToggle" aria-label="Toggle audio">
+    <span class="dotled off" id="audioDot"></span><span id="audioLabel">Unmute</span>
+  </button>
+  <button class="bg-toggle" id="bgToggle" aria-label="Toggle background video">
+    <span class="dotled" id="bgDot"></span><span id="bgLabel">Pause video</span>
+  </button>
+</div>
+
+<div class="page">
+
+  <header class="top">
+    <div class="brand-stack">
+      <div class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+      <div>
+        <div class="brand-title">Microsoft Copilot Chat</div>
+        <div class="brand-sub">For MTA</div>
+      </div>
+      <div class="brand-divider" aria-hidden="true"></div>
+      <div class="mta-logo" aria-label="MTA">MTA</div>
+      <div>
+        <div class="brand-title" style="color:#0039A6">Metropolitan Transportation Authority</div>
+        <div class="brand-sub">Planning &middot; Capital &middot; Procurement &middot; Finance &middot; Comms &middot; HR</div>
+      </div>
+    </div>
+    <div class="top-meta">
+      Prompt Generation Tool &middot; v2<br>
+      <strong>Prepared for MTA</strong>
+    </div>
+  </header>
+
+  <section class="hero">
+    <span class="eyebrow">Interactive Guide</span>
+    <h1>Where Copilot Chat actually pays off at MTA.</h1>
+    <p class="lede">Six desk-based, document-heavy roles where the work is internal-first and the productivity gains compound week over week. Every prompt below produces an internal artifact that goes through normal review before anything external happens &mdash; no operator/labor exposure, no incident or rider-facing output.</p>
+
+    <div class="scope" role="note" aria-label="What's included">
+      <div class="scope-item"><span class="dot"></span><strong>Enterprise-ready</strong></div>
+      <div class="scope-item"><span class="dot"></span><strong>Enterprise Data Protection (EDP)</strong> &mdash; prompts aren't used to train models</div>
+      <div class="scope-item"><span class="dot"></span><strong>Works with the M365 license you already have + Copilot Basic License</strong></div>
+    </div>
+  </section>
+
+  <!-- Role picker -->
+  <div class="roles-wrap" id="rolesWrap">
+    <h2 class="section">Choose a role to explore</h2>
+    <div class="roles">
+
+      <button class="role-card" data-role="planner" style="--card-accent:var(--line-shuttle)" aria-label="Service Planner">
+        <div class="role-icon icon-shuttle">S</div>
+        <h3 class="role-name">Service Planner / Schedule Analyst</h3>
+        <p class="role-blurb">Timetables, GO planning, ridership analysis. Heavy memo and stakeholder writing.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+
+      <button class="role-card" data-role="capital" style="--card-accent:var(--line-blue)" aria-label="Capital Program Manager">
+        <div class="role-icon icon-blue">C</div>
+        <h3 class="role-name">Capital Program / Project Manager</h3>
+        <p class="role-blurb">Status reports, exec summaries, community board updates. Recurring formats every cycle.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+
+      <button class="role-card" data-role="procurement" style="--card-accent:var(--line-yellow)" aria-label="Procurement Specialist">
+        <div class="role-icon icon-yellow">Q</div>
+        <h3 class="role-name">Procurement / Contract Specialist</h3>
+        <p class="role-blurb">Proposal evaluations, clarification requests, plain-language contract summaries.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+
+      <button class="role-card" data-role="finance" style="--card-accent:var(--line-orange)" aria-label="Budget and Finance Analyst">
+        <div class="role-icon icon-orange">F</div>
+        <h3 class="role-name">Budget / Finance Analyst</h3>
+        <p class="role-blurb">Variance commentary, board narrative, budget request reformatting. Same cycle, every cycle.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+
+      <button class="role-card" data-role="govrel" style="--card-accent:var(--line-lightgreen)" aria-label="Government Relations and Communications">
+        <div class="role-icon icon-lgreen">G</div>
+        <h3 class="role-name">Govt &amp; Community Relations / Comms</h3>
+        <p class="role-blurb">Briefing memos, multi-channel announcements, internal FAQs. All internally reviewed.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+
+      <button class="role-card" data-role="hr" style="--card-accent:var(--line-purple)" aria-label="HR Business Partner">
+        <div class="role-icon icon-purple">7</div>
+        <h3 class="role-name">HR Business Partner / Workforce Planning</h3>
+        <p class="role-blurb">Aggregate workforce planning, program descriptions, feedback synthesis. No individual employee work.</p>
+        <div class="role-cta">See 3 prompts</div>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ROLE 1: Service Planner -->
+  <div class="detail" id="detail-planner">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title"><span class="role-title-bullet icon-shuttle">S</span>Service Planner / Schedule Analyst</h2>
+    <p class="role-subtitle">Timetable design, service-change planning, and the analysis behind General Order (GO) work. Document- and data-heavy, all internal.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Convert ridership data commentary into a planning memo</h3>
+        <button class="copy-btn" data-copy="p1-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p1-1">Turn the bullet points below into a 1-page service planning memo for internal review. Structure:
+(1) Background — 2 sentences on the route/line and the question being asked.
+(2) Data observations — what the numbers show, in plain language.
+(3) Planning considerations — operational factors that affect interpretation.
+(4) Options for discussion — 2–3 options with tradeoffs, no recommendation.
+
+Use neutral analytical language. Do not include conclusions the data doesn't directly support.
+
+Bullet points:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Shapes scattered ridership bullets into a clean four-section internal memo a planning lead can circulate without rewriting.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>One page, four labeled sections, neutral tone, 2–3 options with tradeoffs — and no conclusions the data doesn't actually support.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Draft a GO impact summary for stakeholder distribution</h3>
+        <button class="copy-btn" data-copy="p1-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p1-2">Convert the GO details below into a stakeholder summary email. Audience: internal departments (Operations, Customer Communications, Stations, Government &amp; Community Relations).
+
+Structure:
+(1) GO number, dates, and times in 24-hr format.
+(2) Lines and segments affected.
+(3) Service plan during the GO (rerouted, suspended, bustituted).
+(4) Key dates downstream teams need to act on.
+(5) Point of contact.
+
+Keep under 250 words. Use existing GO terminology — don't translate it for a general audience.
+
+GO details:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Produces an internal-distribution email that gives downstream teams exactly the five facts they need to plan their own work.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Under 250 words, five clean sections, GO-native terminology preserved, and the key downstream dates surfaced — not buried.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Synthesize meeting notes into action items</h3>
+        <button class="copy-btn" data-copy="p1-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p1-3">Take the meeting notes below and produce:
+(1) A 3-sentence summary of what was decided.
+(2) An action item table with owner, action, and due date.
+(3) A list of open questions that didn't get resolved.
+
+If an action item has no owner in the notes, mark it [OWNER TBD]. Do not invent owners or dates.
+
+Notes:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Turns sprawling meeting notes into a tight three-part artifact teammates can act on without re-reading the original notes.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>A 3-sentence decision summary, a clean owner/action/date table with [OWNER TBD] honestly flagged where missing, and a separate list of unresolved questions.</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ROLE 2: Capital Program / PM -->
+  <div class="detail" id="detail-capital">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title"><span class="role-title-bullet icon-blue">C</span>Capital Program / Project Manager</h2>
+    <p class="role-subtitle">MTA Construction &amp; Development and capital program staff. Status reporting, stakeholder updates, document synthesis &mdash; pure desk work, recurring every cycle.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Weekly project status report</h3>
+        <button class="copy-btn" data-copy="p2-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p2-1">Convert the project updates below into a weekly status report for the Program Management Office.
+
+Structure:
+(1) Project name, ID, and reporting week.
+(2) Schedule status (on track / at risk / delayed) with one-line justification.
+(3) Budget status with same convention.
+(4) Accomplishments this week — bullets.
+(5) Planned for next week — bullets.
+(6) Issues and risks requiring PMO attention.
+
+If a section has no update, write "No change this week." Do not extrapolate status from incomplete data.
+
+Updates:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Compresses a week of scattered updates into the standard PMO weekly format, in the order PMO reads it.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Six labeled sections, a justification line on every status, "No change this week." used honestly when there's nothing to say, and no inferred status.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Convert a technical document into an executive summary</h3>
+        <button class="copy-btn" data-copy="p2-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p2-2">Summarize the document below into an executive summary suitable for a senior leadership briefing. Maximum 300 words.
+
+Structure:
+(1) What the document is and why it exists.
+(2) Three key findings or recommendations.
+(3) Decisions or approvals being requested.
+(4) Implications if no action is taken.
+
+Use plain language — assume the reader is a senior executive without engineering background. Preserve all dollar figures, dates, and named obligations exactly as written in the source.
+
+Document:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Boils a dense technical document into the four things an executive actually needs before walking into the meeting.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Under 300 words, plain English, dollar figures and dates preserved verbatim, and a clear "what's being asked of you" section.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Draft a stakeholder update for community board / electeds</h3>
+        <button class="copy-btn" data-copy="p2-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p2-3">Draft a project update for distribution to a Community Board or elected official's office. Tone: factual, accessible, non-defensive.
+
+Structure:
+(1) Project name and one-sentence purpose.
+(2) Current phase and what's happening on-site.
+(3) What's coming in the next 30–60 days.
+(4) Known impacts to the community (noise, lane closures, station access).
+(5) Contact for questions.
+
+Under 400 words. No promises about completion dates unless they appear verbatim in the source notes.
+
+Source notes:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Generates a clean, non-defensive community update that GR staff can review and forward — covering the five things every CB and elected office asks first.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Under 400 words, factual tone, current-phase and 30-60 day forward look, community impacts named plainly, and zero invented completion dates.</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ROLE 3: Procurement -->
+  <div class="detail" id="detail-procurement">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title"><span class="role-title-bullet icon-yellow">Q</span>Procurement / Contract Specialist</h2>
+    <p class="role-subtitle">Back-office, paperwork-heavy, no public-facing or operational risk. Copilot Chat is genuinely transformative for proposal evaluations, vendor clarifications, and contract summaries.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Summarize a vendor proposal for evaluation</h3>
+        <button class="copy-btn" data-copy="p3-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p3-1">Summarize the vendor proposal below into a structured evaluation brief.
+
+Sections:
+(1) Vendor name and proposal date.
+(2) Scope as proposed — bullets.
+(3) Pricing summary (preserve all numbers exactly).
+(4) Stated timeline and milestones.
+(5) Notable inclusions.
+(6) Notable exclusions or assumptions the vendor is making.
+(7) Questions for the vendor.
+
+Do not assess responsiveness or make recommendations — that's the evaluator's job.
+
+Proposal:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Reformats a long proposal into a seven-section evaluator brief that preserves every number and surfaces what the vendor quietly excluded.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Numbers preserved exactly, exclusions and assumptions called out as their own section, and zero recommendation language — strict separation of summary and judgment.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Draft a clarification request to a vendor</h3>
+        <button class="copy-btn" data-copy="p3-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p3-2">Based on the gaps below, draft a professional clarification request to send to a vendor during evaluation.
+
+Structure:
+(1) Reference to the solicitation and proposal.
+(2) Numbered list of clarification questions — one topic per question.
+(3) Response deadline and format.
+
+Tone: professional, neutral, no language suggesting evaluation outcome. Keep questions specific and answerable in writing.
+
+Gaps:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Produces a clean clarification letter that probes specific gaps without leaking the evaluator's leaning.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Solicitation reference up top, one-topic-per-question numbered list, clear response deadline and format — neutral throughout.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Convert contract terms into a plain-language summary for the requesting department</h3>
+        <button class="copy-btn" data-copy="p3-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p3-3">Convert the contract terms below into a plain-language summary for the requesting business unit.
+
+Structure:
+(1) What we're buying and from whom.
+(2) Term and renewal options.
+(3) Total not-to-exceed value.
+(4) Key business obligations on our side (what we have to do, by when).
+(5) Key vendor obligations.
+(6) Termination and notice provisions in plain English.
+
+Preserve all dollar figures and dates exactly. Flag any term that seems unusual with [REVIEW] so the requestor can ask Procurement about it.
+
+Contract terms:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Translates legal language into a six-section summary the business unit can actually use to plan their part of the work.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Plain English, dollar figures and dates preserved exactly, "our side" obligations and "their side" obligations clearly separated, and unusual terms flagged with [REVIEW].</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ROLE 4: Budget / Finance -->
+  <div class="detail" id="detail-finance">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title"><span class="role-title-bullet icon-orange">F</span>Budget / Finance Analyst</h2>
+    <p class="role-subtitle">Variance commentary, board materials, budget reformatting. High volume of recurring documents that follow the same structure every cycle.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Variance commentary from a numbers-only summary</h3>
+        <button class="copy-btn" data-copy="p4-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p4-1">Write variance commentary for the line items below. For each line:
+(1) State the variance in dollars and percent.
+(2) Categorize as favorable or unfavorable.
+(3) Provide a one-sentence explanation if a driver is given in the notes, otherwise write "Driver not specified."
+
+Do not invent drivers. Use the agency's standard convention: parentheses for unfavorable variances. Group lines by department or category as they appear in the input.
+
+Line items:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Generates standardized variance commentary line-by-line in the agency's house format, without inventing drivers where none were provided.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Dollars and percent on every line, parentheses convention applied, "Driver not specified." used honestly, grouping preserved from the input.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Board materials narrative from financial tables</h3>
+        <button class="copy-btn" data-copy="p4-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p4-2">Convert the financial tables below into narrative text suitable for a board committee book. Tone: factual, measured, no superlatives.
+
+Structure:
+(1) Period covered.
+(2) Total revenue and total expense at a high level with year-over-year comparison.
+(3) Three drivers of the YoY change with the dollar impact of each.
+(4) Forward-looking note if the input contains forecast information.
+
+Do not characterize results as "strong," "weak," or use any qualitative judgment unless those words appear in the source.
+
+Tables:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Turns financial tables into the measured narrative voice board books require — and refuses to add qualitative spin.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Four sections, three named drivers with dollar impact, forward-looking note only when source contains it, zero superlatives unless they're in the source.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Reformat a budget request into the standard template</h3>
+        <button class="copy-btn" data-copy="p4-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p4-3">Reformat the budget request below into the agency's standard request format.
+
+Required fields:
+(1) Requesting department.
+(2) Title of request.
+(3) Type — operating or capital.
+(4) Total amount and period.
+(5) Justification (3–5 sentences, fact-based).
+(6) Risk if not funded.
+(7) Alternatives considered.
+
+If the input is missing any required field, write [MISSING] in that field — do not infer it. Preserve all dollar amounts exactly.
+
+Request:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Takes an unstructured request and forces it into the seven-field agency template the budget office expects.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>All seven fields present, dollar amounts exact, [MISSING] used honestly where the input doesn't contain the answer — never inferred.</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ROLE 5: GR / Comms -->
+  <div class="detail" id="detail-govrel">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title"><span class="role-title-bullet icon-lgreen">G</span>Government &amp; Community Relations / Communications Staff</h2>
+    <p class="role-subtitle">Heavy writing volume, all internally produced and internally reviewed before going out. No operator/labor exposure, no incident exposure.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Briefing memo for a senior leader before a meeting</h3>
+        <button class="copy-btn" data-copy="p5-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p5-1">Create a 1-page briefing memo for a senior leader ahead of a meeting.
+
+Structure:
+(1) Meeting basics — who, when, where, format.
+(2) Attendee bios in 2 sentences each.
+(3) Their likely interests or asks, based only on what's in the notes.
+(4) Three talking points for our principal.
+(5) Topics to avoid or defer.
+
+Tone: concise, professional, no speculation about attendee positions beyond what's stated. Mark inferences as [ASSUMED].
+
+Notes:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Builds the standard pre-meeting briefing memo a principal expects on their desk — five sections, one page, honest about what's inferred.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>One page, five labeled sections, two-sentence bios, three concrete talking points, "topics to avoid" called out, and inferences flagged [ASSUMED].</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Convert agency announcement into multiple channel formats</h3>
+        <button class="copy-btn" data-copy="p5-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p5-2">Take the announcement below and produce three versions:
+(1) Press release format — 250 words with quote placeholder marked [QUOTE — TBD].
+(2) Internal all-staff email — 150 words, conversational but professional.
+(3) Social media post — under 280 characters, no emoji unless the source uses them.
+
+Keep all dates, names, and figures consistent across versions. Don't add facts that aren't in the source.
+
+Announcement:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Spins one announcement into the three versions comms always has to produce, with the quote placeholder explicitly left for the comms director.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Three versions, length budgets respected, dates/names/figures identical across all three, [QUOTE — TBD] placeholder in the press release, no invented facts.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Draft an FAQ from a single topic brief</h3>
+        <button class="copy-btn" data-copy="p5-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p5-3">Generate an internal FAQ from the brief below. Format: 8–12 question/answer pairs.
+
+Questions should be the ones a station agent, customer service rep, or front-line manager would actually be asked by a rider or staff member about this topic. Answers: 2–3 sentences each, plain language, factually grounded in the brief.
+
+If a likely question can't be answered from the brief, include it under a final section called "Questions we don't have answers for yet."
+
+Brief:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Produces an internal FAQ front-line teams can actually use, and honestly surfaces the questions the brief doesn't yet answer.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>8–12 realistic Q&amp;A pairs in plain language, all grounded in the brief, plus an explicit "we don't know yet" section instead of fabricated answers.</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- ROLE 6: HR / Workforce -->
+  <div class="detail" id="detail-hr">
+    <button class="back" data-back>Back to roles</button>
+    <h2 class="role-title"><span class="role-title-bullet icon-purple">7</span>HR Business Partner / Workforce Planning Analyst</h2>
+    <p class="role-subtitle">Aggregate workforce planning and program/policy work &mdash; desk-bound, uncontroversial. <strong>Explicitly excludes</strong> anything related to specific employees (performance, discipline, accommodations, complaints) &mdash; that's labor relations territory.</p>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 1</span>
+        <h3 class="prompt-title">Convert workforce data into a planning brief</h3>
+        <button class="copy-btn" data-copy="p6-1">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p6-1">Turn the workforce metrics below into a planning brief for HR leadership.
+
+Structure:
+(1) Reporting period and population covered.
+(2) Headcount and movement (hires, separations, transfers) — preserve numbers exactly.
+(3) Observations about the data — pattern-level only, no individual identification.
+(4) Questions for further analysis.
+
+Do not characterize trends as "concerning" or "positive" — present the data and let the reader interpret.
+
+Metrics:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Generates a four-section workforce planning brief that stays at the aggregate pattern level and doesn't editorialize.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Numbers preserved exactly, observations strictly pattern-level, no individual identification, no qualitative judgment language.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 2</span>
+        <h3 class="prompt-title">Draft a program description for an internal initiative</h3>
+        <button class="copy-btn" data-copy="p6-2">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p6-2">Draft an internal program description for the initiative below.
+
+Sections:
+(1) Program name and sponsor.
+(2) Purpose in 2 sentences.
+(3) Eligibility — who can participate.
+(4) What participation involves — time commitment, format.
+(5) Expected outcomes for participants.
+(6) How to enroll or express interest.
+(7) Point of contact.
+
+Tone: professional, inviting, factual. Under 400 words. Don't make commitments about career outcomes.
+
+Initiative:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Produces the standard internal program description used to launch and recruit for HR initiatives, in a consistent seven-section format.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Under 400 words, seven sections, inviting but factual tone, expected outcomes stated without overpromising career impact.</p></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="prompt-card">
+      <div class="prompt-head">
+        <span class="prompt-num">Prompt 3</span>
+        <h3 class="prompt-title">Synthesize policy or training feedback into a summary</h3>
+        <button class="copy-btn" data-copy="p6-3">Copy prompt</button>
+      </div>
+      <div class="prompt-body">
+        <pre class="prompt-text" id="p6-3">Summarize the feedback below into a structured report.
+
+Sections:
+(1) Source and volume of feedback (number of responses, channel).
+(2) Themes — group similar feedback, give each theme a count.
+(3) Representative paraphrases for each theme — do not quote individuals verbatim and do not include identifying details.
+(4) Areas where feedback was contradictory.
+(5) Topics raised that fall outside the scope of the original survey.
+
+Do not recommend actions — that's a separate document.
+
+Feedback:
+[paste]</pre>
+        <div class="meta-row">
+          <div class="meta-block"><h4>What it does</h4><p>Turns raw feedback into a structured five-section report that's safe to circulate — paraphrased, de-identified, and explicitly free of recommendations.</p></div>
+          <div class="meta-block"><h4>What good output looks like</h4><p>Themes with counts, paraphrases (no verbatim quotes, no identifying details), contradictions surfaced, off-scope items separated, and zero action recommendations.</p></div>
+        </div>
+      </div>
+    </article>
+  </div>
+
+  <!-- What Copilot Chat will not do with the Basic license -->
+  <section class="limits" id="limits">
+    <div class="limits-head">
+      <h3>What Copilot Chat will <em>not</em> do with the Basic license</h3>
+    </div>
+    <p class="limits-intro">With the Copilot Basic license only &mdash; no add-ons &mdash; the boundaries below describe where Copilot Chat stops on its own and where supervisory or governance review takes over.</p>
+    <p class="limits-intro">Copilot Chat is a general-purpose reasoning and writing assistant protected by Enterprise Data Protection. It is <strong>not</strong> grounded in your systems, and this prompt set is intentionally scoped to <strong>internal-first artifacts that go through normal review</strong> before anything external happens.</p>
+    <h4 class="limits-subhead">What Copilot Chat will <em>not</em> do with the license alone</h4>
+    <div class="limits-grid">
+      <div>Won't read an employee's Outlook mailbox or calendar</div>
+      <div>Won't read Teams chats, channels, or meeting transcripts</div>
+      <div>Won't search or summarize SharePoint or OneDrive files automatically</div>
+      <div>Won't connect to PeopleSoft, Maximo, EAM, finance ledgers, or procurement systems</div>
+      <div>Won't retrieve internal real-time service status, ridership, or asset telemetry <em>(public web data still accessible)</em></div>
+      <div>Won't draft customer complaint responses involving named riders <em>(not a system constraint, governance/policy decision)</em></div>
+      <div>Won't produce incident reports, accident reports, or operator statements <em>(not a system constraint, model can generate this content)</em></div>
+      <div>Won't perform root-cause determinations or disciplinary documentation <em>(not a system constraint, advisory limitation)</em></div>
+      <div>Won't replace supervisory or legal review of any artifact before it's filed or sent <em>(not a system constraint, human oversight requirement)</em></div>
+      <div>Won't retain your prompts to train foundation models <em>(EDP protection)</em></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div>
+      <h3>Ready to see this in your environment?</h3>
+      <p>We'll run a 45-minute live demo against your tenant with your team's real-world internal documents &mdash; no configuration required on your side.</p>
+    </div>
+    <a class="btn" href="https://outlook.office.com/book/BookTimeWithLiudavid@bookings.microsoft.com/?ismsaljsauthenabled" target="_blank" rel="noopener">Book a live demo</a>
+  </section>
+
+  <div class="built-by">
+    Built with <strong>Cowork</strong> by <strong>DSL</strong> for <strong>Team Kristin</strong> <span class="heart">&#9829;</span>
+  </div>
+
+  <footer class="foot">
+    <div>Example prompts only. Always apply MTA policy on AI-assisted writing, supervisory review, and records handling.</div>
+    <div>v2.0 &middot; offline</div>
+  </footer>
+
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite">Prompt copied to clipboard</div>
+
+<script>
+  const rolesWrap = document.getElementById('rolesWrap');
+  const details = {
+    planner:     document.getElementById('detail-planner'),
+    capital:     document.getElementById('detail-capital'),
+    procurement: document.getElementById('detail-procurement'),
+    finance:     document.getElementById('detail-finance'),
+    govrel:      document.getElementById('detail-govrel'),
+    hr:          document.getElementById('detail-hr')
+  };
+
+  document.querySelectorAll('.role-card').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const r = btn.dataset.role;
+      rolesWrap.classList.add('hidden');
+      Object.values(details).forEach(d=>d.classList.remove('active'));
+      details[r].classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  document.querySelectorAll('[data-back]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      Object.values(details).forEach(d=>d.classList.remove('active'));
+      rolesWrap.classList.remove('hidden');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  });
+
+  const toast = document.getElementById('toast');
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(()=>toast.classList.remove('show'), 1600);
+  }
+
+  // Background video toggle
+  const bgToggle = document.getElementById('bgToggle');
+  const bgDot = document.getElementById('bgDot');
+  const bgLabel = document.getElementById('bgLabel');
+  const bgVideo = document.getElementById('bgVideo');
+  if(bgToggle){
+    bgToggle.addEventListener('click',()=>{
+      document.body.classList.toggle('bg-off');
+      const off = document.body.classList.contains('bg-off');
+      bgToggle.classList.toggle('off', off);
+      bgLabel.textContent = off ? 'Resume video' : 'Pause video';
+      if(bgVideo){
+        if(off){ bgVideo.pause(); } else { bgVideo.play().catch(()=>{}); }
+      }
+    });
+  }
+
+  // MTA subway announcements — picks a random clip from the pool, plays it, waits 5 seconds, picks another.
+  // Add or remove filenames in doorClips to change the pool. The script tries the file from the same folder
+  // first, then from ./input/ as a fallback (matching the video logic).
+  const doorBtn = document.getElementById('doorBtn');
+  const doorSound = document.getElementById('doorSound');
+  const audioToggle = document.getElementById('audioToggle');
+  const audioDot = document.getElementById('audioDot');
+  const audioLabel = document.getElementById('audioLabel');
+
+ const doorClips = [
+  'mta1_standclear.mp3',
+  'mta2_laststop.mp3',
+  'mta3_laststopconductor.mp3',
+  'mta4_nextstopcityhall.mp3',
+  'mta5_nextmanhattanbound.mp3',
+  'mta6_subwaysound.mp3',
+  'mta7_subwayinterior.mp3'
+];
+
+  let doorReplayTimer = null;
+  let lastClipIndex = -1;
+  const REPLAY_DELAY_MS = 5000;
+
+  function pickNextClip(){
+    if(doorClips.length <= 1){ lastClipIndex = 0; return doorClips[0]; }
+    let idx;
+    do { idx = Math.floor(Math.random() * doorClips.length); }
+    while (idx === lastClipIndex);
+    lastClipIndex = idx;
+    return doorClips[idx];
+  }
+
+ function loadAndPlay(){
+  if(!doorSound) return;
+  const file = pickNextClip();
+  doorSound.src = file;
+  doorSound.load();
+  doorSound.play().catch(() => {
+    setMuteState(true);
+  });
+}
+
+function scheduleNext(){
+  clearTimeout(doorReplayTimer);
+  doorReplayTimer = setTimeout(() => {
+    if (!doorSound.muted) loadAndPlay();
+  }, REPLAY_DELAY_MS);
+}
+
+function setMuteState(isMuted){
+  if(!doorSound) return;
+  doorSound.muted = isMuted;
+  if(audioDot) audioDot.classList.toggle('off', isMuted);
+  if(audioLabel) audioLabel.textContent = isMuted ? 'Unmute' : 'Mute';
+  if(audioToggle) audioToggle.classList.toggle('off', isMuted);
+}
+
+if(doorSound){
+  doorSound.addEventListener('ended', scheduleNext);
+  doorSound.addEventListener('error', () => {
+    console.error('Audio file failed to load:', doorSound.src);
+    showToast('Audio file not found or failed to load');
+  });
+}
+
+  if(doorBtn && doorSound){
+    // Manual button: skip the 5-second wait and play a fresh random clip immediately, unmuted.
+    doorBtn.addEventListener('click',()=>{
+      clearTimeout(doorReplayTimer);
+      doorSound.muted = false;
+      setMuteState(false);
+      loadAndPlay();
+    });
+  }
+
+  if(audioToggle && doorSound){
+    audioToggle.addEventListener('click',()=>{
+      const nowMuted = !doorSound.muted;
+      setMuteState(nowMuted);
+      if(!nowMuted) doorSound.play().catch(()=>{});
+    });
+  }
+
+  // MTA / Light mode toggle
+  const modeToggle = document.getElementById('modeToggle');
+  const modeLabel = document.getElementById('modeLabel');
+  function applyMode(isMta){
+    document.body.classList.toggle('mta-mode', isMta);
+    if(modeLabel) modeLabel.textContent = isMta ? 'Light mode' : 'MTA mode';
+  }
+  // Default to MTA (dark) mode unless the user has explicitly switched to Light.
+  try{
+    const saved = localStorage.getItem('mtaMode');
+    applyMode(saved !== '0');
+  }catch(e){ applyMode(true); }
+  if(modeToggle){
+    modeToggle.addEventListener('click',()=>{
+      const next = !document.body.classList.contains('mta-mode');
+      applyMode(next);
+      try{ localStorage.setItem('mtaMode', next ? '1' : '0'); }catch(e){}
+    });
+  }
+
+  document.querySelectorAll('.copy-btn').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.dataset.copy;
+      const text = document.getElementById(id).innerText;
+      try{
+        if(navigator.clipboard && window.isSecureContext){
+          await navigator.clipboard.writeText(text);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+        }
+        const original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        showToast('Prompt copied to clipboard');
+        setTimeout(()=>{ btn.textContent = original; btn.classList.remove('copied'); }, 1600);
+      } catch(e){
+        showToast('Copy failed — select the text manually');
+      }
+    });
+  });
+</script>
+</body>
+</html>
