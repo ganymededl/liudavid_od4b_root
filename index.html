@@ -102,13 +102,14 @@
     .slide.active { animation: none; }
   }
   .lib-details { color: var(--t2); padding-left: 16px; font-size: 11px; line-height: 1.8; margin: 10px 0; }
-  #creative { grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); }
-  #creative .lib { display: grid; grid-template-columns: 136px 1fr; column-gap: 18px; align-content: center; }
+  #creative { grid-template-columns: minmax(0, 1fr); }
+  #creative .lib { display: grid; grid-template-columns: 300px 1fr; column-gap: 26px; align-content: center; }
   #creative .lib > :not(img) { grid-column: 2; }
-  .noir-thumb { width: 136px; height: 158px; object-fit: contain; grid-column: 1; grid-row: 1 / 5; }
+  .noir-thumb { width: 300px; height: 186px; object-fit: contain; grid-column: 1; grid-row: 1 / 5; }
   @media (max-width: 600px) {
-    #creative .lib { grid-template-columns: 96px 1fr; column-gap: 14px; }
-    .noir-thumb { width: 96px; height: 130px; align-self: center; }
+    #creative .lib { grid-template-columns: 1fr; column-gap: 0; }
+    #creative .lib > :not(img) { grid-column: 1; }
+    .noir-thumb { width: 100%; height: 132px; grid-row: auto; margin-bottom: 12px; }
   }
   [hidden] { display: none !important; }
   .slides {
@@ -1117,28 +1118,15 @@ const CONFIG = {
   // Quick-launch tools shown on the main page. Edit href to update a link.
   creative: [
     {
-      name: "Volatility Noir",
-      desc: "A chrome ribbon sculpture you can rotate, strain, and fracture. Optional original synthesized sound.",
-      href: "volatility-noir.html?preset=rupture&scoutTheme=dark",
-      image: "volatility-noir-thumb.png",
-      model: "GPT-6 Astra",
-      public: true
-    },
-    {
-      name: "Midnight Transit Orchestra",
-      desc: "A day of rides becomes a 90-second track. Ride density sets the pulse, transfers scar the map.",
-      href: "midnight-transit-orchestra.html?scoutTheme=dark",
-      image: "midnight-transit-orchestra-thumb.png",
-      model: "Claude Opus 5",
-      public: true
-    },
-    {
-      name: "Reno Noise \u2192 Luxe Score",
-      desc: "Drag one timeline from demolition to finish and hear concrete grit resolve into architecture.",
-      href: "reno-noise-luxe-score.html?scoutTheme=dark",
-      image: "reno-noise-luxe-score-thumb.png",
-      model: "Claude Opus 5",
-      public: true
+      name: "ARTificial Gallery",
+      desc: "Three original interactive works generated live in the browser \u2014 a chrome sculpture, a city score, and a renovation score.",
+      href: "artificial-gallery.html?scoutTheme=dark",
+      image: "artificial-gallery-thumb.png",
+      bullets: [
+        "Volatility Noir \u00b7 Midnight Transit Orchestra \u00b7 Reno Noise \u2192 Luxe Score",
+        "Built with GPT-6 Astra and Claude Opus 5",
+        "Public / no Microsoft sign-in"
+      ]
     }
   ],
   tools: [
@@ -1463,14 +1451,17 @@ const creativeEl = document.getElementById("creative");
   description.className = "lib-desc"; description.textContent = item.desc;
   const details = document.createElement("ul");
   details.className = "lib-details";
-  const model = document.createElement("li");
-  model.textContent = "Built with " + item.model; details.appendChild(model);
-  if (item.public) {
-    const access = document.createElement("li");
-    access.textContent = "Public / no Microsoft sign-in"; details.appendChild(access);
-  }
+  const lines = item.bullets || [
+    "Built with " + item.model,
+    ...(item.public ? ["Public / no Microsoft sign-in"] : [])
+  ];
+  lines.forEach(text => {
+    const line = document.createElement("li");
+    line.textContent = text;
+    details.appendChild(line);
+  });
   const cta = document.createElement("div");
-  cta.className = "lib-cta"; cta.textContent = "Enter the artwork";
+  cta.className = "lib-cta"; cta.textContent = item.cta || "Enter the gallery";
   a.append(image, name, description, details, cta); creativeEl.appendChild(a);
 });
 const toolsEl = document.getElementById("tools");

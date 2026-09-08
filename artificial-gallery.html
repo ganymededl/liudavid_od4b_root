@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ARTificial Gallery — David Shih Chun Liu</title>
+<link rel="icon" href="data:,">
+<meta name="description" content="Three original interactive works generated in the browser: a metallic sculpture, a city score, and a renovation score.">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+button { font: inherit; color: inherit; cursor: pointer; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 4px; }
+.mono { font-family: Consolas, "Courier New", Courier, monospace; font-size: 10px; letter-spacing: .09em; text-transform: uppercase; }
+
+.wrap { max-width: 1320px; margin: auto; padding: 0 44px 64px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  height: 88px; border-bottom: 1px solid var(--cp-border); }
+.brand { display: flex; gap: 14px; align-items: center; }
+.mark { width: 31px; height: 31px; color: var(--cp-accent); flex: none; }
+.brand-name { font-size: 13px; letter-spacing: .24em; font-weight: 600; }
+.submark { margin-top: 5px; color: var(--cp-text-soft); font-size: 9px; letter-spacing: .19em; }
+.top-right { display: flex; gap: 26px; align-items: center; }
+.top-right a, .top-right button { color: var(--cp-text-soft); text-decoration: none; border: 0; background: none; padding: 8px 0; }
+.top-right a:hover, .top-right button:hover { color: var(--cp-accent); }
+
+.lede { padding: 58px 0 40px; display: grid; grid-template-columns: 1fr 300px; gap: 48px; align-items: end;
+  border-bottom: 1px solid var(--cp-border); }
+h1 { margin: 14px 0 0; font-size: clamp(34px, 5vw, 58px); font-weight: 300; letter-spacing: -.05em; line-height: 1.02; }
+h1 em { font-style: normal; color: var(--cp-accent); }
+.lede p { margin: 18px 0 0; color: var(--cp-text-muted); font-size: 14px; line-height: 1.75; max-width: 540px; }
+.colophon { color: var(--cp-text-soft); font-size: 9px; line-height: 2; letter-spacing: .09em; text-transform: uppercase;
+  font-family: Consolas, "Courier New", Courier, monospace; }
+
+.plates { display: grid; gap: 0; }
+.plate { display: grid; grid-template-columns: 470px 1fr; gap: 46px; align-items: center;
+  padding: 44px 0; border-bottom: 1px solid var(--cp-border); text-decoration: none; }
+.plate:hover .shot { transform: translateY(-4px); box-shadow: var(--cp-shadow); }
+.plate:hover .enter { color: var(--cp-accent); }
+.plate:hover .enter span { transform: translateX(5px); }
+.shot { width: 100%; aspect-ratio: 576 / 400; object-fit: cover; display: block; border: 1px solid var(--cp-border);
+  border-radius: 16px; background: var(--cp-surface-soft); transition: transform .25s ease, box-shadow .25s ease; }
+.body .index { color: var(--cp-accent); display: flex; align-items: center; gap: 10px; }
+.body .index::after { content: ""; height: 1px; width: 26px; background: var(--cp-accent); }
+.body h2 { margin: 16px 0 0; font-size: 27px; font-weight: 350; letter-spacing: -.035em; }
+.body .what { margin: 14px 0 0; color: var(--cp-text-muted); font-size: 13.5px; line-height: 1.8; max-width: 480px; }
+.body .how { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 7px; }
+.body .how li { color: var(--cp-text-soft); font-size: 11px; line-height: 1.6; display: flex; gap: 10px; }
+.body .how li::before { content: ""; margin-top: 7px; width: 4px; height: 4px; border-radius: 50%; background: var(--cp-border-strong); flex: none; }
+.meta { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { border: 1px solid var(--cp-border); border-radius: 999px; padding: 6px 11px; color: var(--cp-text-soft);
+  font-family: Consolas, "Courier New", Courier, monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.tag.model { border-color: var(--cp-accent); color: var(--cp-accent); }
+.enter { margin-top: 24px; display: inline-flex; align-items: center; gap: 9px; color: var(--cp-text);
+  font-family: Consolas, "Courier New", Courier, monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.enter span { transition: transform .2s ease; }
+
+footer { padding-top: 40px; display: flex; justify-content: space-between; gap: 28px; flex-wrap: wrap;
+  color: var(--cp-text-soft); font-size: 11px; line-height: 1.9; }
+footer p { margin: 0; max-width: 620px; }
+
+@media (max-width: 1040px) {
+  .plate { grid-template-columns: 340px 1fr; gap: 32px; }
+  .lede { grid-template-columns: 1fr; gap: 26px; align-items: start; }
+}
+@media (max-width: 760px) {
+  .wrap { padding: 0 20px 48px; }
+  header { height: 74px; }
+  .brand-name { font-size: 10px; letter-spacing: .16em; }
+  .top-right { gap: 16px; }
+  .lede { padding: 36px 0 28px; }
+  .plate { grid-template-columns: 1fr; gap: 22px; padding: 30px 0; }
+  .body h2 { font-size: 22px; }
+  .colophon { display: none; }
+}
+@media (prefers-reduced-motion: reduce) { .shot, .enter span { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <svg class="mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="4" y="6" width="24" height="20" rx="2" stroke="currentColor" stroke-width="1.2"/>
+        <path d="M8 22L13 13L18 22M17 22L21 16L24 22" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      <div>
+        <div class="brand-name">ARTIFICIAL GALLERY</div>
+        <div class="submark mono">Works generated in the browser</div>
+      </div>
+    </div>
+    <nav class="top-right">
+      <a class="mono" href="./">Back to hub</a>
+      <button id="theme" class="mono" type="button">Light / dark</button>
+    </nav>
+  </header>
+
+  <section class="lede">
+    <div>
+      <div class="mono" style="color: var(--cp-text-soft)">Three studies &nbsp;/&nbsp; 2026</div>
+      <h1>Three works<br>you can <em>play</em>.</h1>
+      <p>
+        Each work runs live in your browser: the geometry is generated per frame, the sound is
+        synthesized from scratch, and the image reacts to what you do to it. Each one ships as a
+        single HTML file that draws its own surfaces and builds its own instruments.
+      </p>
+    </div>
+    <div class="colophon">
+      Generated geometry<br>
+      Synthesized audio<br>
+      Open to everyone<br><br>
+      WebGL / Canvas / Web Audio<br>
+      Single file per work
+    </div>
+  </section>
+
+  <main class="plates" id="plates"></main>
+
+  <footer>
+    <p>
+      Sound is always opt-in and starts muted. Every work honours reduced-motion settings and can be
+      paused. Each piece exports a still image so a run you like can be kept.
+    </p>
+    <p class="mono">David Shih Chun Liu &nbsp;/&nbsp; ARTificial Gallery</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const WORKS = [
+    {
+      index: "Study 001",
+      title: "Volatility Noir",
+      href: "volatility-noir.html?preset=rupture&scoutTheme=dark",
+      image: "volatility-noir-thumb.png",
+      what: "A single chrome ribbon, knotted and lit like a studio object. One control pulls it from poise to rupture, and the whole surface changes character with it.",
+      how: [
+        "The mesh is rebuilt every frame from a twisting ribbon curve, so tension physically reshapes the geometry.",
+        "The same tension detunes a six-voice drone, so what you see and what you hear come from one number."
+      ],
+      model: "GPT-6 Astra",
+      tags: ["Real-time WebGL", "Drag to orbit", "Optional sound"]
+    },
+    {
+      index: "Study 002",
+      title: "Midnight Transit Orchestra",
+      href: "midnight-transit-orchestra.html?scoutTheme=dark",
+      image: "midnight-transit-orchestra-thumb.png",
+      what: "A day of rides played as a 90-second track. Ride density sets the pulse; every transfer lands as a steel strike and scars the map underneath it.",
+      how: [
+        "A seeded day model generates legs, transfers and waiting times, then drives a scheduled sequencer of kick, sub, hats, brake grind and inharmonic metal.",
+        "The route trails burn in permanently, so the finished cover art is a record of that specific day. Shuffle for a different one."
+      ],
+      model: "Claude Opus 5",
+      tags: ["Generated score", "Exports cover art", "Sound recommended"]
+    },
+    {
+      index: "Study 003",
+      title: "Reno Noise \u2192 Luxe Score",
+      href: "reno-noise-luxe-score.html?scoutTheme=dark",
+      image: "reno-noise-luxe-score-thumb.png",
+      what: "One timeline runs a renovation. Drag from demolition to finish and the room and its soundtrack resolve together, from concrete grit to polished architecture.",
+      how: [
+        "The room is raymarched live: rubble dissolves, cabinets rise and straighten, and surfaces gain a real mirror bounce as the finish lands.",
+        "The score crossfades from irregular hammer strikes into a resolving progression, losing its detune and jitter exactly as the surfaces gain polish."
+      ],
+      model: "Claude Opus 5",
+      tags: ["Raymarched room", "Timeline scrubber", "Sound recommended"]
+    }
+  ];
+
+  const arrow = "\u2192";
+  const container = document.getElementById("plates");
+  WORKS.forEach(work => {
+    const plate = document.createElement("a");
+    plate.className = "plate";
+    plate.href = work.href;
+
+    const shot = document.createElement("img");
+    shot.className = "shot";
+    shot.src = work.image;
+    shot.alt = work.title + " preview";
+    shot.loading = "lazy";
+    shot.decoding = "async";
+
+    const body = document.createElement("div");
+    body.className = "body";
+
+    const index = document.createElement("div");
+    index.className = "index mono";
+    index.textContent = work.index;
+
+    const title = document.createElement("h2");
+    title.textContent = work.title;
+
+    const what = document.createElement("p");
+    what.className = "what";
+    what.textContent = work.what;
+
+    const how = document.createElement("ul");
+    how.className = "how";
+    work.how.forEach(line => {
+      const item = document.createElement("li");
+      item.textContent = line;
+      how.appendChild(item);
+    });
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    const model = document.createElement("span");
+    model.className = "tag model";
+    model.textContent = "Built with " + work.model;
+    meta.appendChild(model);
+    work.tags.forEach(text => {
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = text;
+      meta.appendChild(tag);
+    });
+
+    const enter = document.createElement("div");
+    enter.className = "enter";
+    enter.textContent = "Enter the work ";
+    const chevron = document.createElement("span");
+    chevron.textContent = arrow;
+    enter.appendChild(chevron);
+
+    body.append(index, title, what, how, meta, enter);
+    plate.append(shot, body);
+    container.appendChild(plate);
+  });
+
+  document.getElementById("theme").addEventListener("click", () => {
+    const root = document.documentElement;
+    const next = root.dataset.theme === "dark" ? "light" : "dark";
+    root.dataset.theme = next;
+    // Carry the choice into each work so the gallery and the pieces stay in step.
+    document.querySelectorAll(".plate").forEach(plate => {
+      plate.href = plate.getAttribute("href").replace(/scoutTheme=(dark|light)/, "scoutTheme=" + next);
+    });
+  });
+})();
+</script>
+</body>
+</html>
