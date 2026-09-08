@@ -547,6 +547,13 @@
     color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff);
     padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
   }
+  .lib-access-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 8px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .lib-access-badge.public { color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff); }
+  .lib-access-badge.gated { color: #2a0f00; background: linear-gradient(135deg, #ffb454, #ff6b6b); }
 
   /* ── Recent ─────────────────────────────────────────── */
   .recent {
@@ -1019,14 +1026,14 @@
       <div class="libraries" id="libs"></div>
     </section>
 
-    <!-- TOOLS / QUICK ACCESS -->
+    <!-- CREATIVE EXPERIMENTS -->
     <section class="tools-wrap" aria-labelledby="creativeTitle">
       <p class="section-label" id="creativeTitle">Creative experiments &middot; public, no sign-in</p>
       <div class="libraries" id="creative"></div>
     </section>
 
     <section class="tools-wrap">
-      <p class="section-label">Tools &amp; quick access</p>
+      <p class="section-label">Personal toolkit &middot; public tools + OD4B utilities</p>
       <div class="libraries" id="tools"></div>
     </section>
 
@@ -1034,24 +1041,6 @@
     <section class="podcasts-wrap">
       <p class="section-label">Podcasts &middot; latest episodes</p>
       <div class="podcasts" id="podcasts"></div>
-    </section>
-
-    <!-- BUILD LEDGER -->
-    <section class="build-log-wrap" aria-labelledby="buildLogTitle">
-      <p class="section-label" id="buildLogTitle">Build ledger</p>
-      <a class="lib" href="https://onedrive.cloud.microsoft/:u:/a@xu96zg3b/r/_layouts/15/onedrive.aspx?id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2Fbuild%2Dledger%2Ehtml&parent=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&share=cQqjWVapm5ByQ7xPM8pYIZgJEgUC%5Fbn6pxnp0P7IsgTuF0iokQ" target="_blank" rel="noopener">
-        <div class="lib-icon" style="background: linear-gradient(135deg, #00d9ff, #00ffa3);">
-          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="4" y="5" width="16" height="14" rx="2" stroke="#000" stroke-width="1.8"></rect>
-            <path d="M8 9H16M8 12H16M8 15H13" stroke="#000" stroke-width="1.8" stroke-linecap="round"></path>
-          </svg>
-        </div>
-        <div class="lib-name">Scout &amp; Copilot Build Ledger</div>
-        <div class="lib-desc">Open the dedicated page with filters for build type, customer, platform, date, and conversation reference.</div>
-        <div class="lib-cta">Open ledger
-          <svg viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-      </a>
     </section>
 
     <!-- DOTS -->
@@ -1102,23 +1091,26 @@ const CONFIG = {
     {
       name:  "Prompt Engineering",
       desc:  "Agent specs, prompt libraries, templates",
-      href:  "https://onedrive.cloud.microsoft/:f:/a@xu96zg3b/r/_layouts/15/onedrive.aspx?id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FPromptsPublic&share=cgo0BEIlsgx3QbvGTK5mzqVBEgUCZkPKTu5kgaRwYRoAdv37Hg",
+      href:  "prompt-engineering-public/index.html",
       icon:  "star",
-      color: ["#7b61ff", "#a855f7"]
+      color: ["#7b61ff", "#a855f7"],
+      public: true
     },
     {
       name:  "Demos & Artifacts",
       desc:  "Cowork outputs, dashboards, HTML tools",
-      href:  "https://onedrive.cloud.microsoft/:f:/a@xu96zg3b/r/_layouts/15/onedrive.aspx?id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic&share=cgqpFv6wBkJ5QL0sFxTN9woEEgUC5EjSexcaD%2DLixoeJ2q8bKg",
+      href:  "demos-public/index.html",
       icon:  "list",
-      color: ["#00ffa3", "#00b377"]
+      color: ["#00ffa3", "#00b377"],
+      public: true
     },
     {
       name:  "Scripts & Automation",
       desc:  "PowerShell, Power Automate, PnP flows",
-      href:  "https://onedrive.cloud.microsoft/:f:/a@xu96zg3b/r/_layouts/15/onedrive.aspx?id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FScriptsPublic&share=cgq5VtTD0oMQRbmmBx%2Deza1IEgUCvzmNN7cSL8O7Uatr9Tj7gQ",
+      href:  "scripts-public/index.html",
       icon:  "code",
-      color: ["#ff6b35", "#f59e0b"]
+      color: ["#ff6b35", "#f59e0b"],
+      public: true
     }
   ],
 
@@ -1136,6 +1128,17 @@ const CONFIG = {
         "Built with GPT-6 Astra and Claude Opus 5",
         "Public / no Microsoft sign-in"
       ]
+    },
+    {
+      name: "Mini Soundtrack Lab",
+      desc: "Original browser synth + live generative cover art.",
+      href: "mini-soundtrack-lab.html",
+      image: "midnight-transit-orchestra-thumb.png",
+      bullets: [
+        "Original browser synth and generative cover art",
+        "Public / no Microsoft sign-in"
+      ],
+      cta: "Open the lab"
     }
   ],
   tools: [
@@ -1144,28 +1147,8 @@ const CONFIG = {
       desc:  "Resolve SharePoint / OneDrive drive + folder IDs fast",
       href:  "https://ganymededl.github.io/spofolderfinder/",
       icon:  "star",
-      color: ["#ffd166", "#f59e0b"]
-    },
-    {
-      name:  "Copilot Roadmap Deck Builder",
-      desc:  "Generate roadmap decks from public Microsoft 365 Roadmap and Message Center feeds",
-      href:  "https://ganymededl.github.io/copilot-roadmap-deck-builder/",
-      icon:  "code",
-      color: ["#22d3ee", "#3b82f6"]
-    },
-    {
-      name:  "Mini Soundtrack Lab",
-      desc:  "Original browser synth + live generative cover art (public, no sign-in)",
-      href:  "https://ganymededl.github.io/liudavid_od4b_root/mini-soundtrack-lab.html",
-      icon:  "games",
-      color: ["#ff5ea8", "#7c4dff"]
-    },
-    {
-      name:  "Copilot, Cowork, or Agents?",
-      desc:  "Choose the right Microsoft AI for any task — interactive decision hub (EDU & SLG)",
-      href:  "https://ganymededl.github.io/liudavid_od4b_root/copilot-cowork-agents/",
-      icon:  "list",
-      color: ["#199fd7", "#45ab71"]
+      color: ["#ffd166", "#f59e0b"],
+      public: true
     },
     {
       name:  "DemoIQ Config Builder",
@@ -1482,6 +1465,7 @@ const toolsEl = document.getElementById("tools");
   a.target = "_blank";
   a.rel = "noopener";
   a.innerHTML = `
+    <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : "OD4B / Microsoft sign-in"}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
       ${ICONS[t.icon] || ICONS.star}
     </div>

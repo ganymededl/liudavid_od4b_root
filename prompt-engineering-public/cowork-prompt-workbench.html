@@ -1,0 +1,1519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Cowork Prompt Construction Workbench</title>
+<style>
+  :root {
+    --ink: #201F1E;
+    --ink-soft: #484644;
+    --line: #E1DFDD;
+    --line-soft: #EDEBE9;
+    --paper: #FFFFFF;
+    --paper-alt: #F7F7F8;
+    --paper-tint: #F3F7FC;
+    --brand: #0F6CBD;
+    --brand-ink: #0A4D8A;
+    --brand-soft: #DEECF9;
+    --ok: #0E7C3A;
+    --ok-soft: #DFF6E4;
+    --warn: #8A6A00;
+    --warn-soft: #FFF4CE;
+    --bad: #A4262C;
+    --bad-soft: #FDE7E9;
+    --accent: #5C2E91;
+    --shadow-top: 0 -1px 4px rgba(0,0,0,0.03);
+    --header-grad: linear-gradient(180deg, #FFFFFF 0%, #F7F9FC 100%);
+    --textarea-bg: #FDFDFD;
+    --textarea-bg-focus: #FFFFFF;
+    --code-bg: #FAFBFC;
+  }
+  html[data-theme="dark"] {
+    --ink: #F3F3F3;
+    --ink-soft: #BFBFBF;
+    --line: #3A3A3A;
+    --line-soft: #2A2A2A;
+    --paper: #1F1F1F;
+    --paper-alt: #151515;
+    --paper-tint: #1B2A3A;
+    --brand: #4CC2FF;
+    --brand-ink: #9ED7FF;
+    --brand-soft: #1A3550;
+    --ok: #6CCB8E;
+    --ok-soft: #1C3A2A;
+    --warn: #E8C26B;
+    --warn-soft: #3A2E14;
+    --bad: #F0898E;
+    --bad-soft: #3A1F21;
+    --accent: #B388E8;
+    --shadow-top: 0 -1px 4px rgba(0,0,0,0.5);
+    --header-grad: linear-gradient(180deg, #1F1F1F 0%, #181818 100%);
+    --textarea-bg: #161616;
+    --textarea-bg-focus: #1C1C1C;
+    --code-bg: #141414;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    color: var(--ink);
+    background: var(--paper-alt);
+    line-height: 1.45;
+    font-size: 15px;
+    padding-bottom: 64px;
+    transition: background 150ms ease, color 150ms ease;
+  }
+  header.top {
+    background: var(--header-grad);
+    border-bottom: 1px solid var(--line);
+    padding: 28px 40px 24px;
+    position: relative;
+  }
+  .header-inner {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .header-text { flex: 1; min-width: 0; }
+  .header-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+    min-width: 320px;
+  }
+  .ctrl-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 8px 10px;
+  }
+  .icon-btn {
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    line-height: 1;
+  }
+  .icon-btn:hover { background: var(--paper-tint); }
+  .icon-btn.on { background: var(--brand-soft); color: var(--brand-ink); border-color: var(--brand); }
+  .icon-btn svg { width: 14px; height: 14px; display: block; }
+  .now-playing {
+    flex: 1;
+    min-width: 0;
+    font-size: 12px;
+    color: var(--ink-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .now-playing strong { color: var(--ink); font-weight: 600; }
+  .now-playing.loading::after {
+    content: "";
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+    margin-left: 6px;
+    animation: pulse 1.2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+  input[type="range"].vol {
+    width: 70px;
+    accent-color: var(--brand);
+  }
+  header.top .eyebrow {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand-ink);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .glitter {
+    display: inline-block;
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-weight: 800;
+    background: linear-gradient(
+      100deg,
+      #FFD166 0%,
+      #EF476F 18%,
+      #B388E8 36%,
+      #4CC2FF 54%,
+      #06D6A0 72%,
+      #FFD166 100%
+    );
+    background-size: 260% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: glitter-shift 7s linear infinite;
+    text-shadow: 0 0 0 transparent;
+    padding: 2px 0;
+    position: relative;
+  }
+  html[data-theme="dark"] .glitter {
+    filter: drop-shadow(0 0 6px rgba(179,136,232,0.35));
+  }
+  @keyframes glitter-shift {
+    0%   { background-position:   0% 50%; }
+    100% { background-position: 260% 50%; }
+  }
+  .sparkle {
+    display: inline-block;
+    margin: 0 6px;
+    font-size: 14px;
+    animation: sparkle-pop 2.4s ease-in-out infinite;
+    transform-origin: center;
+    filter: drop-shadow(0 0 2px rgba(255,209,102,0.7));
+  }
+  .sparkle:nth-child(1) { animation-delay: 0s; }
+  .sparkle.end { animation-delay: 1.1s; }
+  @keyframes sparkle-pop {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+    30%      { transform: scale(1.35) rotate(15deg); opacity: 1; }
+    60%      { transform: scale(0.9) rotate(-10deg); opacity: 0.7; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glitter { animation: none; background-position: 0% 50%; }
+    .sparkle { animation: none; }
+  }
+  header.top h1 {
+    margin: 0 0 6px;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  header.top p.lede {
+    margin: 0;
+    color: var(--ink-soft);
+    max-width: 780px;
+  }
+  main {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 32px 40px;
+  }
+  section.panel {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  section.panel h2 {
+    margin: 0 0 14px;
+    font-size: 18px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .step-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--brand);
+    color: white;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .mental-model {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  .mental-model ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .mental-model li {
+    margin-bottom: 10px;
+  }
+  .flow-svg {
+    width: 100%;
+    height: auto;
+    max-height: 200px;
+  }
+  .panel .what {
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+    font-size: 14px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 92px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    resize: vertical;
+    background: var(--textarea-bg);
+    transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--brand);
+    box-shadow: 0 0 0 2px rgba(15,108,189,0.25);
+    background: var(--textarea-bg-focus);
+  }
+  .field-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .hint-toggle {
+    background: none;
+    border: 1px solid var(--line);
+    color: var(--brand-ink);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .hint-toggle:hover { background: var(--brand-soft); }
+  .hint-box {
+    display: none;
+    margin-top: 12px;
+    border: 1px solid var(--line-soft);
+    background: var(--paper-tint);
+    border-radius: 4px;
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+  .hint-box.open { display: block; }
+  .hint-box .row { display: grid; grid-template-columns: 90px 1fr; gap: 12px; }
+  .hint-box .row + .row { margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+  .hint-box .tag {
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    align-self: start;
+    padding-top: 2px;
+  }
+  .hint-box .tag.weak { color: var(--bad); }
+  .hint-box .tag.strong { color: var(--ok); }
+  .hint-box .ex { color: var(--ink); font-family: "Cascadia Code", Consolas, "Courier New", monospace; font-size: 12.5px; }
+  .assemble-bar {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px 20px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  button.primary {
+    background: var(--brand);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  html[data-theme="dark"] button.primary { color: #0B1B27; }
+  button.primary:hover { filter: brightness(0.92); }
+  button.secondary {
+    background: var(--paper);
+    color: var(--brand-ink);
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button.secondary:hover { background: var(--paper-tint); }
+  pre.assembled {
+    background: var(--code-bg);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 16px;
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+    font-size: 12.5px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 420px;
+    overflow: auto;
+    margin: 0;
+    line-height: 1.55;
+  }
+  .empty-state { color: var(--ink-soft); font-style: italic; }
+  .score-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .score-card {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 14px 16px;
+    background: var(--paper);
+  }
+  .score-card .axis {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+  .score-card .rating {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .rating.low { background: var(--warn-soft); color: var(--warn); }
+  .rating.medium { background: var(--brand-soft); color: var(--brand-ink); }
+  .rating.high { background: var(--ok-soft); color: var(--ok); }
+  .score-card .note {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0;
+  }
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+  .example-card {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 16px;
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .example-card h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--brand-ink);
+  }
+  .example-card .tag-row { font-size: 11px; color: var(--ink-soft); }
+  .example-card .preview {
+    background: var(--paper-tint);
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-family: "Cascadia Code", Consolas, "Courier New", monospace;
+    max-height: 170px;
+    overflow: hidden;
+    position: relative;
+    line-height: 1.5;
+    white-space: pre-wrap;
+  }
+  .example-card .preview::after {
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 34px;
+    background: linear-gradient(180deg, rgba(243,247,252,0) 0%, var(--paper-tint) 90%);
+  }
+  .example-card .actions { display: flex; gap: 8px; margin-top: auto; }
+  .example-card .actions button { flex: 1; }
+  .completion-bar {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    background: var(--paper);
+    border-top: 1px solid var(--line);
+    padding: 10px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+    font-size: 13px;
+    box-shadow: var(--shadow-top);
+  }
+  .completion-bar .progress-track {
+    flex: 1;
+    max-width: 360px;
+    height: 6px;
+    background: var(--line-soft);
+    border-radius: 3px;
+    margin: 0 16px;
+    overflow: hidden;
+  }
+  .completion-bar .progress-fill {
+    height: 100%;
+    background: var(--brand);
+    width: 0%;
+    transition: width 220ms ease;
+  }
+  .completion-bar .label { font-weight: 600; color: var(--ink); }
+  .completion-bar .status { color: var(--ink-soft); }
+  /* Genre picker modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-card {
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    max-width: 560px;
+    width: 100%;
+    padding: 24px 26px 22px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.35);
+  }
+  .modal-card h3 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  .modal-card p.sub {
+    margin: 0 0 16px;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+  .genre-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+  .genre-opt {
+    text-align: left;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    font-family: inherit;
+    color: var(--ink);
+    font-size: 13px;
+    line-height: 1.35;
+    transition: all 120ms ease;
+  }
+  .genre-opt:hover {
+    border-color: var(--brand);
+    background: var(--paper-tint);
+  }
+  .genre-opt .name { font-weight: 600; font-size: 13.5px; margin-bottom: 2px; display: block; }
+  .genre-opt .hint { color: var(--ink-soft); font-size: 11.5px; }
+  .genre-opt.swiftie {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, var(--paper) 60%, var(--brand-soft) 100%);
+  }
+  .genre-opt.swiftie .name { color: var(--accent); }
+  .modal-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 14px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--brand-ink);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 0;
+    text-decoration: underline;
+  }
+  .genre-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--brand-soft);
+    color: var(--brand-ink);
+    font-weight: 600;
+  }
+  .toast {
+    position: fixed;
+    bottom: 72px; right: 28px;
+    background: #323130;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-size: 13px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 180ms ease;
+    pointer-events: none;
+    z-index: 20;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .section-intro { color: var(--ink-soft); font-size: 14px; margin: 0 0 6px; }
+  .dense-note {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line-soft);
+  }
+  @media (max-width: 860px) {
+    .mental-model { grid-template-columns: 1fr; }
+    .examples-grid { grid-template-columns: 1fr; }
+    .score-grid { grid-template-columns: 1fr; }
+    header.top, main, .completion-bar { padding-left: 20px; padding-right: 20px; }
+    .header-inner { flex-direction: column; }
+    .header-controls { min-width: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="header-inner">
+    <div class="header-text">
+      <div class="eyebrow"><span class="glitter"><span class="sparkle">&#10022;</span>Team HeCox — Copilot CSA onboarding — Internal only<span class="sparkle end">&#10022;</span></span></div>
+      <h1>Cowork Prompt Construction Workbench</h1>
+      <p class="lede">Learn the 5-component Cowork prompt framework by building one — not by reading about one. Fill each panel, assemble your prompt, see how it scores, and steal from three production-grade examples.</p>
+    </div>
+    <div class="header-controls">
+      <div class="ctrl-row" role="group" aria-label="Appearance">
+        <button class="icon-btn" id="btn-theme" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <span id="theme-label">Dark mode</span>
+        </button>
+        <span style="font-size:11px; color:var(--ink-soft); margin-left:auto;">Theme</span>
+      </div>
+      <div class="ctrl-row" role="group" aria-label="Background focus music">
+        <button class="icon-btn" id="btn-play" aria-label="Play focus music" title="Play focus music">
+          <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          <span id="play-label">Play focus</span>
+        </button>
+        <button class="icon-btn" id="btn-next" aria-label="Next station" title="Next station">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-mute" aria-label="Mute" title="Mute">
+          <svg id="icon-vol" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+        </button>
+        <input type="range" class="vol" id="vol" min="0" max="100" value="45" aria-label="Volume" />
+      </div>
+      <div class="now-playing" id="now-playing">No audio yet — click Play focus. Powered by the public Radio Browser API.</div>
+      <div style="font-size:11px; color:var(--ink-soft); display:flex; gap:8px; align-items:center;">
+        <span>Genre:</span>
+        <span class="genre-chip" id="genre-chip">Not set</span>
+        <button class="link-btn" id="btn-change-genre">Change</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Genre picker modal -->
+<div class="modal-backdrop" id="genre-modal" role="dialog" aria-modal="true" aria-labelledby="genre-title">
+  <div class="modal-card">
+    <h3 id="genre-title">Pick your focus station</h3>
+    <p class="sub">We'll pull matching stations from the public Radio Browser directory and rotate through them while you build your prompt.</p>
+    <div class="genre-grid" id="genre-grid"></div>
+    <div class="modal-foot">
+      <span>You can change this anytime from the header.</span>
+      <button class="link-btn" id="btn-modal-close">Maybe later</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- INTRO -->
+  <section class="panel" id="intro">
+    <h2><span class="step-pill">0</span>What is Cowork?</h2>
+    <div class="mental-model">
+      <ul>
+        <li><strong>A scheduler</strong> fires a prompt on a cadence you set (once, daily, weekly, on-demand).</li>
+        <li><strong>Copilot Cowork</strong> runs the prompt with your M365 data in reach — mail, Teams, files, calendar, SharePoint.</li>
+        <li><strong>A file artifact</strong> lands in <code>output/</code> — a docx, pptx, xlsx, PDF, or HTML — ready to share or review.</li>
+      </ul>
+      <svg class="flow-svg" viewBox="0 0 520 160" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Flow: Scheduler then Copilot Cowork then File output">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+            <path d="M0,0 L10,5 L0,10 z" fill="#0F6CBD"/>
+          </marker>
+        </defs>
+        <!-- Box 1 -->
+        <rect x="10" y="40" width="140" height="80" rx="6" fill="#DEECF9" stroke="#0F6CBD" stroke-width="1.5"/>
+        <text x="80" y="75" text-anchor="middle" font-family="Segoe UI" font-size="13" font-weight="600" fill="#0A4D8A">Scheduler</text>
+        <text x="80" y="95" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#484644">cadence + prompt</text>
+        <!-- Arrow 1 -->
+        <line x1="150" y1="80" x2="190" y2="80" stroke="#0F6CBD" stroke-width="2" marker-end="url(#arrow)"/>
+        <!-- Box 2 -->
+        <rect x="195" y="30" width="140" height="100" rx="6" fill="#F3F7FC" stroke="#5C2E91" stroke-width="1.5"/>
+        <text x="265" y="68" text-anchor="middle" font-family="Segoe UI" font-size="13" font-weight="600" fill="#5C2E91">Copilot Cowork</text>
+        <text x="265" y="86" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#484644">reads M365</text>
+        <text x="265" y="102" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#484644">runs tools</text>
+        <!-- Arrow 2 -->
+        <line x1="335" y1="80" x2="375" y2="80" stroke="#0F6CBD" stroke-width="2" marker-end="url(#arrow)"/>
+        <!-- Box 3 -->
+        <rect x="380" y="40" width="130" height="80" rx="6" fill="#DFF6E4" stroke="#0E7C3A" stroke-width="1.5"/>
+        <text x="445" y="75" text-anchor="middle" font-family="Segoe UI" font-size="13" font-weight="600" fill="#0E7C3A">File output</text>
+        <text x="445" y="95" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#484644">docx · pptx · html</text>
+      </svg>
+    </div>
+    <div class="dense-note">Every Cowork artifact is only as good as the prompt that drove it. The next 5 panels are the prompt.</div>
+  </section>
+
+  <!-- PANEL 1: ROLE -->
+  <section class="panel" data-component="role">
+    <h2><span class="step-pill">1</span>Role + lens</h2>
+    <p class="what">Tell Copilot Cowork who it is and what expertise to bring. "Senior Microsoft CSA for US Federal" produces different output than "Generic assistant." Specify the job title, the domain, and the viewpoint it should take.</p>
+    <textarea id="in-role" placeholder="e.g. Senior Microsoft CSA specializing in..."></textarea>
+    <div class="field-meta">
+      <button class="hint-toggle" data-target="hint-role">Show weak vs. strong example</button>
+      <span><span id="wc-role">0</span> words</span>
+    </div>
+    <div class="hint-box" id="hint-role">
+      <div class="row"><span class="tag weak">Weak</span><span class="ex">"You are a helpful assistant that helps with customer work."</span></div>
+      <div class="row"><span class="tag strong">Strong</span><span class="ex">"You are a senior Microsoft Cloud Solutions Architect supporting US SLED customers, with deep expertise in Azure governance, Entra ID, and Purview. Your lens is risk-first: always surface compliance exposure before optimization opportunities."</span></div>
+    </div>
+  </section>
+
+  <!-- PANEL 2: INPUT -->
+  <section class="panel" data-component="input">
+    <h2><span class="step-pill">2</span>Input spec</h2>
+    <p class="what">Spell out what data Copilot Cowork is working with — file paths in <code>input/</code>, M365 sources (email, Teams, calendar), specific docs, time ranges. Ambiguity here is the #1 cause of wrong outputs.</p>
+    <textarea id="in-input" placeholder="e.g. The file input/customer-asks.xlsx plus..."></textarea>
+    <div class="field-meta">
+      <button class="hint-toggle" data-target="hint-input">Show weak vs. strong example</button>
+      <span><span id="wc-input">0</span> words</span>
+    </div>
+    <div class="hint-box" id="hint-input">
+      <div class="row"><span class="tag weak">Weak</span><span class="ex">"Look at the customer file and recent emails."</span></div>
+      <div class="row"><span class="tag strong">Strong</span><span class="ex">"Use (1) input/customer-asks.xlsx — columns: Feature, Priority, Date_Requested; (2) my last 60 days of Outlook mail where subject contains 'GCC' or 'parity'; (3) the Microsoft 365 Roadmap export at input/roadmap.csv. Ignore anything older than 6 months."</span></div>
+    </div>
+  </section>
+
+  <!-- PANEL 3: OUTPUT -->
+  <section class="panel" data-component="output">
+    <h2><span class="step-pill">3</span>Output spec</h2>
+    <p class="what">Describe the exact deliverable — format (markdown, docx, HTML), structure (sections, columns, bullet counts), length, and any required headers or summaries. If you want a table, name the columns.</p>
+    <textarea id="in-output" placeholder="e.g. A markdown table with columns..."></textarea>
+    <div class="field-meta">
+      <button class="hint-toggle" data-target="hint-output">Show weak vs. strong example</button>
+      <span><span id="wc-output">0</span> words</span>
+    </div>
+    <div class="hint-box" id="hint-output">
+      <div class="row"><span class="tag weak">Weak</span><span class="ex">"Summarize the gaps in a nice format."</span></div>
+      <div class="row"><span class="tag strong">Strong</span><span class="ex">"A markdown table sorted by Gap descending. Columns: Feature, Commercial_GA, GCC_GA, GCC_High_GA, Gap_Days, Customer_Impact (H/M/L), Workaround. Precede the table with a 2-sentence executive summary. Max 25 rows."</span></div>
+    </div>
+  </section>
+
+  <!-- PANEL 4: CONSTRAINTS -->
+  <section class="panel" data-component="constraints">
+    <h2><span class="step-pill">4</span>Constraints</h2>
+    <p class="what">Explicit rules about what to <em>exclude</em>, avoid, or flag. Constraints are where most "polished" prompts fail — a strong constraint list prevents hallucinated data, sensitive info leakage, and format drift.</p>
+    <textarea id="in-constraints" placeholder="e.g. Do not include... Never mention... Flag any..."></textarea>
+    <div class="field-meta">
+      <button class="hint-toggle" data-target="hint-constraints">Show weak vs. strong example</button>
+      <span><span id="wc-constraints">0</span> words</span>
+    </div>
+    <div class="hint-box" id="hint-constraints">
+      <div class="row"><span class="tag weak">Weak</span><span class="ex">"Keep it clean and professional."</span></div>
+      <div class="row"><span class="tag strong">Strong</span><span class="ex">"Exclude preview/beta features. Never include internal Microsoft-confidential pricing. Flag any feature where GCC date is TBD with ⚠. Do not speculate on unannounced roadmap items — if the source doesn't have a date, write 'Not announced.' Avoid competitor comparisons."</span></div>
+    </div>
+  </section>
+
+  <!-- PANEL 5: AUDIENCE -->
+  <section class="panel" data-component="audience">
+    <h2><span class="step-pill">5</span>Audience + use context</h2>
+    <p class="what">Who reads this, where, and when. "CIO on a phone, 10 minutes before the meeting" drives very different tone and density than "Engineering team reviewing async in Teams over a week." Name the reader, the device, and the moment.</p>
+    <textarea id="in-audience" placeholder="e.g. Federal customer CTO reviewing on a laptop during..."></textarea>
+    <div class="field-meta">
+      <button class="hint-toggle" data-target="hint-audience">Show weak vs. strong example</button>
+      <span><span id="wc-audience">0</span> words</span>
+    </div>
+    <div class="hint-box" id="hint-audience">
+      <div class="row"><span class="tag weak">Weak</span><span class="ex">"For internal stakeholders."</span></div>
+      <div class="row"><span class="tag strong">Strong</span><span class="ex">"Federal customer CIO reviewing on a laptop during a quarterly business review. Will copy-paste sections into an email to their security team. Skimmable in 90 seconds; no Microsoft jargon the customer hasn't already used in prior meetings."</span></div>
+    </div>
+  </section>
+
+  <!-- ASSEMBLE -->
+  <div class="assemble-bar">
+    <div>
+      <strong>Ready to stitch it together?</strong>
+      <div style="font-size:12px; color:var(--ink-soft)">We'll format your 5 inputs into a Cowork-ready prompt block.</div>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button class="secondary" id="btn-clear">Clear all</button>
+      <button class="primary" id="btn-assemble">Assemble my prompt</button>
+    </div>
+  </div>
+
+  <section class="panel" id="assembled-section" style="display:none;">
+    <h2><span class="step-pill" style="background:var(--accent)">✓</span>Assembled prompt</h2>
+    <pre class="assembled" id="assembled-output"></pre>
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="secondary" id="btn-copy">Copy to clipboard</button>
+    </div>
+
+    <div id="score-wrap" style="margin-top:22px;">
+      <h3 style="margin:0 0 4px; font-size:15px;">Prompt scorecard</h3>
+      <p class="section-intro">Heuristic rating across four axes. Low is not "wrong" — it's a pointer to what's worth adding.</p>
+      <div class="score-grid" id="score-grid"></div>
+    </div>
+  </section>
+
+  <!-- AUDIO INFO -->
+  <section class="panel" style="padding:14px 20px;">
+    <div style="font-size:12px; color:var(--ink-soft); display:flex; gap:8px; align-items:baseline; flex-wrap:wrap;">
+      <strong style="color:var(--ink); font-size:13px;">About the focus music:</strong>
+      streams are pulled live from the <a href="https://www.radio-browser.info/" target="_blank" rel="noopener" style="color:var(--brand-ink);">Radio Browser API</a> — a community-maintained, no-auth public directory — filtered to ambient, lofi, chillout, focus, and study tags. If the API is unreachable, the player falls back to a small list of SomaFM ambient channels. Two other APIs worth knowing: <a href="https://mubert.com/render/pricing/api" target="_blank" rel="noopener" style="color:var(--brand-ink);">Mubert</a> (AI-generated focus tracks, free developer key) and <a href="https://developer.jamendo.com/" target="_blank" rel="noopener" style="color:var(--brand-ink);">Jamendo</a> (royalty-free catalog with track-level metadata, client_id required). Swap them in by replacing the <code>fetchStations()</code> function.
+    </div>
+  </section>
+
+  <!-- EXAMPLES -->
+  <section class="panel">
+    <h2><span class="step-pill" style="background:var(--accent)">★</span>Steal a real example</h2>
+    <p class="section-intro">Three complete Cowork prompts in daily use by CSAs. Click "Load into workbench" to inspect each component, or "Copy prompt" to use as-is.</p>
+    <div class="examples-grid" id="examples-grid"></div>
+  </section>
+
+</main>
+
+<div class="completion-bar" role="status" aria-live="polite">
+  <span class="label"><span id="done-count">0</span> of 5 components filled</span>
+  <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+  <span class="status" id="progress-status">Start with panel 1 — Role + lens.</span>
+</div>
+
+<div class="toast" id="toast">Copied</div>
+
+<script>
+(function() {
+  "use strict";
+
+  var COMPONENTS = ["role", "input", "output", "constraints", "audience"];
+  var LABELS = {
+    role: "ROLE + LENS",
+    input: "INPUT SPEC",
+    output: "OUTPUT SPEC",
+    constraints: "CONSTRAINTS",
+    audience: "AUDIENCE + USE CONTEXT"
+  };
+
+  // ------ word count + completion ------
+  function wc(s) { return (s.trim().match(/\S+/g) || []).length; }
+
+  function updateCompletion() {
+    var filled = 0;
+    COMPONENTS.forEach(function(c) {
+      var el = document.getElementById("in-" + c);
+      var n = wc(el.value);
+      document.getElementById("wc-" + c).textContent = n;
+      if (n > 0) filled++;
+    });
+    document.getElementById("done-count").textContent = filled;
+    document.getElementById("progress-fill").style.width = (filled / 5 * 100) + "%";
+    var status = document.getElementById("progress-status");
+    if (filled === 0) status.textContent = "Start with panel 1 — Role + lens.";
+    else if (filled < 5) status.textContent = "Keep going — " + (5 - filled) + " to go.";
+    else status.textContent = "All 5 components filled. Hit Assemble.";
+  }
+
+  COMPONENTS.forEach(function(c) {
+    document.getElementById("in-" + c).addEventListener("input", updateCompletion);
+  });
+
+  // ------ hint toggles ------
+  document.querySelectorAll(".hint-toggle").forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      var el = document.getElementById(btn.dataset.target);
+      el.classList.toggle("open");
+      btn.textContent = el.classList.contains("open")
+        ? "Hide example"
+        : "Show weak vs. strong example";
+    });
+  });
+
+  // ------ assemble ------
+  function readAll() {
+    var vals = {};
+    COMPONENTS.forEach(function(c) {
+      vals[c] = document.getElementById("in-" + c).value.trim();
+    });
+    return vals;
+  }
+
+  function formatAssembled(vals) {
+    var sections = [];
+    sections.push("# COWORK PROMPT");
+    sections.push("");
+    COMPONENTS.forEach(function(c) {
+      sections.push("## " + LABELS[c]);
+      sections.push(vals[c] ? vals[c] : "(not provided)");
+      sections.push("");
+    });
+    return sections.join("\n").trim();
+  }
+
+  document.getElementById("btn-assemble").addEventListener("click", function() {
+    var vals = readAll();
+    var empty = COMPONENTS.filter(function(c) { return !vals[c]; });
+    var out = document.getElementById("assembled-output");
+    out.textContent = formatAssembled(vals);
+    document.getElementById("assembled-section").style.display = "block";
+    renderScores(scorePrompt(vals));
+    document.getElementById("assembled-section").scrollIntoView({ behavior: "smooth", block: "start" });
+    if (empty.length) {
+      toast(empty.length + " component(s) still empty — scored anyway");
+    } else {
+      toast("Prompt assembled");
+    }
+  });
+
+  document.getElementById("btn-clear").addEventListener("click", function() {
+    if (!confirm("Clear all 5 panels?")) return;
+    COMPONENTS.forEach(function(c) { document.getElementById("in-" + c).value = ""; });
+    document.getElementById("assembled-section").style.display = "none";
+    updateCompletion();
+  });
+
+  document.getElementById("btn-copy").addEventListener("click", function() {
+    var text = document.getElementById("assembled-output").textContent;
+    navigator.clipboard.writeText(text).then(function() {
+      toast("Copied to clipboard");
+    }, function() {
+      // fallback
+      var ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); toast("Copied"); } catch(e) { toast("Copy failed"); }
+      document.body.removeChild(ta);
+    });
+  });
+
+  // ------ scoring ------
+  function scorePrompt(v) {
+    var all = COMPONENTS.map(function(c) { return v[c] || ""; }).join(" ");
+    var allLower = all.toLowerCase();
+    var totalWords = wc(all);
+
+    // Specificity: numbers, proper nouns, word density
+    var numberMatches = (all.match(/\b\d+\b/g) || []).length;
+    var properNouns = (all.match(/\b[A-Z][a-zA-Z0-9]{2,}\b/g) || []).length;
+    var specScore = 0;
+    if (totalWords >= 60) specScore++;
+    if (numberMatches >= 2) specScore++;
+    if (properNouns >= 4) specScore++;
+    var specificity = rate(specScore, 2);
+    var specNote = {
+      Low: "Add concrete specifics — named files, dates, tools, source systems, or numeric thresholds.",
+      Medium: "Solid foundation. Consider naming more sources (Outlook folders, file paths, date ranges) to pin it down.",
+      High: "Well-grounded — named artifacts and quantified scope are what keep Cowork on the rails."
+    }[specificity];
+
+    // Constraint coverage
+    var ct = (v.constraints || "").toLowerCase();
+    var negPatterns = ["don't","do not","avoid","exclude","never","no ","only ","must not","flag","without","except","ignore","skip"];
+    var negCount = 0;
+    negPatterns.forEach(function(p) { if (ct.indexOf(p) !== -1) negCount++; });
+    var ctWords = wc(ct);
+    var conScore = 0;
+    if (ctWords >= 15) conScore++;
+    if (negCount >= 2) conScore++;
+    if (negCount >= 4) conScore++;
+    var constraintCov = rate(conScore, 2);
+    var conNote = {
+      Low: "Name 2–3 things to exclude or flag — confidentiality, preview data, unverified claims, or stale sources.",
+      Medium: "You have guardrails. Add one rule about what to do when data is missing or uncertain.",
+      High: "Comprehensive guardrails — this is how you prevent hallucinated or out-of-scope output."
+    }[constraintCov];
+
+    // Output clarity
+    var ot = (v.output || "").toLowerCase();
+    var formatCues = ["table","bullet","heading","section","column","row","markdown","html","json","word","page","sentence","paragraph","list","format","csv","docx","pdf","chart","summary","title"];
+    var fmtCount = 0;
+    formatCues.forEach(function(w) { if (ot.indexOf(w) !== -1) fmtCount++; });
+    var otWords = wc(ot);
+    var outScore = 0;
+    if (otWords >= 20) outScore++;
+    if (fmtCount >= 2) outScore++;
+    if (fmtCount >= 4) outScore++;
+    var outputClarity = rate(outScore, 2);
+    var outNote = {
+      Low: "Specify the shape — file type, section names, column labels, or an explicit length target.",
+      Medium: "You've named the format. Add one or two structural details (e.g., sort order, section order, bullet count).",
+      High: "Crisp spec — Copilot Cowork knows exactly what artifact to produce."
+    }[outputClarity];
+
+    // Audience fit
+    var at = (v.audience || "").toLowerCase();
+    var roles = ["executive","engineer","cio","cto","customer","manager","team","director","gm","pm","stakeholder","leadership","architect","developer","ciso","chief","partner","cohort","board"];
+    var ctxCues = ["laptop","phone","mobile","desktop","meeting","email","during","after","before","offline","online","briefing","review","minute","second","async","standup","skim","prep","onboarding"];
+    var roleHit = 0, ctxHit = 0;
+    roles.forEach(function(w) { if (at.indexOf(w) !== -1) roleHit++; });
+    ctxCues.forEach(function(w) { if (at.indexOf(w) !== -1) ctxHit++; });
+    var audScore = 0;
+    if (roleHit >= 1) audScore++;
+    if (ctxHit >= 1) audScore++;
+    if (wc(at) >= 15) audScore++;
+    var audienceFit = rate(audScore, 2);
+    var audNote = {
+      Low: "Name the reader's role and the moment they'll read it — device, time pressure, or what they do next.",
+      Medium: "Reader is identified. Add the reading context (device, minutes available, what happens after).",
+      High: "Reader and moment are both clear — tone and density will match."
+    }[audienceFit];
+
+    return [
+      { axis: "Specificity", rating: specificity, note: specNote },
+      { axis: "Constraint coverage", rating: constraintCov, note: conNote },
+      { axis: "Output clarity", rating: outputClarity, note: outNote },
+      { axis: "Audience fit", rating: audienceFit, note: audNote }
+    ];
+  }
+
+  function rate(score, highThreshold) {
+    if (score >= highThreshold + 1) return "High";
+    if (score >= highThreshold) return "High";
+    if (score === highThreshold - 1) return "Medium";
+    return "Low";
+  }
+
+  function renderScores(scores) {
+    var grid = document.getElementById("score-grid");
+    grid.innerHTML = "";
+    scores.forEach(function(s) {
+      var card = document.createElement("div");
+      card.className = "score-card";
+      card.innerHTML =
+        '<div class="axis">' + s.axis + '</div>' +
+        '<div class="rating ' + s.rating.toLowerCase() + '">' + s.rating + '</div>' +
+        '<p class="note">' + s.note + '</p>';
+      grid.appendChild(card);
+    });
+  }
+
+  // ------ toast ------
+  var toastTimer = null;
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() { t.classList.remove("show"); }, 1800);
+  }
+
+  // ------ examples ------
+  var EXAMPLES = [
+    {
+      id: "gcc-sled",
+      title: "GCC SLED parity & compliance tracker",
+      subtitle: "Monthly · for state & local gov customers",
+      role: "Senior Microsoft Cloud Solutions Architect supporting US State & Local Government (SLED) customers on Microsoft 365 GCC (non-High). Your lens is StateRAMP, CJIS, and IRS 1075 first — surface compliance and attestation implications before capability upside.",
+      input: "Use (1) input/sled-customer-asks.xlsx — state/county feature requests with columns Feature, Agency, CJIS_Scope (Y/N), StateRAMP_Required (Y/N), Priority; (2) input/m365-gcc-roadmap.csv — the current GCC (non-High) roadmap; (3) my Teams chats with the account team over the last 45 days where a message mentions 'GCC', 'CJIS', or 'StateRAMP'; (4) any open premier support cases for this tenant from the last 30 days.",
+      output: "A markdown brief with: (1) 3-bullet executive summary naming the top compliance risk; (2) a table of the top 10 asks sorted by Priority then by Gap_Days — columns Feature, GCC_Availability, CJIS_Notes, StateRAMP_Notes, Workaround, Owner; (3) a 'Newly available in GCC this month' callout of up to 5 features; (4) a closing 'Open questions for the account team' list of 3–5 items.",
+      constraints: "Exclude GCC-High-only features — this customer is GCC only. Never speculate on StateRAMP authorization status; if the authorization isn't explicitly listed, write 'Not verified.' Flag any feature touching CJIS data with a 🛡 marker. Do not include Microsoft-confidential pricing or unreleased SKU names. No competitor comparisons. If the roadmap has no date, write 'Not announced' — never guess.",
+      audience: "State agency CIO and their information security officer, reviewing on a laptop the day before a monthly steering committee. They will share excerpts with their Attorney General's office. Skimmable in 2 minutes; assume they know StateRAMP and CJIS but not internal Microsoft product team names."
+    },
+    {
+      id: "edu-brief",
+      title: "Higher-ed cabinet readiness brief",
+      subtitle: "Monthly · for university CIO cabinet meeting",
+      role: "Senior Microsoft Cloud Solutions Architect supporting US Higher Education customers — R1 research universities and multi-campus systems. Your lens is student-data-first: FERPA exposure and research-IP protection come before feature adoption or cost optimization.",
+      input: "Use (1) input/campus-intake.xlsx — current Microsoft 365 EDU A3/A5 license mix by college and enrollment; (2) my last 60 days of Outlook mail from the customer's IT security and identity teams; (3) the most recent campus IT steering committee deck at input/steering-*.pptx; (4) input/signin-risk.csv — the Entra ID risky sign-in export for the tenant; (5) the two largest open change requests from their ServiceNow export at input/changes.csv.",
+      output: "A 1-page brief (~500 words) ready to paste into a docx. Sections, in order: (1) Semester readiness headline — 1 sentence; (2) FERPA exposure watchlist — 3 bullets; (3) License adoption opportunities — 3 bullets naming specific SKUs (Copilot for Education, Intune for Education, Purview for student records); (4) Top 2 risks with named owner and target date; (5) Recommended 30-day actions — up to 5 bullets. Every bullet ≤ 18 words.",
+      constraints: "Never include individual student identifiers, even from sample data. Do not name faculty or research groups. Flag any line item involving student PII with [FERPA]. This is higher-ed only — avoid K-12 references. No marketing language ('transformative', 'reimagine', 'unlock'); use plain IT-operations terms. If a metric is inferred, prefix it with '~'.",
+      audience: "University CIO and Associate VP for Research Computing, reading on a laptop 15 minutes before the monthly cabinet meeting. They will forward the FERPA section to their general counsel. Skimmable in 90 seconds; assume they know Entra ID and Microsoft 365 EDU but not internal Microsoft product team names."
+    },
+    {
+      id: "leave-behind",
+      title: "Customer leave-behind HTML tool",
+      subtitle: "On-demand · post-workshop artifact",
+      role: "Microsoft Cloud Solutions Architect producing a customer-facing leave-behind after an Azure Well-Architected Framework workshop. Your lens is pragmatic and vendor-neutral — the customer should be able to act on this without a Microsoft seller in the room.",
+      input: "Use (1) input/workshop-notes.docx — my workshop facilitator notes with the 3 priority workloads discussed; (2) input/whiteboard-*.jpg — photos of the session whiteboards; (3) input/intake.xlsx — customer intake form with stakeholder roles and current Azure spend band; (4) the five WAF pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency) as the structural anchor.",
+      output: "A single self-contained HTML file at output/leave-behind.html with: (1) customer-branded header with workshop date; (2) 3-bullet executive summary; (3) decision log as a table with Decision, Owner, Date; (4) per-workload section with current-state, target-state, and 3 recommended next actions each, including Azure service names; (5) open questions list; (6) a simple inline SVG diagram of the target reference architecture. No external CSS or font URLs.",
+      constraints: "Zero external dependencies — no CDN, no Google Fonts, no analytics beacons. The page must render on an air-gapped laptop. Do not include internal Microsoft pricing or discount language — use relative terms. Flag any recommendation that requires a paid SKU with a $ marker. Avoid acronyms the customer did not use in the workshop. Never reference competitor products.",
+      audience: "Customer's architecture review board — a mix of cloud engineers and one non-technical engineering director. They will open this on a corporate laptop, possibly offline, and return to it over the next 90 days. Section density should let an engineer dive deep and a director skim just the executive summary and decision log."
+    },
+    {
+      id: "exec-brief",
+      title: "Executive briefing doc generator",
+      subtitle: "On-demand · pre-GM meeting pre-read",
+      role: "Microsoft CSA drafting a 1-page executive pre-read for a Microsoft GM walking into a meeting with a Fortune 500 customer CIO. Your lens is disciplined brevity — every bullet must earn its place.",
+      input: "Use (1) my Teams chat history with the core customer account team over the last 90 days; (2) the three most recent customer QBR decks at input/qbr-*.pptx; (3) the latest Azure consumption report at input/consumption.csv; (4) any open Microsoft support cases tagged severity A or B for this customer; (5) calendar events with the customer in the last 60 days — titles and attendees only.",
+      output: "A docx at output/gm-prebrief.docx, exactly 1 page (~400 words). Sections in order: (1) Customer context — 2 sentences; (2) What's going well — 3 bullets; (3) Risks and blockers — 3 bullets; (4) The ask — what we want from the GM in 1–2 sentences; (5) Next 2 commitments we'll make. Every bullet ≤ 15 words. Use a single-column layout with bolded section headers.",
+      constraints: "Never include consumption dollar figures — use relative terms (growing, flat, declining, pressured). Do not name individual customer employees other than the CIO. Flag any risk that crosses the executive escalation threshold with [ESCALATE]. No marketing language — no 'empowering', 'industry-leading', or 'unlock'. If a section has fewer than 3 true items, leave it short rather than padding.",
+      audience: "Microsoft GM reading on their phone in the 10 minutes before walking into the meeting. They need to be able to skim all five sections in under 60 seconds and land on the 'ask' with full context. Assume they know the customer account but not the weekly detail."
+    }
+  ];
+
+  function renderExamples() {
+    var grid = document.getElementById("examples-grid");
+    EXAMPLES.forEach(function(ex) {
+      var card = document.createElement("div");
+      card.className = "example-card";
+      var preview = "ROLE\n" + ex.role.substring(0, 140) + (ex.role.length > 140 ? "…" : "")
+        + "\n\nOUTPUT\n" + ex.output.substring(0, 140) + (ex.output.length > 140 ? "…" : "");
+      card.innerHTML =
+        '<h3>' + escapeHtml(ex.title) + '</h3>' +
+        '<div class="tag-row">' + escapeHtml(ex.subtitle) + '</div>' +
+        '<div class="preview">' + escapeHtml(preview) + '</div>' +
+        '<div class="actions">' +
+          '<button class="secondary" data-action="load" data-id="' + ex.id + '">Load into workbench</button>' +
+          '<button class="secondary" data-action="copy" data-id="' + ex.id + '">Copy prompt</button>' +
+        '</div>';
+      grid.appendChild(card);
+    });
+    grid.addEventListener("click", function(e) {
+      var btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      var ex = EXAMPLES.find(function(x) { return x.id === btn.dataset.id; });
+      if (!ex) return;
+      if (btn.dataset.action === "load") {
+        COMPONENTS.forEach(function(c) { document.getElementById("in-" + c).value = ex[c]; });
+        updateCompletion();
+        toast("Loaded into workbench");
+        document.querySelector('[data-component="role"]').scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (btn.dataset.action === "copy") {
+        var vals = {};
+        COMPONENTS.forEach(function(c) { vals[c] = ex[c]; });
+        var text = formatAssembled(vals);
+        navigator.clipboard.writeText(text).then(function() { toast("Prompt copied"); }, function() { toast("Copy failed"); });
+      }
+    });
+  }
+
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  // ------ theme toggle ------
+  var themeBtn = document.getElementById("btn-theme");
+  var themeLabel = document.getElementById("theme-label");
+  function applyTheme(mode) {
+    if (mode === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
+      themeLabel.textContent = "Light mode";
+      themeBtn.classList.add("on");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+      themeLabel.textContent = "Dark mode";
+      themeBtn.classList.remove("on");
+    }
+  }
+  function currentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
+  }
+  // initial — respect stored pref, then OS pref
+  try {
+    var saved = localStorage.getItem("cowork-theme");
+    if (saved === "dark" || saved === "light") {
+      applyTheme(saved);
+    } else if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+      applyTheme("dark");
+    }
+  } catch (e) { /* ignore storage errors */ }
+  themeBtn.addEventListener("click", function() {
+    var next = currentTheme() === "dark" ? "light" : "dark";
+    applyTheme(next);
+    try { localStorage.setItem("cowork-theme", next); } catch (e) {}
+  });
+
+  // ------ background audio (Radio Browser API) ------
+  // Public, no-auth directory of internet radio streams.
+  // https://api.radio-browser.info/ — we rotate through curated ambient/lofi/focus stations.
+  var AUDIO_API_MIRRORS = [
+    "https://de1.api.radio-browser.info",
+    "https://de2.api.radio-browser.info",
+    "https://at1.api.radio-browser.info"
+  ];
+
+  // Genre options shown in the picker modal.
+  //   mode: "tag" searches Radio Browser by tag; "name" searches by station name (used for the Taylor Swift channel).
+  //   tags[] is one or more — on each refill we pick a random tag from the list (lets "Focus mix" stay varied).
+  var GENRES = [
+    { id: "focus-mix",  label: "Focus mix",       hint: "Ambient · lo-fi · chillout · study — rotates",  mode: "tag",  tags: ["ambient", "lofi", "chillout", "focus", "study"] },
+    { id: "lofi",       label: "Lo-fi beats",     hint: "Low-key beats, minimal vocals",                 mode: "tag",  tags: ["lofi"] },
+    { id: "ambient",    label: "Ambient",         hint: "Atmospheric, texture-first",                    mode: "tag",  tags: ["ambient"] },
+    { id: "chillout",   label: "Chillout",        hint: "Downtempo, relaxed tempo",                      mode: "tag",  tags: ["chillout"] },
+    { id: "jazz",       label: "Jazz",            hint: "Instrumental and vocal jazz",                   mode: "tag",  tags: ["jazz"] },
+    { id: "classical",  label: "Classical",       hint: "Orchestral, chamber, piano",                    mode: "tag",  tags: ["classical"] },
+    { id: "electronic", label: "Electronic",      hint: "Downtempo electronic, idm, synthwave",          mode: "tag",  tags: ["electronic", "synthwave", "downtempo"] },
+    { id: "taylor",     label: "Taylor Swift only", hint: "All-Swift fan stations via Radio Browser",    mode: "name", query: "taylor swift", swiftie: true }
+  ];
+
+  // Small offline-safe fallback list (used only if the Radio Browser API is unreachable)
+  var FALLBACK_STATIONS = [
+    { name: "SomaFM — Groove Salad (ambient/downtempo)", url: "https://ice6.somafm.com/groovesalad-128-mp3", homepage: "https://somafm.com/groovesalad/" },
+    { name: "SomaFM — Drone Zone (atmospheric ambient)", url: "https://ice6.somafm.com/dronezone-128-mp3", homepage: "https://somafm.com/dronezone/" },
+    { name: "SomaFM — Deep Space One (deep ambient)", url: "https://ice6.somafm.com/deepspaceone-128-mp3", homepage: "https://somafm.com/deepspaceone/" },
+    { name: "SomaFM — Fluid (liquid drum & bass, low-key)", url: "https://ice6.somafm.com/fluid-128-mp3", homepage: "https://somafm.com/fluid/" }
+  ];
+
+  var audio = new Audio();
+  audio.crossOrigin = "anonymous";
+  audio.preload = "none";
+  audio.volume = 0.45;
+
+  var stations = [];          // queue of { name, url, homepage? }
+  var stationIdx = -1;
+  var wantPlaying = false;    // user intent
+  var muted = false;
+  var loading = false;
+  var selectedGenreId = null; // set when user picks from the modal
+  try { selectedGenreId = localStorage.getItem("cowork-genre") || null; } catch (e) {}
+
+  var btnPlay = document.getElementById("btn-play");
+  var btnNext = document.getElementById("btn-next");
+  var btnMute = document.getElementById("btn-mute");
+  var iconPlay = document.getElementById("icon-play");
+  var iconVol = document.getElementById("icon-vol");
+  var playLabel = document.getElementById("play-label");
+  var nowPlaying = document.getElementById("now-playing");
+  var volSlider = document.getElementById("vol");
+
+  var ICON_PLAY = '<path d="M8 5v14l11-7z"/>';
+  var ICON_PAUSE = '<path d="M6 5h4v14H6zm8 0h4v14h-4z"/>';
+  var ICON_VOL = '<path d="M3 10v4h4l5 5V5L7 10H3zm13.5 2a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/>';
+  var ICON_MUTE = '<path d="M3 10v4h4l5 5V5L7 10H3zm13.59 2l2.7 2.7-1.41 1.41L15.17 13.4l-2.7 2.7-1.41-1.41 2.7-2.7-2.7-2.7 1.41-1.41 2.7 2.7 2.71-2.7 1.41 1.41L16.59 12z"/>';
+
+  function setNowPlaying(text, isLoading) {
+    nowPlaying.innerHTML = text;
+    nowPlaying.classList.toggle("loading", !!isLoading);
+  }
+
+  function setPlayUI(playing) {
+    iconPlay.innerHTML = playing ? ICON_PAUSE : ICON_PLAY;
+    playLabel.textContent = playing ? "Pause" : "Play focus";
+    btnPlay.classList.toggle("on", playing);
+    btnPlay.setAttribute("aria-label", playing ? "Pause focus music" : "Play focus music");
+  }
+
+  function setMuteUI() {
+    iconVol.innerHTML = muted ? ICON_MUTE : ICON_VOL;
+    btnMute.classList.toggle("on", muted);
+    btnMute.setAttribute("aria-label", muted ? "Unmute" : "Mute");
+    btnMute.title = muted ? "Unmute" : "Mute";
+  }
+
+  function pickMirror() {
+    return AUDIO_API_MIRRORS[Math.floor(Math.random() * AUDIO_API_MIRRORS.length)];
+  }
+
+  function shuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+    }
+    return arr;
+  }
+
+  function currentGenre() {
+    var id = selectedGenreId || "focus-mix";
+    for (var i = 0; i < GENRES.length; i++) if (GENRES[i].id === id) return GENRES[i];
+    return GENRES[0];
+  }
+
+  function buildSearchUrl(genre) {
+    var mirror = pickMirror();
+    var qs = "hidebroken=true&order=votes&reverse=true&limit=40";
+    if (genre.mode === "name") {
+      return {
+        url: mirror + "/json/stations/search?name=" + encodeURIComponent(genre.query) + "&" + qs,
+        label: genre.label
+      };
+    }
+    var tag = genre.tags[Math.floor(Math.random() * genre.tags.length)];
+    return {
+      url: mirror + "/json/stations/search?tag=" + encodeURIComponent(tag) + "&codec=MP3&" + qs,
+      label: tag
+    };
+  }
+
+  function fetchStations() {
+    var genre = currentGenre();
+    var req = buildSearchUrl(genre);
+    return fetch(req.url, { headers: { "Accept": "application/json" } })
+      .then(function(r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function(list) {
+        var cleaned = (list || [])
+          .filter(function(s) { return s.url_resolved && /^https?:/i.test(s.url_resolved); });
+        // For tag-based genres, filter out talk/news; skip this filter for name searches (e.g. Taylor Swift)
+        if (genre.mode === "tag") {
+          cleaned = cleaned.filter(function(s) {
+            return !/\btalk|news|podcast|comedy\b/i.test((s.tags || "") + " " + (s.name || ""));
+          });
+        } else if (genre.mode === "name") {
+          // Keep only stations whose name actually matches the query (Radio Browser's name search is fuzzy)
+          var q = genre.query.toLowerCase();
+          cleaned = cleaned.filter(function(s) {
+            return (s.name || "").toLowerCase().indexOf(q) !== -1;
+          });
+        }
+        var mapped = cleaned.map(function(s) {
+          return {
+            name: (s.name || "Unknown station").trim() + " — " + req.label,
+            url: s.url_resolved,
+            homepage: s.homepage || ""
+          };
+        });
+        if (!mapped.length) throw new Error("no usable stations");
+        return shuffle(mapped).slice(0, 12);
+      });
+  }
+
+  function ensureQueue() {
+    if (stations.length && stationIdx < stations.length - 1) {
+      return Promise.resolve();
+    }
+    setNowPlaying("Finding a focus station…", true);
+    return fetchStations()
+      .then(function(list) {
+        stations = list;
+        stationIdx = -1;
+      })
+      .catch(function() {
+        // API unreachable — fall back to bundled list
+        stations = shuffle(FALLBACK_STATIONS.slice());
+        stationIdx = -1;
+      });
+  }
+
+  function playCurrent() {
+    if (!stations.length) return;
+    var s = stations[stationIdx];
+    if (!s) return;
+    setNowPlaying("Tuning in — <strong>" + escapeHtml(s.name) + "</strong>", true);
+    try { audio.pause(); } catch (e) {}
+    audio.src = s.url;
+    var p = audio.play();
+    if (p && typeof p.catch === "function") {
+      p.catch(function() {
+        // this station refused — skip forward
+        advance();
+      });
+    }
+  }
+
+  function advance() {
+    stationIdx++;
+    if (stationIdx >= stations.length) {
+      // refill
+      stations = [];
+      stationIdx = -1;
+      if (wantPlaying) {
+        ensureQueue().then(function() {
+          if (!stations.length) {
+            wantPlaying = false;
+            setPlayUI(false);
+            setNowPlaying("Couldn't reach any station. Try again in a moment.", false);
+            return;
+          }
+          stationIdx = 0;
+          playCurrent();
+        });
+      }
+      return;
+    }
+    playCurrent();
+  }
+
+  audio.addEventListener("playing", function() {
+    loading = false;
+    var s = stations[stationIdx];
+    var label = s ? s.name : "Stream";
+    setNowPlaying("Now playing — <strong>" + escapeHtml(label) + "</strong>", false);
+    setPlayUI(true);
+  });
+  audio.addEventListener("error", function() {
+    if (wantPlaying) advance();
+  });
+  audio.addEventListener("ended", function() {
+    // internet radio usually doesn't "end", but if it does, rotate to next station
+    if (wantPlaying) advance();
+  });
+  audio.addEventListener("stalled", function() {
+    if (wantPlaying) {
+      setNowPlaying("Stream stalled — trying another station…", true);
+      advance();
+    }
+  });
+
+  function startPlayback() {
+    wantPlaying = true;
+    setPlayUI(true); // optimistic
+    ensureQueue().then(function() {
+      if (!stations.length) {
+        wantPlaying = false;
+        setPlayUI(false);
+        setNowPlaying("Couldn't load any stations (network blocked?).", false);
+        return;
+      }
+      if (stationIdx < 0) stationIdx = 0;
+      playCurrent();
+    });
+  }
+
+  btnPlay.addEventListener("click", function() {
+    if (wantPlaying) {
+      wantPlaying = false;
+      audio.pause();
+      setPlayUI(false);
+      setNowPlaying("Paused. Click Play focus to resume.", false);
+      return;
+    }
+    // First-time click with no genre chosen → open picker instead of playing
+    if (!selectedGenreId) {
+      openGenreModal(true);
+      return;
+    }
+    startPlayback();
+  });
+
+  btnNext.addEventListener("click", function() {
+    if (!wantPlaying) return;
+    advance();
+  });
+
+  btnMute.addEventListener("click", function() {
+    muted = !muted;
+    audio.muted = muted;
+    setMuteUI();
+  });
+
+  volSlider.addEventListener("input", function() {
+    audio.volume = Math.max(0, Math.min(1, parseInt(volSlider.value, 10) / 100));
+    if (audio.volume === 0) {
+      if (!muted) { muted = true; audio.muted = true; setMuteUI(); }
+    } else if (muted) {
+      muted = false; audio.muted = false; setMuteUI();
+    }
+  });
+
+  setMuteUI();
+  setPlayUI(false);
+
+  // ------ genre picker modal ------
+  var genreModal = document.getElementById("genre-modal");
+  var genreGrid = document.getElementById("genre-grid");
+  var genreChip = document.getElementById("genre-chip");
+  var btnChangeGenre = document.getElementById("btn-change-genre");
+  var btnModalClose = document.getElementById("btn-modal-close");
+  var autoStartAfterPick = false;
+
+  function renderGenreOptions() {
+    genreGrid.innerHTML = "";
+    GENRES.forEach(function(g) {
+      var btn = document.createElement("button");
+      btn.className = "genre-opt" + (g.swiftie ? " swiftie" : "");
+      btn.setAttribute("data-genre", g.id);
+      btn.innerHTML =
+        '<span class="name">' + escapeHtml(g.label) + (g.swiftie ? ' ♥' : '') + '</span>' +
+        '<span class="hint">' + escapeHtml(g.hint) + '</span>';
+      btn.addEventListener("click", function() { pickGenre(g.id); });
+      genreGrid.appendChild(btn);
+    });
+  }
+
+  function updateGenreChip() {
+    if (!selectedGenreId) {
+      genreChip.textContent = "Not set";
+      genreChip.style.background = "var(--line-soft)";
+      genreChip.style.color = "var(--ink-soft)";
+      return;
+    }
+    var g = currentGenre();
+    genreChip.textContent = g.label;
+    genreChip.style.background = g.swiftie ? "rgba(179,136,232,0.25)" : "var(--brand-soft)";
+    genreChip.style.color = g.swiftie ? "var(--accent)" : "var(--brand-ink)";
+  }
+
+  function openGenreModal(autoStart) {
+    autoStartAfterPick = !!autoStart;
+    genreModal.classList.add("open");
+  }
+  function closeGenreModal() {
+    genreModal.classList.remove("open");
+    autoStartAfterPick = false;
+  }
+
+  function pickGenre(id) {
+    selectedGenreId = id;
+    try { localStorage.setItem("cowork-genre", id); } catch (e) {}
+    updateGenreChip();
+    var g = currentGenre();
+    toast(g.swiftie ? "Swiftie mode engaged" : g.label + " selected");
+    closeGenreModal();
+
+    // If user changed genre while already playing, refresh the queue immediately
+    var shouldStart = autoStartAfterPick || wantPlaying;
+    autoStartAfterPick = false;
+    stations = [];
+    stationIdx = -1;
+    try { audio.pause(); } catch (e) {}
+    if (shouldStart) {
+      startPlayback();
+    }
+  }
+
+  btnChangeGenre.addEventListener("click", function() { openGenreModal(false); });
+  btnModalClose.addEventListener("click", closeGenreModal);
+  genreModal.addEventListener("click", function(e) {
+    if (e.target === genreModal) closeGenreModal();
+  });
+  document.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && genreModal.classList.contains("open")) closeGenreModal();
+  });
+
+  renderGenreOptions();
+  updateGenreChip();
+
+  // ------ init ------
+  renderExamples();
+  updateCompletion();
+})();
+</script>
+
+</body>
+</html>

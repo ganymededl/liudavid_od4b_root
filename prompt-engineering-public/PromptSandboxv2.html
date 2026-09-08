@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<title>Prompt Engineering Sandbox</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #5c6370;
+    --border: #e3e5e8;
+    --border-strong: #c9ccd1;
+    --accent: #2b6cb0;
+    --accent-hover: #1f5490;
+    --surface: #fafbfc;
+    --surface-2: #ffffff;
+    --green: #2ea043;
+    --amber: #d29922;
+    --red: #cf222e;
+    --chip-bg: #f2f4f7;
+    --genre-bg: #f2f4f7;
+    --genre-bg-active: #2b6cb0;
+    --genre-fg-active: #ffffff;
+  }
+  html[data-theme="dark"] {
+    --bg: #0f1115;
+    --fg: #e6e8eb;
+    --muted: #9aa3ad;
+    --border: #262a30;
+    --border-strong: #363b42;
+    --accent: #4c8fd1;
+    --accent-hover: #6aa6e0;
+    --surface: #161a1f;
+    --surface-2: #1b2027;
+    --green: #3fb950;
+    --amber: #e0a72d;
+    --red: #f85149;
+    --chip-bg: #21262d;
+    --genre-bg: #21262d;
+    --genre-bg-active: #4c8fd1;
+    --genre-fg-active: #0f1115;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    transition: background .2s, color .2s;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px 64px;
+  }
+  .topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0;
+  }
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px;
+  }
+  .theme-toggle button {
+    padding: 5px 12px;
+    border-radius: 16px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .theme-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+    font-weight: 600;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: var(--fg);
+  }
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    padding: 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    background: var(--surface-2);
+    color: var(--fg);
+  }
+  textarea:focus, select:focus, button:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: var(--surface-2);
+    color: var(--fg);
+    font-size: 14px;
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  button {
+    border: 1px solid var(--border-strong);
+    background: var(--surface-2);
+    color: var(--fg);
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .12s, border-color .12s, color .12s;
+  }
+  button:hover { background: var(--chip-bg); }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+
+  /* Radio panel */
+  .radio-panel .radio-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .radio-status {
+    font-size: 12px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .genre-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .genre-btn {
+    background: var(--genre-bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .genre-btn:hover { border-color: var(--border-strong); }
+  .genre-btn.active {
+    background: var(--genre-bg-active);
+    color: var(--genre-fg-active);
+    border-color: var(--genre-bg-active);
+    font-weight: 600;
+  }
+  .radio-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .radio-controls input[type="range"] {
+    width: 140px;
+  }
+  .now-playing {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+    max-width: 50%;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .results { display: none; }
+  .results.active { display: block; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+  .scores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+  .score-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 40px;
+    align-items: center;
+    gap: 10px;
+  }
+  .score-label { font-size: 13px; color: var(--fg); }
+  .gauge {
+    background: var(--chip-bg);
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  .gauge-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width .3s ease;
+  }
+  .gauge-fill.green { background: var(--green); }
+  .gauge-fill.amber { background: var(--amber); }
+  .gauge-fill.red { background: var(--red); }
+  .score-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: right;
+  }
+  .score-value.green { color: var(--green); }
+  .score-value.amber { color: var(--amber); }
+  .score-value.red { color: var(--red); }
+  .issues ul { margin: 0; padding-left: 18px; }
+  .issues li { margin-bottom: 6px; }
+  .issues .empty { color: var(--muted); font-style: italic; }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 780px) {
+    .compare, .controls, .scores { grid-template-columns: 1fr; }
+    .now-playing { max-width: 100%; text-align: left; margin-left: 0; }
+  }
+  .compare .box {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--surface-2);
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+  }
+  .compare .box header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px 6px 0 0;
+  }
+  .compare .box pre {
+    margin: 0;
+    padding: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    flex: 1;
+    color: var(--fg);
+    overflow: auto;
+    max-height: 420px;
+  }
+  .copy-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .copy-btn.copied { background: var(--green); color: #fff; border-color: var(--green); }
+  .chip {
+    display: inline-block;
+    background: var(--chip-bg);
+    color: var(--muted);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+  footer {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 32px;
+    text-align: center;
+  }
+  hr.sep {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <header>
+      <h1>Prompt Engineering Sandbox</h1>
+      <p>Paste a prompt, pick a use case and rewrite mode, then evaluate. Everything runs locally in your browser.</p>
+    </header>
+    <div class="theme-toggle" role="tablist" aria-label="Theme">
+      <button id="themeLight" class="active" type="button">Light</button>
+      <button id="themeDark" type="button">Dark</button>
+    </div>
+  </div>
+
+  <!-- Radio panel -->
+  <section class="panel radio-panel">
+    <div class="radio-head">
+      <h2 class="section-title" style="margin:0">Focus radio</h2>
+      <span class="radio-status" id="radioStatus">Idle</span>
+    </div>
+    <div class="genre-row" id="genreRow"></div>
+    <div class="radio-controls">
+      <button id="playPauseBtn" type="button">Play</button>
+      <button id="nextStationBtn" type="button" title="Try another station in this genre">Next station</button>
+      <button id="stopBtn" type="button">Stop</button>
+      <label for="volume" style="margin:0; font-weight:500; font-size:12px; color:var(--muted);">Volume</label>
+      <input id="volume" type="range" min="0" max="1" step="0.01" value="0.6">
+      <span class="now-playing" id="nowPlaying">No station selected</span>
+    </div>
+    <audio id="player" preload="none" crossorigin="anonymous"></audio>
+  </section>
+
+  <section class="panel">
+    <label for="prompt">Prompt</label>
+    <textarea id="prompt" placeholder="Paste or type your prompt here..."></textarea>
+
+    <div class="controls">
+      <div>
+        <label for="useCase">Use case</label>
+        <select id="useCase">
+          <option value="copilot">Copilot Chat / Knowledge Worker</option>
+          <option value="chatbot">Customer-Facing Chatbot</option>
+          <option value="extraction">Data Extraction</option>
+          <option value="code">Code Generation</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+      <div>
+        <label for="rewriteMode">Rewrite mode</label>
+        <select id="rewriteMode">
+          <option value="balanced">Balanced</option>
+          <option value="concise">More Concise</option>
+          <option value="structure">Add Structure</option>
+          <option value="copilot">Optimise for Microsoft Copilot</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="evalBtn" class="primary" type="button">Evaluate &amp; improve</button>
+      <button id="clearBtn" type="button">Clear</button>
+    </div>
+  </section>
+
+  <section id="results" class="results">
+    <div class="panel">
+      <h2 class="section-title">Scores</h2>
+      <div class="scores" id="scores"></div>
+    </div>
+
+    <div class="panel issues">
+      <h2 class="section-title">Issues found</h2>
+      <div id="issuesBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">Original vs improved</h2>
+      <div class="compare">
+        <div class="box">
+          <header>
+            <span>Original <span class="chip" id="origWords"></span></span>
+          </header>
+          <pre id="origText"></pre>
+        </div>
+        <div class="box">
+          <header>
+            <span>Improved <span class="chip" id="newWords"></span></span>
+            <button id="copyBtn" class="copy-btn" type="button">Copy</button>
+          </header>
+          <pre id="newText"></pre>
+        </div>
+      </div>
+      <hr class="sep">
+      <div class="actions">
+        <button id="reEvalBtn" class="primary" type="button">Re-evaluate improved prompt</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>Self-contained static tool. Heuristic analysis only. Radio streams come from radio-browser.info.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ============================================================
+     THEME TOGGLE
+     ============================================================ */
+  const root = document.documentElement;
+  const themeLight = document.getElementById("themeLight");
+  const themeDark = document.getElementById("themeDark");
+  const savedTheme = (function () {
+    try { return localStorage.getItem("ps-theme"); } catch (e) { return null; }
+  })();
+  if (savedTheme === "dark") setTheme("dark");
+
+  function setTheme(t) {
+    root.setAttribute("data-theme", t);
+    themeLight.classList.toggle("active", t === "light");
+    themeDark.classList.toggle("active", t === "dark");
+    try { localStorage.setItem("ps-theme", t); } catch (e) {}
+  }
+  themeLight.addEventListener("click", () => setTheme("light"));
+  themeDark.addEventListener("click", () => setTheme("dark"));
+
+  /* ============================================================
+     RADIO — powered by radio-browser.info
+     ============================================================ */
+  const GENRES = [
+    { key: "pop",        label: "Pop",         tag: "pop" },
+    { key: "acidjazz",   label: "Acid Jazz",   tag: "acid jazz" },
+    { key: "classical",  label: "Classical",   tag: "classical" },
+    { key: "hiphop",     label: "Hip Hop",     tag: "hip hop" },
+    { key: "jazz",       label: "Jazz",        tag: "jazz" },
+    { key: "rock",       label: "Rock",        tag: "rock" },
+    { key: "electronic", label: "Electronic",  tag: "electronic" },
+    { key: "ambient",    label: "Ambient",     tag: "ambient" },
+    { key: "reggae",     label: "Reggae",      tag: "reggae" },
+    { key: "soul",       label: "Soul",        tag: "soul" }
+  ];
+
+  // radio-browser.info has multiple mirror servers; we try a few in order.
+  const RB_HOSTS = [
+    "https://de1.api.radio-browser.info",
+    "https://nl1.api.radio-browser.info",
+    "https://at1.api.radio-browser.info"
+  ];
+
+  const genreRow = document.getElementById("genreRow");
+  const player = document.getElementById("player");
+  const statusEl = document.getElementById("radioStatus");
+  const nowPlayingEl = document.getElementById("nowPlaying");
+  const playPauseBtn = document.getElementById("playPauseBtn");
+  const nextBtn = document.getElementById("nextStationBtn");
+  const stopBtn = document.getElementById("stopBtn");
+  const volume = document.getElementById("volume");
+
+  let activeGenre = null;
+  let stationQueue = [];
+  let currentStation = null;
+
+  GENRES.forEach(g => {
+    const b = document.createElement("button");
+    b.className = "genre-btn";
+    b.textContent = g.label;
+    b.dataset.key = g.key;
+    b.addEventListener("click", () => selectGenre(g));
+    genreRow.appendChild(b);
+  });
+
+  player.volume = parseFloat(volume.value);
+  volume.addEventListener("input", () => { player.volume = parseFloat(volume.value); });
+
+  playPauseBtn.addEventListener("click", () => {
+    if (!currentStation) {
+      setStatus("Pick a genre to start.");
+      return;
+    }
+    if (player.paused) { player.play().catch(onPlayError); }
+    else { player.pause(); }
+  });
+  stopBtn.addEventListener("click", () => {
+    player.pause();
+    player.removeAttribute("src");
+    player.load();
+    currentStation = null;
+    nowPlayingEl.textContent = "Stopped";
+    setStatus("Idle");
+    updatePlayPauseLabel();
+  });
+  nextBtn.addEventListener("click", () => {
+    if (activeGenre) playNextInQueue();
+  });
+
+  player.addEventListener("playing", () => {
+    setStatus("Playing");
+    updatePlayPauseLabel();
+  });
+  player.addEventListener("pause", () => {
+    setStatus("Paused");
+    updatePlayPauseLabel();
+  });
+  player.addEventListener("error", onPlayError);
+  player.addEventListener("stalled", () => setStatus("Stalled — trying another station…"));
+
+  function updatePlayPauseLabel() {
+    playPauseBtn.textContent = player.paused ? "Play" : "Pause";
+  }
+  function setStatus(s) { statusEl.textContent = s; }
+
+  function onPlayError() {
+    setStatus("Stream failed — trying another station…");
+    playNextInQueue();
+  }
+
+  async function selectGenre(g) {
+    activeGenre = g;
+    [...genreRow.querySelectorAll(".genre-btn")].forEach(b => {
+      b.classList.toggle("active", b.dataset.key === g.key);
+    });
+    setStatus("Loading " + g.label + " stations…");
+    nowPlayingEl.textContent = "Loading…";
+    try {
+      const stations = await fetchStations(g.tag);
+      if (!stations.length) {
+        setStatus("No stations found for " + g.label + ".");
+        nowPlayingEl.textContent = "—";
+        return;
+      }
+      // Shuffle for variety
+      stationQueue = shuffle(stations.slice(0, 30));
+      playNextInQueue();
+    } catch (e) {
+      setStatus("Could not reach radio directory.");
+      nowPlayingEl.textContent = "—";
+    }
+  }
+
+  async function fetchStations(tag) {
+    const path = "/json/stations/search?hidebroken=true&is_https=true&order=clickcount&reverse=true&limit=50&tag=" + encodeURIComponent(tag);
+    let lastErr;
+    for (const host of RB_HOSTS) {
+      try {
+        const r = await fetch(host + path, { headers: { "User-Agent": "PromptSandbox/1.0" } });
+        if (r.ok) return await r.json();
+        lastErr = new Error("HTTP " + r.status);
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr || new Error("No hosts responded");
+  }
+
+  function shuffle(a) {
+    const arr = a.slice();
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function playNextInQueue() {
+    if (!stationQueue.length) {
+      setStatus("No more stations — try another genre.");
+      return;
+    }
+    const s = stationQueue.shift();
+    currentStation = s;
+    const url = s.url_resolved || s.url;
+    nowPlayingEl.textContent = s.name + (s.country ? " · " + s.country : "");
+    setStatus("Connecting…");
+    player.src = url;
+    player.play().catch(onPlayError);
+  }
+
+  /* ============================================================
+     PROMPT ANALYSIS — heuristic, no LLM
+     ============================================================ */
+  const useCaseLabels = {
+    copilot: "Copilot / knowledge worker",
+    chatbot: "customer-facing chatbot",
+    extraction: "data extraction",
+    code: "code generation",
+    general: "general-purpose"
+  };
+  const useCasePersona = {
+    copilot: "You are a Microsoft Copilot assistant helping a knowledge worker be more productive.",
+    chatbot: "You are a friendly customer-facing support chatbot.",
+    extraction: "You are a precise data-extraction assistant.",
+    code: "You are an expert software engineer.",
+    general: "You are a helpful assistant."
+  };
+
+  function hasPersona(t)     { return /\b(you are|act as|you're|as an? [a-z]+ (assistant|expert|agent|specialist))\b/i.test(t); }
+  function hasRoleInstruction(t) { return /\b(your (role|job|task) is|you (should|must|will)|please [a-z]+)/i.test(t); }
+  function hasOutputFormat(t){ return /\b(respond in|output (as|in)|format (as|the|your)|return (a|the|as)|in json|in markdown|as bullet|bullet points?|numbered list|table|headings?|sections?)\b/i.test(t); }
+  function hasExamples(t)    { return /\b(example[s]?|e\.g\.|for instance|such as|sample[s]?|here's an example)\b/i.test(t) || /\binput:.*output:/is.test(t); }
+  function hasContext(t)     { return /\b(context|background|given that|i am|we are|our (team|company|product)|the goal is|the audience is|because|so that)\b/i.test(t); }
+  function hasConstraints(t) { return /\b(do not|don't|avoid|must not|only|no more than|at most|at least|limit|within \d+|max(imum)? \d+|min(imum)? \d+|word[s]? or less)\b/i.test(t); }
+  function hasTaskVerb(t)    { return /\b(summari[sz]e|write|draft|extract|analy[sz]e|classify|translate|generate|create|review|compare|explain|list|rewrite|suggest|plan)\b/i.test(t); }
+  function wordCount(t)      { return (t.trim().match(/\b\w+\b/g) || []).length; }
+  function clamp(n, lo, hi)  { return Math.max(lo, Math.min(hi, n)); }
+  function round1(n)         { return Math.round(n * 10) / 10; }
+
+  function analyse(prompt) {
+    const text = prompt || "";
+    const wc = wordCount(text);
+    const flags = {
+      persona: hasPersona(text),
+      role: hasRoleInstruction(text),
+      format: hasOutputFormat(text),
+      examples: hasExamples(text),
+      context: hasContext(text),
+      constraints: hasConstraints(text),
+      verb: hasTaskVerb(text),
+      wc
+    };
+
+    let clarity = 5;
+    if (flags.verb) clarity += 2; else clarity -= 2;
+    if (flags.role) clarity += 1;
+    if (wc < 5) clarity -= 3; else if (wc < 15) clarity -= 1;
+    if (wc > 400) clarity -= 1;
+    clarity = clamp(clarity, 0, 10);
+
+    let specificity = 4;
+    if (wc >= 50) specificity += 2; else specificity -= 2;
+    if (wc >= 120) specificity += 1;
+    if (flags.constraints) specificity += 2;
+    if (flags.examples) specificity += 2;
+    specificity = clamp(specificity, 0, 10);
+
+    let context = 3;
+    if (flags.persona) context += 3;
+    if (flags.context) context += 3;
+    if (flags.role) context += 1;
+    context = clamp(context, 0, 10);
+
+    let output = flags.format ? 8 : 2;
+    if (flags.format && /\b(json|table|markdown)\b/i.test(text)) output += 1;
+    if (flags.format && flags.examples) output += 1;
+    output = clamp(output, 0, 10);
+
+    const overall = round1(
+      clarity * 0.25 + specificity * 0.25 + context * 0.2 + output * 0.2 + (flags.verb ? 10 : 0) * 0.1
+    );
+
+    const scores = {
+      Clarity: round1(clarity),
+      Specificity: round1(specificity),
+      Context: round1(context),
+      "Output Format": round1(output),
+      Overall: overall
+    };
+
+    const issues = [];
+    if (!flags.persona) issues.push("No persona defined — the model isn't told who it should act as.");
+    if (!flags.role) issues.push("No explicit role/task instruction (e.g. \"Your task is to…\", \"You should…\").");
+    if (!flags.verb) issues.push("No clear task verb (summarise, extract, write, analyse…). The model has to guess the action.");
+    if (!flags.format) issues.push("No output format specified — results will vary in structure.");
+    if (!flags.examples) issues.push("No examples provided. Adding 1–2 examples usually improves reliability.");
+    if (!flags.context) issues.push("Little background/context about the audience, goal, or situation.");
+    if (!flags.constraints) issues.push("No constraints (length, tone, what to avoid). Consider adding limits.");
+    if (wc < 50) issues.push("Prompt is under 50 words — likely too short to be specific.");
+    if (wc > 500) issues.push("Prompt is very long (>500 words) — consider trimming for focus.");
+
+    return { scores, flags, issues, wordCount: wc };
+  }
+
+  function improve(prompt, useCase, mode, flags) {
+    let text = (prompt || "").trim();
+    const persona = useCasePersona[useCase] || useCasePersona.general;
+    const label = useCaseLabels[useCase] || useCaseLabels.general;
+
+    const prepend = [];
+    const append = [];
+
+    if (!flags.persona) prepend.push(persona);
+    if (!flags.context) prepend.push("Context: the user is a " + label + " user who needs a reliable, high-quality response.");
+    if (!flags.role && !flags.verb) prepend.push("Your task is to carefully address the user's request below.");
+    if (!flags.format) append.push("Respond in clear bullet points, grouped under short headings, with a brief 1–2 sentence summary at the end.");
+    if (!flags.examples && (useCase === "extraction" || useCase === "code")) append.push("If helpful, include one short worked example to illustrate the expected output.");
+    if (!flags.constraints) append.push("Keep the response focused and avoid speculation — if information is missing, say so explicitly.");
+
+    if (mode === "concise") {
+      append.push("Be as concise as possible. Prefer short sentences. Omit filler.");
+    } else if (mode === "structure") {
+      append.push("Use the following structure:\n1. Summary\n2. Key points (bulleted)\n3. Recommended actions\n4. Open questions");
+    } else if (mode === "copilot") {
+      prepend.unshift("You are Microsoft Copilot, helping an enterprise knowledge worker inside Microsoft 365.");
+      append.push("Cite sources or documents when relevant. If the request involves a file, email, meeting, or person, reference them explicitly. Prefer clear, scannable formatting suited to Microsoft 365.");
+    }
+
+    const header = prepend.length ? prepend.join(" ") + "\n\n" : "";
+    const body = text.length ? text : "[Your prompt goes here.]";
+    const footer = append.length ? "\n\n" + append.map(s => "- " + s).join("\n") : "";
+
+    let improved = (header + body + footer).replace(/\n{3,}/g, "\n\n").trim();
+    if (mode === "concise") improved = improved.replace(/[ \t]{2,}/g, " ");
+    return improved;
+  }
+
+  /* ============================================================
+     RENDERING
+     ============================================================ */
+  function colourFor(score) {
+    if (score >= 7) return "green";
+    if (score >= 4) return "amber";
+    return "red";
+  }
+  function renderScores(scores) {
+    const container = document.getElementById("scores");
+    container.innerHTML = "";
+    Object.keys(scores).forEach(name => {
+      const value = scores[name];
+      const colour = colourFor(value);
+      const row = document.createElement("div");
+      row.className = "score-row";
+      row.innerHTML =
+        '<div class="score-label">' + escapeHtml(name) + '</div>' +
+        '<div class="gauge"><div class="gauge-fill ' + colour + '" style="width:' + (value * 10) + '%"></div></div>' +
+        '<div class="score-value ' + colour + '">' + value.toFixed(1) + '</div>';
+      container.appendChild(row);
+    });
+  }
+  function renderIssues(issues) {
+    const body = document.getElementById("issuesBody");
+    if (!issues.length) { body.innerHTML = '<p class="empty">No major issues detected. Nice prompt.</p>'; return; }
+    const ul = document.createElement("ul");
+    issues.forEach(i => { const li = document.createElement("li"); li.textContent = i; ul.appendChild(li); });
+    body.innerHTML = ""; body.appendChild(ul);
+  }
+  function renderCompare(original, improved) {
+    document.getElementById("origText").textContent = original || "(empty)";
+    document.getElementById("newText").textContent = improved || "(empty)";
+    document.getElementById("origWords").textContent = wordCount(original || "") + " words";
+    document.getElementById("newWords").textContent = wordCount(improved || "") + " words";
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+  }
+
+  /* ============================================================
+     WIRING
+     ============================================================ */
+  let latestImproved = "";
+
+  function runEvaluation() {
+    const prompt = document.getElementById("prompt").value;
+    const useCase = document.getElementById("useCase").value;
+    const mode = document.getElementById("rewriteMode").value;
+    if (!prompt.trim()) { alert("Paste a prompt first."); return; }
+    const analysis = analyse(prompt);
+    const improved = improve(prompt, useCase, mode, analysis.flags);
+    latestImproved = improved;
+    renderScores(analysis.scores);
+    renderIssues(analysis.issues);
+    renderCompare(prompt, improved);
+    const r = document.getElementById("results");
+    r.classList.add("active");
+    r.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("evalBtn").addEventListener("click", runEvaluation);
+  document.getElementById("clearBtn").addEventListener("click", () => {
+    document.getElementById("prompt").value = "";
+    document.getElementById("results").classList.remove("active");
+  });
+  document.getElementById("reEvalBtn").addEventListener("click", () => {
+    if (!latestImproved) return;
+    document.getElementById("prompt").value = latestImproved;
+    runEvaluation();
+  });
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    const btn = this;
+    const text = document.getElementById("newText").textContent;
+    const done = () => {
+      btn.textContent = "Copied"; btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else { fallback(); }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>

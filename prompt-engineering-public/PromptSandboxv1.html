@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prompt Engineering Sandbox</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #5c6370;
+    --border: #e3e5e8;
+    --border-strong: #c9ccd1;
+    --accent: #2b6cb0;
+    --accent-hover: #1f5490;
+    --surface: #fafbfc;
+    --green: #2ea043;
+    --amber: #d29922;
+    --red: #cf222e;
+    --chip-bg: #f2f4f7;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 28px 64px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  header p {
+    color: var(--muted);
+    margin: 0 0 24px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: var(--fg);
+  }
+  textarea {
+    width: 100%;
+    min-height: 180px;
+    padding: 12px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    background: #fff;
+    color: var(--fg);
+  }
+  textarea:focus, select:focus, button:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+  }
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    color: var(--fg);
+  }
+  .actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+  }
+  button {
+    border: 1px solid var(--border-strong);
+    background: #fff;
+    color: var(--fg);
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .12s, border-color .12s;
+  }
+  button:hover { background: #f2f4f7; }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+  button:disabled { opacity: .55; cursor: not-allowed; }
+  .results { display: none; }
+  .results.active { display: block; }
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0 0 12px;
+  }
+  .scores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 24px;
+  }
+  .score-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 40px;
+    align-items: center;
+    gap: 10px;
+  }
+  .score-label { font-size: 13px; color: var(--fg); }
+  .gauge {
+    background: #eef0f3;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+  .gauge-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width .3s ease;
+  }
+  .gauge-fill.green { background: var(--green); }
+  .gauge-fill.amber { background: var(--amber); }
+  .gauge-fill.red { background: var(--red); }
+  .score-value {
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    font-size: 13px;
+    text-align: right;
+  }
+  .score-value.green { color: var(--green); }
+  .score-value.amber { color: var(--amber); }
+  .score-value.red { color: var(--red); }
+  .issues ul {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .issues li {
+    margin-bottom: 6px;
+    color: var(--fg);
+  }
+  .issues .empty {
+    color: var(--muted);
+    font-style: italic;
+  }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 780px) {
+    .compare, .controls, .scores { grid-template-columns: 1fr; }
+  }
+  .compare .box {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+  }
+  .compare .box header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px 6px 0 0;
+  }
+  .compare .box pre {
+    margin: 0;
+    padding: 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 12.5px;
+    flex: 1;
+    color: var(--fg);
+    overflow: auto;
+    max-height: 420px;
+  }
+  .copy-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .copy-btn.copied { background: var(--green); color: #fff; border-color: var(--green); }
+  .chip {
+    display: inline-block;
+    background: var(--chip-bg);
+    color: var(--muted);
+    border-radius: 12px;
+    padding: 2px 10px;
+    font-size: 12px;
+    margin-left: 8px;
+  }
+  footer {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 32px;
+    text-align: center;
+  }
+  hr.sep {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Prompt Engineering Sandbox</h1>
+    <p>Paste a prompt, pick a use case and rewrite mode, then evaluate. Everything runs locally in your browser.</p>
+  </header>
+
+  <section class="panel">
+    <label for="prompt">Prompt</label>
+    <textarea id="prompt" placeholder="Paste or type your prompt here..."></textarea>
+
+    <div class="controls">
+      <div>
+        <label for="useCase">Use case</label>
+        <select id="useCase">
+          <option value="copilot">Copilot Chat / Knowledge Worker</option>
+          <option value="chatbot">Customer-Facing Chatbot</option>
+          <option value="extraction">Data Extraction</option>
+          <option value="code">Code Generation</option>
+          <option value="general">General</option>
+        </select>
+      </div>
+      <div>
+        <label for="rewriteMode">Rewrite mode</label>
+        <select id="rewriteMode">
+          <option value="balanced">Balanced</option>
+          <option value="concise">More Concise</option>
+          <option value="structure">Add Structure</option>
+          <option value="copilot">Optimise for Microsoft Copilot</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="evalBtn" class="primary" type="button">Evaluate &amp; improve</button>
+      <button id="clearBtn" type="button">Clear</button>
+    </div>
+  </section>
+
+  <section id="results" class="results">
+    <div class="panel">
+      <h2 class="section-title">Scores</h2>
+      <div class="scores" id="scores"></div>
+    </div>
+
+    <div class="panel issues">
+      <h2 class="section-title">Issues found</h2>
+      <div id="issuesBody"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">Original vs improved</h2>
+      <div class="compare">
+        <div class="box">
+          <header>
+            <span>Original <span class="chip" id="origWords"></span></span>
+          </header>
+          <pre id="origText"></pre>
+        </div>
+        <div class="box">
+          <header>
+            <span>Improved <span class="chip" id="newWords"></span></span>
+            <button id="copyBtn" class="copy-btn" type="button">Copy</button>
+          </header>
+          <pre id="newText"></pre>
+        </div>
+      </div>
+      <hr class="sep">
+      <div class="actions">
+        <button id="reEvalBtn" class="primary" type="button">Re-evaluate improved prompt</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>Self-contained static tool. No network calls. Heuristic analysis only.</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  const useCaseLabels = {
+    copilot: "Copilot / knowledge worker",
+    chatbot: "customer-facing chatbot",
+    extraction: "data extraction",
+    code: "code generation",
+    general: "general-purpose"
+  };
+
+  const useCasePersona = {
+    copilot: "You are a Microsoft Copilot assistant helping a knowledge worker be more productive.",
+    chatbot: "You are a friendly customer-facing support chatbot.",
+    extraction: "You are a precise data-extraction assistant.",
+    code: "You are an expert software engineer.",
+    general: "You are a helpful assistant."
+  };
+
+  // --- Heuristic detectors -------------------------------------------------
+
+  function hasPersona(t) {
+    return /\b(you are|act as|you're|as an? [a-z]+ (assistant|expert|agent|specialist))\b/i.test(t);
+  }
+  function hasRoleInstruction(t) {
+    return /\b(your (role|job|task) is|you (should|must|will)|please [a-z]+)/i.test(t);
+  }
+  function hasOutputFormat(t) {
+    return /\b(respond in|output (as|in)|format (as|the|your)|return (a|the|as)|in json|in markdown|as bullet|bullet points?|numbered list|table|headings?|sections?)\b/i.test(t);
+  }
+  function hasExamples(t) {
+    return /\b(example[s]?|e\.g\.|for instance|such as|sample[s]?|here's an example)\b/i.test(t)
+      || /\binput:.*output:/is.test(t);
+  }
+  function hasContext(t) {
+    return /\b(context|background|given that|i am|we are|our (team|company|product)|the goal is|the audience is|because|so that)\b/i.test(t);
+  }
+  function hasConstraints(t) {
+    return /\b(do not|don't|avoid|must not|only|no more than|at most|at least|limit|within \d+|max(imum)? \d+|min(imum)? \d+|word[s]? or less)\b/i.test(t);
+  }
+  function hasTaskVerb(t) {
+    return /\b(summari[sz]e|write|draft|extract|analy[sz]e|classify|translate|generate|create|review|compare|explain|list|rewrite|suggest|plan)\b/i.test(t);
+  }
+  function wordCount(t) {
+    return (t.trim().match(/\b\w+\b/g) || []).length;
+  }
+
+  // --- Analysis ------------------------------------------------------------
+
+  function analyse(prompt, useCase) {
+    const text = prompt || "";
+    const wc = wordCount(text);
+    const flags = {
+      persona: hasPersona(text),
+      role: hasRoleInstruction(text),
+      format: hasOutputFormat(text),
+      examples: hasExamples(text),
+      context: hasContext(text),
+      constraints: hasConstraints(text),
+      verb: hasTaskVerb(text),
+      wc
+    };
+
+    // Clarity: task verb, role instruction, not too short, reasonable structure
+    let clarity = 5;
+    if (flags.verb) clarity += 2; else clarity -= 2;
+    if (flags.role) clarity += 1;
+    if (wc < 5) clarity -= 3;
+    else if (wc < 15) clarity -= 1;
+    if (wc > 400) clarity -= 1;
+    clarity = clamp(clarity, 0, 10);
+
+    // Specificity: word count + constraints + examples. Penalise if under 50 words.
+    let specificity = 4;
+    if (wc >= 50) specificity += 2;
+    else specificity -= 2;
+    if (wc >= 120) specificity += 1;
+    if (flags.constraints) specificity += 2;
+    if (flags.examples) specificity += 2;
+    specificity = clamp(specificity, 0, 10);
+
+    // Context: persona, background/context cues, audience/goal
+    let context = 3;
+    if (flags.persona) context += 3;
+    if (flags.context) context += 3;
+    if (flags.role) context += 1;
+    context = clamp(context, 0, 10);
+
+    // Output format
+    let output = flags.format ? 8 : 2;
+    if (flags.format && /\b(json|table|markdown)\b/i.test(text)) output += 1;
+    if (flags.format && flags.examples) output += 1;
+    output = clamp(output, 0, 10);
+
+    // Overall: weighted average
+    const overall = Math.round(
+      (clarity * 0.25 + specificity * 0.25 + context * 0.2 + output * 0.2 + (flags.verb ? 10 : 0) * 0.1) * 10
+    ) / 10;
+
+    const scores = {
+      Clarity: round1(clarity),
+      Specificity: round1(specificity),
+      Context: round1(context),
+      "Output Format": round1(output),
+      Overall: round1(overall)
+    };
+
+    const issues = [];
+    if (!flags.persona) issues.push("No persona defined — the model isn't told who it should act as.");
+    if (!flags.role) issues.push("No explicit role/task instruction (e.g. \"Your task is to…\", \"You should…\").");
+    if (!flags.verb) issues.push("No clear task verb (summarise, extract, write, analyse…). The model has to guess the action.");
+    if (!flags.format) issues.push("No output format specified — results will vary in structure.");
+    if (!flags.examples) issues.push("No examples provided. Adding 1–2 examples usually improves reliability.");
+    if (!flags.context) issues.push("Little background/context about the audience, goal, or situation.");
+    if (!flags.constraints) issues.push("No constraints (length, tone, what to avoid). Consider adding limits.");
+    if (wc < 50) issues.push("Prompt is under 50 words — likely too short to be specific.");
+    if (wc > 500) issues.push("Prompt is very long (>500 words) — consider trimming for focus.");
+
+    return { scores, flags, issues, wordCount: wc };
+  }
+
+  function round1(n) { return Math.round(n * 10) / 10; }
+  function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
+  // --- Rewrite -------------------------------------------------------------
+
+  function improve(prompt, useCase, mode, flags) {
+    let text = (prompt || "").trim();
+    const persona = useCasePersona[useCase] || useCasePersona.general;
+    const label = useCaseLabels[useCase] || useCaseLabels.general;
+
+    const prepend = [];
+    const append = [];
+
+    // Core injections based on missing elements
+    if (!flags.persona) {
+      prepend.push(persona);
+    }
+    if (!flags.context) {
+      prepend.push("Context: the user is a " + label + " user who needs a reliable, high-quality response.");
+    }
+    if (!flags.role && !flags.verb) {
+      prepend.push("Your task is to carefully address the user's request below.");
+    }
+    if (!flags.format) {
+      append.push("Respond in clear bullet points, grouped under short headings, with a brief 1–2 sentence summary at the end.");
+    }
+    if (!flags.examples && (useCase === "extraction" || useCase === "code")) {
+      append.push("If helpful, include one short worked example to illustrate the expected output.");
+    }
+    if (!flags.constraints) {
+      append.push("Keep the response focused and avoid speculation — if information is missing, say so explicitly.");
+    }
+
+    // Mode-specific shaping
+    if (mode === "concise") {
+      append.push("Be as concise as possible. Prefer short sentences. Omit filler.");
+    } else if (mode === "structure") {
+      append.push("Use the following structure: \n1. Summary\n2. Key points (bulleted)\n3. Recommended actions\n4. Open questions");
+    } else if (mode === "copilot") {
+      prepend.unshift("You are Microsoft Copilot, helping an enterprise knowledge worker inside Microsoft 365.");
+      append.push("Cite sources or documents when relevant. If the request involves a file, email, meeting, or person, reference them explicitly. Prefer clear, scannable formatting suited to Microsoft 365.");
+    }
+    // "balanced" adds nothing beyond the base injections
+
+    const header = prepend.length ? prepend.join(" ") + "\n\n" : "";
+    const body = text.length ? text : "[Your prompt goes here.]";
+    const footer = append.length ? "\n\n" + append.map(s => "- " + s).join("\n") : "";
+
+    let improved = header + body + footer;
+
+    // Light cleanup: collapse triple+ newlines
+    improved = improved.replace(/\n{3,}/g, "\n\n").trim();
+
+    // Concise mode: trim redundant whitespace in the body
+    if (mode === "concise") {
+      improved = improved.replace(/[ \t]{2,}/g, " ");
+    }
+
+    return improved;
+  }
+
+  // --- Rendering -----------------------------------------------------------
+
+  function colourFor(score) {
+    if (score >= 7) return "green";
+    if (score >= 4) return "amber";
+    return "red";
+  }
+
+  function renderScores(scores) {
+    const container = document.getElementById("scores");
+    container.innerHTML = "";
+    Object.keys(scores).forEach(name => {
+      const value = scores[name];
+      const colour = colourFor(value);
+      const row = document.createElement("div");
+      row.className = "score-row";
+      row.innerHTML =
+        '<div class="score-label">' + escapeHtml(name) + '</div>' +
+        '<div class="gauge"><div class="gauge-fill ' + colour + '" style="width:' + (value * 10) + '%"></div></div>' +
+        '<div class="score-value ' + colour + '">' + value.toFixed(1) + '</div>';
+      container.appendChild(row);
+    });
+  }
+
+  function renderIssues(issues) {
+    const body = document.getElementById("issuesBody");
+    if (!issues.length) {
+      body.innerHTML = '<p class="empty">No major issues detected. Nice prompt.</p>';
+      return;
+    }
+    const ul = document.createElement("ul");
+    issues.forEach(i => {
+      const li = document.createElement("li");
+      li.textContent = i;
+      ul.appendChild(li);
+    });
+    body.innerHTML = "";
+    body.appendChild(ul);
+  }
+
+  function renderCompare(original, improved) {
+    document.getElementById("origText").textContent = original || "(empty)";
+    document.getElementById("newText").textContent = improved || "(empty)";
+    document.getElementById("origWords").textContent = wordCount(original || "") + " words";
+    document.getElementById("newWords").textContent = wordCount(improved || "") + " words";
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+  }
+
+  // --- Wiring --------------------------------------------------------------
+
+  let latestImproved = "";
+
+  function runEvaluation() {
+    const prompt = document.getElementById("prompt").value;
+    const useCase = document.getElementById("useCase").value;
+    const mode = document.getElementById("rewriteMode").value;
+
+    if (!prompt.trim()) {
+      alert("Paste a prompt first.");
+      return;
+    }
+
+    const analysis = analyse(prompt, useCase);
+    const improved = improve(prompt, useCase, mode, analysis.flags);
+    latestImproved = improved;
+
+    renderScores(analysis.scores);
+    renderIssues(analysis.issues);
+    renderCompare(prompt, improved);
+
+    document.getElementById("results").classList.add("active");
+    document.getElementById("results").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  document.getElementById("evalBtn").addEventListener("click", runEvaluation);
+
+  document.getElementById("clearBtn").addEventListener("click", function () {
+    document.getElementById("prompt").value = "";
+    document.getElementById("results").classList.remove("active");
+  });
+
+  document.getElementById("reEvalBtn").addEventListener("click", function () {
+    if (!latestImproved) return;
+    document.getElementById("prompt").value = latestImproved;
+    runEvaluation();
+  });
+
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    const btn = this;
+    const text = document.getElementById("newText").textContent;
+    const done = function () {
+      btn.textContent = "Copied";
+      btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1400);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, fallback);
+    } else {
+      fallback();
+    }
+    function fallback() {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  });
+})();
+</script>
+</body>
+</html>
