@@ -1182,10 +1182,10 @@ const CONFIG = {
   ],
 
   // ── PODCASTS ─────────────────────────────────────────
-  // The weekly automation refreshes latestUrl / latestTitle / latestDate.
+  // The daily automation refreshes latestUrl / latestTitle / latestDate.
   // To add a show: copy a block and set name/host/accent/img/channelUrl/source.
   //   channelUrl  = the "all episodes / subscribe" link (shown as Channel; leave "" to hide)
-  //   source      = the page the weekly refresh reads to find the newest episode
+  //   source      = the exact YouTube playlist URL the daily refresh reads
   //                 (leave "" for a curated/hand-picked list so the refresh skips it)
   //   latestLabel = optional button caption (defaults to "Latest episode";
   //                 e.g. "Open playlist" for a curated collection)
@@ -1491,19 +1491,22 @@ const podEl = document.getElementById("podcasts");
         <span class="pod-name">${p.name}</span>
       </div>
       <div class="pod-host">${p.host}</div>
-      <a class="pod-latest" href="${p.latestUrl}" target="_blank" rel="noopener">
+      <a class="pod-latest" target="_blank" rel="noopener">
         <span class="pod-play" style="background: linear-gradient(135deg, ${acc}, ${acc}bb);">${ICONS.play}</span>
         <span class="pod-latest-txt">
           <span class="pod-latest-label">${p.latestLabel || "Latest episode"}</span>
-          <span class="pod-latest-title">${p.latestTitle}</span>
+          <span class="pod-latest-title"></span>
         </span>
       </a>
       <div class="pod-foot">
         ${p.channelUrl ? `<a class="pod-sub" href="${p.channelUrl}" target="_blank" rel="noopener">Channel ${ICONS.arrow}</a>` : `<span></span>`}
-        <span class="pod-date">${p.latestDate}</span>
+        <span class="pod-date"></span>
       </div>
     </div>
   `;
+  card.querySelector(".pod-latest").href = p.latestUrl;
+  card.querySelector(".pod-latest-title").textContent = p.latestTitle;
+  card.querySelector(".pod-date").textContent = p.latestDate;
   podEl.appendChild(card);
 });
 
