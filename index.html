@@ -541,6 +541,13 @@
   }
   .lib:hover .lib-cta svg { transform: translateX(3px); }
 
+  .lib-public-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 8px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff);
+    padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
+  }
+
   /* ── Recent ─────────────────────────────────────────── */
   .recent {
     display: grid;
@@ -1087,9 +1094,10 @@ const CONFIG = {
     {
       name:  "Games",
       desc:  "Browser games, Copilot Arcade, interactive tools",
-      href:  "https://onedrive.cloud.microsoft/:f:/a@xu96zg3b/r/_layouts/15/onedrive.aspx?id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FGamesPublic&share=cgrsdvN3S6uITI6ZdlVXEPDKEgUCfBaySyjPe4aCd5TDeQCAOQ",
+      href:  "games-public/index.html",
       icon:  "games",
-      color: ["#00d9ff", "#0099cc"]
+      color: ["#00d9ff", "#0099cc"],
+      public: true
     },
     {
       name:  "Prompt Engineering",
@@ -1308,6 +1316,7 @@ CONFIG.libraries.forEach(lib => {
   a.href = lib.href;
   a.className = "lib";
   a.innerHTML = `
+    ${lib.public ? '<div class="lib-public-badge">Public</div>' : ''}
     <div class="lib-icon" style="background: linear-gradient(135deg, ${lib.color[0]}, ${lib.color[1]});">
       ${ICONS[lib.icon] || ICONS.list}
     </div>

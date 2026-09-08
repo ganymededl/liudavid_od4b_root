@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Donkey Kong</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: #000;
+    color: #fff;
+    font-family: "Courier New", monospace;
+    height: 100%;
+    overflow: hidden;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+  }
+  #wrap {
+    position: relative;
+    width: 480px;
+  }
+  canvas {
+    display: block;
+    border: 2px solid #444;
+    background: #000;
+    image-rendering: pixelated;
+  }
+  #restart {
+    position: absolute;
+    left: 50%;
+    top: 68%;
+    transform: translate(-50%, -50%);
+    padding: 10px 24px;
+    font-size: 18px;
+    font-family: inherit;
+    cursor: pointer;
+    background: #c0392b;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    display: none;
+    z-index: 10;
+  }
+  #restart:hover { background: #e74c3c; }
+  #hint {
+    margin-top: 10px;
+    color: #888;
+    font-size: 12px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game" width="480" height="480"></canvas>
+  <button id="restart">Restart</button>
+</div>
+<div id="hint">Arrow keys to move / climb &middot; Space or Up to jump &middot; Rescue Pauline at the top!</div>
+<script>
+"use strict";
+/* =====================================================================
+   TUNING CONSTANTS
+   GRAVITY              : downward acceleration per frame when airborne
+   JUMP_VELOCITY        : initial upward velocity when jumping (negative)
+   TERMINAL_VY          : max downward fall speed
+   PLATFORM_SNAP        : px tolerance for "on platform" detection
+   MOVE_SPEED           : horizontal px per frame
+   CLIMB_SPEED          : vertical ladder climb px per frame
+   BARREL_SPEED_BASE    : starting barrel horizontal speed
+   BARREL_SPEED_INC     : barrel speed added per completed level
+   BARREL_SPAWN_INTERVAL: frames between barrel spawns
+   COLLISION_DIST       : center-to-center distance for player/barrel hit
+   LADDER_GRAB_DIST     : horizontal px from ladder center to grab
+   BARREL_LADDER_PROB   : per-frame chance barrel descends a ladder
+   CANVAS_W / CANVAS_H  : canvas dimensions
+   HUD_H                : top HUD strip height
+   ===================================================================== */
+const GRAVITY = 0.5;
+const JUMP_VELOCITY = -11;
+const TERMINAL_VY = 10;
+const PLATFORM_SNAP = 4;
+const MOVE_SPEED = 3;
+const CLIMB_SPEED = 2;
+const BARREL_SPEED_BASE = 2;
+const BARREL_SPEED_INC = 0.2;
+const BARREL_SPAWN_INTERVAL = 180;
+const COLLISION_DIST = 28;
+const LADDER_GRAB_DIST = 10;
+const BARREL_LADDER_PROB = 0.025;
+const CANVAS_W = 480;
+const CANVAS_H = 480;
+const HUD_H = 40;
+
+/* ---------- Static level layout ---------- */
+const PLATFORMS = [
+  { x: 0, y: 120, w: 480, h: 12 }, // top (DK level)
+  { x: 0, y: 250, w: 480, h: 12 }, // middle
+  { x: 0, y: 390, w: 480, h: 12 }  // bottom
+];
+
+const LADDERS = [
+  // Top <-> Middle
+  { x: 120, top: 120, bottom: 250 },
+  { x: 340, top: 120, bottom: 250 },
+  // Middle <-> Bottom
+  { x: 80,  top: 250, bottom: 390 },
+  { x: 260, top: 250, bottom: 390 },
+  { x: 420, top: 250, bottom: 390 }
+];
+
+const PLAYER_W = 16;
+const PLAYER_H = 24;
+const BARREL_R = 10;
+
+/* ---------- Canvas setup ---------- */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const restartBtn = document.getElementById("restart");
+
+/* ---------- Audio (Web Audio API, fail-silent) ---------- */
+let audioCtx = null;
+try {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (AC) audioCtx = new AC();
+} catch (e) {
+  audioCtx = null;
+}
+function playTone(freq, duration, type, vol, sweepTo) {
+  if (!audioCtx) return;
+  try {
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type || "square";
+    osc.frequency.setValueAtTime(freq, now);
+    if (typeof sweepTo === "number") {
+      osc.frequency.linearRampToValueAtTime(sweepTo, now + duration);
+    }
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + duration);
+  } catch (e) { /* fail silent */ }
+}
+function sfxJump()  { playTone(540, 0.11, "square",   0.08, 820); }
+function sfxHit()   { playTone(90,  0.32, "sawtooth", 0.18, 40);  }
+function sfxScore() {
+  playTone(520, 0.09, "square", 0.08);
+  setTimeout(function(){ playTone(720, 0.09, "square", 0.08); }, 90);
+  setTimeout(function(){ playTone(960, 0.10, "square", 0.08); }, 180);
+}
+
+/* ---------- Input ---------- */
+const keys = Object.create(null);
+window.addEventListener("keydown", function(e){
+  keys[e.key] = true;
+  if (["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"," "].indexOf(e.key) !== -1) {
+    e.preventDefault();
+  }
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume().catch(function(){});
+  }
+});
+window.addEventListener("keyup", function(e){ keys[e.key] = false; });
+
+/* ---------- Game State ---------- */
+let gameState;
+
+function createPlayer() {
+  return {
+    x: 24,
+    y: PLATFORMS[2].y - PLAYER_H,
+    vx: 0,
+    vy: 0,
+    w: PLAYER_W,
+    h: PLAYER_H,
+    onGround: true,
+    onLadder: false,
+    facing: 1,
+    flashFrames: 0
+  };
+}
+
+function initGame() {
+  gameState = {
+    player: createPlayer(),
+    barrels: [],
+    score: 0,
+    lives: 3,
+    level: 1,
+    phase: "playing",   // 'playing' | 'dead' | 'win' | 'gameover'
+    spawnTimer: 0,
+    dkFrame: 0,
+    deathTimer: 0
+  };
+  hideRestart();
+}
+
+function nextLevel() {
+  gameState.player = createPlayer();
+  gameState.barrels = [];
+  gameState.spawnTimer = 0;
+  gameState.level += 1;
+  gameState.phase = "playing";
+  hideRestart();
+}
+
+function showRestart() { restartBtn.style.display = "block"; }
+function hideRestart() { restartBtn.style.display = "none"; }
+
+restartBtn.addEventListener("click", function(){
+  if (!gameState) { initGame(); return; }
+  if (gameState.phase === "gameover") {
+    initGame();
+  } else if (gameState.phase === "win") {
+    nextLevel();
+  }
+});
+
+/* ---------- Helpers ---------- */
+function ladderAt(centerX, bottomY) {
+  for (let i = 0; i < LADDERS.length; i++) {
+    const l = LADDERS[i];
+    if (Math.abs(centerX - l.x) <= LADDER_GRAB_DIST) {
+      if (bottomY >= l.top - 2 && bottomY <= l.bottom + 2) {
+        return l;
+      }
+    }
+  }
+  return null;
+}
+
+function ladderStartingHere(centerX, bottomY) {
+  // A ladder whose TOP coincides with the platform the entity stands on
+  for (let i = 0; i < LADDERS.length; i++) {
+    const l = LADDERS[i];
+    if (Math.abs(centerX - l.x) <= LADDER_GRAB_DIST) {
+      if (Math.abs(bottomY - l.top) <= PLATFORM_SNAP + 2) return l;
+    }
+  }
+  return null;
+}
+
+function platformUnder(x, w, bottomY, vy) {
+  if (vy < 0) return null;
+  for (let i = 0; i < PLATFORMS.length; i++) {
+    const p = PLATFORMS[i];
+    if (x + w > p.x && x < p.x + p.w) {
+      if (bottomY >= p.y - PLATFORM_SNAP && bottomY <= p.y + PLATFORM_SNAP + Math.max(0, vy)) {
+        return p;
+      }
+    }
+  }
+  return null;
+}
+
+function stillOnAnyPlatform(x, w, bottomY) {
+  for (let i = 0; i < PLATFORMS.length; i++) {
+    const p = PLATFORMS[i];
+    if (x + w > p.x && x < p.x + p.w) {
+      if (Math.abs(bottomY - p.y) <= PLATFORM_SNAP) return true;
+    }
+  }
+  return false;
+}
+
+/* ---------- Barrels ---------- */
+function spawnBarrel() {
+  const speed = BARREL_SPEED_BASE + BARREL_SPEED_INC * (gameState.level - 1);
+  gameState.barrels.push({
+    x: 96,
+    y: PLATFORMS[0].y - BARREL_R * 2,
+    vx: speed,
+    vy: 0,
+    r: BARREL_R,
+    onGround: true,
+    onLadder: false,
+    ladderBottom: 0,
+    rotation: 0,
+    scored: false,
+    ladderCooldown: 0
+  });
+}
+
+function updateBarrels() {
+  const curSpeed = BARREL_SPEED_BASE + BARREL_SPEED_INC * (gameState.level - 1);
+
+  for (let i = gameState.barrels.length - 1; i >= 0; i--) {
+    const b = gameState.barrels[i];
+
+    if (b.ladderCooldown > 0) b.ladderCooldown--;
+
+    if (b.onLadder) {
+      b.y += curSpeed;
+      b.rotation += 0.15;
+      if (b.y + b.r * 2 >= b.ladderBottom) {
+        b.y = b.ladderBottom - b.r * 2;
+        b.onLadder = false;
+        b.onGround = true;
+        b.vy = 0;
+        // After descending a ladder pick a direction (bias toward current dir)
+        b.vx = (Math.random() < 0.5 ? -1 : 1) * curSpeed;
+        b.ladderCooldown = 30;
+      }
+    } else {
+      // Gravity
+      if (!b.onGround) {
+        b.vy += GRAVITY;
+        if (b.vy > TERMINAL_VY) b.vy = TERMINAL_VY;
+      }
+
+      b.x += b.vx;
+      b.y += b.vy;
+      b.rotation += b.vx * 0.06;
+
+      const bottomY = b.y + b.r * 2;
+      const plat = platformUnder(b.x, b.r * 2, bottomY, b.vy);
+      if (plat && b.vy >= 0) {
+        b.y = plat.y - b.r * 2;
+        b.vy = 0;
+        b.onGround = true;
+      } else if (b.onGround) {
+        if (!stillOnAnyPlatform(b.x, b.r * 2, bottomY)) b.onGround = false;
+      }
+
+      // Walls bounce
+      if (b.x < 0)              { b.x = 0;              b.vx = Math.abs(b.vx); }
+      if (b.x + b.r * 2 > CANVAS_W) { b.x = CANVAS_W - b.r * 2; b.vx = -Math.abs(b.vx); }
+
+      // Ladder descent chance (only when grounded and moving)
+      if (b.onGround && b.ladderCooldown === 0) {
+        const centerX = b.x + b.r;
+        const bottom  = b.y + b.r * 2;
+        for (let k = 0; k < LADDERS.length; k++) {
+          const l = LADDERS[k];
+          if (Math.abs(centerX - l.x) <= LADDER_GRAB_DIST &&
+              Math.abs(bottom - l.top) <= PLATFORM_SNAP + 2) {
+            if (Math.random() < BARREL_LADDER_PROB) {
+              b.onLadder = true;
+              b.ladderBottom = l.bottom;
+              b.x = l.x - b.r;
+              b.vx = 0;
+              b.vy = 0;
+              b.onGround = false;
+            }
+            break;
+          }
+        }
+      }
+    }
+
+    // Remove off-screen
+    if (b.y > CANVAS_H + 40 || b.x < -40 || b.x > CANVAS_W + 40) {
+      gameState.barrels.splice(i, 1);
+      continue;
+    }
+
+    // Player interaction
+    const p = gameState.player;
+    const bcx = b.x + b.r;
+    const bcy = b.y + b.r;
+    const pcx = p.x + p.w / 2;
+    const pcy = p.y + p.h / 2;
+
+    // Jump-over score: while airborne and player feet above barrel center
+    if (!b.scored && !p.onGround && !p.onLadder) {
+      const feet = p.y + p.h;
+      if (feet <= bcy && Math.abs(pcx - bcx) < 24) {
+        b.scored = true;
+        gameState.score += 100;
+        sfxScore();
+      }
+    }
+
+    // Collision
+    const dx = bcx - pcx;
+    const dy = bcy - pcy;
+    if (Math.hypot(dx, dy) < COLLISION_DIST && gameState.phase === "playing" && p.flashFrames === 0) {
+      loseLife();
+    }
+  }
+}
+
+/* ---------- Player ---------- */
+function updatePlayer() {
+  const p = gameState.player;
+  const centerX = p.x + p.w / 2;
+  const bottomY = p.y + p.h;
+
+  // ------ Ladder mode ------
+  if (p.onLadder) {
+    const l = ladderAt(centerX, bottomY);
+    // Lock horizontally to the ladder
+    if (l) p.x = l.x - p.w / 2;
+
+    p.vx = 0;
+    p.vy = 0;
+
+    if (keys["ArrowUp"])   p.y -= CLIMB_SPEED;
+    if (keys["ArrowDown"]) p.y += CLIMB_SPEED;
+
+    const newBottom = p.y + p.h;
+
+    // Exit at top
+    if (l && newBottom <= l.top) {
+      p.y = l.top - p.h;
+      p.onLadder = false;
+      p.onGround = true;
+      // Win check (top platform + right side near Pauline)
+      if (p.x + p.w > 380) gameWin();
+      return;
+    }
+    // Exit at bottom (land on lower platform)
+    if (l && newBottom >= l.bottom) {
+      p.y = l.bottom - p.h;
+      p.onLadder = false;
+      p.onGround = true;
+      return;
+    }
+    // Side exit: if near a platform and horizontal pressed, step off
+    if (keys["ArrowLeft"] || keys["ArrowRight"]) {
+      for (let i = 0; i < PLATFORMS.length; i++) {
+        const pl = PLATFORMS[i];
+        if (Math.abs(newBottom - pl.y) <= PLATFORM_SNAP + 1) {
+          p.y = pl.y - p.h;
+          p.onLadder = false;
+          p.onGround = true;
+          break;
+        }
+      }
+    }
+    return;
+  }
+
+  // ------ Normal mode ------
+  // Horizontal input with in-air momentum
+  if (p.onGround) {
+    p.vx = 0;
+    if (keys["ArrowLeft"])  { p.vx = -MOVE_SPEED; p.facing = -1; }
+    if (keys["ArrowRight"]) { p.vx =  MOVE_SPEED; p.facing =  1; }
+  } else {
+    if (keys["ArrowLeft"])  { p.vx = -MOVE_SPEED; p.facing = -1; }
+    else if (keys["ArrowRight"]) { p.vx =  MOVE_SPEED; p.facing =  1; }
+    // else keep existing vx (momentum)
+  }
+
+  // Ladder grab (Up or Down when grounded)
+  if (p.onGround) {
+    if (keys["ArrowUp"]) {
+      const l = ladderAt(centerX, bottomY);
+      if (l) {
+        p.onLadder = true;
+        p.x = l.x - p.w / 2;
+        p.vx = 0; p.vy = 0;
+        return;
+      }
+    } else if (keys["ArrowDown"]) {
+      const l = ladderStartingHere(centerX, bottomY);
+      if (l) {
+        p.onLadder = true;
+        p.x = l.x - p.w / 2;
+        p.vx = 0; p.vy = 0;
+        p.y += CLIMB_SPEED;
+        p.onGround = false;
+        return;
+      }
+    }
+  }
+
+  // Jump
+  if ((keys[" "] || keys["ArrowUp"]) && p.onGround && !p.onLadder) {
+    p.vy = JUMP_VELOCITY;
+    p.onGround = false;
+    sfxJump();
+  }
+
+  // Gravity
+  if (!p.onGround) {
+    p.vy += GRAVITY;
+    if (p.vy > TERMINAL_VY) p.vy = TERMINAL_VY;
+  }
+
+  // Move
+  p.x += p.vx;
+  p.y += p.vy;
+
+  // Bounds
+  if (p.x < 0) p.x = 0;
+  if (p.x + p.w > CANVAS_W) p.x = CANVAS_W - p.w;
+
+  // Platform collision (only when descending)
+  const newBottom = p.y + p.h;
+  const plat = platformUnder(p.x, p.w, newBottom, p.vy);
+  if (plat && p.vy >= 0) {
+    p.y = plat.y - p.h;
+    p.vy = 0;
+    p.onGround = true;
+    // Win check: on top platform near Pauline
+    if (plat === PLATFORMS[0] && p.x + p.w > 380) gameWin();
+  } else {
+    if (p.onGround && !stillOnAnyPlatform(p.x, p.w, newBottom)) {
+      p.onGround = false;
+    }
+  }
+
+  // Fall-off-screen safety
+  if (p.y > CANVAS_H) loseLife();
+}
+
+/* ---------- Life / win ---------- */
+function loseLife() {
+  if (gameState.phase !== "playing") return;
+  sfxHit();
+  gameState.lives -= 1;
+  gameState.player.flashFrames = 30;
+  if (gameState.lives <= 0) {
+    gameState.phase = "gameover";
+    showRestart();
+  } else {
+    gameState.phase = "dead";
+    gameState.deathTimer = 40;
+  }
+}
+
+function gameWin() {
+  if (gameState.phase !== "playing") return;
+  gameState.phase = "win";
+  sfxScore();
+  gameState.score += 500;
+  showRestart();
+}
+
+/* ---------- Main loop ---------- */
+function update() {
+  if (gameState.phase === "playing") {
+    updatePlayer();
+    updateBarrels();
+    gameState.spawnTimer += 1;
+    if (gameState.spawnTimer >= BARREL_SPAWN_INTERVAL) {
+      spawnBarrel();
+      gameState.spawnTimer = 0;
+    }
+    gameState.dkFrame += 1;
+    if (gameState.player.flashFrames > 0) gameState.player.flashFrames -= 1;
+  } else if (gameState.phase === "dead") {
+    if (gameState.player.flashFrames > 0) gameState.player.flashFrames -= 1;
+    gameState.deathTimer -= 1;
+    if (gameState.deathTimer <= 0) {
+      gameState.player = createPlayer();
+      gameState.barrels = [];
+      gameState.spawnTimer = 0;
+      gameState.phase = "playing";
+    }
+  }
+}
+
+/* ---------- Rendering ---------- */
+function render() {
+  // Background
+  ctx.fillStyle = "#1a1a2e";
+  ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+  // HUD
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0, 0, CANVAS_W, HUD_H);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 16px 'Courier New', monospace";
+  ctx.textAlign = "left";
+  ctx.fillText("SCORE " + gameState.score, 12, 25);
+  ctx.textAlign = "center";
+  ctx.fillText("LEVEL " + gameState.level, CANVAS_W / 2, 25);
+  ctx.textAlign = "right";
+  ctx.fillText("LIVES " + gameState.lives, CANVAS_W - 12, 25);
+  ctx.fillStyle = "#444";
+  ctx.fillRect(0, HUD_H - 2, CANVAS_W, 2);
+
+  // Platforms (girders)
+  for (let i = 0; i < PLATFORMS.length; i++) {
+    const p = PLATFORMS[i];
+    ctx.fillStyle = "#c0392b";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+    // Rivets
+    ctx.fillStyle = "#7a1f15";
+    for (let rx = 8; rx < p.w - 4; rx += 20) {
+      ctx.fillRect(p.x + rx, p.y + 2, 2, 2);
+      ctx.fillRect(p.x + rx, p.y + p.h - 4, 2, 2);
+    }
+    // Top highlight
+    ctx.fillStyle = "#e55b44";
+    ctx.fillRect(p.x, p.y, p.w, 2);
+  }
+
+  // Ladders
+  for (let i = 0; i < LADDERS.length; i++) {
+    const l = LADDERS[i];
+    ctx.strokeStyle = "#f1c40f";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(l.x - 8, l.top);
+    ctx.lineTo(l.x - 8, l.bottom);
+    ctx.moveTo(l.x + 8, l.top);
+    ctx.lineTo(l.x + 8, l.bottom);
+    ctx.stroke();
+    for (let ry = l.top + 8; ry < l.bottom; ry += 10) {
+      ctx.beginPath();
+      ctx.moveTo(l.x - 8, ry);
+      ctx.lineTo(l.x + 8, ry);
+      ctx.stroke();
+    }
+  }
+
+  // Donkey Kong (top-left)
+  drawDK(30, PLATFORMS[0].y);
+
+  // Pauline (top-right)
+  drawPauline(420, PLATFORMS[0].y);
+
+  // Barrels
+  for (let i = 0; i < gameState.barrels.length; i++) {
+    drawBarrel(gameState.barrels[i]);
+  }
+
+  // Player
+  drawPlayer(gameState.player);
+
+  // Overlays
+  if (gameState.phase === "gameover") {
+    drawOverlay();
+    ctx.fillStyle = "#e74c3c";
+    ctx.font = "bold 48px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("GAME OVER", CANVAS_W / 2, CANVAS_H / 2 - 20);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 18px 'Courier New', monospace";
+    ctx.fillText("Final Score: " + gameState.score, CANVAS_W / 2, CANVAS_H / 2 + 12);
+  } else if (gameState.phase === "win") {
+    drawOverlay();
+    ctx.fillStyle = "#2ecc71";
+    ctx.font = "bold 44px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("YOU WIN!", CANVAS_W / 2, CANVAS_H / 2 - 20);
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 18px 'Courier New', monospace";
+    ctx.fillText("Level " + gameState.level + " cleared", CANVAS_W / 2, CANVAS_H / 2 + 12);
+  }
+}
+
+function drawOverlay() {
+  ctx.fillStyle = "rgba(0,0,0,0.72)";
+  ctx.fillRect(0, HUD_H, CANVAS_W, CANVAS_H - HUD_H);
+}
+
+function drawDK(x, topPlatformY) {
+  const f = gameState.dkFrame;
+  const pound = Math.floor(f / 25) % 2 === 0 ? 0 : 3;
+  const bodyH = 48;
+  const by = topPlatformY - bodyH - pound;
+
+  // Body
+  ctx.fillStyle = "#6b3410";
+  roundRect(x, by + 14, 64, 36, 8, true, false);
+  // Head
+  ctx.fillStyle = "#8b4513";
+  roundRect(x + 10, by - 8, 44, 26, 8, true, false);
+  // Face patch
+  ctx.fillStyle = "#d2a679";
+  roundRect(x + 16, by + 2, 32, 14, 4, true, false);
+  // Eyes
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(x + 20, by + 4, 6, 6);
+  ctx.fillRect(x + 38, by + 4, 6, 6);
+  ctx.fillStyle = "#000";
+  ctx.fillRect(x + 22, by + 6, 3, 3);
+  ctx.fillRect(x + 40, by + 6, 3, 3);
+  // Nose / mouth
+  ctx.fillStyle = "#3a1f08";
+  ctx.fillRect(x + 28, by + 11, 8, 2);
+  ctx.fillRect(x + 26, by + 14, 12, 2);
+
+  // Arms (pounding animation)
+  const armY = by + 18 + (pound ? -6 : 2);
+  ctx.fillStyle = "#6b3410";
+  roundRect(x - 12, armY, 18, 16, 5, true, false);
+  roundRect(x + 58, armY, 18, 16, 5, true, false);
+
+  // Chest patch
+  ctx.fillStyle = "#c49a72";
+  roundRect(x + 18, by + 22, 28, 22, 4, true, false);
+
+  // Legs
+  ctx.fillStyle = "#6b3410";
+  ctx.fillRect(x + 10, by + 46, 14, 6);
+  ctx.fillRect(x + 40, by + 46, 14, 6);
+}
+
+function drawPauline(x, topPlatformY) {
+  const by = topPlatformY - 32;
+  // Dress
+  ctx.fillStyle = "#ff6ec7";
+  ctx.fillRect(x, by + 16, 18, 16);
+  // Trim
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(x, by + 30, 18, 2);
+  // Head
+  ctx.fillStyle = "#ffd1a4";
+  ctx.fillRect(x + 4, by + 4, 10, 10);
+  // Hair
+  ctx.fillStyle = "#8b0000";
+  ctx.fillRect(x + 3, by + 1, 12, 4);
+  ctx.fillRect(x + 2, by + 3, 3, 8);
+  ctx.fillRect(x + 13, by + 3, 3, 8);
+  // Eyes
+  ctx.fillStyle = "#000";
+  ctx.fillRect(x + 7, by + 8, 2, 2);
+  ctx.fillRect(x + 11, by + 8, 2, 2);
+
+  // "HELP!" callout flashing
+  if (Math.floor(gameState.dkFrame / 30) % 2 === 0 && gameState.phase === "playing") {
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold 11px 'Courier New', monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("HELP!", x + 9, by - 4);
+  }
+}
+
+function drawPlayer(p) {
+  const flashing = p.flashFrames > 0 && Math.floor(p.flashFrames / 4) % 2 === 0;
+  const bodyColor = flashing ? "#ffffff" : "#e74c3c";
+  const legColor  = flashing ? "#ffffff" : "#2980b9";
+  const skinColor = flashing ? "#ffffff" : "#ffd1a4";
+
+  // Legs
+  ctx.fillStyle = legColor;
+  ctx.fillRect(p.x + 2,         p.y + 17, 5, 7);
+  ctx.fillRect(p.x + p.w - 7,   p.y + 17, 5, 7);
+  // Shoes
+  ctx.fillStyle = flashing ? "#ffffff" : "#2c1608";
+  ctx.fillRect(p.x + 1,         p.y + 22, 6, 2);
+  ctx.fillRect(p.x + p.w - 7,   p.y + 22, 6, 2);
+  // Body / overalls torso
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(p.x + 1, p.y + 9, p.w - 2, 9);
+  // Head
+  ctx.fillStyle = skinColor;
+  ctx.fillRect(p.x + 3, p.y + 3, p.w - 6, 7);
+  // Mustache
+  ctx.fillStyle = flashing ? "#ffffff" : "#2c1608";
+  ctx.fillRect(p.x + 3, p.y + 8, p.w - 6, 1);
+  // Cap
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(p.x + 2, p.y,     p.w - 4, 3);
+  if (p.facing > 0) {
+    ctx.fillRect(p.x + p.w - 4, p.y + 2, 5, 2); // brim
+  } else {
+    ctx.fillRect(p.x - 1,       p.y + 2, 5, 2);
+  }
+  // Eye
+  if (!flashing) {
+    ctx.fillStyle = "#000";
+    ctx.fillRect(p.x + (p.facing > 0 ? p.w - 6 : 3), p.y + 5, 2, 2);
+  }
+}
+
+function drawBarrel(b) {
+  const cx = b.x + b.r;
+  const cy = b.y + b.r;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(b.rotation);
+  // Outer circle
+  ctx.fillStyle = "#5c2e0c";
+  ctx.beginPath();
+  ctx.arc(0, 0, b.r, 0, Math.PI * 2);
+  ctx.fill();
+  // Cross pattern
+  ctx.strokeStyle = "#a86a33";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-b.r + 2, 0); ctx.lineTo(b.r - 2, 0);
+  ctx.moveTo(0, -b.r + 2); ctx.lineTo(0, b.r - 2);
+  ctx.stroke();
+  // Inner ring
+  ctx.strokeStyle = "#3a1f08";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(0, 0, b.r - 2, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r, fill, stroke) {
+  if (r > w / 2) r = w / 2;
+  if (r > h / 2) r = h / 2;
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  if (fill) ctx.fill();
+  if (stroke) ctx.stroke();
+}
+
+/* ---------- Boot ---------- */
+function frame() {
+  update();
+  render();
+  requestAnimationFrame(frame);
+}
+
+initGame();
+frame();
+</script>
+</body>
+</html>

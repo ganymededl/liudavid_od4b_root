@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CO·PAC·ILOT — Your AI Wingman in the Maze</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Theme ---------- */
+  :root {
+    --bg: #000;
+    --fg: #fff;
+    --wall: #1A1AFF;
+    --pellet: #FFFFFF;
+    --shadow: rgba(39,100,231,0.45);
+  }
+  body.light {
+    --bg: #F5F5F0;
+    --fg: #1A237E;
+    --wall: #1A237E;
+    --pellet: #2A2A2A;
+    --shadow: rgba(26,35,126,0.30);
+  }
+
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: var(--bg); color: var(--fg);
+    font-family: 'Press Start 2P', monospace;
+    overflow: hidden;
+    transition: background 300ms ease, color 300ms ease;
+  }
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+    box-sizing: border-box;
+  }
+  /* Canvas internal resolution stays at 448x576; CSS scales it up to fill the
+     viewport while preserving aspect ratio. image-rendering: pixelated keeps
+     the retro arcade look at large sizes. */
+  #game {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    background: var(--bg);
+    box-shadow: 0 0 60px var(--shadow);
+    transition: background 300ms ease, box-shadow 300ms ease;
+    height: min(94vh, calc(94vw * 576 / 448));
+    width: auto;
+    aspect-ratio: 448 / 576;
+  }
+  #toggleMode {
+    position: fixed; top: 12px; right: 12px;
+    background: rgba(0,0,0,0.6); color: #fff;
+    border: 2px solid #2764E7;
+    font-family: inherit; font-size: 10px;
+    padding: 8px 12px; cursor: pointer; letter-spacing: 1px;
+    z-index: 5;
+  }
+  body.light #toggleMode {
+    background: rgba(255,255,255,0.7); color: #1A237E; border-color: #1A237E;
+  }
+  #hint {
+    position: fixed; bottom: 8px; left: 0; right: 0;
+    text-align: center; font-size: 7px; opacity: 0.5;
+    pointer-events: none; line-height: 1.6;
+  }
+  /* ensure font loads quickly so canvas text doesn't flash */
+  .preload { font-family: 'Press Start 2P', monospace; visibility: hidden; position: absolute; }
+</style>
+</head>
+<body>
+  <span class="preload">.</span>
+  <div id="stage">
+    <canvas id="game" width="448" height="576"></canvas>
+  </div>
+  <button id="toggleMode" type="button">[M] LIGHT</button>
+  <div id="hint">ARROWS / WASD MOVE · [M] THEME · [P] PAUSE · [1][2][3] DIFFICULTY ON TITLE</div>
+
+<script>
+"use strict";
+
+/* =========================================================================
+   CO·PAC·ILOT  —  Pac-Man clone with Microsoft Copilot identity
+   Single-file HTML5 canvas game. Vanilla JS only.
+   ----- Hero features (in order of priority) -----
+     1) Ghost AI personality correctness (Blinky/Pinky/Inky/Clyde)
+     2) Copilot four-petal -> Pac-Man morph on title screen
+     3) "Copilot Splash" gradient burst on fruit eat
+     4) Three difficulty tiers (EASY / NORMAL / INSANE)
+   ========================================================================= */
+
+/* ---------- Constants ---------- */
+const COLS = 28, ROWS = 31, TILE = 16;
+const HUD_TOP = 48, HUD_BOT = 32;
+const W = COLS * TILE;                       // 448
+const H = ROWS * TILE + HUD_TOP + HUD_BOT;   // 576
+
+/* Copilot brand palette */
+const COPILOT = {
+  blue:    '#2764E7',
+  cyan:    '#0FBDE4',
+  green:   '#35B778',
+  magenta: '#B146C2',
+  orange:  '#F7941D'
+};
+const PETALS = [COPILOT.blue, COPILOT.cyan, COPILOT.green, COPILOT.magenta];
+const HUE_CYCLE = [COPILOT.blue, COPILOT.cyan, COPILOT.green, COPILOT.magenta, COPILOT.orange];
+
+/* Direction vectors */
+const DIR = {
+  NONE:  { x: 0, y: 0, name: 'none'  },
+  LEFT:  { x:-1, y: 0, name: 'left'  },
+  RIGHT: { x: 1, y: 0, name: 'right' },
+  UP:    { x: 0, y:-1, name: 'up'    },
+  DOWN:  { x: 0, y: 1, name: 'down'  }
+};
+const opposite = d => (d===DIR.LEFT?DIR.RIGHT:d===DIR.RIGHT?DIR.LEFT:d===DIR.UP?DIR.DOWN:d===DIR.DOWN?DIR.UP:DIR.NONE);
+
+/* ---------- Maze layout (28 wide x 31 tall) ----------
+   '#' wall   '.' pellet   'o' power pellet   ' ' empty
+   '-' ghost-house door     (tunnels are the row of dots at y=14)
+*/
+const MAZE_RAW = [
+  "############################", //  0
+  "#............##............#", //  1
+  "#.####.#####.##.#####.####.#", //  2
+  "#o####.#####.##.#####.####o#", //  3
+  "#.####.#####.##.#####.####.#", //  4
+  "#..........................#", //  5
+  "#.####.##.########.##.####.#", //  6
+  "#.####.##.########.##.####.#", //  7
+  "#......##....##....##......#", //  8
+  "######.##### ## #####.######", //  9
+  "######.##### ## #####.######", // 10
+  "######.##          ##.######", // 11
+  "######.## ###--### ##.######", // 12
+  "######.## #      # ##.######", // 13
+  "      .   #      #   .      ", // 14  <- tunnel row
+  "######.## #      # ##.######", // 15
+  "######.## ######## ##.######", // 16
+  "######.##          ##.######", // 17
+  "######.## ######## ##.######", // 18
+  "######.## ######## ##.######", // 19
+  "#............##............#", // 20
+  "#.####.#####.##.#####.####.#", // 21
+  "#.####.#####.##.#####.####.#", // 22
+  "#o..##................##..o#", // 23
+  "###.##.##.########.##.##.###", // 24
+  "###.##.##.########.##.##.###", // 25
+  "#......##....##....##......#", // 26
+  "#.##########.##.##########.#", // 27
+  "#.##########.##.##########.#", // 28
+  "#..........................#", // 29
+  "############################"  // 30
+];
+
+/* Sanity check — surface row issues during dev */
+console.assert(MAZE_RAW.length === ROWS, 'MAZE rows wrong: ' + MAZE_RAW.length);
+MAZE_RAW.forEach((r,i)=> console.assert(r.length === COLS, 'row '+i+' has '+r.length));
+
+/* Player & ghost spawn anchors (tile coordinates) */
+const PLAYER_SPAWN  = { col: 13.5, row: 23 };  // half-col so pacman straddles center
+const GHOST_HOUSE_CENTER = { col: 13.5, row: 14 };
+const GHOST_SPAWNS = {
+  blinky: { col: 13.5, row: 11 },              // sits just above the gate, exits immediately
+  pinky:  { col: 13.5, row: 14 },
+  inky:   { col: 11.5, row: 14 },
+  clyde:  { col: 15.5, row: 14 }
+};
+/* Scatter-mode home corners (where each ghost retreats during scatter phase) */
+const SCATTER_TARGETS = {
+  blinky: { col: 25, row: 0 },
+  pinky:  { col: 2,  row: 0 },
+  inky:   { col: 27, row: 30 },
+  clyde:  { col: 0,  row: 30 }
+};
+
+/* ---------- Difficulty tiers ---------- */
+const DIFFICULTIES = {
+  easy:   { name: 'EASY',   ghostSpeed: 0.65, frightenSec: 10, exitRate: 0.5, pacSpeed: 0.85, color: COPILOT.green },
+  normal: { name: 'NORMAL', ghostSpeed: 0.75, frightenSec: 7,  exitRate: 1.0, pacSpeed: 0.80, color: COPILOT.cyan  },
+  insane: { name: 'INSANE', ghostSpeed: 0.95, frightenSec: 3,  exitRate: 2.0, pacSpeed: 0.80, color: COPILOT.magenta }
+};
+
+/* Base reference speed (px/frame at 60fps for 100% speed) */
+const BASE_SPEED_PX = 1.45;
+
+/* Scatter / Chase phase timeline (seconds) — classic level-1 timings */
+const PHASE_TIMELINE = [
+  { mode: 'scatter', dur: 7  },
+  { mode: 'chase',   dur: 20 },
+  { mode: 'scatter', dur: 7  },
+  { mode: 'chase',   dur: 20 },
+  { mode: 'scatter', dur: 5  },
+  { mode: 'chase',   dur: 20 },
+  { mode: 'scatter', dur: 5  },
+  { mode: 'chase',   dur: Infinity }
+];
+
+/* Bonus fruit progression per level */
+const FRUITS = [
+  { name: 'cherry',     color: '#FF1A1A', stem: COPILOT.green, points: 100  },
+  { name: 'strawberry', color: '#FF3F66', stem: COPILOT.green, points: 300  },
+  { name: 'orange',     color: COPILOT.orange, stem: COPILOT.green, points: 500  },
+  { name: 'apple',      color: '#E63946', stem: COPILOT.green, points: 700  },
+  { name: 'melon',      color: COPILOT.green, stem: '#1B5E20', points: 1000 },
+  { name: 'galaxian',   color: COPILOT.cyan,  stem: COPILOT.blue,  points: 2000 },
+  { name: 'bell',       color: '#FFD400', stem: '#7A5A00', points: 3000 },
+  { name: 'key',        color: COPILOT.cyan, stem: '#5A5A5A', points: 5000 }
+];
+
+/* ---------- Globals ---------- */
+const cvs = document.getElementById('game');
+const ctx = cvs.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+
+let maze = [];
+let totalDotsAtStart = 0;
+
+const game = {
+  state: 'title',           // 'title' | 'ready' | 'playing' | 'dying' | 'levelclear' | 'gameover'
+  difficulty: 'normal',
+  score: 0,
+  highScore: 0,
+  lives: 3,
+  level: 1,
+  dotsEaten: 0,
+  ghostCombo: 0,
+  paused: false,
+  fruitActive: null,        // { col,row, type, expires }
+  fruitsThisLevel: 0,
+  splashes: [],             // active "Copilot splash" effects
+  trails: [],               // pacman gradient trail particles
+  floaters: [],             // floating point texts
+  phaseIndex: 0,
+  phaseTimer: 0,
+  frightenTimer: 0,
+  mode: 'scatter',          // 'scatter' | 'chase' | 'frightened'
+  modeBeforeFright: 'scatter',
+  morphT: 0,                // title morph animation time
+  startedAt: performance.now(),
+  flashWallTimer: 0,        // level-clear wall flash
+  cruiseElroy: false        // INSANE-mode flag for Blinky
+};
+
+/* ---------- Audio (Web Audio API — procedural, no external URLs) ----------
+   We synthesize waka/death sounds locally so the game has audio without
+   relying on cross-origin MP3 downloads (which often fail on file:// or due
+   to CORS). Init is deferred to first user gesture to satisfy autoplay rules.
+*/
+const audio = {
+  ctx: null,
+  enabled: true,
+  initted: false,
+  chompTimer: null,
+  chompPhase: 0,
+  lastChompAt: 0,
+  init() {
+    if (this.initted) return;
+    this.initted = true;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) { this.enabled = false; return; }
+      this.ctx = new AC();
+    } catch(e) { this.enabled = false; }
+  },
+  /* One short tone with envelope. Used as a building block. */
+  blip(freq, dur, type, gain) {
+    if (!this.enabled || !this.ctx) return;
+    const t = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = type || 'square';
+    osc.frequency.setValueAtTime(freq, t);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(gain || 0.18, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    osc.connect(g).connect(this.ctx.destination);
+    osc.start(t);
+    osc.stop(t + dur + 0.02);
+  },
+  /* "Waka-waka" — two alternating tones; called every time Pac eats a pellet. */
+  startChomp() {
+    if (!this.enabled || !this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const now = performance.now();
+    if (now - this.lastChompAt < 90) return;        // throttle so it doesn't blast
+    this.lastChompAt = now;
+    const high = (this.chompPhase++ % 2) === 0;
+    this.blip(high ? 520 : 360, 0.07, 'square', 0.16);
+  },
+  stopChomp() { /* nothing to stop — chomp is one-shot per pellet */ },
+  /* Descending death wail. */
+  playDeath() {
+    if (!this.enabled || !this.ctx) return;
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+    const t0 = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(660, t0);
+    osc.frequency.exponentialRampToValueAtTime(80, t0 + 1.1);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.linearRampToValueAtTime(0.25, t0 + 0.05);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.3);
+    osc.connect(g).connect(this.ctx.destination);
+    osc.start(t0);
+    osc.stop(t0 + 1.4);
+  },
+  /* Triumphant "ate ghost" sound */
+  playGhostEat() {
+    if (!this.enabled || !this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    const freqs = [440, 660, 880];
+    freqs.forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(f, t0 + i * 0.05);
+      g.gain.setValueAtTime(0, t0 + i * 0.05);
+      g.gain.linearRampToValueAtTime(0.2, t0 + i * 0.05 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.05 + 0.12);
+      osc.connect(g).connect(this.ctx.destination);
+      osc.start(t0 + i * 0.05);
+      osc.stop(t0 + i * 0.05 + 0.13);
+    });
+  },
+  /* Power-pellet activation tone */
+  playPower() {
+    if (!this.enabled || !this.ctx) return;
+    this.blip(180, 0.4, 'sawtooth', 0.18);
+    setTimeout(() => this.blip(240, 0.4, 'sawtooth', 0.18), 100);
+  },
+  /* Fruit pickup — three quick rising tones */
+  playFruit() {
+    if (!this.enabled || !this.ctx) return;
+    const t0 = this.ctx.currentTime;
+    [523, 659, 784].forEach((f, i) => {
+      const osc = this.ctx.createOscillator();
+      const g = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(f, t0 + i * 0.07);
+      g.gain.setValueAtTime(0, t0 + i * 0.07);
+      g.gain.linearRampToValueAtTime(0.22, t0 + i * 0.07 + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0 + i * 0.07 + 0.18);
+      osc.connect(g).connect(this.ctx.destination);
+      osc.start(t0 + i * 0.07);
+      osc.stop(t0 + i * 0.07 + 0.2);
+    });
+  }
+};
+
+/* ---------- Maze helpers ---------- */
+function loadMaze() {
+  maze = MAZE_RAW.map(r => r.split(''));
+  totalDotsAtStart = 0;
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (maze[y][x] === '.' || maze[y][x] === 'o') totalDotsAtStart++;
+    }
+  }
+}
+function tileAt(col, row) {
+  if (row < 0 || row >= ROWS) return '#';
+  if (col < 0 || col >= COLS) return ' ';   // tunnel = open
+  return maze[row][col];
+}
+function isWall(col, row, allowDoor=false) {
+  const t = tileAt(col, row);
+  if (t === '#') return true;
+  if (t === '-' && !allowDoor) return true;
+  return false;
+}
+function tileCenterPx(col, row) {
+  return { x: col * TILE + TILE/2, y: row * TILE + TILE/2 + HUD_TOP };
+}
+function pxToTile(px, py) {
+  return { col: Math.floor(px / TILE), row: Math.floor((py - HUD_TOP) / TILE) };
+}
+
+/* ---------- Entities ---------- */
+
+class Pac {
+  constructor() { this.reset(); }
+  reset() {
+    const p = tileCenterPx(PLAYER_SPAWN.col, PLAYER_SPAWN.row);
+    this.x = p.x; this.y = p.y;
+    this.dir = DIR.LEFT;
+    this.nextDir = DIR.LEFT;
+    this.mouth = 0;          // 0..1 chomp
+    this.mouthDir = 1;
+    this.alive = true;
+    this.deathT = 0;         // 0..1
+  }
+  /* Current grid tile (col,row) — used by ghost AI for targeting. */
+  tile() {
+    return {
+      col: Math.round((this.x - TILE/2) / TILE),
+      row: Math.round((this.y - TILE/2 - HUD_TOP) / TILE)
+    };
+  }
+  speed() { return BASE_SPEED_PX * DIFFICULTIES[game.difficulty].pacSpeed * (1 + 0.02 * (game.level-1)); }
+  /* attempt to switch to nextDir if next tile in that direction is passable */
+  tryTurn() {
+    if (this.nextDir === this.dir) return;
+    // Only at near-tile-center
+    const cx = (this.x - TILE/2) / TILE;
+    const cy = (this.y - TILE/2 - HUD_TOP) / TILE;
+    const onCenterX = Math.abs(cx - Math.round(cx)) < 0.15;
+    const onCenterY = Math.abs(cy - Math.round(cy)) < 0.15;
+    const col = Math.round(cx), row = Math.round(cy);
+    if (this.nextDir.x !== 0 && !onCenterY) return;
+    if (this.nextDir.y !== 0 && !onCenterX) return;
+    const nc = col + this.nextDir.x, nr = row + this.nextDir.y;
+    if (!isWall(nc, nr)) {
+      this.dir = this.nextDir;
+      // snap to center perpendicular axis to prevent drift
+      if (this.dir.x !== 0) this.y = row * TILE + TILE/2 + HUD_TOP;
+      if (this.dir.y !== 0) this.x = col * TILE + TILE/2;
+    }
+  }
+  step() {
+    if (!this.alive) {
+      this.deathT = Math.min(1, this.deathT + 1/90); // ~1.5s
+      return;
+    }
+    this.tryTurn();
+    const sp = this.speed();
+    const cx = (this.x - TILE/2) / TILE;
+    const cy = (this.y - TILE/2 - HUD_TOP) / TILE;
+    const col = Math.round(cx), row = Math.round(cy);
+    // Check if heading into a wall — stop at center of current tile
+    const aheadCol = col + this.dir.x;
+    const aheadRow = row + this.dir.y;
+    const blocked = isWall(aheadCol, aheadRow);
+    const targetCx = col * TILE + TILE/2;
+    const targetCy = row * TILE + TILE/2 + HUD_TOP;
+    if (blocked) {
+      // approach center on the axis of travel; halt at center
+      if (this.dir.x !== 0) {
+        if ((this.dir.x > 0 && this.x >= targetCx) || (this.dir.x < 0 && this.x <= targetCx)) {
+          this.x = targetCx; return;
+        }
+      } else if (this.dir.y !== 0) {
+        if ((this.dir.y > 0 && this.y >= targetCy) || (this.dir.y < 0 && this.y <= targetCy)) {
+          this.y = targetCy; return;
+        }
+      } else return;
+    }
+    this.x += this.dir.x * sp;
+    this.y += this.dir.y * sp;
+    // tunnel wrap
+    if (this.x < -TILE/2) this.x = W + TILE/2;
+    if (this.x > W + TILE/2) this.x = -TILE/2;
+    // chomp animation
+    this.mouth += this.mouthDir * 0.15;
+    if (this.mouth >= 1) { this.mouth = 1; this.mouthDir = -1; }
+    if (this.mouth <= 0) { this.mouth = 0; this.mouthDir = 1; }
+    // gradient trail particle
+    if ((performance.now()|0) % 3 === 0) {
+      const t = performance.now() * 0.001;
+      const colorIdx = Math.floor(t) % HUE_CYCLE.length;
+      game.trails.push({
+        x: this.x, y: this.y, life: 0, max: 22, color: HUE_CYCLE[colorIdx]
+      });
+      if (game.trails.length > 60) game.trails.shift();
+    }
+  }
+  consume() {
+    const cx = (this.x - TILE/2) / TILE;
+    const cy = (this.y - TILE/2 - HUD_TOP) / TILE;
+    const col = Math.round(cx), row = Math.round(cy);
+    if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+    const t = maze[row][col];
+    if (t === '.') {
+      maze[row][col] = ' ';
+      game.score += 10;
+      game.dotsEaten++;
+      audio.startChomp();
+      maybeSpawnFruit();
+      checkExtraLife();
+      checkCruiseElroy();
+    } else if (t === 'o') {
+      maze[row][col] = ' ';
+      game.score += 50;
+      game.dotsEaten++;
+      audio.startChomp();
+      enterFrightened();
+      maybeSpawnFruit();
+      checkExtraLife();
+    }
+    // Fruit pickup
+    if (game.fruitActive) {
+      const fp = tileCenterPx(game.fruitActive.col, game.fruitActive.row);
+      if (Math.abs(this.x - fp.x) < TILE/2 && Math.abs(this.y - fp.y) < TILE/2) {
+        eatFruit();
+      }
+    }
+  }
+}
+
+class Ghost {
+  constructor(name, color) {
+    this.name = name;
+    this.color = color;
+    this.reset();
+  }
+  reset() {
+    const sp = GHOST_SPAWNS[this.name];
+    const p = tileCenterPx(sp.col, sp.row);
+    this.x = p.x; this.y = p.y;
+    this.dir = (this.name === 'blinky') ? DIR.LEFT : DIR.UP;
+    this.state = 'house';     // 'house' | 'leaving' | 'normal' | 'frightened' | 'eaten'
+    this.bobT = Math.random() * Math.PI * 2;
+    if (this.name === 'blinky') this.state = 'normal';   // Blinky starts outside
+  }
+  /* tile column/row this ghost is centered on */
+  tile() {
+    return {
+      col: Math.round((this.x - TILE/2) / TILE),
+      row: Math.round((this.y - TILE/2 - HUD_TOP) / TILE)
+    };
+  }
+  speed() {
+    const d = DIFFICULTIES[game.difficulty];
+    let mul = d.ghostSpeed * (1 + 0.015 * (game.level-1));
+    if (this.state === 'frightened') mul *= 0.55;
+    if (this.state === 'eaten') mul = 1.6;
+    if (this.state === 'house' || this.state === 'leaving') mul = 0.5;
+    // Tunnel slow-down (classic)
+    const t = this.tile();
+    if (t.row === 14 && (t.col < 6 || t.col > 21)) mul *= 0.65;
+    // Cruise Elroy: Blinky speed boost late game (or immediately on INSANE)
+    if (this.name === 'blinky' && game.cruiseElroy && this.state === 'normal') mul *= 1.10;
+    return BASE_SPEED_PX * mul;
+  }
+  /* compute target tile based on AI personality and current global mode */
+  computeTarget(pac, blinky) {
+    if (this.state === 'eaten') return { col: GHOST_HOUSE_CENTER.col, row: 12 };
+    if (this.state === 'frightened') return null;  // pick random
+    if (game.mode === 'scatter' && !(this.name === 'blinky' && game.cruiseElroy)) {
+      return SCATTER_TARGETS[this.name];
+    }
+    const pt = pac.tile();
+    switch (this.name) {
+      case 'blinky':
+        // SHADOW: target Pac-Man's exact tile.
+        return { col: pt.col, row: pt.row };
+      case 'pinky': {
+        // SPEEDY: 4 tiles ahead of Pac-Man's facing direction
+        // (classic original game has the famous "up bug" overflow that also shifts left;
+        //  we reproduce the spirit, not the bug.)
+        return { col: pt.col + pac.dir.x * 4, row: pt.row + pac.dir.y * 4 };
+      }
+      case 'inky': {
+        // BASHFUL: vector from Blinky through a point 2 tiles ahead of Pac-Man, doubled
+        const px = pt.col + pac.dir.x * 2;
+        const py = pt.row + pac.dir.y * 2;
+        const bt = blinky.tile();
+        return { col: px + (px - bt.col), row: py + (py - bt.row) };
+      }
+      case 'clyde': {
+        // POKEY: chase Pac when far; scatter to bottom-left when within 8 tiles
+        const dx = pt.col - this.tile().col, dy = pt.row - this.tile().row;
+        if (dx*dx + dy*dy < 64) return SCATTER_TARGETS.clyde;
+        return { col: pt.col, row: pt.row };
+      }
+    }
+  }
+  /* At each tile center, choose direction by minimizing distance to target.
+     Cannot reverse unless forced. Tiebreaker: up > left > down > right. */
+  chooseDir(target) {
+    const t = this.tile();
+    const order = [DIR.UP, DIR.LEFT, DIR.DOWN, DIR.RIGHT];
+    const allowDoor = (this.state === 'eaten' || this.state === 'leaving');
+    const reverse = opposite(this.dir);
+    let candidates = [];
+    for (const d of order) {
+      if (d === reverse) continue;                            // no reversing
+      const nc = t.col + d.x, nr = t.row + d.y;
+      if (isWall(nc, nr, allowDoor)) continue;
+      candidates.push({ d, nc, nr });
+    }
+    if (candidates.length === 0) {                            // dead-end -> reverse
+      return reverse;
+    }
+    if (this.state === 'frightened') {
+      return candidates[Math.floor(Math.random() * candidates.length)].d;
+    }
+    if (!target) return candidates[0].d;
+    // Pick min euclidean distance squared
+    let best = candidates[0], bestD = Infinity;
+    for (const c of candidates) {
+      const dx = c.nc - target.col, dy = c.nr - target.row;
+      const dist = dx*dx + dy*dy;
+      if (dist < bestD) { bestD = dist; best = c; }
+    }
+    return best.d;
+  }
+  step(pac, blinky) {
+    // House behavior: bob up and down, exit when allowed
+    if (this.state === 'house') {
+      this.bobT += 0.05;
+      this.y = tileCenterPx(GHOST_SPAWNS[this.name].col, GHOST_SPAWNS[this.name].row).y + Math.sin(this.bobT) * 4;
+      if (canExitHouse(this)) this.state = 'leaving';
+      return;
+    }
+    if (this.state === 'leaving') {
+      // Move to door tile (col 13.5, row 11)
+      const target = tileCenterPx(13.5, 11);
+      const dx = target.x - this.x, dy = target.y - this.y;
+      const d = Math.hypot(dx, dy);
+      const sp = this.speed();
+      if (d < sp) { this.x = target.x; this.y = target.y; this.state = 'normal'; this.dir = DIR.LEFT; return; }
+      this.x += (dx / d) * sp;
+      this.y += (dy / d) * sp;
+      return;
+    }
+    // Eaten -> heading back to house
+    if (this.state === 'eaten') {
+      // when reach door area, become house->leaving again
+      const t = this.tile();
+      if (t.col === 13 && t.row === 14 || t.col === 14 && t.row === 14) {
+        // arrived at house center
+        this.state = 'leaving';
+        return;
+      }
+    }
+    /* Decide direction ONCE per tile entry. Snap to the tile center on entry
+       so the ghost stays aligned in the corridor. Without the "new tile"
+       gate, the ghost would re-snap every frame and never make forward
+       progress (the bug that made ghosts look frozen). */
+    const cx = (this.x - TILE/2) / TILE;
+    const cy = (this.y - TILE/2 - HUD_TOP) / TILE;
+    const col = Math.round(cx);
+    const row = Math.round(cy);
+    const nearCenter = Math.abs(cx - col) < 0.15 && Math.abs(cy - row) < 0.15;
+    const lastT = this._lastTile;
+    const enteredNewTile = !lastT || lastT.col !== col || lastT.row !== row;
+    if (nearCenter && enteredNewTile) {
+      this.x = col * TILE + TILE/2;
+      this.y = row * TILE + TILE/2 + HUD_TOP;
+      const target = this.computeTarget(pac, blinky);
+      this.dir = this.chooseDir(target);
+      this._lastTile = { col, row };
+    }
+    const sp = this.speed();
+    this.x += this.dir.x * sp;
+    this.y += this.dir.y * sp;
+    // tunnel wrap
+    if (this.x < -TILE/2) this.x = W + TILE/2;
+    if (this.x > W + TILE/2) this.x = -TILE/2;
+  }
+}
+
+/* Ghost-house exit gate: stagger releases by dots eaten + difficulty rate */
+function canExitHouse(g) {
+  const d = DIFFICULTIES[game.difficulty];
+  const eaten = game.dotsEaten;
+  // Pinky: free almost immediately; Inky after a few dots; Clyde later.
+  const thresholds = { pinky: 0, inky: Math.round(30/d.exitRate), clyde: Math.round(60/d.exitRate) };
+  return eaten >= (thresholds[g.name] ?? 0);
+}
+
+/* Cruise Elroy — Blinky speed boost late game (or first dot on INSANE) */
+function checkCruiseElroy() {
+  if (game.difficulty === 'insane') {
+    if (game.dotsEaten >= 1) game.cruiseElroy = true;
+  } else {
+    const remaining = totalDotsAtStart - game.dotsEaten;
+    if (remaining <= 20) game.cruiseElroy = true;
+  }
+}
+
+/* ---------- Pac & ghosts instances ---------- */
+const pac = new Pac();
+const ghosts = [
+  new Ghost('blinky', '#FF0000'),
+  new Ghost('pinky',  '#FFB8FF'),
+  new Ghost('inky',   '#00FFFF'),
+  new Ghost('clyde',  '#FFB852')
+];
+const blinky = ghosts[0];
+
+/* ---------- Game flow ---------- */
+function loadHighScore() {
+  try { game.highScore = parseInt(localStorage.getItem('copacilot.high') || '0', 10) || 0; }
+  catch(e) { game.highScore = 0; }
+}
+function saveHighScore() {
+  if (game.score > game.highScore) {
+    game.highScore = game.score;
+    try { localStorage.setItem('copacilot.high', String(game.highScore)); } catch(e){}
+  }
+}
+
+function startGame(diffKey) {
+  game.difficulty = diffKey;
+  game.score = 0;
+  game.lives = 3;
+  game.level = 1;
+  game.fruitsThisLevel = 0;
+  game.cruiseElroy = false;
+  loadMaze();
+  startLevel();
+  game.state = 'ready';
+  game.readyT = 0;
+  audio.init();
+}
+
+function startLevel() {
+  loadMaze();
+  pac.reset();
+  ghosts.forEach(g => g.reset());
+  game.dotsEaten = 0;
+  game.phaseIndex = 0;
+  game.phaseTimer = 0;
+  game.mode = PHASE_TIMELINE[0].mode;
+  game.frightenTimer = 0;
+  game.fruitActive = null;
+  game.fruitsThisLevel = 0;
+  game.cruiseElroy = (game.difficulty === 'insane');
+  game.flashWallTimer = 0;
+}
+
+function nextLevel() {
+  game.level++;
+  game.state = 'ready';
+  game.readyT = 0;
+  startLevel();
+}
+
+function loseLife() {
+  game.lives--;
+  audio.playDeath();
+  pac.alive = false;
+  game.state = 'dying';
+}
+
+function afterDeath() {
+  if (game.lives <= 0) {
+    saveHighScore();
+    game.state = 'gameover';
+    // big finale splash
+    addSplash(W/2, HUD_TOP + (ROWS*TILE)/2, 320);
+    return;
+  }
+  pac.reset();
+  ghosts.forEach(g => g.reset());
+  game.state = 'ready';
+  game.readyT = 0;
+}
+
+function checkExtraLife() {
+  // Award extra life at 10000 (one-time)
+  if (!game._extraGiven && game.score >= 10000) {
+    game._extraGiven = true;
+    game.lives++;
+  }
+}
+
+function enterFrightened() {
+  const d = DIFFICULTIES[game.difficulty];
+  game.modeBeforeFright = (game.mode === 'frightened') ? game.modeBeforeFright : game.mode;
+  game.mode = 'frightened';
+  game.frightenTimer = d.frightenSec;
+  game.ghostCombo = 0;
+  for (const g of ghosts) {
+    if (g.state === 'normal') {
+      g.state = 'frightened';
+      g.dir = opposite(g.dir);  // classic instant reverse
+    }
+  }
+  audio.playPower();
+}
+
+function exitFrightened() {
+  game.mode = game.modeBeforeFright;
+  for (const g of ghosts) if (g.state === 'frightened') g.state = 'normal';
+}
+
+/* Fruit appears twice per level after 70 and 170 dots eaten */
+function maybeSpawnFruit() {
+  const milestones = [70, 170];
+  if (game.fruitsThisLevel >= 2) return;
+  const due = milestones[game.fruitsThisLevel];
+  if (game.dotsEaten >= due && !game.fruitActive) {
+    const idx = Math.min(game.level - 1, FRUITS.length - 1);
+    game.fruitActive = {
+      col: 13.5, row: 17,
+      type: idx,
+      expires: performance.now() + 9000
+    };
+    game.fruitsThisLevel++;
+  }
+}
+
+function eatFruit() {
+  if (!game.fruitActive) return;
+  const f = FRUITS[game.fruitActive.type];
+  game.score += f.points;
+  const p = tileCenterPx(game.fruitActive.col, game.fruitActive.row);
+  addSplash(p.x, p.y, 80);
+  addFloater(p.x, p.y, '+' + f.points);
+  game.fruitActive = null;
+  audio.playFruit();
+  checkExtraLife();
+}
+
+function addSplash(x, y, maxRadius) {
+  game.splashes.push({
+    x, y, t: 0, max: 36, maxRadius
+  });
+}
+function addFloater(x, y, text) {
+  game.floaters.push({ x, y, t: 0, max: 50, text });
+}
+
+/* Ghost collision: when pac touches ghost */
+function checkGhostCollisions() {
+  for (const g of ghosts) {
+    const dx = g.x - pac.x, dy = g.y - pac.y;
+    if (dx*dx + dy*dy < (TILE*0.55)*(TILE*0.55)) {
+      if (g.state === 'frightened') {
+        // Eat ghost
+        game.ghostCombo++;
+        const pts = 200 * Math.pow(2, game.ghostCombo - 1);  // 200, 400, 800, 1600
+        game.score += pts;
+        addFloater(g.x, g.y, '+' + pts);
+        addSplash(g.x, g.y, 50);
+        g.state = 'eaten';
+        audio.playGhostEat();
+        checkExtraLife();
+      } else if (g.state === 'normal') {
+        loseLife();
+        return;
+      }
+      // 'eaten' or 'house' -> ignore
+    }
+  }
+}
+
+/* Phase timer: scatter <-> chase */
+function updatePhase(dt) {
+  if (game.mode === 'frightened') {
+    game.frightenTimer -= dt;
+    if (game.frightenTimer <= 0) exitFrightened();
+    return;
+  }
+  if (game.phaseIndex >= PHASE_TIMELINE.length) return;
+  const ph = PHASE_TIMELINE[game.phaseIndex];
+  if (ph.dur === Infinity) { game.mode = ph.mode; return; }
+  game.phaseTimer += dt;
+  if (game.phaseTimer >= ph.dur) {
+    game.phaseTimer = 0;
+    game.phaseIndex++;
+    if (game.phaseIndex < PHASE_TIMELINE.length) {
+      const newPh = PHASE_TIMELINE[game.phaseIndex];
+      // On phase change, normal-state ghosts reverse direction (classic)
+      for (const g of ghosts) if (g.state === 'normal') g.dir = opposite(g.dir);
+      game.mode = newPh.mode;
+    }
+  }
+}
+
+/* Level clear check */
+function checkLevelClear() {
+  if (game.dotsEaten >= totalDotsAtStart) {
+    game.state = 'levelclear';
+    game.flashWallTimer = 0;
+    audio.stopChomp();
+  }
+}
+
+/* ---------- Rendering ---------- */
+function getWallColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--wall').trim();
+}
+function getBgColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+}
+function getFgColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--fg').trim();
+}
+function getPelletColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue('--pellet').trim();
+}
+
+/* Draw maze walls as outlines on edges that face open space.
+   Produces the classic Pac-Man corridor look. */
+function drawMaze() {
+  const wall = getWallColor();
+  // optional flash on level clear
+  const flash = (game.state === 'levelclear');
+  let useColor = wall;
+  if (flash) {
+    const t = Math.floor(game.flashWallTimer * 6);
+    useColor = (t % 2 === 0) ? wall : '#FFFFFF';
+  }
+  ctx.strokeStyle = useColor;
+  ctx.lineWidth = 2;
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (maze[y][x] !== '#') continue;
+      const top   = (y === 0      || maze[y-1][x] === '#');
+      const bot   = (y === ROWS-1 || maze[y+1][x] === '#');
+      const left  = (x === 0      || maze[y][x-1] === '#');
+      const right = (x === COLS-1 || maze[y][x+1] === '#');
+      const px = x * TILE, py = y * TILE + HUD_TOP;
+      ctx.beginPath();
+      if (!top)   { ctx.moveTo(px, py);          ctx.lineTo(px+TILE, py); }
+      if (!bot)   { ctx.moveTo(px, py+TILE);     ctx.lineTo(px+TILE, py+TILE); }
+      if (!left)  { ctx.moveTo(px, py);          ctx.lineTo(px, py+TILE); }
+      if (!right) { ctx.moveTo(px+TILE, py);     ctx.lineTo(px+TILE, py+TILE); }
+      ctx.stroke();
+    }
+  }
+  // Ghost-house door
+  ctx.strokeStyle = '#FFB8FF';
+  ctx.lineWidth = 2;
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      if (maze[y][x] !== '-') continue;
+      const px = x * TILE, py = y * TILE + HUD_TOP;
+      ctx.beginPath();
+      ctx.moveTo(px, py + TILE/2);
+      ctx.lineTo(px + TILE, py + TILE/2);
+      ctx.stroke();
+    }
+  }
+}
+
+function drawPellets() {
+  ctx.fillStyle = getPelletColor();
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const t = maze[y][x];
+      const px = x * TILE + TILE/2, py = y * TILE + TILE/2 + HUD_TOP;
+      if (t === '.') {
+        ctx.fillRect(px - 1.5, py - 1.5, 3, 3);
+      } else if (t === 'o') {
+        // power pellet — pulse
+        const pulse = 1 + 0.3 * Math.sin(performance.now() * 0.008);
+        ctx.beginPath();
+        ctx.arc(px, py, 4 * pulse, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+/* Pac-Man with Copilot gradient body and oscillating mouth */
+function drawPac(x, y, dir, mouth, scale=1) {
+  const r = (TILE/2 - 1) * scale;
+  // mouth angle: 0..pi/3 ish based on chomp
+  const mouthAngle = 0.05 + mouth * 0.55;
+  let rot = 0;
+  if (dir === DIR.LEFT)  rot = Math.PI;
+  if (dir === DIR.UP)    rot = -Math.PI/2;
+  if (dir === DIR.DOWN)  rot =  Math.PI/2;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  // Cycle gradient: pick two adjacent palette colors based on time
+  const t = performance.now() * 0.0006;
+  const idx = Math.floor(t) % HUE_CYCLE.length;
+  const c1 = HUE_CYCLE[idx];
+  const c2 = HUE_CYCLE[(idx+1) % HUE_CYCLE.length];
+  const grad = ctx.createLinearGradient(-r, -r, r, r);
+  grad.addColorStop(0, c1);
+  grad.addColorStop(1, c2);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.arc(0, 0, r, mouthAngle, Math.PI*2 - mouthAngle);
+  ctx.closePath();
+  ctx.fill();
+  // subtle highlight rim
+  ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+}
+
+/* Pac death animation: closing mouth */
+function drawPacDying(x, y) {
+  const t = pac.deathT;  // 0..1
+  const r = TILE/2 - 1;
+  const angle = Math.max(0.05, (1 - t) * Math.PI);  // mouth grows to full circle
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(-Math.PI/2);
+  const grad = ctx.createLinearGradient(-r, -r, r, r);
+  grad.addColorStop(0, COPILOT.cyan);
+  grad.addColorStop(1, COPILOT.magenta);
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.moveTo(0,0);
+  ctx.arc(0, 0, r, angle, Math.PI*2 - angle);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+/* Ghost — classic round-top, wavy bottom with eyes */
+function drawGhost(g) {
+  const r = TILE/2 - 1;
+  const x = g.x, y = g.y;
+  // Body color
+  let body = g.color;
+  if (g.state === 'frightened') {
+    const flash = (game.frightenTimer < 2 && Math.floor(game.frightenTimer * 6) % 2 === 0);
+    body = flash ? '#FFFFFF' : '#1A1AFF';
+  }
+  if (g.state === 'eaten') body = null;  // only eyes
+  // Slight desaturation in light mode
+  if (document.body.classList.contains('light') && g.state === 'normal') {
+    body = mixWithWhite(body, 0.18);
+  }
+  if (body) {
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    // top half-circle
+    ctx.arc(x, y - 1, r, Math.PI, 0, false);
+    // right side down
+    ctx.lineTo(x + r, y + r - 1);
+    // wavy bottom (4 humps)
+    const humps = 4;
+    const w = (r * 2) / humps;
+    let phase = (performance.now() * 0.005) % 1;
+    for (let i = 0; i < humps; i++) {
+      const cx1 = x + r - (i + 0.5) * w;
+      ctx.quadraticCurveTo(cx1, y + r - 1 - 4 * (1 - phase), x + r - (i+1) * w, y + r - 1);
+    }
+    ctx.lineTo(x - r, y - 1);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Eyes: white sclera + pupil pointing in dir (or frightened pupil)
+  const eyeR = 3, pupilR = 1.5;
+  const eyeOffsetX = 3, eyeOffsetY = -1;
+  const left = { x: x - eyeOffsetX, y: y + eyeOffsetY };
+  const right = { x: x + eyeOffsetX, y: y + eyeOffsetY };
+  ctx.fillStyle = '#FFFFFF';
+  if (g.state === 'frightened') {
+    // angry mouth eyes
+    ctx.fillStyle = '#FFC0E0';
+    ctx.beginPath(); ctx.arc(left.x, left.y, 1.5, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(right.x, right.y, 1.5, 0, Math.PI*2); ctx.fill();
+    // wavy "scared" mouth
+    ctx.strokeStyle = '#FFC0E0';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i = 0; i < 4; i++) {
+      const sx = x - 4 + i * 2.5;
+      ctx.lineTo(sx, y + 4 + (i%2 === 0 ? 0 : 2));
+    }
+    ctx.stroke();
+  } else {
+    ctx.beginPath(); ctx.arc(left.x, left.y, eyeR, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(right.x, right.y, eyeR, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#000044';
+    const dx = g.dir.x, dy = g.dir.y;
+    ctx.beginPath(); ctx.arc(left.x + dx*1.5, left.y + dy*1.5, pupilR, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(right.x + dx*1.5, right.y + dy*1.5, pupilR, 0, Math.PI*2); ctx.fill();
+  }
+}
+
+/* Mix a hex color with white by amount [0..1] */
+function mixWithWhite(hex, amt) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+  const nr = Math.round(r + (255 - r) * amt);
+  const ng = Math.round(g + (255 - g) * amt);
+  const nb = Math.round(b + (255 - b) * amt);
+  return '#' + [nr,ng,nb].map(v => v.toString(16).padStart(2,'0')).join('');
+}
+
+/* Fruit drawing — varied per type */
+function drawFruit(x, y, typeIdx) {
+  const f = FRUITS[typeIdx];
+  ctx.fillStyle = f.color;
+  ctx.beginPath();
+  ctx.arc(x, y + 1, 5, 0, Math.PI*2);
+  ctx.fill();
+  // small companion (cherry-pair) for low fruits
+  if (typeIdx === 0) {
+    ctx.beginPath();
+    ctx.arc(x + 4, y + 3, 4, 0, Math.PI*2);
+    ctx.fill();
+  }
+  // stem/leaf
+  ctx.strokeStyle = f.stem;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(x, y - 4);
+  ctx.lineTo(x + 3, y - 8);
+  ctx.stroke();
+}
+
+/* Copilot splash effect — four expanding gradient arcs */
+function drawSplashes() {
+  for (const s of game.splashes) {
+    const t = s.t / s.max;            // 0..1
+    const r = t * s.maxRadius;
+    const alpha = Math.max(0, 1 - t);
+    ctx.lineWidth = 4 * (1 - t * 0.5);
+    for (let i = 0; i < 4; i++) {
+      ctx.strokeStyle = applyAlpha(PETALS[i], alpha);
+      ctx.beginPath();
+      const startA = i * Math.PI / 2 + t * Math.PI * 0.4;
+      ctx.arc(s.x, s.y, r, startA, startA + Math.PI / 2.4);
+      ctx.stroke();
+    }
+  }
+  game.splashes = game.splashes.filter(s => (s.t += 1) < s.max);
+}
+
+function applyAlpha(hex, a) {
+  const h = hex.replace('#','');
+  const r = parseInt(h.substr(0,2),16), g = parseInt(h.substr(2,2),16), b = parseInt(h.substr(4,2),16);
+  return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+}
+
+/* Floating point text */
+function drawFloaters() {
+  ctx.font = '8px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  for (const f of game.floaters) {
+    const t = f.t / f.max;
+    const alpha = Math.max(0, 1 - t);
+    ctx.fillStyle = applyAlpha('#FFFFFF', alpha);
+    ctx.fillText(f.text, f.x, f.y - t * 18);
+  }
+  game.floaters = game.floaters.filter(f => (f.t += 1) < f.max);
+}
+
+/* Pac-Man trail particles (gradient breadcrumbs) */
+function drawTrails() {
+  for (const t of game.trails) {
+    const k = t.life / t.max;
+    if (k >= 1) continue;
+    ctx.fillStyle = applyAlpha(t.color, 0.35 * (1 - k));
+    ctx.beginPath();
+    ctx.arc(t.x, t.y, (TILE/2 - 1) * (1 - k * 0.6), 0, Math.PI*2);
+    ctx.fill();
+  }
+  game.trails = game.trails.filter(t => (t.life += 1) < t.max);
+}
+
+/* HUD: top score+highscore, bottom lives + fruit + difficulty */
+function drawHUD() {
+  ctx.font = '10px "Press Start 2P", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillStyle = getFgColor();
+  ctx.fillText('SCORE', 8, 14);
+  ctx.fillText(String(game.score).padStart(6,'0'), 8, 30);
+  ctx.textAlign = 'center';
+  ctx.fillText('HIGH', W/2, 14);
+  ctx.fillText(String(Math.max(game.score, game.highScore)).padStart(6,'0'), W/2, 30);
+  ctx.textAlign = 'right';
+  ctx.fillText('LV ' + game.level, W - 8, 14);
+  // Difficulty label, pulsing for INSANE
+  const d = DIFFICULTIES[game.difficulty];
+  let label = d.name + ' MODE';
+  if (game.difficulty === 'insane') {
+    const pulse = 0.55 + 0.45 * Math.sin(performance.now() * 0.012);
+    ctx.fillStyle = applyAlpha(d.color, pulse);
+  } else {
+    ctx.fillStyle = d.color;
+  }
+  ctx.font = '8px "Press Start 2P", monospace';
+  ctx.fillText(label, W - 8, 30);
+
+  // Bottom HUD
+  const by = HUD_TOP + ROWS * TILE + 8;
+  // Lives as mini gradient pac icons
+  for (let i = 0; i < game.lives - 1; i++) {
+    const cx = 16 + i * 18, cy = by + 10;
+    drawPac(cx, cy, DIR.RIGHT, 0.6, 0.7);
+  }
+  // Recent fruits (right side)
+  ctx.textAlign = 'right';
+  const seen = Math.min(game.level, FRUITS.length);
+  for (let i = 0; i < seen; i++) {
+    const idx = i; // show fruit progression up to current level
+    const cx = W - 14 - (seen - 1 - i) * 18, cy = by + 10;
+    drawFruit(cx, cy, idx);
+  }
+}
+
+/* ---------- Title screen + Copilot morph animation ---------- */
+function drawCopilotPetals(cx, cy, scale, openness, rotate) {
+  // Four overlapping rounded petals in brand colors. openness=1 -> full logo;
+  // openness=0 -> all collapsed to center (about to become Pac).
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rotate);
+  const petalLen = 36 * scale;
+  const petalW = 22 * scale;
+  const offset = 10 * scale * openness;   // distance from center
+  for (let i = 0; i < 4; i++) {
+    ctx.save();
+    ctx.rotate(i * Math.PI / 2);
+    ctx.translate(0, -offset);
+    const grad = ctx.createLinearGradient(0, -petalLen, 0, petalLen);
+    grad.addColorStop(0, lighten(PETALS[i], 0.18));
+    grad.addColorStop(1, PETALS[i]);
+    ctx.fillStyle = grad;
+    // teardrop / petal: ellipse with rounded top
+    ctx.beginPath();
+    ctx.moveTo(0, -petalLen);
+    ctx.bezierCurveTo(petalW * 0.8, -petalLen * 0.6, petalW * 0.7, petalLen * 0.2, 0, petalLen * 0.4);
+    ctx.bezierCurveTo(-petalW * 0.7, petalLen * 0.2, -petalW * 0.8, -petalLen * 0.6, 0, -petalLen);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.restore();
+}
+function lighten(hex, amt) { return mixWithWhite(hex, amt); }
+
+function drawTitleScreen() {
+  ctx.fillStyle = getBgColor();
+  ctx.fillRect(0, 0, W, H);
+  // Title with Copilot gradient text fill
+  const cx = W / 2;
+  const titleY = 120;
+
+  /* Morph timer is wall-clock based so the animation lasts the same on any monitor */
+  if (!game.morphStart) game.morphStart = performance.now();
+  const tt = (performance.now() - game.morphStart) / 1000;
+  game.morphT = tt;
+  // Phase 1 (0..1.6s): petals spinning, shrinking slightly
+  // Phase 2 (1.6..2.4s): petals collapsing to center (openness -> 0)
+  // Phase 3 (2.4..end): Pac-Man wedge appears + opens mouth
+  let phase = 1;
+  if (tt > 1.6) phase = 2;
+  if (tt > 2.4) phase = 3;
+  let openness = 1, rot = tt * 3;
+  if (phase === 2) openness = 1 - (tt - 1.6) / 0.8;
+  if (phase === 3) openness = 0;
+  // Petals
+  if (phase < 3) {
+    const scale = 1.0 - 0.3 * Math.max(0, (tt - 1.0) / 1.4);
+    drawCopilotPetals(cx, 230, scale, Math.max(0, openness), rot);
+  } else {
+    // Morph: appear as Pac-Man with growing mouth
+    const t = (tt - 2.4);
+    const mouth = Math.min(1, t * 1.2);
+    drawPac(cx, 230, DIR.RIGHT, mouth, 1.6);
+    // gradient ring expanding outward at the moment of morph
+    if (t < 0.7) {
+      const a = 1 - t / 0.7;
+      ctx.strokeStyle = applyAlpha(COPILOT.cyan, a);
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, 230, 30 + t * 60, 0, Math.PI*2);
+      ctx.stroke();
+    }
+  }
+
+  // Title text "CO·PAC·ILOT" with brand gradient
+  ctx.font = '22px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  const titleText = 'CO·PAC·ILOT';
+  const grad = ctx.createLinearGradient(cx - 150, titleY, cx + 150, titleY);
+  grad.addColorStop(0,    COPILOT.blue);
+  grad.addColorStop(0.33, COPILOT.cyan);
+  grad.addColorStop(0.66, COPILOT.green);
+  grad.addColorStop(1,    COPILOT.magenta);
+  ctx.fillStyle = grad;
+  ctx.fillText(titleText, cx, titleY);
+  // tagline
+  ctx.font = '8px "Press Start 2P", monospace';
+  ctx.fillStyle = getFgColor();
+  ctx.globalAlpha = 0.65;
+  ctx.fillText('YOUR AI WINGMAN IN THE MAZE', cx, titleY + 22);
+  ctx.globalAlpha = 1.0;
+
+  // Difficulty selector (only show after morph)
+  if (phase === 3 && tt > 2.8) {
+    ctx.font = '11px "Press Start 2P", monospace';
+    ctx.fillStyle = getFgColor();
+    ctx.fillText('SELECT DIFFICULTY', cx, 320);
+    const items = [
+      { key: '[1]', name: 'EASY',   color: COPILOT.green   },
+      { key: '[2]', name: 'NORMAL', color: COPILOT.cyan    },
+      { key: '[3]', name: 'INSANE', color: COPILOT.magenta }
+    ];
+    items.forEach((it, i) => {
+      const y = 360 + i * 30;
+      const blink = (game.difficulty === it.name.toLowerCase());
+      ctx.fillStyle = blink ? '#FFFFFF' : it.color;
+      ctx.fillText(it.key + ' ' + it.name, cx, y);
+    });
+    // High score
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.fillStyle = getFgColor();
+    ctx.globalAlpha = 0.7;
+    ctx.fillText('HIGH SCORE  ' + String(game.highScore).padStart(6,'0'), cx, 470);
+    // Press start prompt
+    if (Math.floor(performance.now()/500) % 2 === 0) {
+      ctx.fillStyle = COPILOT.orange;
+      ctx.fillText('PRESS 1 / 2 / 3 TO START', cx, 500);
+    }
+    ctx.globalAlpha = 1.0;
+  } else {
+    // before morph completes: show "INITIALIZING..."
+    ctx.font = '9px "Press Start 2P", monospace';
+    ctx.fillStyle = getFgColor();
+    ctx.globalAlpha = 0.7;
+    ctx.fillText('LOADING COPILOT...', cx, 350);
+    ctx.globalAlpha = 1.0;
+  }
+
+  // Brand attribution (small)
+  ctx.font = '6px "Press Start 2P", monospace';
+  ctx.fillStyle = getFgColor();
+  ctx.globalAlpha = 0.4;
+  ctx.fillText('A COPILOT × PAC-MAN MASHUP', cx, H - 14);
+  ctx.globalAlpha = 1.0;
+}
+
+/* "READY!" + countdown overlay */
+function drawReadyOverlay() {
+  ctx.font = '14px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = COPILOT.orange;
+  ctx.fillText('READY!', W/2, HUD_TOP + 18 * TILE);
+}
+
+/* Game-over splash + screen */
+function drawGameOver() {
+  // a giant copilot splash already added; render text on top
+  ctx.font = '20px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  const cx = W / 2;
+  const grad = ctx.createLinearGradient(cx - 120, 0, cx + 120, 0);
+  grad.addColorStop(0,    COPILOT.blue);
+  grad.addColorStop(0.5,  COPILOT.magenta);
+  grad.addColorStop(1,    COPILOT.orange);
+  ctx.fillStyle = grad;
+  ctx.fillText('GAME OVER', cx, H/2 - 10);
+  ctx.font = '10px "Press Start 2P", monospace';
+  ctx.fillStyle = getFgColor();
+  ctx.fillText('FINAL SCORE  ' + String(game.score).padStart(6,'0'), cx, H/2 + 18);
+  ctx.fillText('HIGH SCORE   ' + String(game.highScore).padStart(6,'0'), cx, H/2 + 38);
+  if (Math.floor(performance.now()/500) % 2 === 0) {
+    ctx.fillStyle = COPILOT.cyan;
+    ctx.fillText('PRESS ENTER TO PLAY AGAIN', cx, H/2 + 76);
+  }
+}
+
+/* ---------- Input ---------- */
+const keys = {};
+window.addEventListener('keydown', (e) => {
+  audio.init();   // user gesture unlocks audio
+  keys[e.key] = true;
+  switch (e.key) {
+    case 'ArrowLeft': case 'a': case 'A':  pac.nextDir = DIR.LEFT;  break;
+    case 'ArrowRight':case 'd': case 'D':  pac.nextDir = DIR.RIGHT; break;
+    case 'ArrowUp':   case 'w': case 'W':  pac.nextDir = DIR.UP;    break;
+    case 'ArrowDown': case 's': case 'S':  pac.nextDir = DIR.DOWN;  break;
+    case 'm': case 'M':
+      document.body.classList.toggle('light');
+      const btn = document.getElementById('toggleMode');
+      btn.textContent = document.body.classList.contains('light') ? '[M] DARK' : '[M] LIGHT';
+      break;
+    case 'p': case 'P':
+      if (game.state === 'playing') game.paused = !game.paused;
+      break;
+    case '1':
+      if (game.state === 'title') startGame('easy');
+      break;
+    case '2':
+      if (game.state === 'title') startGame('normal');
+      break;
+    case '3':
+      if (game.state === 'title') startGame('insane');
+      break;
+    case 'Enter':
+      if (game.state === 'gameover') {
+        game.state = 'title';
+        game.morphStart = 0;
+        game.morphT = 0;
+        game.splashes.length = 0;
+      }
+      break;
+  }
+  // Prevent arrow scroll
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key)) e.preventDefault();
+}, { passive: false });
+
+document.getElementById('toggleMode').addEventListener('click', () => {
+  document.body.classList.toggle('light');
+  const btn = document.getElementById('toggleMode');
+  btn.textContent = document.body.classList.contains('light') ? '[M] DARK' : '[M] LIGHT';
+});
+
+/* ---------- Main loop ---------- */
+let lastT = performance.now();
+let loopError = null;
+function loop() {
+  try { frame(); } catch (e) {
+    loopError = e;
+    console.error('CO·PAC·ILOT loop error:', e);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#FF4444';
+    ctx.font = '10px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('RUNTIME ERROR', W/2, H/2 - 10);
+    ctx.fillStyle = '#fff';
+    ctx.font = '7px "Press Start 2P", monospace';
+    ctx.fillText('CHECK BROWSER CONSOLE (F12)', W/2, H/2 + 10);
+    ctx.fillText(String(e).substring(0, 40), W/2, H/2 + 24);
+  }
+  requestAnimationFrame(loop);
+}
+function frame() {
+  const now = performance.now();
+  const dt = Math.min(0.05, (now - lastT) / 1000);
+  lastT = now;
+
+  ctx.fillStyle = getBgColor();
+  ctx.fillRect(0, 0, W, H);
+
+  if (game.state === 'title') {
+    drawTitleScreen();
+    return;
+  }
+
+  if (game.state === 'gameover') {
+    // background maze still visible (faded)
+    drawMaze(); drawPellets();
+    drawSplashes();
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, 0, W, H);
+    drawGameOver();
+    return;
+  }
+
+  // ---- Update sim ----
+  if (!game.paused) {
+    if (game.state === 'ready') {
+      game.readyT = (game.readyT || 0) + dt;
+      if (game.readyT > 1.6) { game.state = 'playing'; }
+    }
+    else if (game.state === 'playing') {
+      updatePhase(dt);
+      pac.step();
+      pac.consume();
+      for (const g of ghosts) g.step(pac, blinky);
+      checkGhostCollisions();
+      checkLevelClear();
+      // fruit expiry
+      if (game.fruitActive && performance.now() > game.fruitActive.expires) {
+        game.fruitActive = null;
+      }
+      // chomp: pause if not consuming
+      // (implicit — startChomp is called only when a pellet is eaten;
+      // we let it loop a moment then naturally fade)
+    }
+    else if (game.state === 'dying') {
+      pac.step();
+      if (pac.deathT >= 1) afterDeath();
+    }
+    else if (game.state === 'levelclear') {
+      game.flashWallTimer += dt;
+      if (game.flashWallTimer > 2.2) nextLevel();
+    }
+  }
+
+  // ---- Render world ----
+  drawMaze();
+  drawPellets();
+  // Fruit (under pac)
+  if (game.fruitActive) {
+    const p = tileCenterPx(game.fruitActive.col, game.fruitActive.row);
+    drawFruit(p.x, p.y, game.fruitActive.type);
+  }
+  drawTrails();
+  // Pac
+  if (game.state === 'dying' || !pac.alive) {
+    drawPacDying(pac.x, pac.y);
+  } else {
+    drawPac(pac.x, pac.y, pac.dir, pac.mouth);
+  }
+  // Ghosts (skip during dying for clarity)
+  if (game.state !== 'dying' && game.state !== 'levelclear') {
+    for (const g of ghosts) drawGhost(g);
+  }
+  // Effects
+  drawSplashes();
+  drawFloaters();
+  // HUD
+  drawHUD();
+
+  if (game.state === 'ready')   drawReadyOverlay();
+  if (game.paused)              drawPausedOverlay();
+}
+
+function drawPausedOverlay() {
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.font = '14px "Press Start 2P", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = COPILOT.orange;
+  ctx.fillText('PAUSED', W/2, H/2);
+  ctx.font = '8px "Press Start 2P", monospace';
+  ctx.fillStyle = getFgColor();
+  ctx.fillText('PRESS P TO RESUME', W/2, H/2 + 22);
+}
+
+/* ---------- Boot ---------- */
+loadHighScore();
+loadMaze();
+// Wait one frame for font, then start
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>

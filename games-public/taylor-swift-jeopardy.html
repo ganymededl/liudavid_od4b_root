@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Taylor Swift Jeopardy ✨</title>
+<style>
+  :root {
+    --navy: #0a1a3a;
+    --navy-deep: #050e24;
+    --navy-light: #16295a;
+    --gold: #f5c518;
+    --gold-deep: #d4a70a;
+    --cream: #fff8e0;
+    --pink: #ff7fbf;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100%;
+    background: radial-gradient(ellipse at top, var(--navy-light), var(--navy-deep));
+    font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+    color: var(--cream);
+    overflow-x: hidden;
+  }
+  header {
+    text-align: center;
+    padding: 18px 10px 8px;
+    position: relative;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 48px);
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(245,197,24,0.6), 3px 3px 0 var(--navy-deep);
+    letter-spacing: 2px;
+  }
+  .subtitle { color: var(--pink); margin-top: 4px; font-size: 14px; letter-spacing: 1px; }
+  .controls {
+    position: absolute; top: 14px; right: 16px;
+    display: flex; gap: 8px;
+  }
+  .ctrl-btn {
+    background: var(--gold);
+    color: var(--navy-deep);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 0 var(--gold-deep);
+    font-size: 14px;
+    transition: transform 0.1s;
+  }
+  .ctrl-btn:hover { transform: translateY(-1px); }
+  .ctrl-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--gold-deep); }
+  .ctrl-btn.muted { background: #555; color: #ccc; }
+
+  #scoreboard {
+    text-align: center;
+    font-size: 28px;
+    color: var(--gold);
+    margin: 8px 0 16px;
+    font-weight: bold;
+    text-shadow: 0 0 8px rgba(245,197,24,0.5);
+  }
+  #scoreboard .label { color: var(--cream); font-size: 16px; margin-right: 10px; }
+
+  #board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    max-width: 1100px;
+    margin: 0 auto 24px;
+    padding: 0 10px;
+  }
+  .category {
+    background: linear-gradient(180deg, var(--navy-light), var(--navy));
+    color: var(--gold);
+    text-align: center;
+    padding: 16px 6px;
+    font-weight: bold;
+    font-size: clamp(13px, 1.4vw, 18px);
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 0 var(--navy-deep);
+    min-height: 80px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile {
+    background: linear-gradient(180deg, var(--navy), var(--navy-deep));
+    color: var(--gold);
+    font-size: clamp(20px, 3vw, 38px);
+    font-weight: bold;
+    text-align: center;
+    padding: 22px 4px;
+    border: 2px solid var(--gold);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-shadow: 2px 2px 0 var(--navy-deep);
+    min-height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: "Georgia", serif;
+  }
+  .tile:hover { transform: scale(1.04); box-shadow: 0 0 18px rgba(245,197,24,0.7); }
+  .tile.used {
+    background: transparent;
+    color: transparent;
+    cursor: default;
+    border-color: rgba(245,197,24,0.2);
+    box-shadow: none;
+  }
+  .tile.used:hover { transform: none; box-shadow: none; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(5,14,36,0.92);
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: linear-gradient(160deg, var(--navy), var(--navy-deep));
+    border: 3px solid var(--gold);
+    border-radius: 16px;
+    padding: 40px 30px;
+    max-width: 720px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(245,197,24,0.4);
+    animation: popIn 0.35s cubic-bezier(.17,.67,.43,1.27);
+  }
+  @keyframes popIn {
+    0% { transform: scale(0.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .clue-category { color: var(--pink); font-size: 14px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .clue-value { color: var(--gold); font-size: 26px; font-weight: bold; margin-bottom: 20px; }
+  .clue-text {
+    font-size: clamp(18px, 2.5vw, 26px);
+    color: var(--cream);
+    margin: 20px 0 30px;
+    line-height: 1.5;
+    font-family: "Georgia", serif;
+  }
+  .answer-input {
+    width: 80%;
+    padding: 12px 16px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: 2px solid var(--gold);
+    background: var(--navy-deep);
+    color: var(--cream);
+    text-align: center;
+    outline: none;
+  }
+  .answer-input:focus { box-shadow: 0 0 12px var(--gold); }
+  .modal-btns { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    background: var(--gold);
+    color: var(--navy-deep);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 var(--gold-deep);
+    transition: transform 0.1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--gold-deep); }
+  .btn.secondary { background: var(--pink); box-shadow: 0 4px 0 #c4609a; }
+  .btn.secondary:active { box-shadow: 0 1px 0 #c4609a; }
+
+  .feedback { margin-top: 20px; font-size: 20px; font-weight: bold; min-height: 28px; }
+  .feedback.correct { color: #6fffa5; }
+  .feedback.wrong { color: #ff6f8f; }
+  .correct-answer { color: var(--gold); margin-top: 8px; font-size: 16px; }
+
+  /* Daily Double splash */
+  #dd-splash {
+    position: fixed; inset: 0;
+    background: radial-gradient(circle, var(--gold), var(--gold-deep), var(--navy-deep));
+    display: none;
+    align-items: center; justify-content: center;
+    z-index: 200;
+    animation: ddPulse 0.8s ease-out;
+  }
+  #dd-splash.active { display: flex; }
+  #dd-splash h2 {
+    font-size: clamp(48px, 12vw, 140px);
+    color: var(--navy-deep);
+    text-shadow: 4px 4px 0 var(--cream), 0 0 30px rgba(255,255,255,0.6);
+    letter-spacing: 8px;
+    animation: ddShake 0.5s ease-in-out infinite alternate;
+    text-align: center;
+    font-family: "Georgia", serif;
+  }
+  @keyframes ddPulse {
+    0% { transform: scale(0); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes ddShake {
+    0% { transform: rotate(-2deg) scale(1); }
+    100% { transform: rotate(2deg) scale(1.04); }
+  }
+
+  .wager-input {
+    width: 60%;
+    padding: 10px;
+    font-size: 22px;
+    border-radius: 8px;
+    border: 2px solid var(--gold);
+    background: var(--navy-deep);
+    color: var(--gold);
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+    outline: none;
+  }
+  .wager-hint { color: var(--pink); font-size: 14px; margin-top: 6px; }
+
+  /* Confetti */
+  #confetti-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 300;
+  }
+
+  /* Final Jeopardy */
+  #final-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #final-screen h2 { color: var(--gold); font-size: clamp(30px, 5vw, 50px); margin-bottom: 14px; letter-spacing: 3px; }
+  #final-screen .final-cat { color: var(--pink); font-size: 20px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px; }
+  #final-screen .final-clue { font-size: clamp(18px, 2.5vw, 24px); margin: 30px 0; color: var(--cream); font-family: Georgia, serif; line-height: 1.6; }
+
+  /* Game over */
+  #gameover-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  #gameover-screen h2 { color: var(--gold); font-size: clamp(40px, 8vw, 80px); text-shadow: 0 0 20px var(--gold); }
+  #gameover-screen .final-score { font-size: clamp(30px, 6vw, 60px); color: var(--cream); margin: 30px 0; }
+  .hidden { display: none !important; }
+
+  /* Sparkle emojis floating */
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    font-size: 24px;
+    animation: floatUp 3s linear forwards;
+    z-index: 150;
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-300px) rotate(360deg); opacity: 0; }
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    color: rgba(255,248,224,0.5);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>✨ TAYLOR SWIFT JEOPARDY! 🎤</h1>
+  <div class="subtitle">💛 A Swiftie's Quiz Extravaganza 🦋</div>
+  <div class="controls">
+    <button id="mute-btn" class="ctrl-btn">🔊 Mute</button>
+    <button id="reset-btn" class="ctrl-btn">🔄 Reset</button>
+  </div>
+</header>
+
+<div id="scoreboard">
+  <span class="label">SCORE:</span>
+  <span id="score">$0</span>
+</div>
+
+<div id="start-gate" style="text-align:center; padding:60px 20px;">
+  <h2 style="color:var(--gold); font-size:clamp(28px,4vw,42px); margin-bottom:20px; letter-spacing:2px;">🎤 Ready, Swifties? 🎤</h2>
+  <p style="color:var(--cream); font-size:18px; margin-bottom:30px; max-width:600px; margin-left:auto; margin-right:auto;">Click below to start the game with music and sound effects. 💛✨</p>
+  <button id="start-btn" class="btn" style="font-size:22px; padding:16px 40px;">▶ Start Game</button>
+  <p style="color:var(--pink); font-size:13px; margin-top:18px;">(Your browser needs a click to enable audio.)</p>
+</div>
+
+<div id="game-area" class="hidden">
+  <div id="board"></div>
+  <div style="text-align:center; margin: 20px 0;">
+    <button id="final-btn" class="btn hidden">🌟 Go to Final Jeopardy! 🌟</button>
+  </div>
+</div>
+
+<div id="final-screen" class="hidden">
+  <h2>💫 FINAL JEOPARDY 💫</h2>
+  <div class="final-cat" id="final-cat"></div>
+  <div>Place your wager (0 - <span id="max-wager">0</span>):</div>
+  <input type="number" id="final-wager" class="wager-input" min="0" />
+  <br /><br />
+  <button id="final-wager-btn" class="btn">Lock In Wager</button>
+
+  <div id="final-clue-area" class="hidden">
+    <div class="final-clue" id="final-clue-text"></div>
+    <input type="text" id="final-answer" class="answer-input" placeholder="Your answer..." />
+    <br /><br />
+    <button id="final-submit" class="btn">Submit Final Answer</button>
+    <div class="feedback" id="final-feedback"></div>
+  </div>
+</div>
+
+<div id="gameover-screen" class="hidden">
+  <h2>🎉 GAME OVER! 🎉</h2>
+  <div class="final-score">Final Score: <span id="final-total">$0</span></div>
+  <div id="gameover-msg" style="font-size:22px; color: var(--pink); margin-bottom:30px;"></div>
+  <button id="play-again-btn" class="btn">✨ Play Again ✨</button>
+</div>
+
+<!-- Clue Modal -->
+<div id="clue-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="clue-category" id="modal-category"></div>
+    <div class="clue-value" id="modal-value"></div>
+
+    <div id="wager-area" class="hidden">
+      <div>How much do you wager, Swiftie? (up to max of score or $1000)</div>
+      <input type="number" id="dd-wager" class="wager-input" min="5" />
+      <div class="wager-hint" id="wager-hint"></div>
+      <br />
+      <button id="wager-lock" class="btn">Lock In Wager</button>
+    </div>
+
+    <div id="clue-area" class="hidden">
+      <div class="clue-text" id="modal-clue"></div>
+      <input type="text" id="modal-answer" class="answer-input" placeholder="What is...?" autocomplete="off" />
+      <div class="modal-btns">
+        <button id="submit-btn" class="btn">Submit Answer</button>
+        <button id="skip-btn" class="btn secondary">Skip</button>
+      </div>
+      <div class="feedback" id="modal-feedback"></div>
+      <div class="correct-answer hidden" id="modal-correct"></div>
+      <div class="modal-btns hidden" id="next-btns">
+        <button id="continue-btn" class="btn">Continue ✨</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Daily Double splash -->
+<div id="dd-splash">
+  <h2>DAILY<br />DOUBLE!<br />💎</h2>
+</div>
+
+<canvas id="confetti-canvas"></canvas>
+
+<footer>Powered by Web Audio API ✨ Made with 💛 for Swifties</footer>
+
+<script>
+/* ============================================================
+   TAYLOR SWIFT JEOPARDY — GAME DATA
+   ============================================================ */
+const CATEGORIES = [
+  {
+    name: "🎵 THE ERAS",
+    clues: [
+      { v: 200, q: "Taylor's self-titled debut album was released in this year.", a: "2006", accept: ["2006"] },
+      { v: 400, q: "The album that gave us 'Love Story' and 'You Belong With Me'.", a: "Fearless", accept: ["fearless"] },
+      { v: 600, q: "This surprise 2020 album features 'cardigan' as its lead single.", a: "Folklore", accept: ["folklore"] },
+      { v: 800, q: "This 2022 album features 'Anti-Hero' and 'Lavender Haze'.", a: "Midnights", accept: ["midnights"] },
+      { v: 1000, q: "Her 2024 double-album release about heartbreak and poets.", a: "The Tortured Poets Department", accept: ["tortured poets", "ttpd", "the tortured poets department"] }
+    ]
+  },
+  {
+    name: "📝 FINISH THE LYRIC",
+    clues: [
+      { v: 200, q: "\"We are never ever ever getting ___\"", a: "Back Together", accept: ["back together"] },
+      { v: 400, q: "\"You belong with me, you belong with ___\"", a: "Me", accept: ["me"] },
+      { v: 600, q: "\"Long story short, I survived. Long story short, I ___\"", a: "Thrived", accept: ["thrived"] },
+      { v: 800, q: "\"I had the time of my life fighting dragons with ___\"", a: "You", accept: ["you"] },
+      { v: 1000, q: "\"'Cause, darling, I'm a nightmare dressed like a ___\"", a: "Daydream", accept: ["daydream"] }
+    ]
+  },
+  {
+    name: "🏆 RECORDS & AWARDS",
+    clues: [
+      { v: 200, q: "Taylor's lucky number — and her childhood jersey number.", a: "13", accept: ["13", "thirteen"] },
+      { v: 400, q: "Taylor was named Person of the Year by this magazine in 2023.", a: "TIME", accept: ["time", "time magazine"] },
+      { v: 600, q: "Taylor is the first artist to win Album of the Year at the Grammys this many times.", a: "4", accept: ["4", "four"] },
+      { v: 800, q: "This 2023-2024 concert tour became the first to gross over $1 billion.", a: "The Eras Tour", accept: ["eras tour", "the eras tour"] },
+      { v: 1000, q: "In 2022, Taylor became the only artist ever to occupy all top spots of the Hot 100 simultaneously with this many songs.", a: "10", accept: ["10", "ten"] }
+    ]
+  },
+  {
+    name: "🐱 SWIFTIES ONLY",
+    clues: [
+      { v: 200, q: "Taylor has this many cats.", a: "3", accept: ["3", "three"] },
+      { v: 400, q: "Two of Taylor's cats are named after characters from Grey's Anatomy and this other TV show.", a: "Law & Order: SVU", accept: ["svu", "law and order", "law & order", "law and order svu"] },
+      { v: 600, q: "Taylor famously hides these in music videos and social media for fans to find.", a: "Easter Eggs", accept: ["easter eggs", "easter egg"] },
+      { v: 800, q: "The trend of fans trading these handmade items took over the Eras Tour.", a: "Friendship Bracelets", accept: ["friendship bracelets", "friendship bracelet", "bracelets"] },
+      { v: 1000, q: "Taylor's third cat, a Ragdoll, is named after this Brad Pitt movie character.", a: "Benjamin Button", accept: ["benjamin button", "benjamin"] }
+    ]
+  },
+  {
+    name: "🌟 TAYLOR'S WORLD",
+    clues: [
+      { v: 200, q: "Taylor Swift was born in this U.S. state.", a: "Pennsylvania", accept: ["pennsylvania", "pa"] },
+      { v: 400, q: "Taylor's family moved to this music city so she could pursue her career.", a: "Nashville", accept: ["nashville"] },
+      { v: 600, q: "Her re-recorded albums are marked with this two-word suffix.", a: "Taylor's Version", accept: ["taylor's version", "taylors version"] },
+      { v: 800, q: "Taylor is dating this Kansas City Chiefs tight end.", a: "Travis Kelce", accept: ["travis kelce", "kelce"] },
+      { v: 1000, q: "This 2023 concert film broke box office records for concert movies.", a: "The Eras Tour (film)", accept: ["eras tour", "the eras tour", "taylor swift the eras tour"] }
+    ]
+  }
+];
+
+const FINAL_JEOPARDY = {
+  category: "💫 SIGNATURE SONGS",
+  clue: "This 10-minute version of a Taylor Swift song, re-released on Red (Taylor's Version), broke the record for the longest song ever to hit #1 on the Billboard Hot 100.",
+  answer: "All Too Well",
+  accept: ["all too well", "all too well (10 minute version)", "all too well 10 minute version"]
+};
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+let score = 0;
+let usedCount = 0;
+let totalTiles = CATEGORIES.length * 5;
+let dailyDouble = null; // { cat, idx }
+let currentClue = null;
+let currentWager = 0;
+let muted = false;
+
+/* ============================================================
+   AUDIO — Web Audio API synthesis + archive.org theme
+   ============================================================ */
+let audioCtx = null;
+let masterGain = null;
+let thinkInterval = null;
+let thinkNodes = [];
+
+function initAudio() {
+  if (!audioCtx) {
+    try {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      masterGain = audioCtx.createGain();
+      masterGain.gain.value = muted ? 0 : 0.7;
+      masterGain.connect(audioCtx.destination);
+    } catch (e) { console.error("Audio init failed", e); }
+  }
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume().catch(e => console.error("resume failed", e));
+  }
+}
+
+function setMute(m) {
+  muted = m;
+  if (masterGain) masterGain.gain.value = m ? 0 : 0.7;
+  const theme = document.getElementById("theme-audio");
+  if (theme) theme.muted = m;
+  document.getElementById("mute-btn").textContent = m ? "🔇 Unmute" : "🔊 Mute";
+  document.getElementById("mute-btn").classList.toggle("muted", m);
+}
+
+// Think-music looping motif (triangle wave)
+function startThinkMusic() {
+  initAudio();
+  stopThinkMusic();
+  const notes = [392.00, 440.00, 493.88, 523.25, 493.88, 440.00, 392.00, 440.00]; // G A B C B A G A
+  let step = 0;
+  const beat = 0.32;
+  const playNote = () => {
+    if (!audioCtx || muted) return;
+    const t = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "triangle";
+    osc.frequency.value = notes[step % notes.length];
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(0.5, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, t + beat * 0.9);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(t);
+    osc.stop(t + beat);
+    thinkNodes.push(osc);
+    step++;
+  };
+  playNote();
+  thinkInterval = setInterval(playNote, beat * 1000);
+}
+
+function stopThinkMusic() {
+  if (thinkInterval) { clearInterval(thinkInterval); thinkInterval = null; }
+  thinkNodes = [];
+}
+
+// Correct answer: ascending sine-wave chord (triumphant)
+function playCorrect() {
+  initAudio();
+  if (muted) return;
+  const t = audioCtx.currentTime;
+  const freqs = [523.25, 659.25, 783.99, 1046.50]; // C E G C
+  freqs.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.value = f;
+    const start = t + i * 0.08;
+    g.gain.setValueAtTime(0, start);
+    g.gain.linearRampToValueAtTime(0.5, start + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.001, start + 0.9);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(start);
+    osc.stop(start + 1.0);
+  });
+}
+
+// Wrong answer: descending sawtooth buzzer
+function playWrong() {
+  initAudio();
+  if (muted) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  osc.type = "sawtooth";
+  osc.frequency.setValueAtTime(440, t);
+  osc.frequency.exponentialRampToValueAtTime(110, t + 0.8);
+  g.gain.setValueAtTime(0.5, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+  osc.connect(g); g.connect(masterGain);
+  osc.start(t);
+  osc.stop(t + 0.85);
+}
+
+// Daily Double: dramatic ascending square-wave fanfare / sting
+function playDailyDouble() {
+  initAudio();
+  if (muted) return;
+  const t = audioCtx.currentTime;
+  const notes = [261.63, 329.63, 392.00, 523.25, 659.25, 783.99, 1046.50]; // C E G C E G C
+  notes.forEach((f, i) => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "square";
+    osc.frequency.value = f;
+    const start = t + i * 0.09;
+    g.gain.setValueAtTime(0, start);
+    g.gain.linearRampToValueAtTime(0.4, start + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, start + 0.25);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(start);
+    osc.stop(start + 0.3);
+  });
+  // Final sting
+  const stingStart = t + notes.length * 0.09 + 0.1;
+  [523.25, 659.25, 783.99].forEach(f => {
+    const osc = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    osc.type = "square";
+    osc.frequency.value = f;
+    g.gain.setValueAtTime(0.4, stingStart);
+    g.gain.exponentialRampToValueAtTime(0.001, stingStart + 0.6);
+    osc.connect(g); g.connect(masterGain);
+    osc.start(stingStart);
+    osc.stop(stingStart + 0.7);
+  });
+}
+
+/* ============================================================
+   BACKGROUND THEME (archive.org Jeopardy Think Music 1997)
+   ============================================================ */
+const themeAudio = document.createElement("audio");
+themeAudio.id = "theme-audio";
+themeAudio.src = "https://archive.org/download/tvtunes_29826/Jeopardy%20-%201997%20-%20Think%20Music.mp3";
+themeAudio.loop = true;
+themeAudio.volume = 0.35;
+themeAudio.preload = "auto";
+document.body.appendChild(themeAudio);
+
+themeAudio.addEventListener("error", () => {
+  console.warn("Theme music could not be loaded from archive.org (network/CORS). Synth sounds will still work.");
+});
+
+function startTheme() {
+  if (muted) return;
+  const p = themeAudio.play();
+  if (p && p.catch) p.catch(err => console.warn("Theme audio play blocked:", err));
+}
+
+/* ============================================================
+   BOARD SETUP
+   ============================================================ */
+function buildBoard() {
+  const board = document.getElementById("board");
+  board.innerHTML = "";
+
+  // Categories row
+  CATEGORIES.forEach(cat => {
+    const el = document.createElement("div");
+    el.className = "category";
+    el.textContent = cat.name;
+    board.appendChild(el);
+  });
+
+  // Tiles
+  for (let row = 0; row < 5; row++) {
+    CATEGORIES.forEach((cat, catIdx) => {
+      const clue = cat.clues[row];
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.textContent = "$" + clue.v;
+      tile.dataset.cat = catIdx;
+      tile.dataset.idx = row;
+      tile.addEventListener("click", () => openClue(catIdx, row, tile));
+      board.appendChild(tile);
+    });
+  }
+
+  // Choose Daily Double randomly (not $200 row for drama)
+  const ddRow = Math.floor(Math.random() * 4) + 1; // 1..4 (i.e., $400-$1000)
+  const ddCat = Math.floor(Math.random() * 5);
+  dailyDouble = { cat: ddCat, idx: ddRow };
+}
+
+/* ============================================================
+   CLUE FLOW
+   ============================================================ */
+function openClue(catIdx, idx, tileEl) {
+  if (tileEl.classList.contains("used")) return;
+  initAudio();
+  startTheme();
+
+  const cat = CATEGORIES[catIdx];
+  const clue = cat.clues[idx];
+  currentClue = { cat, clue, catIdx, idx, tileEl };
+  currentWager = clue.v;
+
+  const modal = document.getElementById("clue-modal");
+  document.getElementById("modal-category").textContent = cat.name;
+  document.getElementById("modal-value").textContent = "$" + clue.v;
+
+  // Reset modal sections
+  document.getElementById("wager-area").classList.add("hidden");
+  document.getElementById("clue-area").classList.add("hidden");
+  document.getElementById("modal-feedback").textContent = "";
+  document.getElementById("modal-feedback").className = "feedback";
+  document.getElementById("modal-correct").classList.add("hidden");
+  document.getElementById("modal-correct").textContent = "";
+  document.getElementById("next-btns").classList.add("hidden");
+  document.querySelector("#clue-area .modal-btns").classList.remove("hidden");
+  document.getElementById("modal-answer").value = "";
+  document.getElementById("modal-answer").disabled = false;
+
+  const isDD = (catIdx === dailyDouble.cat && idx === dailyDouble.idx);
+
+  if (isDD) {
+    // Show splash
+    const splash = document.getElementById("dd-splash");
+    splash.classList.add("active");
+    playDailyDouble();
+    spawnSparkles(30);
+    setTimeout(() => {
+      splash.classList.remove("active");
+      modal.classList.add("active");
+      showWagerArea();
+    }, 2200);
+  } else {
+    modal.classList.add("active");
+    showClueArea();
+    startThinkMusic();
+    document.getElementById("modal-answer").focus();
+  }
+}
+
+function showWagerArea() {
+  const wagerArea = document.getElementById("wager-area");
+  wagerArea.classList.remove("hidden");
+  const maxW = Math.max(score, 1000);
+  const wagerInput = document.getElementById("dd-wager");
+  wagerInput.min = 5;
+  wagerInput.max = maxW;
+  wagerInput.value = Math.min(1000, maxW);
+  document.getElementById("wager-hint").textContent = `Min $5, Max $${maxW}`;
+  wagerInput.focus();
+}
+
+function showClueArea() {
+  document.getElementById("clue-area").classList.remove("hidden");
+  document.getElementById("modal-clue").textContent = currentClue.clue.q;
+}
+
+document.getElementById("wager-lock").addEventListener("click", () => {
+  const maxW = Math.max(score, 1000);
+  let w = parseInt(document.getElementById("dd-wager").value, 10);
+  if (isNaN(w) || w < 5) w = 5;
+  if (w > maxW) w = maxW;
+  currentWager = w;
+  document.getElementById("wager-area").classList.add("hidden");
+  showClueArea();
+  startThinkMusic();
+  document.getElementById("modal-answer").focus();
+});
+
+function normalize(s) {
+  return (s || "").toLowerCase().trim().replace(/^(what|who|where|when)\s+(is|are|was|were)\s+/i, "").replace(/[^a-z0-9\s&]/g, "").replace(/\s+/g, " ").trim();
+}
+
+function checkAnswer(user, accept) {
+  const u = normalize(user);
+  if (!u) return false;
+  return accept.some(a => {
+    const na = normalize(a);
+    return u === na || u.includes(na) || na.includes(u);
+  });
+}
+
+document.getElementById("submit-btn").addEventListener("click", submitAnswer);
+document.getElementById("modal-answer").addEventListener("keydown", e => {
+  if (e.key === "Enter") submitAnswer();
+});
+document.getElementById("skip-btn").addEventListener("click", () => handleResult(false, true));
+
+function submitAnswer() {
+  const val = document.getElementById("modal-answer").value;
+  const correct = checkAnswer(val, currentClue.clue.accept);
+  handleResult(correct, false);
+}
+
+function handleResult(correct, skipped) {
+  stopThinkMusic();
+  const fb = document.getElementById("modal-feedback");
+  const correctEl = document.getElementById("modal-correct");
+  document.getElementById("modal-answer").disabled = true;
+  document.querySelector("#clue-area .modal-btns").classList.add("hidden");
+  document.getElementById("next-btns").classList.remove("hidden");
+
+  if (correct) {
+    score += currentWager;
+    fb.textContent = "✨ CORRECT! +$" + currentWager + " ✨";
+    fb.className = "feedback correct";
+    playCorrect();
+    launchConfetti();
+  } else {
+    if (!skipped) {
+      score -= currentWager;
+      fb.textContent = "💔 Sorry! -$" + currentWager;
+    } else {
+      fb.textContent = "⏭️ Skipped.";
+    }
+    fb.className = "feedback wrong";
+    playWrong();
+    correctEl.textContent = "Correct answer: " + currentClue.clue.a;
+    correctEl.classList.remove("hidden");
+  }
+
+  // Mark tile used
+  currentClue.tileEl.classList.add("used");
+  currentClue.tileEl.textContent = "";
+  usedCount++;
+  updateScore();
+}
+
+document.getElementById("continue-btn").addEventListener("click", () => {
+  document.getElementById("clue-modal").classList.remove("active");
+  if (usedCount >= totalTiles) {
+    document.getElementById("final-btn").classList.remove("hidden");
+    document.getElementById("final-btn").scrollIntoView({ behavior: "smooth" });
+  }
+});
+
+function updateScore() {
+  const el = document.getElementById("score");
+  const sign = score < 0 ? "-$" : "$";
+  el.textContent = sign + Math.abs(score);
+  el.style.color = score < 0 ? "#ff6f8f" : "var(--gold)";
+}
+
+/* ============================================================
+   FINAL JEOPARDY
+   ============================================================ */
+document.getElementById("final-btn").addEventListener("click", () => {
+  document.getElementById("game-area").classList.add("hidden");
+  const fs = document.getElementById("final-screen");
+  fs.classList.remove("hidden");
+  document.getElementById("final-cat").textContent = FINAL_JEOPARDY.category;
+  const maxWager = Math.max(score, 0);
+  document.getElementById("max-wager").textContent = "$" + maxWager;
+  const fw = document.getElementById("final-wager");
+  fw.min = 0;
+  fw.max = maxWager;
+  fw.value = Math.min(500, maxWager);
+  startThinkMusic();
+});
+
+document.getElementById("final-wager-btn").addEventListener("click", () => {
+  const maxWager = Math.max(score, 0);
+  let w = parseInt(document.getElementById("final-wager").value, 10);
+  if (isNaN(w) || w < 0) w = 0;
+  if (w > maxWager) w = maxWager;
+  currentWager = w;
+  document.getElementById("final-clue-area").classList.remove("hidden");
+  document.getElementById("final-clue-text").textContent = FINAL_JEOPARDY.clue;
+  document.getElementById("final-answer").focus();
+});
+
+document.getElementById("final-answer").addEventListener("keydown", e => {
+  if (e.key === "Enter") submitFinal();
+});
+document.getElementById("final-submit").addEventListener("click", submitFinal);
+
+function submitFinal() {
+  stopThinkMusic();
+  const val = document.getElementById("final-answer").value;
+  const correct = checkAnswer(val, FINAL_JEOPARDY.accept);
+  const fb = document.getElementById("final-feedback");
+  if (correct) {
+    score += currentWager;
+    fb.textContent = "🎉 CORRECT! +$" + currentWager + " — Correct: " + FINAL_JEOPARDY.answer;
+    fb.className = "feedback correct";
+    playCorrect();
+    launchConfetti(true);
+  } else {
+    score -= currentWager;
+    fb.textContent = "💔 Not quite. -$" + currentWager + " — Correct: " + FINAL_JEOPARDY.answer;
+    fb.className = "feedback wrong";
+    playWrong();
+  }
+  updateScore();
+  document.getElementById("final-answer").disabled = true;
+  document.getElementById("final-submit").disabled = true;
+  setTimeout(endGame, 2800);
+}
+
+function endGame() {
+  document.getElementById("final-screen").classList.add("hidden");
+  document.getElementById("gameover-screen").classList.remove("hidden");
+  const sign = score < 0 ? "-$" : "$";
+  document.getElementById("final-total").textContent = sign + Math.abs(score);
+  let msg = "";
+  if (score >= 10000) msg = "👑 You're a certified Mastermind Swiftie!";
+  else if (score >= 6000) msg = "🌟 Enchanted performance!";
+  else if (score >= 3000) msg = "💛 Lover of Swift lore!";
+  else if (score >= 0) msg = "✨ A solid Fearless effort!";
+  else msg = "💔 Shake it off and try again!";
+  document.getElementById("gameover-msg").textContent = msg;
+  themeAudio.pause();
+}
+
+document.getElementById("play-again-btn").addEventListener("click", resetGame);
+document.getElementById("reset-btn").addEventListener("click", resetGame);
+
+function resetGame() {
+  score = 0;
+  usedCount = 0;
+  updateScore();
+  document.getElementById("game-area").classList.remove("hidden");
+  document.getElementById("final-screen").classList.add("hidden");
+  document.getElementById("gameover-screen").classList.add("hidden");
+  document.getElementById("final-btn").classList.add("hidden");
+  document.getElementById("final-clue-area").classList.add("hidden");
+  document.getElementById("final-answer").disabled = false;
+  document.getElementById("final-submit").disabled = false;
+  document.getElementById("final-answer").value = "";
+  document.getElementById("final-feedback").textContent = "";
+  buildBoard();
+  themeAudio.currentTime = 0;
+  if (!muted) themeAudio.play().catch(()=>{});
+}
+
+/* ============================================================
+   MUTE
+   ============================================================ */
+document.getElementById("mute-btn").addEventListener("click", () => {
+  setMute(!muted);
+  if (muted) themeAudio.pause(); else themeAudio.play().catch(()=>{});
+});
+
+/* ============================================================
+   CONFETTI (canvas)
+   ============================================================ */
+const canvas = document.getElementById("confetti-canvas");
+const cctx = canvas.getContext("2d");
+let confettiPieces = [];
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+function launchConfetti(big) {
+  const n = big ? 180 : 80;
+  const colors = ["#f5c518", "#ff7fbf", "#fff8e0", "#6fffa5", "#9fc4ff"];
+  for (let i = 0; i < n; i++) {
+    confettiPieces.push({
+      x: Math.random() * canvas.width,
+      y: -20 - Math.random() * 100,
+      vx: (Math.random() - 0.5) * 6,
+      vy: Math.random() * 3 + 2,
+      size: Math.random() * 8 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rot: Math.random() * Math.PI,
+      vr: (Math.random() - 0.5) * 0.2,
+      life: 180
+    });
+  }
+  if (!confettiAnimating) { confettiAnimating = true; animateConfetti(); }
+}
+
+let confettiAnimating = false;
+function animateConfetti() {
+  cctx.clearRect(0, 0, canvas.width, canvas.height);
+  confettiPieces = confettiPieces.filter(p => p.life > 0 && p.y < canvas.height + 50);
+  confettiPieces.forEach(p => {
+    p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.rot += p.vr; p.life--;
+    cctx.save();
+    cctx.translate(p.x, p.y);
+    cctx.rotate(p.rot);
+    cctx.fillStyle = p.color;
+    cctx.fillRect(-p.size/2, -p.size/2, p.size, p.size * 0.5);
+    cctx.restore();
+  });
+  if (confettiPieces.length > 0) {
+    requestAnimationFrame(animateConfetti);
+  } else {
+    confettiAnimating = false;
+    cctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+/* Sparkle emojis for Daily Double */
+function spawnSparkles(n) {
+  const emojis = ["✨", "💎", "💛", "🌟", "💫"];
+  for (let i = 0; i < n; i++) {
+    const el = document.createElement("div");
+    el.className = "sparkle";
+    el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    el.style.left = Math.random() * window.innerWidth + "px";
+    el.style.top = (window.innerHeight - 50) + "px";
+    el.style.animationDelay = (Math.random() * 0.5) + "s";
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+buildBoard();
+updateScore();
+
+// Start gate — guarantees audio starts on a real user gesture
+document.getElementById("start-btn").addEventListener("click", () => {
+  initAudio();
+  startTheme();
+  // Play a short welcome chord so user hears audio is working
+  if (audioCtx && !muted) {
+    const t = audioCtx.currentTime;
+    [523.25, 659.25, 783.99].forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.value = f;
+      const s = t + i * 0.06;
+      g.gain.setValueAtTime(0, s);
+      g.gain.linearRampToValueAtTime(0.35, s + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, s + 0.7);
+      osc.connect(g); g.connect(masterGain);
+      osc.start(s);
+      osc.stop(s + 0.75);
+    });
+  }
+  document.getElementById("start-gate").classList.add("hidden");
+  document.getElementById("game-area").classList.remove("hidden");
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Microsoft Copilot Arcade</title>
+<style>
+  /* ============ TOKENS ============ */
+  :root {
+    --copilot-blue: #0F6CBD;
+    --copilot-purple: #7B4FD0;
+    --copilot-gradient: linear-gradient(135deg, #0F6CBD 0%, #7B4FD0 100%);
+    --radius-s: 6px;
+    --radius-m: 12px;
+    --radius-l: 20px;
+    --font: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+    --transition: 220ms cubic-bezier(0.1, 0.9, 0.2, 1);
+  }
+  /* Light */
+  :root {
+    --bg: #F5F6FA;
+    --bg-elev: #FFFFFF;
+    --bg-elev-2: #FAFBFC;
+    --text: #1F1F1F;
+    --text-dim: #616161;
+    --border: #E1E4EA;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08), 0 8px 24px rgba(15,108,189,0.08);
+    --shadow-hover: 0 6px 16px rgba(0,0,0,0.12), 0 16px 40px rgba(123,79,208,0.18);
+    --terminal-bg: #1E1E1E;
+    --terminal-border: #3C3C3C;
+    --ok: #22C55E;
+    --err: #EF4444;
+  }
+  /* Dark */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0B0C10;
+      --bg-elev: #1A1B22;
+      --bg-elev-2: #23252E;
+      --text: #F5F5F7;
+      --text-dim: #9CA3AF;
+      --border: #2D2F3A;
+      --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 8px 24px rgba(123,79,208,0.2);
+      --shadow-hover: 0 6px 16px rgba(0,0,0,0.6), 0 16px 40px rgba(15,108,189,0.35);
+      --terminal-bg: #0D0D0D;
+      --terminal-border: #2A2A2A;
+    }
+  }
+  /* ============ BASE ============ */
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  button { font-family: inherit; cursor: pointer; border: none; }
+  :focus-visible {
+    outline: 2px solid var(--copilot-blue);
+    outline-offset: 3px;
+    border-radius: var(--radius-s);
+  }
+
+  /* ============ LOBBY ============ */
+  .screen { display: none; animation: fadeIn 320ms var(--transition); }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .lobby {
+    max-width: 1200px; margin: 0 auto;
+    padding: 48px 24px 64px;
+  }
+  .lobby-header { text-align: center; margin-bottom: 56px; }
+  .logo-mark {
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 8px 18px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    margin-bottom: 24px;
+    font-weight: 600; font-size: 14px; letter-spacing: 0.3px;
+  }
+  .logo-mark svg { width: 22px; height: 22px; }
+  h1.title {
+    font-size: clamp(36px, 7vw, 68px);
+    font-weight: 700;
+    margin: 0 0 12px;
+    background: var(--copilot-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: -1.5px;
+  }
+  .subtitle { color: var(--text-dim); font-size: clamp(15px, 2vw, 18px); margin: 0; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+  .game-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-l);
+    padding: 28px;
+    text-align: left;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; gap: 14px;
+    min-height: 280px;
+  }
+  .game-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: var(--copilot-gradient);
+    opacity: 0; transition: opacity var(--transition);
+    pointer-events: none;
+  }
+  .game-card:hover, .game-card:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+    border-color: transparent;
+  }
+  .game-card:hover::before, .game-card:focus-visible::before { opacity: 0.06; }
+  .game-card .icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: var(--radius-m);
+    background: var(--copilot-gradient);
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    box-shadow: 0 6px 18px rgba(15,108,189,0.3);
+  }
+  .game-card .icon-wrap svg { width: 36px; height: 36px; }
+  .game-card h2 { font-size: 22px; margin: 0; font-weight: 600; }
+  .game-card p { margin: 0; color: var(--text-dim); font-size: 14px; line-height: 1.5; flex: 1; }
+  .game-card .stats {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    padding-top: 14px; border-top: 1px solid var(--border);
+    font-size: 12px; color: var(--text-dim);
+  }
+  .game-card .stats b { color: var(--text); font-weight: 600; }
+
+  /* ============ GAME SHELL ============ */
+  .game-shell {
+    min-height: 100vh; padding: 20px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .game-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px; gap: 16px;
+    flex-wrap: wrap;
+  }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: var(--radius-m);
+    font-weight: 600; font-size: 14px;
+    transition: all var(--transition);
+  }
+  .back-btn:hover { border-color: var(--copilot-blue); color: var(--copilot-blue); transform: translateX(-2px); }
+  .game-title { font-size: 20px; font-weight: 700; margin: 0; }
+  .hud {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .hud-chip {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: var(--radius-m);
+    font-size: 13px;
+    display: flex; align-items: center; gap: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .hud-chip b { font-weight: 700; }
+  .hud-chip.accent { background: var(--copilot-gradient); color: white; border-color: transparent; }
+
+  /* ============ GAME 1: WHACK-A-BUG ============ */
+  .bug-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .terminal {
+    background: var(--terminal-bg);
+    border: 1px solid var(--terminal-border);
+    border-radius: var(--radius-m);
+    aspect-ratio: 1 / 1;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 100ms;
+  }
+  .terminal:active { transform: scale(0.98); }
+  .terminal-bar {
+    height: 22px;
+    background: #2D2D2D;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 10px;
+    border-bottom: 1px solid var(--terminal-border);
+  }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .terminal-dot.r { background: #FF5F56; }
+  .terminal-dot.y { background: #FFBD2E; }
+  .terminal-dot.g { background: #27C93F; }
+  .terminal-title {
+    font: 10px var(--mono); color: #888; margin-left: auto;
+  }
+  .terminal-body {
+    position: absolute; top: 22px; left: 0; right: 0; bottom: 0;
+    font: 11px var(--mono);
+    color: #6A9955;
+    padding: 8px;
+    overflow: hidden;
+  }
+  .terminal-body::before {
+    content: '$ npm run dev\A> starting dev server...';
+    white-space: pre;
+    opacity: 0.5;
+  }
+  .bug {
+    position: absolute;
+    left: 50%; top: 100%;
+    transform: translate(-50%, 0);
+    width: 54%; height: 54%;
+    transition: top 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2);
+    pointer-events: none;
+    display: flex; align-items: center; justify-content: center;
+    filter: drop-shadow(0 0 12px rgba(239,68,68,0.8));
+  }
+  .bug.up { top: 50%; transform: translate(-50%, -50%); }
+  .bug svg { width: 100%; height: 100%; }
+  .flash {
+    position: absolute; inset: 0;
+    background: rgba(34,197,94,0.25);
+    color: #22C55E;
+    font: 700 14px var(--font);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none;
+    text-shadow: 0 0 10px rgba(34,197,94,0.8);
+  }
+  .flash.show { animation: flashAnim 600ms ease-out; }
+  @keyframes flashAnim {
+    0% { opacity: 0; transform: scale(0.5); }
+    30% { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 0; transform: scale(1.3); }
+  }
+  .terminal.escape { animation: shake 400ms; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* ============ GAME 2: TYPING SPRINT ============ */
+  .typing-stage {
+    position: relative;
+    background: linear-gradient(180deg, #0a0a1f 0%, #1a0b2e 60%, #2d1b4e 100%);
+    border-radius: var(--radius-l);
+    height: 60vh; min-height: 440px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .typing-stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(transparent 0, transparent calc(100% - 1px), rgba(255,255,255,0.04) 100%),
+      linear-gradient(90deg, transparent 0, transparent calc(100% - 1px), rgba(255,255,255,0.04) 100%);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+  .typing-stage::after {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--copilot-purple), transparent);
+    box-shadow: 0 0 14px var(--copilot-purple);
+  }
+  .falling-word {
+    position: absolute;
+    font: 600 clamp(16px, 2.4vw, 22px) var(--mono);
+    color: #E6E9FF;
+    padding: 8px 14px;
+    background: rgba(15,108,189,0.15);
+    border: 1px solid rgba(123,79,208,0.6);
+    border-radius: var(--radius-s);
+    text-shadow: 0 0 8px rgba(123,79,208,0.6);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+  .falling-word .typed { color: var(--copilot-blue); text-shadow: 0 0 10px var(--copilot-blue); }
+  .falling-word.hit { animation: hitBurst 500ms ease-out forwards; }
+  @keyframes hitBurst {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(15,108,189,0.8); }
+    100% { transform: scale(1.8); opacity: 0; box-shadow: 0 0 0 40px rgba(15,108,189,0); }
+  }
+  .falling-word.miss { animation: glitchOut 500ms forwards; }
+  @keyframes glitchOut {
+    0% { transform: translateX(0); filter: none; }
+    20% { transform: translateX(-4px); filter: hue-rotate(90deg); }
+    40% { transform: translateX(4px); filter: hue-rotate(-90deg); }
+    60% { transform: translateX(-2px); filter: invert(1); }
+    100% { opacity: 0; transform: translateY(20px); }
+  }
+  .type-input-wrap {
+    display: flex; gap: 10px; margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .type-input {
+    flex: 1; min-width: 200px;
+    padding: 14px 18px;
+    font: 500 18px var(--mono);
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: var(--radius-m);
+    transition: border-color var(--transition);
+  }
+  .type-input:focus {
+    outline: none;
+    border-color: var(--copilot-blue);
+    box-shadow: 0 0 0 4px rgba(15,108,189,0.15);
+  }
+  .leaderboard {
+    margin-top: 22px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-m);
+    padding: 18px;
+  }
+  .leaderboard h3 { margin: 0 0 10px; font-size: 15px; font-weight: 700; }
+  .leaderboard ol { margin: 0; padding-left: 20px; font-variant-numeric: tabular-nums; }
+  .leaderboard li { padding: 4px 0; font-size: 14px; color: var(--text-dim); }
+  .leaderboard li b { color: var(--text); }
+
+  /* ============ GAME 3: MEMORY MATCH ============ */
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .mem-card {
+    aspect-ratio: 3 / 4;
+    perspective: 1000px;
+    position: relative;
+    cursor: pointer;
+    background: transparent;
+    padding: 0;
+  }
+  .mem-card-inner {
+    position: relative; width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 520ms cubic-bezier(0.2, 0.9, 0.3, 1.1);
+  }
+  .mem-card.flipped .mem-card-inner { transform: rotateY(180deg); }
+  .mem-card.matched .mem-card-inner {
+    transform: rotateY(180deg);
+    animation: matchPulse 600ms ease-out;
+  }
+  @keyframes matchPulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(123,79,208,0); }
+    50% { box-shadow: 0 0 0 8px rgba(123,79,208,0.5); }
+  }
+  .mem-card.shake .mem-card-inner { animation: cardShake 360ms; }
+  @keyframes cardShake {
+    0%,100% { transform: rotateY(180deg) translateX(0); }
+    33% { transform: rotateY(180deg) translateX(-8px); }
+    66% { transform: rotateY(180deg) translateX(8px); }
+  }
+  .mem-face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: var(--radius-m);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .mem-front {
+    background: var(--copilot-gradient);
+    color: white;
+  }
+  .mem-front svg { width: 46%; height: 46%; opacity: 0.9; }
+  .mem-back {
+    transform: rotateY(180deg);
+    background: var(--bg-elev);
+    flex-direction: column; gap: 8px;
+    padding: 10px;
+  }
+  .mem-back svg { width: 50%; height: 50%; }
+  .mem-tooltip {
+    font-size: 11px; font-weight: 600; color: var(--text-dim);
+    text-align: center;
+  }
+  .particle-canvas {
+    position: fixed; inset: 0;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* ============ UTILITY ============ */
+  .game-screen { display: none; }
+  .game-screen.active { display: block; animation: fadeIn 300ms var(--transition); }
+  .result-banner {
+    text-align: center;
+    padding: 24px;
+    background: var(--copilot-gradient);
+    color: white;
+    border-radius: var(--radius-m);
+    margin: 20px auto; max-width: 600px;
+    box-shadow: var(--shadow);
+  }
+  .result-banner h3 { margin: 0 0 8px; font-size: 24px; }
+  .result-banner p { margin: 4px 0; opacity: 0.95; }
+  .result-banner button {
+    margin-top: 14px; padding: 10px 22px;
+    background: rgba(255,255,255,0.2); color: white;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: var(--radius-m); font-weight: 600;
+    backdrop-filter: blur(10px);
+  }
+  .result-banner button:hover { background: rgba(255,255,255,0.3); }
+
+  @media (max-width: 600px) {
+    .memory-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .hud-chip { font-size: 12px; padding: 6px 10px; }
+    .game-title { font-size: 16px; }
+    .terminal-body::before { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ LOBBY ============ -->
+<section id="lobby" class="screen active">
+  <div class="lobby">
+    <header class="lobby-header">
+      <div class="logo-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0F6CBD"/><stop offset="1" stop-color="#7B4FD0"/></linearGradient></defs><path d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.2L18.8 8 12 11.8 5.2 8 12 4.2zM5 9.7l6 3.4v7.2l-6-3.3V9.7zm14 0v7.3l-6 3.3v-7.2l6-3.4z" fill="url(#lg)"/></svg>
+        <span>Microsoft Copilot Arcade</span>
+      </div>
+      <h1 class="title">Play, Prompt, Prevail</h1>
+      <p class="subtitle">Three mini-games. Pure browser. Zero dependencies.</p>
+    </header>
+
+    <div class="cards">
+      <button class="game-card" data-game="whack" aria-label="Play Whack-a-Bug">
+        <div class="icon-wrap">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a4 4 0 0 1 4 4H8a4 4 0 0 1 4-4zm-7 9h3v2H5v-2zm11 0h3v2h-3v-2zM6 8h12v4a6 6 0 0 1-12 0V8zm2 8.5a6 6 0 0 0 8 0V18H8v-1.5zM4 14l3 1v2l-3 1v-4zm16 0v4l-3-1v-2l3-1z"/></svg>
+        </div>
+        <h2>Whack-a-Bug</h2>
+        <p>Squash glowing bugs in VS Code terminal windows. Build combos, beat the clock.</p>
+        <div class="stats"><span>Best score: <b id="stat-whack">—</b></span></div>
+      </button>
+
+      <button class="game-card" data-game="typing" aria-label="Play Copilot Typing Sprint">
+        <div class="icon-wrap">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm1 3v2h2V8H5zm4 0v2h2V8H9zm4 0v2h2V8h-2zm4 0v2h2V8h-2zM5 11v2h2v-2H5zm4 0v2h2v-2H9zm4 0v2h6v-2h-6zM5 14v2h14v-2H5z"/></svg>
+        </div>
+        <h2>Copilot Typing Sprint</h2>
+        <p>Falling M365 prompt words. Type fast, type clean, top the leaderboard.</p>
+        <div class="stats"><span>Best WPM: <b id="stat-typing">—</b></span></div>
+      </button>
+
+      <button class="game-card" data-game="memory" aria-label="Play Copilot Memory Match">
+        <div class="icon-wrap">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>
+        </div>
+        <h2>Copilot Memory Match</h2>
+        <p>Match 8 pairs of Microsoft icons. Fewer moves, faster time — sharper mind.</p>
+        <div class="stats">
+          <span>Best moves: <b id="stat-mem-moves">—</b></span>
+          <span>Best time: <b id="stat-mem-time">—</b></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GAME 1: WHACK-A-BUG ============ -->
+<section id="whack" class="screen">
+  <div class="game-shell">
+    <div class="game-topbar">
+      <button class="back-btn" data-back>← Lobby</button>
+      <h2 class="game-title">Whack-a-Bug</h2>
+      <div class="hud">
+        <div class="hud-chip">Score <b id="w-score">0</b></div>
+        <div class="hud-chip">Combo ×<b id="w-combo">1</b></div>
+        <div class="hud-chip accent">Time <b id="w-time">60</b>s</div>
+      </div>
+    </div>
+    <div class="bug-grid" id="bug-grid" aria-label="Whack-a-bug 3 by 3 grid"></div>
+    <div id="w-result"></div>
+  </div>
+</section>
+
+<!-- ============ GAME 2: TYPING SPRINT ============ -->
+<section id="typing" class="screen">
+  <div class="game-shell">
+    <div class="game-topbar">
+      <button class="back-btn" data-back>← Lobby</button>
+      <h2 class="game-title">Copilot Typing Sprint</h2>
+      <div class="hud">
+        <div class="hud-chip">Score <b id="t-score">0</b></div>
+        <div class="hud-chip">WPM <b id="t-wpm">0</b></div>
+        <div class="hud-chip">Combo <b id="t-combo">0</b></div>
+        <div class="hud-chip accent">Lvl <b id="t-level">1</b></div>
+        <div class="hud-chip">Lives <b id="t-lives">3</b></div>
+      </div>
+    </div>
+    <div class="typing-stage" id="typing-stage" aria-hidden="true"></div>
+    <div class="type-input-wrap">
+      <input id="t-input" class="type-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type the falling word" placeholder="type the falling word…" />
+      <button class="back-btn" id="t-restart" style="background:var(--copilot-gradient);color:white;border-color:transparent;">Restart</button>
+    </div>
+    <div class="leaderboard">
+      <h3>Top 5 — This Device</h3>
+      <ol id="t-leaderboard"></ol>
+    </div>
+    <div id="t-result"></div>
+  </div>
+</section>
+
+<!-- ============ GAME 3: MEMORY MATCH ============ -->
+<section id="memory" class="screen">
+  <div class="game-shell">
+    <div class="game-topbar">
+      <button class="back-btn" data-back>← Lobby</button>
+      <h2 class="game-title">Copilot Memory Match</h2>
+      <div class="hud">
+        <div class="hud-chip">Moves <b id="m-moves">0</b></div>
+        <div class="hud-chip accent">Time <b id="m-time">0:00</b></div>
+        <div class="hud-chip">Matched <b id="m-matched">0</b>/8</div>
+      </div>
+    </div>
+    <div class="memory-grid" id="memory-grid" role="grid" aria-label="Memory match 4 by 4 grid"></div>
+    <div id="m-result"></div>
+  </div>
+</section>
+
+<canvas class="particle-canvas" id="particle-canvas"></canvas>
+
+<script>
+/* ============================================================
+   MICROSOFT COPILOT ARCADE — single-file edition
+   ============================================================ */
+
+/* ---------- AUDIO ENGINE ---------- */
+const Audio = (() => {
+  let ctx, master;
+  const ensure = () => {
+    if (!ctx) {
+      ctx = new (window.AudioContext || window.webkitAudioContext)();
+      master = ctx.createGain();
+      master.gain.value = 0.4;
+      master.connect(ctx.destination);
+    }
+    if (ctx.state === 'suspended') ctx.resume();
+    return ctx;
+  };
+  const env = (node, t0, a=0.005, d=0.1, s=0, sl=0.3, r=0.1, peak=0.6) => {
+    const g = node.gain;
+    g.cancelScheduledValues(t0);
+    g.setValueAtTime(0, t0);
+    g.linearRampToValueAtTime(peak, t0 + a);
+    g.linearRampToValueAtTime(peak * sl, t0 + a + d);
+    g.linearRampToValueAtTime(0, t0 + a + d + s + r);
+  };
+  const beep = (freq=880, dur=0.1, type='square', vol=0.3) => {
+    const c = ensure();
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = type; o.frequency.value = freq;
+    o.connect(g); g.connect(master);
+    const t = c.currentTime;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.start(t); o.stop(t + dur + 0.02);
+  };
+  const noise = (dur=0.1, vol=0.2, filterFreq=2000) => {
+    const c = ensure();
+    const buf = c.createBuffer(1, c.sampleRate * dur, c.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i=0; i<data.length; i++) data[i] = (Math.random()*2-1) * (1 - i/data.length);
+    const src = c.createBufferSource(); src.buffer = buf;
+    const filt = c.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = filterFreq;
+    const g = c.createGain(); g.gain.value = vol;
+    src.connect(filt); filt.connect(g); g.connect(master);
+    src.start();
+  };
+  const chord = (freqs, dur=0.4, type='triangle', vol=0.15) => {
+    freqs.forEach(f => beep(f, dur, type, vol));
+  };
+
+  // Named SFX
+  const sfx = {
+    // Game 1
+    bugPop: () => { beep(180, 0.08, 'square', 0.25); setTimeout(()=>beep(120, 0.08, 'square', 0.2), 60); },
+    fixDing: () => { beep(1200, 0.08, 'sine', 0.3); setTimeout(()=>beep(1800, 0.12, 'sine', 0.25), 70); },
+    alarm: () => { beep(200, 0.1, 'sawtooth', 0.3); setTimeout(()=>beep(150, 0.15, 'sawtooth', 0.3), 90); },
+    // Game 2
+    keyClick: () => { beep(2400+Math.random()*400, 0.03, 'square', 0.12); noise(0.02, 0.06, 4000); },
+    wordHit: () => { beep(660, 0.08, 'sine', 0.25); setTimeout(()=>beep(990, 0.1, 'sine', 0.22), 50); },
+    buzzer: () => { beep(110, 0.22, 'sawtooth', 0.25); setTimeout(()=>beep(90, 0.22, 'sawtooth', 0.22), 80); },
+    // Game 3
+    chime: (i) => {
+      const notes = [523, 587, 659, 698, 784, 880, 988, 1047];
+      beep(notes[i % notes.length], 0.18, 'triangle', 0.25);
+      setTimeout(()=>beep(notes[i % notes.length]*1.5, 0.14, 'sine', 0.18), 80);
+    },
+    matchFanfare: () => { chord([523, 659, 784], 0.35, 'triangle', 0.22); setTimeout(()=>chord([659, 784, 988], 0.4, 'sine', 0.2), 120); },
+    thud: () => { beep(120, 0.15, 'sine', 0.22); noise(0.06, 0.08, 500); },
+  };
+
+  /* ---- Background music loops ---- */
+  const loops = { whack: null, typing: null };
+
+  const startWhackLoop = () => {
+    stopLoop('whack');
+    const c = ensure();
+    const step = 0.2; // 8th-note
+    const notes = [261.63, 329.63, 392, 329.63, 261.63, 293.66, 329.63, 246.94]; // C E G E C D E B
+    let i = 0;
+    const tick = () => {
+      const t = c.currentTime;
+      const o = c.createOscillator(); o.type = 'square';
+      const g = c.createGain();
+      o.frequency.value = notes[i % notes.length] / 2;
+      o.connect(g); g.connect(master);
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.06, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + step * 0.9);
+      o.start(t); o.stop(t + step);
+      // bass
+      if (i % 2 === 0) {
+        const b = c.createOscillator(); b.type = 'triangle';
+        const bg = c.createGain();
+        b.frequency.value = notes[i % notes.length] / 4;
+        b.connect(bg); bg.connect(master);
+        bg.gain.setValueAtTime(0, t);
+        bg.gain.linearRampToValueAtTime(0.08, t + 0.01);
+        bg.gain.exponentialRampToValueAtTime(0.0001, t + step * 0.8);
+        b.start(t); b.stop(t + step);
+      }
+      i++;
+    };
+    loops.whack = setInterval(tick, step * 1000);
+    tick();
+  };
+
+  const startTypingLoop = () => {
+    stopLoop('typing');
+    const c = ensure();
+    const step = 0.24;
+    // Synthwave-ish: Am - F - C - G
+    const bass = [220, 174.61, 130.81, 196];
+    const lead = [440, 523.25, 659.25, 523.25, 440, 392, 349.23, 392];
+    let i = 0;
+    const tick = () => {
+      const t = c.currentTime;
+      const chordIdx = Math.floor(i / 4) % bass.length;
+      // bass
+      const b = c.createOscillator(); b.type = 'sawtooth';
+      const bfilt = c.createBiquadFilter(); bfilt.type='lowpass'; bfilt.frequency.value = 600;
+      const bg = c.createGain();
+      b.frequency.value = bass[chordIdx];
+      b.connect(bfilt); bfilt.connect(bg); bg.connect(master);
+      bg.gain.setValueAtTime(0, t);
+      bg.gain.linearRampToValueAtTime(0.07, t + 0.02);
+      bg.gain.exponentialRampToValueAtTime(0.0001, t + step * 0.95);
+      b.start(t); b.stop(t + step);
+      // lead
+      if (i % 2 === 0) {
+        const l = c.createOscillator(); l.type = 'triangle';
+        const lg = c.createGain();
+        l.frequency.value = lead[i % lead.length];
+        l.connect(lg); lg.connect(master);
+        lg.gain.setValueAtTime(0, t);
+        lg.gain.linearRampToValueAtTime(0.05, t + 0.01);
+        lg.gain.exponentialRampToValueAtTime(0.0001, t + step * 0.7);
+        l.start(t); l.stop(t + step);
+      }
+      i++;
+    };
+    loops.typing = setInterval(tick, step * 1000);
+    tick();
+  };
+
+  const stopLoop = (name) => {
+    if (loops[name]) { clearInterval(loops[name]); loops[name] = null; }
+  };
+  const stopAll = () => { Object.keys(loops).forEach(stopLoop); };
+
+  return { ensure, sfx, startWhackLoop, startTypingLoop, stopLoop, stopAll };
+})();
+
+/* ---------- STORAGE ---------- */
+const LS = {
+  get: (k, d) => { try { const v = localStorage.getItem('cpa_' + k); return v ? JSON.parse(v) : d; } catch(e) { return d; } },
+  set: (k, v) => { try { localStorage.setItem('cpa_' + k, JSON.stringify(v)); } catch(e) {} },
+};
+
+/* ---------- NAVIGATION ---------- */
+const screens = document.querySelectorAll('.screen');
+const showScreen = (id) => {
+  // Fully stop any running game (loops, timers, RAF, spawn schedulers)
+  try { Whack && Whack.stop && Whack.stop(); } catch(e) {}
+  try { Typing && Typing.stop && Typing.stop(); } catch(e) {}
+  try { Memory && Memory.stop && Memory.stop(); } catch(e) {}
+  Audio.stopAll();
+  screens.forEach(s => s.classList.toggle('active', s.id === id));
+  window.scrollTo({top:0, behavior:'instant'});
+  if (id === 'whack') Whack.start();
+  if (id === 'typing') Typing.start();
+  if (id === 'memory') Memory.start();
+  if (id === 'lobby') { refreshLobbyStats(); }
+};
+document.querySelectorAll('[data-game]').forEach(b => {
+  b.addEventListener('click', () => {
+    Audio.ensure();
+    showScreen(b.dataset.game);
+  });
+});
+document.querySelectorAll('[data-back]').forEach(b => b.addEventListener('click', () => showScreen('lobby')));
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const active = document.querySelector('.screen.active');
+    if (active && active.id !== 'lobby') showScreen('lobby');
+  }
+});
+
+const fmtTime = (s) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+
+const refreshLobbyStats = () => {
+  document.getElementById('stat-whack').textContent = LS.get('whack_best', 0) || '—';
+  document.getElementById('stat-typing').textContent = LS.get('typing_best_wpm', 0) || '—';
+  const mm = LS.get('mem_best_moves', 0);
+  const mt = LS.get('mem_best_time', 0);
+  document.getElementById('stat-mem-moves').textContent = mm || '—';
+  document.getElementById('stat-mem-time').textContent = mt ? fmtTime(mt) : '—';
+};
+refreshLobbyStats();
+
+/* ============================================================
+   GAME 1: WHACK-A-BUG
+   ============================================================ */
+const Whack = (() => {
+  const grid = document.getElementById('bug-grid');
+  const elScore = document.getElementById('w-score');
+  const elCombo = document.getElementById('w-combo');
+  const elTime = document.getElementById('w-time');
+  const resultBox = document.getElementById('w-result');
+  const bugSVG = `<svg viewBox="0 0 24 24" fill="none">
+    <defs><radialGradient id="bugGlow"><stop offset="0" stop-color="#FF6B6B"/><stop offset="1" stop-color="#991B1B"/></radialGradient></defs>
+    <ellipse cx="12" cy="13" rx="6" ry="7" fill="url(#bugGlow)" stroke="#450a0a" stroke-width="0.8"/>
+    <circle cx="9.5" cy="11" r="1.2" fill="#fff"/>
+    <circle cx="14.5" cy="11" r="1.2" fill="#fff"/>
+    <circle cx="9.5" cy="11.2" r="0.5" fill="#000"/>
+    <circle cx="14.5" cy="11.2" r="0.5" fill="#000"/>
+    <path d="M8 5l2 3M16 5l-2 3M4 10l3 1M4 14l3 0M4 18l3-1M20 10l-3 1M20 14l-3 0M20 18l-3-1" stroke="#450a0a" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M12 8v10" stroke="#450a0a" stroke-width="0.8" opacity="0.5"/>
+  </svg>`;
+  const titles = ['bug.js','error.ts','crash.py','panic.rs','stack.java','null.go','leak.cpp','oops.rb','fail.sh'];
+  let state = null;
+
+  const render = () => {
+    grid.innerHTML = '';
+    for (let i = 0; i < 9; i++) {
+      const hole = document.createElement('div');
+      hole.className = 'terminal';
+      hole.setAttribute('role','button');
+      hole.setAttribute('tabindex','0');
+      hole.setAttribute('aria-label','Terminal window ' + (i+1));
+      hole.innerHTML = `
+        <div class="terminal-bar">
+          <span class="terminal-dot r"></span><span class="terminal-dot y"></span><span class="terminal-dot g"></span>
+          <span class="terminal-title">${titles[i]}</span>
+        </div>
+        <div class="terminal-body"></div>
+        <div class="bug" aria-hidden="true">${bugSVG}</div>
+        <div class="flash">Fixed by Copilot ✓</div>`;
+      const handleHit = () => hit(i);
+      hole.addEventListener('click', handleHit);
+      hole.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleHit(); } });
+      grid.appendChild(hole);
+    }
+  };
+
+  const hit = (i) => {
+    if (!state || !state.running) return;
+    const slot = state.holes[i];
+    if (slot.active) {
+      slot.active = false;
+      clearTimeout(slot.retreat);
+      state.combo++;
+      const mult = Math.min(5, 1 + Math.floor(state.combo/3));
+      state.score += 10 * mult;
+      elScore.textContent = state.score;
+      elCombo.textContent = mult;
+      Audio.sfx.fixDing();
+      const hole = grid.children[i];
+      hole.querySelector('.bug').classList.remove('up');
+      const flash = hole.querySelector('.flash');
+      flash.classList.remove('show'); void flash.offsetWidth; flash.classList.add('show');
+    }
+  };
+
+  const spawn = () => {
+    if (!state || !state.running) return;
+    const free = state.holes.map((h,i) => h.active ? -1 : i).filter(x => x >= 0);
+    if (free.length === 0) return schedule();
+    const i = free[Math.floor(Math.random() * free.length)];
+    const slot = state.holes[i];
+    slot.active = true;
+    const hole = grid.children[i];
+    hole.querySelector('.bug').classList.add('up');
+    Audio.sfx.bugPop();
+    const uptime = Math.max(500, 1400 - state.level * 180);
+    slot.retreat = setTimeout(() => {
+      if (slot.active) {
+        slot.active = false;
+        hole.querySelector('.bug').classList.remove('up');
+        hole.classList.remove('escape'); void hole.offsetWidth; hole.classList.add('escape');
+        Audio.sfx.alarm();
+        state.combo = 0;
+        elCombo.textContent = 1;
+      }
+    }, uptime);
+    schedule();
+  };
+
+  const schedule = () => {
+    const delay = Math.max(280, 900 - state.level * 110) + Math.random() * 300;
+    state.spawnTimer = setTimeout(spawn, delay);
+  };
+
+  const start = () => {
+    resultBox.innerHTML = '';
+    render();
+    state = {
+      running: true, score: 0, combo: 0, level: 0, time: 60,
+      holes: Array.from({length:9}, () => ({active:false, retreat:null})),
+      spawnTimer: null, clockTimer: null, levelTimer: null,
+    };
+    elScore.textContent = 0; elCombo.textContent = 1; elTime.textContent = 60;
+    Audio.startWhackLoop();
+    schedule();
+    state.clockTimer = setInterval(() => {
+      state.time--;
+      elTime.textContent = state.time;
+      if (state.time <= 0) end();
+    }, 1000);
+    state.levelTimer = setInterval(() => {
+      state.level = Math.min(5, state.level + 1);
+    }, 10000);
+  };
+
+  const end = () => {
+    if (!state) return;
+    state.running = false;
+    clearTimeout(state.spawnTimer);
+    clearInterval(state.clockTimer);
+    clearInterval(state.levelTimer);
+    state.holes.forEach(h => clearTimeout(h.retreat));
+    Audio.stopLoop('whack');
+    const best = Math.max(state.score, LS.get('whack_best', 0));
+    LS.set('whack_best', best);
+    const isNew = state.score === best && state.score > 0;
+    resultBox.innerHTML = `<div class="result-banner">
+      <h3>Time's up!</h3>
+      <p>Score: <b>${state.score}</b> ${isNew ? '🏆 New best!' : ''}</p>
+      <p>Best: <b>${best}</b></p>
+      <button id="w-again">Play again</button>
+    </div>`;
+    document.getElementById('w-again').addEventListener('click', start);
+  };
+
+  // Silent teardown for navigation — kills timers/audio without end banner
+  const stop = () => {
+    if (!state) return;
+    state.running = false;
+    clearTimeout(state.spawnTimer);
+    clearInterval(state.clockTimer);
+    clearInterval(state.levelTimer);
+    state.holes.forEach(h => clearTimeout(h.retreat));
+    Audio.stopLoop('whack');
+  };
+  return { start, stop };
+})();
+
+/* ============================================================
+   GAME 2: TYPING SPRINT
+   ============================================================ */
+const Typing = (() => {
+  const stage = document.getElementById('typing-stage');
+  const input = document.getElementById('t-input');
+  const elScore = document.getElementById('t-score');
+  const elWpm = document.getElementById('t-wpm');
+  const elCombo = document.getElementById('t-combo');
+  const elLevel = document.getElementById('t-level');
+  const elLives = document.getElementById('t-lives');
+  const lbEl = document.getElementById('t-leaderboard');
+  const resultBox = document.getElementById('t-result');
+  const restart = document.getElementById('t-restart');
+
+  // AI / Copilot / ML vocabulary
+  const EASY = ['RAG','LLM','GPT','Token','Prompt','Agent','Model','Tensor','Chain','Vector'];
+  const MED = ['RLHF','Grounding','Embedding','Inference','Fine-tune','Attention','Transformer','Copilot','Guardrails','Hallucinate'];
+  const HARD = ['Reinforcement','Backpropagation','Quantization','Distillation','Orchestration','RetrievalAugmented','SemanticKernel','ContextWindow','MultiModal','ChainOfThought'];
+
+  let state = null;
+
+  const pickWord = () => {
+    const pool = state.level <= 2 ? EASY : state.level <= 4 ? [...EASY, ...MED] : [...MED, ...HARD];
+    return pool[Math.floor(Math.random() * pool.length)];
+  };
+
+  const spawn = () => {
+    if (!state || !state.running) return;
+    const w = pickWord();
+    const el = document.createElement('div');
+    el.className = 'falling-word';
+    el.textContent = w;
+    const stageW = stage.clientWidth;
+    const approxWidth = w.length * 13 + 40;
+    const x = Math.max(10, Math.min(stageW - approxWidth - 10, Math.random() * (stageW - approxWidth)));
+    el.style.left = x + 'px';
+    el.style.top = '-40px';
+    stage.appendChild(el);
+    const speed = 40 + state.level * 12 + Math.random() * 15; // px/sec
+    state.words.push({ el, word: w, typed: 0, y: -40, speed, dead: false });
+    scheduleSpawn();
+  };
+
+  const scheduleSpawn = () => {
+    const gap = Math.max(700, 1800 - state.level * 180) + Math.random() * 400;
+    state.spawnTimer = setTimeout(spawn, gap);
+  };
+
+  const renderWord = (obj) => {
+    const { el, word, typed } = obj;
+    if (typed > 0) {
+      el.innerHTML = `<span class="typed">${word.slice(0,typed)}</span>${word.slice(typed)}`;
+    } else {
+      el.textContent = word;
+    }
+  };
+
+  const loop = (ts) => {
+    if (!state || !state.running) return;
+    if (!state.lastTs) state.lastTs = ts;
+    const dt = (ts - state.lastTs) / 1000;
+    state.lastTs = ts;
+    const maxY = stage.clientHeight - 60;
+    for (const obj of state.words) {
+      if (obj.dead) continue;
+      obj.y += obj.speed * dt;
+      obj.el.style.top = obj.y + 'px';
+      if (obj.y > maxY) {
+        obj.dead = true;
+        obj.el.classList.add('miss');
+        Audio.sfx.buzzer();
+        state.lives--;
+        state.combo = 0;
+        elLives.textContent = state.lives;
+        elCombo.textContent = 0;
+        setTimeout(() => obj.el.remove(), 520);
+        if (state.lives <= 0) return end();
+      }
+    }
+    state.words = state.words.filter(o => !o.dead);
+
+    // WPM calc (standard: chars/5 / minutes)
+    const mins = (performance.now() - state.startedAt) / 60000;
+    if (mins > 0.01) elWpm.textContent = Math.round((state.chars / 5) / mins);
+
+    state.raf = requestAnimationFrame(loop);
+  };
+
+  const onInput = (e) => {
+    if (!state || !state.running) return;
+    const v = input.value;
+    if (!v) return;
+    const last = v[v.length-1];
+    if (/[A-Za-z]/.test(last)) Audio.sfx.keyClick();
+
+    // Find best match: a live word whose prefix matches (case-insensitive)
+    const lower = v.toLowerCase();
+    let target = null;
+    for (const o of state.words) {
+      if (o.dead) continue;
+      if (o.word.toLowerCase().startsWith(lower)) {
+        if (!target || o.y > target.y) target = o; // lowest on screen
+      }
+    }
+    if (!target) {
+      // no match, clear input on backspace to wrong path? we just keep - but if totally wrong reset
+      if (v.length > 0) input.value = '';
+      state.combo = 0;
+      elCombo.textContent = 0;
+      return;
+    }
+    target.typed = v.length;
+    renderWord(target);
+    if (v.length === target.word.length) {
+      // destroyed!
+      target.dead = true;
+      target.el.classList.add('hit');
+      Audio.sfx.wordHit();
+      state.chars += target.word.length;
+      state.combo++;
+      state.score += target.word.length * 10 * Math.max(1, Math.floor(state.combo/3)+1);
+      elScore.textContent = state.score;
+      elCombo.textContent = state.combo;
+      setTimeout(() => target.el.remove(), 520);
+      input.value = '';
+      // level up every 8 words
+      state.destroyed++;
+      if (state.destroyed % 8 === 0) {
+        state.level = Math.min(9, state.level + 1);
+        elLevel.textContent = state.level;
+      }
+    }
+  };
+
+  const start = () => {
+    if (state) stop();
+    resultBox.innerHTML = '';
+    stage.querySelectorAll('.falling-word').forEach(e => e.remove());
+    state = {
+      running: true, words: [], score: 0, combo: 0, level: 1, lives: 3,
+      chars: 0, destroyed: 0,
+      startedAt: performance.now(), lastTs: 0, spawnTimer: null, raf: null,
+    };
+    elScore.textContent = 0; elCombo.textContent = 0; elWpm.textContent = 0;
+    elLevel.textContent = 1; elLives.textContent = 3;
+    input.value = ''; input.disabled = false;
+    setTimeout(() => input.focus(), 100);
+    Audio.startTypingLoop();
+    scheduleSpawn();
+    state.raf = requestAnimationFrame(loop);
+    renderLeaderboard();
+  };
+
+  const stop = () => {
+    if (!state) return;
+    state.running = false;
+    clearTimeout(state.spawnTimer);
+    cancelAnimationFrame(state.raf);
+    Audio.stopLoop('typing');
+  };
+
+  const end = () => {
+    stop();
+    const wpm = parseInt(elWpm.textContent, 10) || 0;
+    const bestW = Math.max(wpm, LS.get('typing_best_wpm', 0));
+    LS.set('typing_best_wpm', bestW);
+    // leaderboard
+    const board = LS.get('typing_lb', []);
+    const initials = promptInitials();
+    board.push({ initials, score: state.score, wpm });
+    board.sort((a,b) => b.score - a.score);
+    LS.set('typing_lb', board.slice(0, 5));
+    renderLeaderboard();
+    resultBox.innerHTML = `<div class="result-banner">
+      <h3>Run over</h3>
+      <p>Score: <b>${state.score}</b> · WPM: <b>${wpm}</b></p>
+      <p>Best WPM: <b>${bestW}</b></p>
+      <button id="t-again">Play again</button>
+    </div>`;
+    document.getElementById('t-again').addEventListener('click', start);
+  };
+
+  const promptInitials = () => {
+    let s = '';
+    try { s = (prompt('Enter initials (3 chars):', 'YOU') || 'YOU'); } catch(e) { s = 'YOU'; }
+    return s.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,3) || 'YOU';
+  };
+
+  const renderLeaderboard = () => {
+    const board = LS.get('typing_lb', []);
+    if (board.length === 0) {
+      lbEl.innerHTML = '<li style="color:var(--text-dim)">No scores yet — play a round!</li>';
+      return;
+    }
+    lbEl.innerHTML = board.map(e => `<li><b>${e.initials}</b> — ${e.score} pts · ${e.wpm} WPM</li>`).join('');
+  };
+
+  input.addEventListener('input', onInput);
+  restart.addEventListener('click', start);
+
+  return { start, stop };
+})();
+
+/* ============================================================
+   GAME 3: MEMORY MATCH
+   ============================================================ */
+const Memory = (() => {
+  const grid = document.getElementById('memory-grid');
+  const elMoves = document.getElementById('m-moves');
+  const elTime = document.getElementById('m-time');
+  const elMatched = document.getElementById('m-matched');
+  const resultBox = document.getElementById('m-result');
+  const canvas = document.getElementById('particle-canvas');
+  const cctx = canvas.getContext('2d');
+  const resizeCanvas = () => { canvas.width = innerWidth; canvas.height = innerHeight; };
+  resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+
+  const ICONS = [
+    { name: 'Copilot', color: '#7B4FD0', svg: `<path d="M12 2a4 4 0 0 0-4 4v1H6a4 4 0 0 0-4 4v2a4 4 0 0 0 4 4h1v1a4 4 0 0 0 4 4h2a4 4 0 0 0 4-4v-1h1a4 4 0 0 0 4-4v-2a4 4 0 0 0-4-4h-1V6a4 4 0 0 0-4-4h-2z" fill="#7B4FD0"/><circle cx="10" cy="12" r="1.2" fill="#fff"/><circle cx="14" cy="12" r="1.2" fill="#fff"/>` },
+    { name: 'Teams', color: '#6264A7', svg: `<rect x="2" y="5" width="13" height="14" rx="2" fill="#6264A7"/><text x="8.5" y="15" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="9" fill="white">T</text><circle cx="18" cy="9" r="3" fill="#6264A7"/>` },
+    { name: 'Word', color: '#2B579A', svg: `<rect x="3" y="3" width="18" height="18" rx="2" fill="#2B579A"/><text x="12" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="white">W</text>` },
+    { name: 'Excel', color: '#217346', svg: `<rect x="3" y="3" width="18" height="18" rx="2" fill="#217346"/><text x="12" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="white">X</text>` },
+    { name: 'PowerPoint', color: '#B7472A', svg: `<rect x="3" y="3" width="18" height="18" rx="2" fill="#B7472A"/><text x="12" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="white">P</text>` },
+    { name: 'Outlook', color: '#0078D4', svg: `<rect x="3" y="3" width="18" height="18" rx="2" fill="#0078D4"/><text x="12" y="16" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="10" fill="white">O</text>` },
+    { name: 'Power Automate', color: '#0066FF', svg: `<path d="M12 2l9 5v10l-9 5-9-5V7z" fill="#0066FF"/><path d="M8 10l4-3 4 3v6l-4 3-4-3z" fill="#fff" opacity="0.8"/>` },
+    { name: 'GitHub Copilot', color: '#24292F', svg: `<circle cx="12" cy="12" r="10" fill="#24292F"/><path d="M8 10c0-1 1-2 2-2s1 1 1 2-1 2-2 2-1-1-1-2zm5 0c0-1 1-2 2-2s1 1 1 2-1 2-2 2-1-1-1-2zm-4 4h6c0 1-2 2-3 2s-3-1-3-2z" fill="#fff"/>` },
+  ];
+
+  let state = null;
+
+  const shuffle = (a) => { for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+  const render = () => {
+    grid.innerHTML = '';
+    state.deck.forEach((card, idx) => {
+      const el = document.createElement('button');
+      el.className = 'mem-card';
+      el.setAttribute('aria-label', 'Card ' + (idx+1));
+      el.innerHTML = `
+        <div class="mem-card-inner">
+          <div class="mem-face mem-front">
+            <svg viewBox="0 0 24 24"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z" fill="white" opacity="0.3"/><text x="12" y="16" text-anchor="middle" font-family="Segoe UI" font-weight="700" font-size="10" fill="white">?</text></svg>
+          </div>
+          <div class="mem-face mem-back">
+            <svg viewBox="0 0 24 24">${card.svg}</svg>
+            <div class="mem-tooltip">${card.name}</div>
+          </div>
+        </div>`;
+      el.addEventListener('click', () => flip(idx));
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(idx); } });
+      grid.appendChild(el);
+    });
+  };
+
+  const flip = (idx) => {
+    if (!state || state.locked) return;
+    const card = state.deck[idx];
+    if (card.matched || state.flipped.includes(idx)) return;
+    const el = grid.children[idx];
+    el.classList.add('flipped');
+    Audio.sfx.chime(card.iconIdx);
+    state.flipped.push(idx);
+    if (state.flipped.length === 2) {
+      state.moves++;
+      elMoves.textContent = state.moves;
+      const [a, b] = state.flipped;
+      const cardA = state.deck[a], cardB = state.deck[b];
+      if (cardA.iconIdx === cardB.iconIdx) {
+        cardA.matched = cardB.matched = true;
+        grid.children[a].classList.add('matched');
+        grid.children[b].classList.add('matched');
+        state.matched++;
+        elMatched.textContent = state.matched;
+        state.flipped = [];
+        Audio.sfx.matchFanfare();
+        burst(grid.children[a]);
+        burst(grid.children[b]);
+        if (state.matched === 8) setTimeout(end, 650);
+      } else {
+        state.locked = true;
+        setTimeout(() => {
+          grid.children[a].classList.remove('flipped');
+          grid.children[b].classList.remove('flipped');
+          grid.children[a].classList.add('shake');
+          grid.children[b].classList.add('shake');
+          Audio.sfx.thud();
+          setTimeout(() => { grid.children[a].classList.remove('shake'); grid.children[b].classList.remove('shake'); }, 400);
+          state.flipped = [];
+          state.locked = false;
+        }, 900);
+      }
+    }
+  };
+
+  /* Particle burst */
+  const particles = [];
+  const burst = (el) => {
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const colors = ['#0F6CBD','#7B4FD0','#22C55E','#FFD700','#FF69B4'];
+    for (let i = 0; i < 24; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const v = 2 + Math.random() * 4;
+      particles.push({
+        x: cx, y: cy,
+        vx: Math.cos(a)*v, vy: Math.sin(a)*v - 2,
+        life: 1, size: 3 + Math.random()*4,
+        color: colors[Math.floor(Math.random()*colors.length)],
+      });
+    }
+  };
+  const tickParticles = () => {
+    cctx.clearRect(0,0,canvas.width,canvas.height);
+    for (let i = particles.length-1; i >= 0; i--) {
+      const p = particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += 0.18; p.life -= 0.018;
+      if (p.life <= 0) { particles.splice(i,1); continue; }
+      cctx.globalAlpha = p.life;
+      cctx.fillStyle = p.color;
+      cctx.beginPath(); cctx.arc(p.x, p.y, p.size, 0, Math.PI*2); cctx.fill();
+    }
+    cctx.globalAlpha = 1;
+    requestAnimationFrame(tickParticles);
+  };
+  tickParticles();
+
+  const start = () => {
+    resultBox.innerHTML = '';
+    const pairs = [];
+    ICONS.forEach((ic, i) => { pairs.push({...ic, iconIdx: i}); pairs.push({...ic, iconIdx: i}); });
+    state = {
+      deck: shuffle(pairs).map(c => ({...c, matched: false})),
+      flipped: [], locked: false, moves: 0, matched: 0,
+      startedAt: Date.now(), timer: null,
+    };
+    elMoves.textContent = 0; elMatched.textContent = 0; elTime.textContent = '0:00';
+    render();
+    state.timer = setInterval(() => {
+      const s = Math.floor((Date.now() - state.startedAt) / 1000);
+      elTime.textContent = fmtTime(s);
+    }, 500);
+  };
+
+  const end = () => {
+    clearInterval(state.timer);
+    const sec = Math.floor((Date.now() - state.startedAt) / 1000);
+    const bestMoves = LS.get('mem_best_moves', 0);
+    const bestTime = LS.get('mem_best_time', 0);
+    const newMoves = !bestMoves || state.moves < bestMoves;
+    const newTime = !bestTime || sec < bestTime;
+    if (newMoves) LS.set('mem_best_moves', state.moves);
+    if (newTime) LS.set('mem_best_time', sec);
+    resultBox.innerHTML = `<div class="result-banner">
+      <h3>All pairs matched! 🎉</h3>
+      <p>Moves: <b>${state.moves}</b> ${newMoves ? '🏆 New best!' : ''}</p>
+      <p>Time: <b>${fmtTime(sec)}</b> ${newTime ? '🏆 New best!' : ''}</p>
+      <button id="m-again">Play again</button>
+    </div>`;
+    document.getElementById('m-again').addEventListener('click', start);
+  };
+
+  const stop = () => {
+    if (state && state.timer) { clearInterval(state.timer); state.timer = null; }
+  };
+  return { start, stop };
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>COPILOT Breakout — COWORK Edition</title>
+<style>
+  :root {
+    --bg-0: #05071a;
+    --bg-1: #0a0f2c;
+    --ink: #e8ecff;
+    --indigo: #6366f1;
+    --purple: #a855f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: radial-gradient(ellipse at top, var(--bg-1), var(--bg-0) 70%);
+    color: var(--ink);
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+  }
+  #wrap {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  canvas {
+    display: block;
+    background: transparent;
+    box-shadow:
+      0 0 60px rgba(99, 102, 241, 0.25),
+      0 0 120px rgba(168, 85, 247, 0.18);
+    border-radius: 14px;
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+  #hud {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    pointer-events: none;
+    z-index: 5;
+    font-variant-numeric: tabular-nums;
+  }
+  .hud-panel {
+    background: rgba(10, 15, 44, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #e8ecff;
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.25) inset;
+  }
+  .hud-panel b {
+    color: #fff;
+    font-weight: 700;
+    margin-left: 6px;
+    text-shadow: 0 0 8px rgba(168, 85, 247, 0.8);
+  }
+  #mute {
+    pointer-events: auto;
+    cursor: pointer;
+    background: linear-gradient(135deg, rgba(99,102,241,0.35), rgba(168,85,247,0.35));
+    border: 1px solid rgba(168, 85, 247, 0.6);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 0 18px rgba(99, 102, 241, 0.4);
+  }
+  #mute:hover { transform: translateY(-1px); box-shadow: 0 0 28px rgba(168, 85, 247, 0.6); }
+  #mute.muted { opacity: 0.55; }
+  #overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: radial-gradient(ellipse at center, rgba(10, 15, 44, 0.85), rgba(5, 7, 26, 0.95));
+    z-index: 10;
+    text-align: center;
+    padding: 20px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay h1 {
+    font-size: clamp(38px, 7vw, 72px);
+    background: linear-gradient(90deg, #6366f1, #a855f7, #06b6d4, #10b981, #f59e0b, #ef4444, #ec4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.25em;
+    font-weight: 800;
+    text-shadow: 0 0 40px rgba(168, 85, 247, 0.4);
+  }
+  #overlay p {
+    max-width: 520px;
+    line-height: 1.6;
+    opacity: 0.85;
+    font-size: 15px;
+  }
+  #overlay .sub {
+    letter-spacing: 0.3em;
+    font-size: 12px;
+    color: #a855f7;
+    text-transform: uppercase;
+  }
+  #overlay button {
+    margin-top: 10px;
+    padding: 14px 34px;
+    font-size: 16px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.6), 0 8px 24px rgba(99, 102, 241, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  #overlay button:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 0 45px rgba(168, 85, 247, 0.8), 0 12px 32px rgba(99, 102, 241, 0.55);
+  }
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(168, 85, 247, 0.15);
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+  <div id="hud">
+    <div class="hud-panel">Score<b id="score">0</b></div>
+    <div class="hud-panel">Lives<b id="lives">3</b></div>
+    <div class="hud-panel">Level<b id="level">1</b></div>
+    <button id="mute" title="Toggle sound (M)">🔊 Sound</button>
+  </div>
+
+  <div id="wrap">
+    <canvas id="game" width="960" height="640"></canvas>
+  </div>
+
+  <div id="overlay">
+    <span class="tag">Cowork Arcade</span>
+    <h1>COPILOT</h1>
+    <p class="sub">Breakout · Cowork Edition</p>
+    <p>Smash the COPILOT bricks with the COWORK paddle. Move with your mouse, finger, or arrow keys. Press <b>M</b> to mute, <b>P</b> to pause.</p>
+    <button id="start">Start Game</button>
+  </div>
+
+<script>
+(() => {
+  // ---------- Canvas & HiDPI ----------
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const BASE_W = 960, BASE_H = 640;
+
+  function fitCanvas() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const maxW = Math.min(window.innerWidth - 20, BASE_W);
+    const maxH = Math.min(window.innerHeight - 20, BASE_H);
+    const scale = Math.min(maxW / BASE_W, maxH / BASE_H);
+    canvas.style.width = (BASE_W * scale) + 'px';
+    canvas.style.height = (BASE_H * scale) + 'px';
+    canvas.width = BASE_W * dpr;
+    canvas.height = BASE_H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  window.addEventListener('resize', fitCanvas);
+  fitCanvas();
+
+  // ---------- Pixel font for COPILOT (5 wide × 7 tall) ----------
+  const GLYPHS = {
+    C: [
+      "01110",
+      "10001",
+      "10000",
+      "10000",
+      "10000",
+      "10001",
+      "01110",
+    ],
+    O: [
+      "01110",
+      "10001",
+      "10001",
+      "10001",
+      "10001",
+      "10001",
+      "01110",
+    ],
+    P: [
+      "11110",
+      "10001",
+      "10001",
+      "11110",
+      "10000",
+      "10000",
+      "10000",
+    ],
+    I: [
+      "11111",
+      "00100",
+      "00100",
+      "00100",
+      "00100",
+      "00100",
+      "11111",
+    ],
+    L: [
+      "10000",
+      "10000",
+      "10000",
+      "10000",
+      "10000",
+      "10000",
+      "11111",
+    ],
+    T: [
+      "11111",
+      "00100",
+      "00100",
+      "00100",
+      "00100",
+      "00100",
+      "00100",
+    ],
+  };
+
+  const WORD = "COPILOT";
+  // indigo, purple, cyan, emerald, amber, red, pink
+  const LETTER_COLORS = ["#6366f1", "#a855f7", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899"];
+  const LETTER_FREQS  = [480, 400, 340, 280, 560, 400, 620]; // C, O, P, I, L, O, T
+
+  // ---------- Audio ----------
+  let audioCtx = null;
+  let masterGain = null;
+  let musicGain = null;
+  let muted = false;
+  let musicTimer = null;
+  let musicStep = 0;
+
+  function ensureAudio() {
+    if (audioCtx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    audioCtx = new AC();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = muted ? 0 : 0.8;
+    masterGain.connect(audioCtx.destination);
+    musicGain = audioCtx.createGain();
+    musicGain.gain.value = 0.12;
+    musicGain.connect(masterGain);
+  }
+
+  function setMute(m) {
+    muted = m;
+    if (masterGain) masterGain.gain.value = muted ? 0 : 0.8;
+    const btn = document.getElementById('mute');
+    btn.textContent = muted ? '🔇 Muted' : '🔊 Sound';
+    btn.classList.toggle('muted', muted);
+  }
+
+  // Brick hit: unique square wave per letter
+  function playBrickHit(letterIdx) {
+    if (!audioCtx || muted) return;
+    const f = LETTER_FREQS[letterIdx];
+    const t0 = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'square';
+    o.frequency.setValueAtTime(f, t0);
+    o.frequency.exponentialRampToValueAtTime(f * 1.5, t0 + 0.05);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.22, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18);
+    o.connect(g).connect(masterGain);
+    o.start(t0);
+    o.stop(t0 + 0.2);
+  }
+
+  // Paddle contact: triangle, slide 660 -> 220 over 0.3s
+  function playPaddle() {
+    if (!audioCtx || muted) return;
+    const t0 = audioCtx.currentTime;
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(660, t0);
+    o.frequency.exponentialRampToValueAtTime(220, t0 + 0.3);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(0.25, t0 + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.32);
+    o.connect(g).connect(masterGain);
+    o.start(t0);
+    o.stop(t0 + 0.34);
+  }
+
+  // Life lost: sawtooth descending 440->330->220->110 (0.2s each)
+  function playLifeLost() {
+    if (!audioCtx || muted) return;
+    const notes = [440, 330, 220, 110];
+    let t = audioCtx.currentTime;
+    notes.forEach((f) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.22, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      o.connect(g).connect(masterGain);
+      o.start(t);
+      o.stop(t + 0.21);
+      t += 0.2;
+    });
+  }
+
+  // Game over: sawtooth fanfare 880->660->440->220 then 60Hz bass rumble
+  function playGameOver() {
+    if (!audioCtx || muted) return;
+    const notes = [880, 660, 440, 220];
+    let t = audioCtx.currentTime;
+    notes.forEach((f) => {
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.28, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      o.connect(g).connect(masterGain);
+      o.start(t);
+      o.stop(t + 0.38);
+      t += 0.3;
+    });
+    // Bass rumble
+    const bo = audioCtx.createOscillator();
+    const bg = audioCtx.createGain();
+    bo.type = 'sawtooth';
+    bo.frequency.setValueAtTime(60, t);
+    bo.frequency.exponentialRampToValueAtTime(30, t + 1.2);
+    bg.gain.setValueAtTime(0.0001, t);
+    bg.gain.exponentialRampToValueAtTime(0.4, t + 0.08);
+    bg.gain.exponentialRampToValueAtTime(0.0001, t + 1.4);
+    bo.connect(bg).connect(masterGain);
+    bo.start(t);
+    bo.stop(t + 1.45);
+  }
+
+  // Chiptune square-wave loop
+  // Simple 16-step arpeggio-ish melody
+  const MELODY = [
+    392, 523, 659, 784, 659, 523, 440, 587,
+    494, 659, 784, 988, 784, 659, 523, 659
+  ];
+  function startMusic() {
+    if (!audioCtx) return;
+    stopMusic();
+    const stepDur = 0.18;
+    musicStep = 0;
+    const schedule = () => {
+      if (!audioCtx) return;
+      const t = audioCtx.currentTime;
+      const f = MELODY[musicStep % MELODY.length];
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = 'square';
+      o.frequency.setValueAtTime(f, t);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.08, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + stepDur * 0.9);
+      o.connect(g).connect(musicGain);
+      o.start(t);
+      o.stop(t + stepDur);
+
+      // Bass every 4 steps
+      if (musicStep % 4 === 0) {
+        const bo = audioCtx.createOscillator();
+        const bg = audioCtx.createGain();
+        bo.type = 'triangle';
+        bo.frequency.setValueAtTime(f / 4, t);
+        bg.gain.setValueAtTime(0.0001, t);
+        bg.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+        bg.gain.exponentialRampToValueAtTime(0.0001, t + stepDur * 2.5);
+        bo.connect(bg).connect(musicGain);
+        bo.start(t);
+        bo.stop(t + stepDur * 2.6);
+      }
+      musicStep++;
+    };
+    schedule();
+    musicTimer = setInterval(schedule, stepDur * 1000);
+  }
+  function stopMusic() {
+    if (musicTimer) { clearInterval(musicTimer); musicTimer = null; }
+  }
+
+  // ---------- Game state ----------
+  const state = {
+    running: false,
+    paused: false,
+    score: 0,
+    lives: 3,
+    level: 1,
+    ballSpeedMul: 1,
+    bricks: [],
+    particles: [],
+    shocks: [],
+    popups: [],
+    stars: [],
+    trail: [],
+    paddle: { x: BASE_W / 2 - 70, y: BASE_H - 50, w: 140, h: 22, targetX: null },
+    ball: { x: BASE_W / 2, y: BASE_H - 80, r: 8, vx: 4, vy: -4 },
+    keys: { left: false, right: false },
+    gameOver: false,
+    flashTime: 0,
+  };
+
+  // Starfield
+  for (let i = 0; i < 160; i++) {
+    state.stars.push({
+      x: Math.random() * BASE_W,
+      y: Math.random() * BASE_H,
+      r: Math.random() * 1.4 + 0.2,
+      tw: Math.random() * Math.PI * 2,
+      s: 0.6 + Math.random() * 1.6,
+    });
+  }
+
+  // ---------- Build bricks for COPILOT ----------
+  function buildBricks() {
+    state.bricks = [];
+    const brickW = 18;
+    const brickH = 18;
+    const letterGap = brickW; // gap between letters
+    const letterW = 5 * brickW;
+    const letterH = 7 * brickH;
+    const totalW = WORD.length * letterW + (WORD.length - 1) * letterGap;
+    const startX = (BASE_W - totalW) / 2;
+    const startY = 70;
+
+    for (let li = 0; li < WORD.length; li++) {
+      const letter = WORD[li];
+      const glyph = GLYPHS[letter];
+      const color = LETTER_COLORS[li];
+      const letterX = startX + li * (letterW + letterGap);
+      for (let row = 0; row < 7; row++) {
+        for (let col = 0; col < 5; col++) {
+          if (glyph[row][col] === '1') {
+            state.bricks.push({
+              x: letterX + col * brickW,
+              y: startY + row * brickH,
+              w: brickW - 2,
+              h: brickH - 2,
+              color,
+              letterIdx: li,
+              alive: true,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // ---------- Reset helpers ----------
+  function resetBall() {
+    const speed = 5 * state.ballSpeedMul;
+    state.ball.x = BASE_W / 2;
+    state.ball.y = BASE_H - 80;
+    const ang = (-Math.PI / 2) + (Math.random() - 0.5) * 0.6;
+    state.ball.vx = Math.cos(ang) * speed;
+    state.ball.vy = Math.sin(ang) * speed;
+    state.trail.length = 0;
+  }
+
+  function nextLevel() {
+    state.level++;
+    state.ballSpeedMul *= 1.1;
+    buildBricks();
+    resetBall();
+    updateHUD();
+  }
+
+  function startGame() {
+    state.score = 0;
+    state.lives = 3;
+    state.level = 1;
+    state.ballSpeedMul = 1;
+    state.gameOver = false;
+    buildBricks();
+    resetBall();
+    state.running = true;
+    state.paused = false;
+    updateHUD();
+    ensureAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    startMusic();
+  }
+
+  function updateHUD() {
+    document.getElementById('score').textContent = state.score;
+    document.getElementById('lives').textContent = state.lives;
+    document.getElementById('level').textContent = state.level;
+  }
+
+  // ---------- Input ----------
+  function setPaddleFromClient(clientX) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = BASE_W / rect.width;
+    const x = (clientX - rect.left) * scaleX;
+    state.paddle.targetX = x - state.paddle.w / 2;
+  }
+  canvas.addEventListener('mousemove', (e) => setPaddleFromClient(e.clientX));
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length) setPaddleFromClient(e.touches[0].clientX);
+    e.preventDefault();
+  }, { passive: false });
+  canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length) setPaddleFromClient(e.touches[0].clientX);
+    e.preventDefault();
+  }, { passive: false });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') state.keys.left = true;
+    if (e.key === 'ArrowRight') state.keys.right = true;
+    if (e.key === 'm' || e.key === 'M') setMute(!muted);
+    if (e.key === 'p' || e.key === 'P') state.paused = !state.paused;
+  });
+  window.addEventListener('keyup', (e) => {
+    if (e.key === 'ArrowLeft') state.keys.left = false;
+    if (e.key === 'ArrowRight') state.keys.right = false;
+  });
+
+  document.getElementById('mute').addEventListener('click', () => {
+    ensureAudio();
+    setMute(!muted);
+  });
+
+  document.getElementById('start').addEventListener('click', () => {
+    document.getElementById('overlay').classList.add('hidden');
+    startGame();
+  });
+
+  // ---------- Effects ----------
+  function spawnParticles(x, y, color) {
+    for (let i = 0; i < 20; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const sp = 1.5 + Math.random() * 4.5;
+      state.particles.push({
+        x, y,
+        vx: Math.cos(a) * sp,
+        vy: Math.sin(a) * sp,
+        life: 1,
+        decay: 0.018 + Math.random() * 0.02,
+        color,
+        size: 1.5 + Math.random() * 2.5,
+      });
+    }
+  }
+  function spawnShock(x, y, color) {
+    state.shocks.push({ x, y, r: 6, color, life: 1 });
+  }
+  function spawnPopup(x, y, text, color) {
+    state.popups.push({ x, y, text, color, life: 1, vy: -1.2 });
+  }
+
+  // ---------- Collision ----------
+  function circleRect(cx, cy, cr, rx, ry, rw, rh) {
+    const nx = Math.max(rx, Math.min(cx, rx + rw));
+    const ny = Math.max(ry, Math.min(cy, ry + rh));
+    const dx = cx - nx;
+    const dy = cy - ny;
+    return (dx * dx + dy * dy) < cr * cr ? { nx, ny, dx, dy } : null;
+  }
+
+  // ---------- Main loop ----------
+  let lastTime = performance.now();
+  function frame(now) {
+    const dt = Math.min(32, now - lastTime) / 16.67;
+    lastTime = now;
+    update(dt);
+    render();
+    requestAnimationFrame(frame);
+  }
+
+  function update(dt) {
+    // Stars twinkle
+    for (const s of state.stars) s.tw += 0.04 * s.s * dt;
+
+    if (!state.running || state.paused) return;
+
+    // Paddle movement
+    const pad = state.paddle;
+    if (state.keys.left) pad.x -= 9 * dt;
+    if (state.keys.right) pad.x += 9 * dt;
+    if (pad.targetX !== null) {
+      pad.x += (pad.targetX - pad.x) * 0.25 * dt;
+    }
+    pad.x = Math.max(10, Math.min(BASE_W - pad.w - 10, pad.x));
+
+    // Ball
+    const b = state.ball;
+    b.x += b.vx * dt;
+    b.y += b.vy * dt;
+
+    // Trail
+    state.trail.push({ x: b.x, y: b.y, life: 1 });
+    if (state.trail.length > 22) state.trail.shift();
+    for (const t of state.trail) t.life -= 0.045 * dt;
+
+    // Walls
+    if (b.x - b.r < 8) { b.x = 8 + b.r; b.vx = Math.abs(b.vx); }
+    if (b.x + b.r > BASE_W - 8) { b.x = BASE_W - 8 - b.r; b.vx = -Math.abs(b.vx); }
+    if (b.y - b.r < 8) { b.y = 8 + b.r; b.vy = Math.abs(b.vy); }
+
+    // Paddle collision
+    if (
+      b.y + b.r >= pad.y &&
+      b.y - b.r <= pad.y + pad.h &&
+      b.x >= pad.x && b.x <= pad.x + pad.w &&
+      b.vy > 0
+    ) {
+      b.y = pad.y - b.r;
+      const rel = (b.x - (pad.x + pad.w / 2)) / (pad.w / 2);
+      const angle = rel * (Math.PI / 3); // up to 60°
+      const speed = Math.hypot(b.vx, b.vy);
+      b.vx = Math.sin(angle) * speed;
+      b.vy = -Math.abs(Math.cos(angle) * speed);
+      playPaddle();
+    }
+
+    // Bricks
+    for (const br of state.bricks) {
+      if (!br.alive) continue;
+      const hit = circleRect(b.x, b.y, b.r, br.x, br.y, br.w, br.h);
+      if (hit) {
+        br.alive = false;
+        const cx = br.x + br.w / 2;
+        const cy = br.y + br.h / 2;
+        // reflect based on overlap axis
+        const dx = b.x - cx;
+        const dy = b.y - cy;
+        if (Math.abs(dx / br.w) > Math.abs(dy / br.h)) {
+          b.vx = dx > 0 ? Math.abs(b.vx) : -Math.abs(b.vx);
+        } else {
+          b.vy = dy > 0 ? Math.abs(b.vy) : -Math.abs(b.vy);
+        }
+        const pts = 10 * state.level;
+        state.score += pts;
+        spawnParticles(cx, cy, br.color);
+        spawnShock(cx, cy, br.color);
+        spawnPopup(cx, cy, '+' + pts, br.color);
+        playBrickHit(br.letterIdx);
+        state.flashTime = 0.15;
+        updateHUD();
+        break; // only one brick per frame
+      }
+    }
+
+    // Clear dead bricks occasionally
+    if (state.bricks.some(br => !br.alive)) {
+      // Check win
+      if (!state.bricks.some(br => br.alive)) {
+        nextLevel();
+      }
+    }
+
+    // Ball falls off
+    if (b.y - b.r > BASE_H) {
+      state.lives--;
+      updateHUD();
+      playLifeLost();
+      if (state.lives <= 0) {
+        state.running = false;
+        state.gameOver = true;
+        stopMusic();
+        playGameOver();
+        setTimeout(() => {
+          const ov = document.getElementById('overlay');
+          ov.querySelector('h1').textContent = 'GAME OVER';
+          ov.querySelector('.sub').textContent = 'Final Score: ' + state.score;
+          ov.querySelector('button').textContent = 'Play Again';
+          ov.classList.remove('hidden');
+        }, 1800);
+      } else {
+        resetBall();
+      }
+    }
+
+    // Particles
+    for (const p of state.particles) {
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vy += 0.08 * dt;
+      p.vx *= 0.985;
+      p.life -= p.decay * dt;
+    }
+    state.particles = state.particles.filter(p => p.life > 0);
+
+    // Shockwaves
+    for (const s of state.shocks) {
+      s.r += 2.4 * dt;
+      s.life -= 0.035 * dt;
+    }
+    state.shocks = state.shocks.filter(s => s.life > 0);
+
+    // Popups
+    for (const p of state.popups) {
+      p.y += p.vy * dt;
+      p.vy *= 0.985;
+      p.life -= 0.018 * dt;
+    }
+    state.popups = state.popups.filter(p => p.life > 0);
+
+    // Flash decay
+    if (state.flashTime > 0) state.flashTime -= 0.016 * dt;
+  }
+
+  // ---------- Render ----------
+  function render() {
+    // Background deep space
+    const g = ctx.createLinearGradient(0, 0, 0, BASE_H);
+    g.addColorStop(0, '#0a0f2c');
+    g.addColorStop(1, '#05071a');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, BASE_W, BASE_H);
+
+    // Grid scanlines
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    ctx.strokeStyle = '#a855f7';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < BASE_W; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, BASE_H); ctx.stroke();
+    }
+    for (let y = 0; y < BASE_H; y += 40) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(BASE_W, y); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Horizontal scanline overlay
+    ctx.save();
+    ctx.globalAlpha = 0.04;
+    ctx.fillStyle = '#ffffff';
+    for (let y = 0; y < BASE_H; y += 3) {
+      ctx.fillRect(0, y, BASE_W, 1);
+    }
+    ctx.restore();
+
+    // Stars
+    for (const s of state.stars) {
+      const tw = 0.5 + 0.5 * Math.sin(s.tw);
+      ctx.save();
+      ctx.globalAlpha = 0.3 + 0.7 * tw;
+      ctx.fillStyle = '#e8ecff';
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Flash on hit
+    if (state.flashTime > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (state.flashTime * 0.25) + ')';
+      ctx.fillRect(0, 0, BASE_W, BASE_H);
+    }
+
+    // Bricks
+    for (const br of state.bricks) {
+      if (!br.alive) continue;
+      drawBrick(br);
+    }
+
+    // Shockwaves
+    for (const s of state.shocks) {
+      ctx.save();
+      ctx.globalAlpha = s.life;
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 3 * s.life;
+      ctx.shadowColor = s.color;
+      ctx.shadowBlur = 20;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // Particles
+    for (const p of state.particles) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Trail (comet)
+    for (let i = 0; i < state.trail.length; i++) {
+      const t = state.trail[i];
+      const a = Math.max(0, t.life) * (i / state.trail.length);
+      ctx.save();
+      ctx.globalAlpha = a * 0.8;
+      const grad = ctx.createRadialGradient(t.x, t.y, 0, t.x, t.y, 12);
+      grad.addColorStop(0, '#ffffff');
+      grad.addColorStop(0.4, '#a855f7');
+      grad.addColorStop(1, 'rgba(99,102,241,0)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 10 * a + 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Ball
+    if (state.running) {
+      const b = state.ball;
+      ctx.save();
+      ctx.shadowColor = '#a855f7';
+      ctx.shadowBlur = 22;
+      const bg = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+      bg.addColorStop(0, '#ffffff');
+      bg.addColorStop(0.6, '#e8ecff');
+      bg.addColorStop(1, '#a855f7');
+      ctx.fillStyle = bg;
+      ctx.beginPath();
+      ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Paddle
+    drawPaddle();
+
+    // Popups
+    for (const p of state.popups) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = p.color;
+      ctx.shadowBlur = 12;
+      ctx.font = 'bold 16px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.text, p.x, p.y);
+      ctx.restore();
+    }
+
+    // Pause overlay
+    if (state.paused && state.running) {
+      ctx.fillStyle = 'rgba(5,7,26,0.65)';
+      ctx.fillRect(0, 0, BASE_W, BASE_H);
+      ctx.fillStyle = '#e8ecff';
+      ctx.font = 'bold 48px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.shadowColor = '#a855f7';
+      ctx.shadowBlur = 20;
+      ctx.fillText('PAUSED', BASE_W / 2, BASE_H / 2);
+      ctx.shadowBlur = 0;
+      ctx.font = '16px "Segoe UI", sans-serif';
+      ctx.fillText('Press P to resume', BASE_W / 2, BASE_H / 2 + 36);
+    }
+  }
+
+  function drawBrick(br) {
+    ctx.save();
+    // Glow
+    ctx.shadowColor = br.color;
+    ctx.shadowBlur = 12;
+    // Gradient fill
+    const grad = ctx.createLinearGradient(br.x, br.y, br.x, br.y + br.h);
+    grad.addColorStop(0, shade(br.color, 1.25));
+    grad.addColorStop(1, shade(br.color, 0.75));
+    ctx.fillStyle = grad;
+    roundRect(ctx, br.x, br.y, br.w, br.h, 3);
+    ctx.fill();
+    // Highlight line
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(br.x + 2, br.y + 2);
+    ctx.lineTo(br.x + br.w - 2, br.y + 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawPaddle() {
+    const p = state.paddle;
+    ctx.save();
+    // Glow
+    ctx.shadowColor = '#a855f7';
+    ctx.shadowBlur = 28;
+    const grad = ctx.createLinearGradient(p.x, p.y, p.x + p.w, p.y + p.h);
+    grad.addColorStop(0, '#6366f1');
+    grad.addColorStop(1, '#a855f7');
+    ctx.fillStyle = grad;
+    roundRect(ctx, p.x, p.y, p.w, p.h, 10);
+    ctx.fill();
+    // Inner highlight
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    roundRect(ctx, p.x + 3, p.y + 2, p.w - 6, 5, 4);
+    ctx.fill();
+    // Label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 14px "Segoe UI", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(255,255,255,0.8)';
+    ctx.shadowBlur = 8;
+    ctx.fillText('COWORK', p.x + p.w / 2, p.y + p.h / 2 + 1);
+    ctx.restore();
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  function shade(hex, f) {
+    const c = hex.replace('#', '');
+    const r = Math.min(255, Math.max(0, parseInt(c.slice(0, 2), 16) * f)) | 0;
+    const g = Math.min(255, Math.max(0, parseInt(c.slice(2, 4), 16) * f)) | 0;
+    const b = Math.min(255, Math.max(0, parseInt(c.slice(4, 6), 16) * f)) | 0;
+    return 'rgb(' + r + ',' + g + ',' + b + ')';
+  }
+
+  requestAnimationFrame((t) => { lastTime = t; frame(t); });
+})();
+</script>
+</body>
+</html>
