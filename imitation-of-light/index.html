@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Imitation of Light — unofficial fan film</title>
+<meta name="description" content="A 64-second original unofficial fan film with stylized Neil Tennant and Chris Lowe figures, computational sculptures, and an original synth score. Built with GPT-6 Astra.">
+<link rel="icon" href="data:,">
+<script>
+(() => {
+  const param = new URLSearchParams(window.location.search).get("scoutTheme");
+  const theme = param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme);
+})();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cp-surface);color:var(--cp-text);font:14px "Segoe UI",Aptos,Calibri,-apple-system,BlinkMacSystemFont,sans-serif}
+main{max-width:1440px;margin:auto;padding:26px 32px 40px}
+header{display:flex;justify-content:space-between;gap:20px;align-items:center;padding-bottom:22px}
+h1{font-size:19px;letter-spacing:.02em;font-weight:400;margin:0}
+.meta{font:10px Consolas,"Courier New",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--cp-text-soft)}
+video{width:100%;height:auto;aspect-ratio:16/9;display:block}
+.screen{border:1px solid var(--cp-border);position:relative}
+.transport{display:flex;align-items:center;gap:18px;margin:20px 0}
+button,a.download{border:1px solid var(--cp-border-strong);background:none;color:var(--cp-text);padding:10px 16px;border-radius:10px;font:inherit;cursor:pointer;text-decoration:none}
+button.primary{background:var(--cp-accent);color:var(--cp-accent-fg);border-color:var(--cp-accent)}
+button:disabled{opacity:.45;cursor:wait}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--cp-accent);outline-offset:4px}
+input{min-width:40px;flex:1;accent-color:var(--cp-accent)}
+.details{display:grid;grid-template-columns:1fr 1fr;gap:40px;border-top:1px solid var(--cp-border);padding-top:20px;color:var(--cp-text-soft);font-size:12px;line-height:1.8}
+.details p{margin:0 0 10px}.details a{color:var(--cp-text)}
+#status{min-height:18px;font-size:12px;color:var(--cp-accent)}
+.downloads{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0}
+@media(max-width:640px){main{padding:18px 12px}header{align-items:start}.meta{font-size:8px;line-height:1.7}.transport{gap:8px;flex-wrap:wrap}.transport input{order:4;flex-basis:100%}.details{grid-template-columns:1fr;gap:14px}}
+</style>
+</head>
+<body>
+<main>
+<header><h1>The Imitation of Light</h1><div class="meta">Unofficial fan film / 64 seconds<br>Built with GPT-6 Astra</div></header>
+<div class="screen">
+<video controls playsinline preload="metadata" poster="poster.jpg" aria-label="The Imitation of Light, an unofficial 64-second animated fan film">
+<source src="the-imitation-of-light.mp4" type="video/mp4">
+Your browser cannot play this video. Use the MP4 download below.
+</video>
+</div>
+<div class="downloads">
+<a class="download" id="galleryLink" href="../artificial-gallery.html">Back to ARTificial Gallery</a>
+<a class="download" href="the-imitation-of-light.mp4" download>Download film / MP4</a>
+</div>
+<div class="details">
+<div><p><strong>An original visual and musical interpretation.</strong> Two sculptural avatars of Neil Tennant and Chris Lowe dissolve into a tape machine, become a cathedral of logic, and return to human form. The figures are stylized interpretations, not filmed performances.</p>
+<p>New geometry, animation, and instrumental score. No extracted video, album artwork, lyrics, song samples, or cloned voices. Unofficial and unaffiliated with Pet Shop Boys.</p></div>
+<div><p><strong>Alan Turing / album announcement.</strong> Pet Shop Boys have announced <em>A man from the future</em> for <time datetime="2026-10-09">October 9, 2026</time> via Parlophone. The album explores Alan Turing's life and work, revising the piece first performed at the 2014 BBC Proms. It features narration by Juliet Stevenson and contributions from Andrew Hodges, the Manchester Camerata Octet, and Sven Helbig.</p>
+<p><a href="https://www.petshopboys.co.uk/" target="_blank" rel="noopener">Visit the official Pet Shop Boys site for the announcement and release details &rarr;</a></p>
+<p>Video inspirations: <a href="https://www.youtube.com/watch?v=VckCoZkCEu8" target="_blank" rel="noopener">Integral</a> / <a href="https://www.youtube.com/watch?v=rp8uNaon5B0" target="_blank" rel="noopener">I Don't Know What You Want But I Can't Give It Anymore</a>. Links are for context; their media is not embedded or reproduced.</p></div>
+</div>
+</main>
+<script>
+document.getElementById("galleryLink").href += "?scoutTheme=" + encodeURIComponent(document.documentElement.dataset.theme);
+</script>
+</body>
+</html>

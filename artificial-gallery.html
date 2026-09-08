@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ARTificial Gallery — David Shih Chun Liu</title>
 <link rel="icon" href="data:,">
-<meta name="description" content="Three original interactive works generated in the browser: a metallic sculpture, a city score, and a renovation score.">
+<meta name="description" content="Original computational art and film, including The Imitation of Light: an unofficial Pet Shop Boys and Alan Turing tribute with an original synth score.">
 <script>
   (() => {
     const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -116,6 +116,12 @@ h1 em { font-style: normal; color: var(--cp-accent); }
 .enter { margin-top: 24px; display: inline-flex; align-items: center; gap: 9px; color: var(--cp-text);
   font-family: Consolas, "Courier New", Courier, monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
 .enter span { transition: transform .2s ease; }
+.plate.film .shot { aspect-ratio: 16 / 9; object-fit: contain; }
+.release-note { padding: 22px 26px; margin: 28px 0 0; border-left: 2px solid var(--cp-accent);
+  background: var(--cp-bg-elevated); color: var(--cp-text-muted); font-size: 13px; line-height: 1.8; }
+.release-note p { margin: 0 0 10px; }
+.release-note p:last-child { margin-bottom: 0; }
+.release-note .mono, .release-note a { color: var(--cp-accent); }
 
 footer { padding-top: 40px; display: flex; justify-content: space-between; gap: 28px; flex-wrap: wrap;
   color: var(--cp-text-soft); font-size: 11px; line-height: 1.9; }
@@ -148,7 +154,7 @@ footer p { margin: 0; max-width: 620px; }
       </svg>
       <div>
         <div class="brand-name">ARTIFICIAL GALLERY</div>
-        <div class="submark mono">Works generated in the browser</div>
+        <div class="submark mono">Computational art &amp; original film</div>
       </div>
     </div>
     <nav class="top-right">
@@ -159,12 +165,12 @@ footer p { margin: 0; max-width: 620px; }
 
   <section class="lede">
     <div>
-      <div class="mono" style="color: var(--cp-text-soft)">Three studies &nbsp;/&nbsp; 2026</div>
-      <h1>Three works<br>you can <em>play</em>.</h1>
+      <div class="mono" style="color: var(--cp-text-soft)">Four studies &nbsp;/&nbsp; 2026</div>
+      <h1>Four works<br>you can <em>play</em>.</h1>
       <p>
-        Each work runs live in your browser: the geometry is generated per frame, the sound is
-        synthesized from scratch, and the image reacts to what you do to it. Each one ships as a
-        single HTML file that draws its own surfaces and builds its own instruments.
+        Three interactive studies and an original short film explore generated geometry and
+        synthesized sound. Shape the live sculptures and scores, or watch
+        <em>The Imitation of Light</em>, a 64-second unofficial fan tribute.
       </p>
     </div>
     <div class="colophon">
@@ -172,16 +178,28 @@ footer p { margin: 0; max-width: 620px; }
       Synthesized audio<br>
       Open to everyone<br><br>
       WebGL / Canvas / Web Audio<br>
-      Single file per work
+      Interactive studies + 1080p film
     </div>
   </section>
+
+  <aside class="release-note" aria-label="Official Pet Shop Boys album announcement">
+    <p class="mono">Alan Turing / album announcement</p>
+    <p>Pet Shop Boys have announced <strong><em>A man from the future</em></strong>,
+      an album exploring Alan Turing's life and work, for <time datetime="2026-10-09">October 9, 2026</time>
+      via Parlophone. It revises the work first performed at the BBC Proms in 2014,
+      with narration by Juliet Stevenson and contributions from Andrew Hodges,
+      the Manchester Camerata Octet, and Sven Helbig.</p>
+    <p><a href="https://www.petshopboys.co.uk/" target="_blank" rel="noopener">Read the announcement on the official Pet Shop Boys site &rarr;</a></p>
+    <p><em>The Imitation of Light</em> below is an independent, unofficial fan film with original music and visuals.
+      It is not an album video and is not affiliated with Pet Shop Boys.</p>
+  </aside>
 
   <main class="plates" id="plates"></main>
 
   <footer>
     <p>
-      Sound is always opt-in and starts muted. Every work honours reduced-motion settings and can be
-      paused. Each piece exports a still image so a run you like can be kept.
+      Audio begins only after you choose to play. The interactive studies offer still-image exports;
+      the film includes a downloadable 1080p MP4. Everything here is publicly accessible without sign-in.
     </p>
     <p class="mono">David Shih Chun Liu &nbsp;/&nbsp; ARTificial Gallery</p>
   </footer>
@@ -191,6 +209,21 @@ footer p { margin: 0; max-width: 620px; }
 (() => {
   "use strict";
   const WORKS = [
+    {
+      index: "Study 004 / Film",
+      kind: "film",
+      title: "The Imitation of Light",
+      href: "imitation-of-light/?scoutTheme=dark",
+      image: "imitation-of-light/poster.jpg",
+      what: "An unofficial tribute to computation, humanity, and electronic pop. Sculptural interpretations of Neil Tennant and Chris Lowe transform into punched tape and an architecture of machine logic, then return to human form.",
+      how: [
+        "64 seconds of original animation and an original instrumental synth score, rendered as a 1080p film.",
+        "An independent fan work: no copied video, album artwork, song samples, lyrics, or cloned voices."
+      ],
+      model: "GPT-6 Astra",
+      tags: ["64 seconds", "1080p MP4", "Unofficial fan film"],
+      cta: "Watch the film"
+    },
     {
       index: "Study 001",
       title: "Volatility Noir",
@@ -236,8 +269,10 @@ footer p { margin: 0; max-width: 620px; }
   const container = document.getElementById("plates");
   WORKS.forEach(work => {
     const plate = document.createElement("a");
-    plate.className = "plate";
-    plate.href = work.href;
+    plate.className = "plate" + (work.kind === "film" ? " film" : "");
+    const target = new URL(work.href, location.href);
+    target.searchParams.set("scoutTheme", document.documentElement.dataset.theme);
+    plate.href = target.href;
 
     const shot = document.createElement("img");
     shot.className = "shot";
@@ -283,7 +318,7 @@ footer p { margin: 0; max-width: 620px; }
 
     const enter = document.createElement("div");
     enter.className = "enter";
-    enter.textContent = "Enter the work ";
+    enter.textContent = (work.cta || "Enter the work") + " ";
     const chevron = document.createElement("span");
     chevron.textContent = arrow;
     enter.appendChild(chevron);
