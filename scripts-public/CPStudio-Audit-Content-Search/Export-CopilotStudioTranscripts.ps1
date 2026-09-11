@@ -877,9 +877,9 @@ function Get-BotDirectory {
         actually sees in the Microsoft 365 admin center Agent Registry.
 
         Transcript metadata carries the Dataverse schema name (for example
-        'cr834_harvardprofessionalwritingc_3_SZtu'), which is unreadable and does not appear in
+        'cr834_examplewritingcoach_3_abcd'), which is unreadable and does not appear in
         any admin UI. The Dataverse 'bot' table carries both that schema name and the display
-        name ('Harvard Writing Coach'), keyed by BotId - which transcript metadata also carries.
+        name ('Example Writing Coach'), keyed by BotId - which transcript metadata also carries.
         Uses the same Dataverse token, so no Microsoft Graph consent is required.
     #>
     [CmdletBinding()]
@@ -2215,3 +2215,4 @@ if ($wantHtml) {
 # Objects are returned only on request. Emitting them by default floods the console with
 # entire transcript bodies and makes the run output unreadable.
 if ($PassThru) { $conversations }
+

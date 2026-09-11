@@ -74,7 +74,7 @@ frank.miller@diax38232937.onmicrosoft.com
 ```
 
 Checked against the tenant's actual user list (`data/users-before.json`), **seven of those
-eight addresses do not exist**. Aadi's real UPN is `AadiK@DIAx38232937.OnMicrosoft.com`, not
+eight addresses do not exist**. Aadi's real UPN is `SampleUser@DIAx38232937.OnMicrosoft.com`, not
 `aadi.kapoor@…`.
 
 `New-ComplianceSearch` accepted every one of them without error. Non-resolving locations
@@ -225,8 +225,9 @@ Prompts present: 01–11. Prompt 12 absent (Cause B). Prompts L1–L5 absent (Ca
 ## To close the remaining gaps
 
 1. Run `Test-ComplianceSearchScope.ps1` against the real UPNs, notably
-   `AadiK@DIAx38232937.OnMicrosoft.com`.
+   `SampleUser@DIAx38232937.OnMicrosoft.com`.
 2. Recreate the Content Search using the validated `-ExchangeLocation` string.
 3. Set the window to cover 2026-09-04 through 2026-09-06 so PROMPT 12 and Aadi's L1–L5 fall
    inside it.
 4. Export, extract, re-run the report. Expect 19 turns across 2 actors.
+

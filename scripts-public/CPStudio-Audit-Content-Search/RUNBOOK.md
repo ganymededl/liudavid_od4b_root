@@ -1,4 +1,4 @@
-﻿# Copilot Studio Agent Interaction Audit - Administrator Runbook
+# Copilot Studio Agent Interaction Audit - Administrator Runbook
 
 **Version 2.1** | Validated against tenant `M365CPI78116917E5CP`, environment
 `orgd63eebeb.crm.dynamics.com`, 10 September 2026.
@@ -566,8 +566,8 @@ agent and user directories, using the **same token** already used to read transc
 Microsoft Graph permissions and no additional consent.
 
 **Agents.** Transcripts store the Dataverse *schema* name, which is frequently unrecognisable.
-For example `cr834_harvardprofessionalwritingc_3_SZtu` is the agent listed in the registry as
-**Harvard Writing Coach**. Pass the friendly name instead:
+For example `cr834_examplewritingcoach_3_abcd` is the agent listed in the registry as
+**Example Writing Coach**. Pass the friendly name instead:
 
 | What you have | Where to find it | Example |
 |---|---|---|
@@ -1262,7 +1262,7 @@ Connect-IPPSSession
 
 | Symptom | Likely cause | Action |
 |---|---|---|
-| Agent name in transcripts is unrecognisable (e.g. `cr834_harvardprofessionalwritingc_3_SZtu`) | Transcripts store the Dataverse schema name, not the registry display name | The tool resolves it automatically from the `bot` table. Pass the friendly registry name to `-AgentName`. |
+| Agent name in transcripts is unrecognisable (e.g. `cr834_examplewritingcoach_3_abcd`) | Transcripts store the Dataverse schema name, not the registry display name | The tool resolves it automatically from the `bot` table. Pass the friendly registry name to `-AgentName`. |
 | Do not know a user's Entra object ID | Not needed | Pass alias, UPN or display name to `-User`. The resolved identity is echoed before the run. |
 | `-User` matched several people | Ambiguous value | The tool lists every candidate with name, UPN and object ID. Re-run with a more specific value. |
 | Friendly names not resolving (raw GUIDs / schema names shown) | The identity lacks Read on the `bot` or `systemuser` tables | Grant read on those tables. The export still works without them. |
@@ -1356,3 +1356,4 @@ Connect-IPPSSession
 8. [Manage audit log retention policies](https://learn.microsoft.com/en-us/purview/audit-log-retention-policies)
 9. [Search for and delete Copilot data in eDiscovery](https://learn.microsoft.com/en-us/purview/ediscovery-search-and-delete-copilot-data)
 10. [Query data using the Dataverse Web API](https://learn.microsoft.com/en-us/power-apps/developer/data-platform/webapi/query-data-web-api)
+

@@ -11,7 +11,7 @@
 
     This was a real failure in the pilot: the search was scoped to
     "aadi.kapoor@contoso.onmicrosoft.com" while the account's actual UPN was
-    "AadiK@contoso.onmicrosoft.com". The export came back with only the admin's mailbox and
+    "SampleUser@contoso.onmicrosoft.com". The export came back with only the admin's mailbox and
     nothing indicated a problem.
 
     Run this first. It resolves each address against Exchange Online and refuses to emit a
@@ -26,7 +26,7 @@
 .EXAMPLE
     Connect-IPPSSession
     Connect-ExchangeOnline
-    .\Test-ComplianceSearchScope.ps1 -Mailbox AadiK@contoso.onmicrosoft.com,admin@contoso.onmicrosoft.com
+    .\Test-ComplianceSearchScope.ps1 -Mailbox SampleUser@contoso.onmicrosoft.com,admin@contoso.onmicrosoft.com
 #>
 [CmdletBinding()]
 param (
@@ -95,3 +95,4 @@ Write-Host ''
 Write-Host "  -ExchangeLocation `"$locations`"" -ForegroundColor Cyan
 Write-Host ''
 return $locations
+

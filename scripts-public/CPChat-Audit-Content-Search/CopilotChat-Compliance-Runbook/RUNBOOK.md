@@ -60,7 +60,7 @@ history, with nothing in the UI or the logs to indicate a problem.
 
 This is not hypothetical. In the pilot run for this solution the search was scoped to
 `aadi.kapoor@<tenant>.onmicrosoft.com` while the account's real UPN was
-`AadiK@<tenant>.onmicrosoft.com`. The export came back containing only the admin's mailbox
+`SampleUser@<tenant>.onmicrosoft.com`. The export came back containing only the admin's mailbox
 and looked completely healthy.
 
 Run the bundled validator before you create the search:
@@ -70,7 +70,7 @@ Connect-ExchangeOnline
 Connect-IPPSSession
 
 .\Test-ComplianceSearchScope.ps1 -Mailbox `
-    'AadiK@contoso.onmicrosoft.com','admin@contoso.onmicrosoft.com'
+    'SampleUser@contoso.onmicrosoft.com','admin@contoso.onmicrosoft.com'
 ```
 
 It resolves every identity against Exchange Online, flags any that resolve to a *different*
@@ -457,3 +457,4 @@ foreach ($customer in $customers) {
 - [Microsoft Purview eDiscovery documentation](https://learn.microsoft.com/en-us/purview/ediscovery)
 - [Copilot Chat adoption guide](https://learn.microsoft.com/en-us/copilot/adoption)
 - Script inline comments for detailed parsing logic
+

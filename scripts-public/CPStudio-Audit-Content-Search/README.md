@@ -185,7 +185,7 @@ interactive sign-in only** - the discovery token is silently exchanged for the e
    AGENT                                    COUNT  OLDEST (EDT)          NEWEST (EDT)
    MCP Enterprise Admin Assistant              15  2026-08-15 14:45:53   2026-09-10 14:33:44
    MC Student Concierge                        12  2026-08-11 03:04:37   2026-09-08 03:21:17
-   Harvard Writing Coach                        8  2026-08-31 15:34:35   2026-09-08 16:47:21
+   Example Writing Coach                        8  2026-08-31 15:34:35   2026-09-08 16:47:21
 ```
 
 If several environments exist, they are all listed and you re-run with `-EnvironmentName`:
@@ -251,8 +251,8 @@ All agents**, for example `MCP Enterprise Admin Assistant`. You do not need the 
 Matching is case-insensitive and ignores spaces, underscores and hyphens.
 
 > This matters because transcripts store the Dataverse **schema** name, which is often
-> unrecognisable. For example `cr834_harvardprofessionalwritingc_3_SZtu` is the agent shown in
-> the registry as **Harvard Writing Coach**. The report displays the friendly name and shows the
+> unrecognisable. For example `cr834_examplewritingcoach_3_abcd` is the agent shown in
+> the registry as **Example Writing Coach**. The report displays the friendly name and shows the
 > schema name alongside for traceability.
 
 ### Users - use whatever you have
@@ -288,7 +288,7 @@ the `-AgentName` and `-User` syntax:
    AGENT                                    COUNT  OLDEST (EDT)          NEWEST (EDT)
    MCP Enterprise Admin Assistant              15  2026-08-15 14:45:53   2026-09-10 14:33:44
    MC Student Concierge                        12  2026-08-11 03:04:37   2026-09-08 03:21:17
-   Harvard Writing Coach                        8  2026-08-31 15:34:35   2026-09-08 16:47:21
+   Example Writing Coach                        8  2026-08-31 15:34:35   2026-09-08 16:47:21
 ```
 
 ---
@@ -415,3 +415,4 @@ Confirm those three lines match the target environment before trusting any outpu
 
 See `RUNBOOK.md` for the step-by-step administrator procedure, correlation guidance, and
 troubleshooting.
+

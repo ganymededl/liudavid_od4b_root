@@ -23,7 +23,7 @@ function loadDocx() {
   const candidates = [
     path.join(__dirname, "node_modules", "docx"),
     path.join(__dirname, "..", "node_modules", "docx"),
-    "C:\\Scout_Output\\Harvard-Cowork-Chargeback\\node_modules\\docx",
+    "C:\\Scout_Output\\Example-Docx-Build\\node_modules\\docx",
     "docx",
   ];
   for (const c of candidates) {
