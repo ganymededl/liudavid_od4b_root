@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Copilot Studio Audit Content Search</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+*{box-sizing:border-box}html,body{margin:0;background:var(--cp-bg);color:var(--cp-text);font-family:"Segoe UI",Aptos,Calibri,-apple-system,BlinkMacSystemFont,sans-serif}.wrap{max-width:960px;margin:auto;padding:48px 24px 72px}a{color:var(--cp-link);text-decoration:none}.back{font-size:12px;color:var(--cp-text-muted);font-weight:700}h1{margin:24px 0 10px;font-size:30px}.sub{font-size:15px;line-height:1.55;color:var(--cp-text-muted);max-width:780px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:24px}.panel{background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:16px;padding:20px;box-shadow:0 0 2px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.14)}h2{font-size:16px;margin:0 0 12px}ul{margin:0;padding-left:20px}li{margin:9px 0;color:var(--cp-text-muted)}li a{font-weight:700}.note{font-size:12px;line-height:1.6;color:var(--cp-text-muted);border-top:1px solid var(--cp-border);margin-top:28px;padding-top:16px}
+</style>
+</head>
+<body><main class="wrap">
+<a class="back" href="../index.html">&larr; Back to Scripts &amp; Automation</a>
+<h1>Copilot Studio Audit Content Search</h1>
+<p class="sub">Readiness checks, transcript export tooling, administrator runbooks, validation previews, and screenshots for Copilot Studio audit workflows.</p>
+<div class="grid">
+<section class="panel"><h2>Runbooks and docs</h2><ul>
+<li><a href="README.md">README.md</a></li>
+<li><a href="RUNBOOK.md">RUNBOOK.md</a></li>
+<li><a href="Copilot-Agent-Audit-Administrator-Runbook.pdf">Administrator runbook PDF</a></li>
+<li><a href="Copilot-Agent-Audit-Administrator-Runbook.docx">Administrator runbook DOCX</a></li>
+</ul></section>
+<section class="panel"><h2>Automation scripts</h2><ul>
+<li><a href="Test-CopilotAuditReadiness.ps1">Test-CopilotAuditReadiness.ps1</a></li>
+<li><a href="Export-CopilotStudioTranscripts.ps1">Export-CopilotStudioTranscripts.ps1</a></li>
+<li><a href="Probe-GraphCopilotInteractions.ps1">Probe-GraphCopilotInteractions.ps1</a></li>
+<li><a href="build-agent-runbook-docx.js">build-agent-runbook-docx.js</a></li>
+</ul></section>
+<section class="panel"><h2>Visual evidence</h2><ul>
+<li><a href="Screenshots/">Screenshots</a></li>
+<li><a href="Validation-Previews/">Validation previews</a></li>
+</ul></section>
+</div>
+<p class="note">Public safety filter applied: generated logs are not published.</p>
+</main></body></html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Copilot Chat Audit Screenshots</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+*{box-sizing:border-box}body{margin:0;background:var(--cp-bg);color:var(--cp-text);font-family:"Segoe UI",Aptos,Calibri,-apple-system,BlinkMacSystemFont,sans-serif}.wrap{max-width:1180px;margin:auto;padding:48px 24px 72px}a{color:var(--cp-link);text-decoration:none}.back{font-size:12px;color:var(--cp-text-muted);font-weight:700}h1{margin:24px 0 10px;font-size:30px}.sub{font-size:15px;line-height:1.55;color:var(--cp-text-muted)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:24px}.card{background:var(--cp-surface);border:1px solid var(--cp-border);border-radius:16px;overflow:hidden;box-shadow:0 0 2px rgba(0,0,0,0.12),0 1px 2px rgba(0,0,0,0.14)}img{width:100%;height:150px;object-fit:cover;background:var(--cp-surface-soft);display:block}.caption{padding:12px;font-size:12px;color:var(--cp-text-muted);overflow-wrap:anywhere}
+</style>
+</head>
+<body><main class="wrap">
+<a class="back" href="../../index.html">&larr; Back to Copilot Chat Audit Content Search</a>
+<h1>Copilot Chat Audit Screenshots</h1>
+<p class="sub">Guided screenshots for the Microsoft 365 Copilot Chat compliance search workflow.</p>
+<div class="grid">
+<a class="card" href="01-copilot-chat-landing.png"><img src="01-copilot-chat-landing.png" alt=""><div class="caption">01-copilot-chat-landing.png</div></a>
+<a class="card" href="10-ediscovery-cases-permission-fixed.png"><img src="10-ediscovery-cases-permission-fixed.png" alt=""><div class="caption">10-ediscovery-cases-permission-fixed.png</div></a>
+<a class="card" href="11-content-search-landing.png"><img src="11-content-search-landing.png" alt=""><div class="caption">11-content-search-landing.png</div></a>
+<a class="card" href="12-create-search-named.png"><img src="12-create-search-named.png" alt=""><div class="caption">12-create-search-named.png</div></a>
+<a class="card" href="12-create-search-step1.png"><img src="12-create-search-step1.png" alt=""><div class="caption">12-create-search-step1.png</div></a>
+<a class="card" href="13-search-created.png"><img src="13-search-created.png" alt=""><div class="caption">13-search-created.png</div></a>
+<a class="card" href="14-add-sources.png"><img src="14-add-sources.png" alt=""><div class="caption">14-add-sources.png</div></a>
+<a class="card" href="15-source-search-results.png"><img src="15-source-search-results.png" alt=""><div class="caption">15-source-search-results.png</div></a>
+<a class="card" href="16-six-sources-selected.png"><img src="16-six-sources-selected.png" alt=""><div class="caption">16-six-sources-selected.png</div></a>
+<a class="card" href="17-sources-saved.png"><img src="17-sources-saved.png" alt=""><div class="caption">17-sources-saved.png</div></a>
+<a class="card" href="18-add-conditions-menu.png"><img src="18-add-conditions-menu.png" alt=""><div class="caption">18-add-conditions-menu.png</div></a>
+<a class="card" href="18b-conditions-show-more.png"><img src="18b-conditions-show-more.png" alt=""><div class="caption">18b-conditions-show-more.png</div></a>
+<a class="card" href="19-content-kind-condition.png"><img src="19-content-kind-condition.png" alt=""><div class="caption">19-content-kind-condition.png</div></a>
+<a class="card" href="20-content-kind-copilot-search.png"><img src="20-content-kind-copilot-search.png" alt=""><div class="caption">20-content-kind-copilot-search.png</div></a>
+<a class="card" href="21-keyql-condition-added.png"><img src="21-keyql-condition-added.png" alt=""><div class="caption">21-keyql-condition-added.png</div></a>
+<a class="card" href="22-keyql-query-typed.png"><img src="22-keyql-query-typed.png" alt=""><div class="caption">22-keyql-query-typed.png</div></a>
+<a class="card" href="23-run-query-dialog.png"><img src="23-run-query-dialog.png" alt=""><div class="caption">23-run-query-dialog.png</div></a>
+<a class="card" href="24-run-query-options.png"><img src="24-run-query-options.png" alt=""><div class="caption">24-run-query-options.png</div></a>
+<a class="card" href="25-query-running.png"><img src="25-query-running.png" alt=""><div class="caption">25-query-running.png</div></a>
+<a class="card" href="26-statistics-result.png"><img src="26-statistics-result.png" alt=""><div class="caption">26-statistics-result.png</div></a>
+<a class="card" href="27-sample-view.png"><img src="27-sample-view.png" alt=""><div class="caption">27-sample-view.png</div></a>
+<a class="card" href="28-sample-generating.png"><img src="28-sample-generating.png" alt=""><div class="caption">28-sample-generating.png</div></a>
+<a class="card" href="29-sample-results.png"><img src="29-sample-results.png" alt=""><div class="caption">29-sample-results.png</div></a>
+<a class="card" href="30-export-dialog.png"><img src="30-export-dialog.png" alt=""><div class="caption">30-export-dialog.png</div></a>
+<a class="card" href="31-export-config.png"><img src="31-export-config.png" alt=""><div class="caption">31-export-config.png</div></a>
+<a class="card" href="32-export-options-set.png"><img src="32-export-options-set.png" alt=""><div class="caption">32-export-options-set.png</div></a>
+<a class="card" href="33-export-submitted.png"><img src="33-export-submitted.png" alt=""><div class="caption">33-export-submitted.png</div></a>
+<a class="card" href="34-export-started.png"><img src="34-export-started.png" alt=""><div class="caption">34-export-started.png</div></a>
+<a class="card" href="35-export-status.png"><img src="35-export-status.png" alt=""><div class="caption">35-export-status.png</div></a>
+<a class="card" href="36-export-detail.png"><img src="36-export-detail.png" alt=""><div class="caption">36-export-detail.png</div></a>
+<a class="card" href="37-download.png"><img src="37-download.png" alt=""><div class="caption">37-download.png</div></a>
+<a class="card" href="GUI-Verify-CopilotInteraction-LicensedUser-AadiK-Sep05-result.png"><img src="GUI-Verify-CopilotInteraction-LicensedUser-AadiK-Sep05-result.png" alt=""><div class="caption">GUI-Verify-CopilotInteraction-LicensedUser-AadiK-Sep05-result.png</div></a>
+<a class="card" href="seed-prompt-01.png"><img src="seed-prompt-01.png" alt=""><div class="caption">seed-prompt-01.png</div></a>
+</div>
+</main></body></html>
