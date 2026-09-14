@@ -1,0 +1,1277 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#A51C30">
+  <title>Harvard Veritas Challenge</title>
+  <style>
+    :root {
+      --crimson: #A51C30;
+      --crimson-dark: #6d1020;
+      --blue: #060CE9;
+      --blue-dark: #020675;
+      --gold: #ffd65a;
+      --cream: #fff8df;
+      --ink: #07112f;
+      --panel: #101a43;
+      --good: #53e08c;
+      --bad: #ff6577;
+      --shadow: 0 1.2rem 3rem rgba(0,0,0,.42);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; background: #040819; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      overflow-x: hidden;
+      color: white;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(165,28,48,.68), transparent 35rem),
+        linear-gradient(145deg, #030616 0%, #111c4a 50%, #05081a 100%);
+      font-family: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", Impact, sans-serif;
+      text-transform: uppercase;
+    }
+
+    button, input { font: inherit; }
+    button { text-transform: uppercase; }
+    button:focus-visible, input:focus-visible {
+      outline: .22rem solid white;
+      outline-offset: .18rem;
+    }
+
+    .skip-link {
+      position: fixed;
+      left: .7rem;
+      top: -5rem;
+      z-index: 1000;
+      padding: .75rem 1rem;
+      color: #111;
+      background: var(--gold);
+      border-radius: .4rem;
+    }
+    .skip-link:focus { top: .7rem; }
+
+    .sparkles, .confetti {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+    .spark {
+      position: absolute;
+      width: .22rem;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 0 .65rem .16rem rgba(255,214,90,.75);
+      animation: twinkle var(--d, 3s) ease-in-out infinite;
+      animation-delay: var(--delay, 0s);
+      opacity: .15;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: .08; transform: scale(.5); }
+      50% { opacity: .85; transform: scale(1.35); }
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      width: min(96rem, 100%);
+      margin: 0 auto;
+      padding: .8rem clamp(.5rem, 2vw, 1.5rem) 1.2rem;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center;
+      gap: 1rem;
+      min-height: 5.7rem;
+      margin-bottom: .7rem;
+    }
+    .brand { min-width: 0; }
+    .brand-kicker {
+      color: var(--gold);
+      font-size: clamp(.67rem, 1vw, .85rem);
+      font-weight: 900;
+      letter-spacing: .24em;
+    }
+    h1 {
+      margin: .08rem 0 0;
+      overflow: hidden;
+      color: white;
+      font-size: clamp(1.25rem, 3.3vw, 2.8rem);
+      font-style: italic;
+      font-weight: 1000;
+      letter-spacing: .035em;
+      line-height: .92;
+      text-overflow: ellipsis;
+      text-shadow: .12rem .14rem 0 var(--crimson), .22rem .28rem .3rem rgba(0,0,0,.65);
+      white-space: nowrap;
+    }
+    .score-card {
+      min-width: clamp(9rem, 18vw, 15rem);
+      padding: .48rem 1rem .58rem;
+      border: .12rem solid rgba(255,255,255,.42);
+      border-radius: .45rem;
+      background: linear-gradient(155deg, rgba(255,255,255,.17), rgba(255,255,255,.025)), var(--crimson);
+      box-shadow: inset 0 .12rem .2rem rgba(255,255,255,.3), 0 .45rem 1rem rgba(0,0,0,.35);
+      text-align: center;
+    }
+    .score-label {
+      display: block;
+      color: #ffd9df;
+      font-size: clamp(.65rem, 1vw, .82rem);
+      font-weight: 900;
+      letter-spacing: .2em;
+    }
+    .score {
+      display: block;
+      color: var(--gold);
+      font-family: Impact, "Arial Black", sans-serif;
+      font-size: clamp(1.65rem, 4vw, 2.65rem);
+      letter-spacing: .03em;
+      line-height: 1;
+      text-shadow: .12rem .15rem .12rem rgba(0,0,0,.58);
+    }
+    .score.negative { color: var(--bad); }
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: .45rem;
+    }
+    .control-btn, .final-btn, .action-btn {
+      cursor: pointer;
+      border: .1rem solid rgba(255,255,255,.4);
+      border-radius: .38rem;
+      color: white;
+      background: linear-gradient(#c32942, #851327);
+      box-shadow: inset 0 .1rem rgba(255,255,255,.3), 0 .25rem .55rem rgba(0,0,0,.35);
+      font-weight: 1000;
+      letter-spacing: .07em;
+    }
+    .control-btn {
+      min-width: 3rem;
+      min-height: 2.55rem;
+      padding: .5rem .7rem;
+      font-size: .76rem;
+    }
+    button:hover:not(:disabled) { filter: brightness(1.13); }
+    button:active:not(:disabled) { transform: translateY(.08rem); }
+    button:disabled { cursor: not-allowed; opacity: .45; }
+
+    .board-shell {
+      overflow-x: auto;
+      padding: clamp(.4rem, 1vw, .75rem);
+      border: .15rem solid rgba(255,255,255,.32);
+      border-radius: .7rem;
+      background:
+        linear-gradient(125deg, rgba(255,255,255,.16), transparent 23%, transparent 76%, rgba(255,255,255,.1)),
+        #080d2d;
+      box-shadow: var(--shadow), inset 0 .2rem .45rem rgba(255,255,255,.15);
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(8.5rem, 1fr));
+      gap: clamp(.25rem, .65vw, .55rem);
+      min-width: 44rem;
+      perspective: 75rem;
+    }
+    .category {
+      display: grid;
+      place-items: center;
+      min-height: clamp(4.6rem, 8vw, 7rem);
+      padding: .5rem .35rem;
+      border: .14rem solid #02075f;
+      color: white;
+      background:
+        linear-gradient(155deg, rgba(255,255,255,.25), transparent 18%, transparent 68%, rgba(0,0,0,.32)),
+        linear-gradient(#1018ff, var(--blue-dark));
+      box-shadow: inset .13rem .18rem .35rem rgba(255,255,255,.27), inset -.18rem -.22rem .35rem rgba(0,0,0,.5), 0 .22rem .3rem rgba(0,0,0,.55);
+      font-size: clamp(.86rem, 1.45vw, 1.24rem);
+      font-weight: 1000;
+      letter-spacing: .035em;
+      line-height: 1.02;
+      text-align: center;
+      text-wrap: balance;
+      text-shadow: .11rem .13rem .12rem #000;
+    }
+    .tile {
+      position: relative;
+      display: grid;
+      place-items: center;
+      min-height: clamp(4rem, 7.7vw, 6.7rem);
+      overflow: hidden;
+      cursor: pointer;
+      border: .14rem solid #02075f;
+      color: var(--gold);
+      background:
+        linear-gradient(145deg, rgba(255,255,255,.24) 0%, transparent 19%, transparent 66%, rgba(0,0,0,.36) 100%),
+        var(--blue);
+      box-shadow: inset .14rem .16rem .3rem rgba(255,255,255,.28), inset -.2rem -.24rem .4rem rgba(0,0,0,.48), 0 .22rem .32rem rgba(0,0,0,.58);
+      font-family: Impact, "Arial Black", sans-serif;
+      font-size: clamp(1.65rem, 4.4vw, 3.4rem);
+      letter-spacing: .025em;
+      text-shadow: .14rem .18rem .08rem rgba(0,0,0,.66);
+      transition: transform .16s ease, filter .16s ease;
+    }
+    .tile::after {
+      position: absolute;
+      top: -60%;
+      left: -70%;
+      width: 48%;
+      height: 220%;
+      content: "";
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
+      transform: rotate(24deg);
+      animation: sheen 7s ease-in-out infinite;
+    }
+    .tile:nth-child(3n)::after { animation-delay: -2.4s; }
+    @keyframes sheen {
+      0%, 74% { left: -75%; }
+      100% { left: 145%; }
+    }
+    .tile:hover:not(:disabled) { z-index: 2; transform: translateY(-.12rem) scale(1.025); }
+    .tile.used {
+      border-color: #050923;
+      color: transparent;
+      background: #070b31;
+      box-shadow: inset 0 0 1.2rem rgba(0,0,0,.85);
+    }
+    .tile.used::after { display: none; }
+
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: .9rem .1rem 0;
+    }
+    .fact-note {
+      max-width: 64rem;
+      margin: 0;
+      color: #cbd2ef;
+      font-family: Arial, sans-serif;
+      font-size: clamp(.66rem, 1vw, .78rem);
+      line-height: 1.4;
+      text-transform: none;
+    }
+    .final-btn {
+      flex: 0 0 auto;
+      padding: .8rem 1rem;
+      color: var(--gold);
+      background: linear-gradient(#202b78, #091044);
+    }
+
+    .overlay {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: clamp(.6rem, 2vw, 1.5rem);
+      background: rgba(1,3,14,.86);
+      backdrop-filter: blur(.6rem);
+    }
+    .overlay[hidden] { display: none; }
+    .start-card, .modal-card, .help-card {
+      position: relative;
+      width: min(72rem, 96vw);
+      max-height: 94vh;
+      overflow: auto;
+      padding: clamp(1.1rem, 3vw, 2.5rem);
+      border: .14rem solid rgba(255,255,255,.42);
+      border-radius: .8rem;
+      background:
+        linear-gradient(140deg, rgba(255,255,255,.15), transparent 20%, transparent 76%, rgba(255,255,255,.08)),
+        linear-gradient(145deg, #152360, #070b2c);
+      box-shadow: 0 2rem 6rem rgba(0,0,0,.7), inset 0 .13rem .3rem rgba(255,255,255,.2);
+      text-align: center;
+    }
+    .start-card { width: min(48rem, 95vw); }
+    .seal {
+      display: grid;
+      place-items: center;
+      width: clamp(5rem, 14vw, 8rem);
+      aspect-ratio: 1;
+      margin: 0 auto 1rem;
+      border: .35rem double var(--gold);
+      border-radius: 50%;
+      color: white;
+      background: radial-gradient(circle, #c52742, var(--crimson-dark));
+      box-shadow: 0 0 2rem rgba(255,214,90,.25), inset 0 0 0 .3rem rgba(255,255,255,.12);
+      font-family: Georgia, serif;
+      font-size: clamp(.9rem, 2.4vw, 1.35rem);
+      font-weight: bold;
+      line-height: 1;
+    }
+    .start-card h2, .modal-card h2, .help-card h2 {
+      margin: .25rem 0 .65rem;
+      color: var(--gold);
+      font-size: clamp(1.55rem, 5vw, 3.6rem);
+      font-style: italic;
+      font-weight: 1000;
+      letter-spacing: .035em;
+      line-height: .95;
+      text-shadow: .12rem .17rem .1rem rgba(0,0,0,.6);
+    }
+    .start-card p, .help-card {
+      font-family: Arial, sans-serif;
+      text-transform: none;
+    }
+    .start-card p { color: #dce2ff; line-height: 1.5; }
+    .primary {
+      min-width: min(19rem, 90%);
+      padding: .95rem 1.3rem;
+      color: #141414;
+      background: linear-gradient(#fff0a8, #e4ad27);
+      border-color: #fff1a4;
+      font-size: 1rem;
+    }
+
+    .modal-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: min(43rem, 92vh);
+    }
+    .modal-card.daily {
+      background:
+        radial-gradient(circle, rgba(255,214,90,.32), transparent 38%),
+        linear-gradient(145deg, #b01e38, #370716);
+    }
+    .modal-card.final {
+      background:
+        radial-gradient(circle at 50% 30%, rgba(92,105,255,.38), transparent 40%),
+        linear-gradient(145deg, #131e63, #04071d);
+    }
+    .eyebrow {
+      margin: 0 0 .5rem;
+      color: #cad4ff;
+      font-size: clamp(.72rem, 1.2vw, .92rem);
+      font-weight: 900;
+      letter-spacing: .23em;
+    }
+    .clue {
+      width: min(66rem, 100%);
+      margin: .8rem auto 1.2rem;
+      color: white;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.3rem, 4.2vw, 3.15rem);
+      font-weight: bold;
+      line-height: 1.18;
+      text-shadow: .12rem .18rem .14rem rgba(0,0,0,.6);
+      text-transform: uppercase;
+      text-wrap: balance;
+    }
+    .daily-burst {
+      color: var(--gold);
+      font-size: clamp(2.5rem, 9vw, 7rem);
+      font-style: italic;
+      font-weight: 1000;
+      line-height: .86;
+      text-shadow: .18rem .24rem 0 #751126, 0 0 2rem rgba(255,214,90,.58);
+      animation: burst .68s cubic-bezier(.17,.86,.36,1.25) both;
+    }
+    @keyframes burst {
+      from { opacity: 0; transform: scale(.2) rotate(-7deg); }
+      to { opacity: 1; transform: scale(1) rotate(-2deg); }
+    }
+    .field-wrap {
+      width: min(39rem, 100%);
+      margin: .6rem auto;
+      text-align: left;
+    }
+    .field-wrap label {
+      display: block;
+      margin-bottom: .4rem;
+      color: var(--gold);
+      font-size: .8rem;
+      font-weight: 1000;
+      letter-spacing: .14em;
+    }
+    .text-input {
+      width: 100%;
+      padding: .78rem .9rem;
+      border: .14rem solid rgba(255,255,255,.72);
+      border-radius: .35rem;
+      color: #101633;
+      background: var(--cream);
+      font-family: Arial, sans-serif;
+      font-size: clamp(1rem, 2vw, 1.22rem);
+      text-transform: none;
+    }
+    .hint {
+      min-height: 1.5rem;
+      margin: .35rem 0 0;
+      color: #cbd4fa;
+      font-family: Arial, sans-serif;
+      font-size: .78rem;
+      line-height: 1.35;
+      text-transform: none;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: .7rem;
+      margin-top: .9rem;
+    }
+    .action-btn { min-width: 9rem; padding: .78rem 1rem; }
+    .action-btn.secondary { background: linear-gradient(#33427f, #141d51); }
+    .action-btn.correct { color: #071f13; background: linear-gradient(#7ff0aa, #31b968); }
+    .action-btn.incorrect { color: white; background: linear-gradient(#ff7586, #b51d36); }
+    .answer-panel {
+      width: min(58rem, 100%);
+      margin-top: 1rem;
+      padding: .85rem 1rem;
+      border: .1rem solid rgba(255,214,90,.6);
+      border-radius: .45rem;
+      color: var(--gold);
+      background: rgba(0,0,0,.28);
+      font-family: Georgia, serif;
+      font-size: clamp(1rem, 2.4vw, 1.45rem);
+      line-height: 1.35;
+      text-transform: none;
+    }
+    .timer {
+      display: grid;
+      place-items: center;
+      width: 6.2rem;
+      aspect-ratio: 1;
+      margin: .5rem auto;
+      border: .34rem solid var(--gold);
+      border-radius: 50%;
+      color: var(--gold);
+      background: #050a30;
+      font-family: Impact, sans-serif;
+      font-size: 2.8rem;
+      box-shadow: 0 0 1.6rem rgba(255,214,90,.3);
+    }
+    .result-message {
+      color: var(--gold);
+      font-size: clamp(1.45rem, 4vw, 2.8rem);
+      font-weight: 1000;
+      text-wrap: balance;
+    }
+
+    .help-card {
+      width: min(52rem, 96vw);
+      text-align: left;
+    }
+    .help-card h2 { text-align: center; text-transform: uppercase; }
+    .help-card ol { padding-left: 1.3rem; line-height: 1.5; }
+    .help-card li + li { margin-top: .55rem; }
+    .help-card strong { color: var(--gold); }
+
+    .confetti { z-index: 150; }
+    .confetti-piece {
+      position: absolute;
+      left: var(--x);
+      top: 45%;
+      width: .55rem;
+      height: 1.15rem;
+      border-radius: .12rem;
+      background: var(--c);
+      transform: rotate(var(--r));
+      animation: confetti-fly 1.45s ease-out forwards;
+    }
+    @keyframes confetti-fly {
+      0% { opacity: 1; transform: translate(0,0) rotate(var(--r)) scale(1); }
+      100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(calc(var(--r) + 620deg)) scale(.55); }
+    }
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0,0,0,0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
+    }
+
+    @media (max-width: 47rem) {
+      .topbar {
+        grid-template-columns: 1fr auto;
+        gap: .55rem;
+      }
+      .score-card { grid-row: 2; grid-column: 1 / -1; }
+      .controls { gap: .25rem; }
+      .control-btn { min-width: 2.7rem; padding: .45rem .48rem; font-size: .68rem; }
+      .footer-row { align-items: stretch; flex-direction: column-reverse; }
+      .final-btn { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .001ms !important;
+      }
+      .sparkles { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#game-board">Skip to game board</a>
+  <div class="sparkles" id="sparkles" aria-hidden="true"></div>
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+  <main class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-kicker">Veritas Broadcast Network</div>
+        <h1>Harvard Veritas Challenge</h1>
+      </div>
+      <div class="score-card" aria-label="Current score">
+        <span class="score-label">Scholar Score</span>
+        <output class="score" id="score">$0</output>
+      </div>
+      <div class="controls" aria-label="Game controls">
+        <button class="control-btn" id="help-btn" type="button" aria-haspopup="dialog">Rules</button>
+        <button class="control-btn" id="mute-btn" type="button" aria-pressed="false">Mute</button>
+        <button class="control-btn" id="reset-btn" type="button">Reset</button>
+      </div>
+    </header>
+
+    <section class="board-shell" aria-label="Harvard trivia board">
+      <div class="board" id="game-board"></div>
+    </section>
+
+    <footer class="footer-row">
+      <p class="fact-note">
+        Facts verified against Harvard University, Harvard Library, Harvard College DSO, HUIT/IAM, Smithsonian, and Britannica.
+        Keyword hints are informational only; the presenter’s Correct/Incorrect ruling is authoritative. All music and cues are original Web Audio synthesis.
+      </p>
+      <button class="final-btn" id="final-btn" type="button">Final Jeopardy</button>
+    </footer>
+  </main>
+
+  <section class="overlay" id="start-overlay" role="dialog" aria-modal="true" aria-labelledby="start-title">
+    <div class="start-card">
+      <div class="seal" aria-hidden="true">VERI<br>TAS</div>
+      <div class="brand-kicker">A Crimson Quiz Experience</div>
+      <h2 id="start-title">Harvard Veritas Challenge</h2>
+      <p>Choose clues, type each response, and let the presenter rule Correct or Incorrect. Start enables the original synthesized game soundtrack.</p>
+      <button class="action-btn primary" id="start-btn" type="button">Enter the Game</button>
+    </div>
+  </section>
+
+  <section class="overlay" id="clue-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-card" id="modal-card">
+      <div id="modal-content"></div>
+    </div>
+  </section>
+
+  <section class="overlay" id="help-overlay" role="dialog" aria-modal="true" aria-labelledby="help-title" hidden>
+    <div class="help-card">
+      <h2 id="help-title">Rules & Controls</h2>
+      <ol>
+        <li><strong>Select a value:</strong> read the clue, type a response, then reveal it for the presenter’s ruling.</li>
+        <li><strong>Scoring:</strong> Correct adds the clue value; Incorrect subtracts it. Negative scores appear in red.</li>
+        <li><strong>Daily Double:</strong> one hidden tile is randomized per game. Wager $5 through the greater of your score or $1,000 before seeing its clue.</li>
+        <li><strong>Final:</strong> after the category reveal, wager from $0 through your positive score. You have 30 seconds once the clue appears.</li>
+        <li><strong>Keyboard:</strong> Tab navigates controls; arrow keys move among board tiles; Enter/Space selects; Escape closes Rules.</li>
+      </ol>
+      <div class="button-row">
+        <button class="action-btn primary" id="close-help-btn" type="button">Return to Board</button>
+      </div>
+    </div>
+  </section>
+
+  <div class="sr-only" id="live-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    "use strict";
+
+    const categories = [
+      {
+        name: "🏛️ Veritas & History",
+        clues: [
+          ["Founded by Massachusetts Bay Colony vote in this year", "What is 1636?"],
+          ["Latin for truth, Harvard motto adopted in 1643", "What is Veritas?"],
+          ["College named in 1639 for first major benefactor who left half his estate and an approximately 400-volume library", "Who is John Harvard?"],
+          ["President and Fellows of Harvard College, under the Charter of 1650, is known by this organizational name", "What is the Harvard Corporation?"],
+          ["The statue says “Founder, 1638,” but John Harvard was instead this institutional figure", "What is a benefactor?"]
+        ]
+      },
+      {
+        name: "🗿 Campus & Landmarks",
+        clues: [
+          ["Daniel Chester French’s Yard bronze with a shoe rubbed shiny", "What is the John Harvard statue?"],
+          ["Its wrong person, role, and date inspired this nickname", "What is the Statue of Three Lies?"],
+          ["Flagship library memorializing Harry Elkins Widener", "What is Widener Library?"],
+          ["The disaster that killed Harry and led Eleanor to fund the library", "What is the sinking of Titanic?"],
+          ["The Cabot, Currier, and Pforzheimer area shortened to “the Quad”", "What is Radcliffe Quadrangle?"]
+        ]
+      },
+      {
+        name: "🎓 Traditions & Lore",
+        clues: [
+          ["March House assignment celebration", "What is Housing Day?"],
+          ["Midnight final reading-period night run", "What is Primal Scream?"],
+          ["“The Game” rival", "What is Yale?"],
+          ["Number of undergraduate residential Houses", "What is twelve?"],
+          ["Nickname for Cabot, Currier, and Pforzheimer", "What is the Quad?"]
+        ]
+      },
+      {
+        name: "🔢 Harvard by the Numbers",
+        clues: [
+          ["Years between 1636 and 1776", "What is 140 years?"],
+          ["Graduate and professional schools beyond the College", "What is twelve?"],
+          ["Approximate volumes in John Harvard’s bequest", "What is 400?"],
+          ["Harvard’s fiscal year 2024 endowment", "What is $53.2 billion?"],
+          ["Alan Garber’s presidential ordinal", "What is 31st?"]
+        ]
+      },
+      {
+        name: "💻 Tech & the Digital Yard",
+        clues: [
+          ["HUIT expansion", "What is Information Technology?"],
+          ["Unified credential introduced in 2015", "What is HarvardKey?"],
+          ["IBM ASCC operational in 1944", "What is Harvard Mark I?"],
+          ["Mark I pioneer and future Navy rear admiral", "Who is Grace Hopper?"],
+          ["Moth in the Mark II logbook labeled the “first actual case”", "What is a computer bug?"]
+        ]
+      }
+    ];
+
+    const finalClue = {
+      category: "Harvard Origins",
+      clue: "Harvard’s namesake benefactor earned his B.A. and M.A. at this Cambridge University college",
+      response: "What is Emmanuel College?"
+    };
+
+    const values = [200, 400, 600, 800, 1000];
+    const board = document.getElementById("game-board");
+    const scoreOutput = document.getElementById("score");
+    const finalButton = document.getElementById("final-btn");
+    const muteButton = document.getElementById("mute-btn");
+    const clueOverlay = document.getElementById("clue-overlay");
+    const modalCard = document.getElementById("modal-card");
+    const modalContent = document.getElementById("modal-content");
+    const helpOverlay = document.getElementById("help-overlay");
+    const startOverlay = document.getElementById("start-overlay");
+    const liveRegion = document.getElementById("live-region");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let score = 0;
+    let used = new Set();
+    let dailyKey = "";
+    let finalUsed = false;
+    let gameStarted = false;
+    let current = null;
+    let returnFocus = null;
+    let finalCountdownId = null;
+    let finalSeconds = 30;
+
+    class GameAudio {
+      constructor() {
+        this.context = null;
+        this.master = null;
+        this.muted = false;
+        this.idleTimer = null;
+        this.finalMusicTimer = null;
+        this.idleStep = 0;
+        this.finalStep = 0;
+        this.idleNodes = new Set();
+        this.finalNodes = new Set();
+      }
+
+      async init() {
+        if (!this.context) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          this.context = new AudioContextClass();
+          this.master = this.context.createGain();
+          this.master.gain.value = this.muted ? 0 : 0.48;
+          this.master.connect(this.context.destination);
+        }
+        if (this.context.state === "suspended") await this.context.resume();
+      }
+
+      tone(freq, duration, type, volume, group = "sfx", delay = 0) {
+        if (!this.context || !this.master) return;
+        const start = this.context.currentTime + delay;
+        const oscillator = this.context.createOscillator();
+        const gain = this.context.createGain();
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(Math.max(volume, 0.0002), start + 0.018);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        oscillator.connect(gain);
+        gain.connect(this.master);
+        const collection = group === "idle" ? this.idleNodes : group === "final" ? this.finalNodes : null;
+        if (collection) collection.add(oscillator);
+        oscillator.addEventListener("ended", () => collection?.delete(oscillator), { once: true });
+        oscillator.start(start);
+        oscillator.stop(start + duration + .03);
+      }
+
+      stopNodes(collection) {
+        collection.forEach(node => {
+          try { node.stop(); } catch (_) { /* already stopped */ }
+        });
+        collection.clear();
+      }
+
+      startIdle() {
+        if (!this.context || this.idleTimer || this.finalMusicTimer) return;
+        const melody = [293.66, 369.99, 440, 369.99, 329.63, 493.88, 440, 369.99, 293.66, 329.63, 369.99, 246.94];
+        const bass = [73.42, 73.42, 92.5, 92.5, 82.41, 61.74];
+        const tick = () => {
+          const i = this.idleStep++;
+          this.tone(melody[i % melody.length], .15, "square", .035, "idle");
+          if (i % 2 === 0) this.tone(bass[Math.floor(i / 2) % bass.length], .28, "triangle", .055, "idle");
+          if (i % 4 === 3) this.tone(880, .035, "sine", .014, "idle");
+          this.idleTimer = window.setTimeout(tick, 215);
+        };
+        tick();
+      }
+
+      pauseIdle() {
+        window.clearTimeout(this.idleTimer);
+        this.idleTimer = null;
+        this.stopNodes(this.idleNodes);
+      }
+
+      dailySting() {
+        [196, 246.94, 293.66, 392, 587.33, 783.99].forEach((note, i) => {
+          this.tone(note, .45, i < 3 ? "sawtooth" : "square", .075, "sfx", i * .105);
+        });
+        this.tone(98, 1.15, "triangle", .12, "sfx", 0);
+      }
+
+      correct() {
+        [392, 493.88, 587.33, 783.99].forEach((note, i) => this.tone(note, .2 + i * .05, "triangle", .1, "sfx", i * .09));
+      }
+
+      incorrect() {
+        this.tone(196, .3, "sawtooth", .09);
+        this.tone(138.59, .48, "sawtooth", .08, "sfx", .2);
+      }
+
+      finalReveal() {
+        [146.83, 220, 293.66, 440].forEach((note, i) => this.tone(note, .5, "triangle", .075, "sfx", i * .16));
+      }
+
+      startFinalMusic() {
+        this.stopFinalMusic();
+        const melody = [220, 246.94, 261.63, 329.63, 293.66, 261.63, 246.94, 196, 220, 261.63, 329.63, 293.66, 246.94, 220, 196, 164.81];
+        const tick = () => {
+          const i = this.finalStep++;
+          this.tone(melody[i % melody.length], .27, "triangle", .062, "final");
+          if (i % 4 === 0) this.tone(i % 8 === 0 ? 110 : 98, .7, "sine", .065, "final");
+          if (i % 2 === 1) this.tone(659.25, .025, "square", .012, "final");
+          this.finalMusicTimer = window.setTimeout(tick, 375);
+        };
+        tick();
+      }
+
+      stopFinalMusic() {
+        window.clearTimeout(this.finalMusicTimer);
+        this.finalMusicTimer = null;
+        this.stopNodes(this.finalNodes);
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        if (this.master && this.context) {
+          this.master.gain.setTargetAtTime(this.muted ? 0 : .48, this.context.currentTime, .025);
+        }
+        return this.muted;
+      }
+    }
+
+    const audio = new GameAudio();
+
+    function money(amount) {
+      const sign = amount < 0 ? "-$" : "$";
+      return sign + Math.abs(amount).toLocaleString("en-US");
+    }
+
+    function announce(message) {
+      liveRegion.textContent = "";
+      window.setTimeout(() => { liveRegion.textContent = message; }, 20);
+    }
+
+    function updateScore() {
+      scoreOutput.value = money(score);
+      scoreOutput.textContent = money(score);
+      scoreOutput.classList.toggle("negative", score < 0);
+    }
+
+    function chooseDaily() {
+      dailyKey = `${Math.floor(Math.random() * 5)}-${Math.floor(Math.random() * 5)}`;
+    }
+
+    function renderBoard() {
+      board.innerHTML = "";
+      categories.forEach(category => {
+        const heading = document.createElement("div");
+        heading.className = "category";
+        heading.textContent = category.name;
+        board.appendChild(heading);
+      });
+      values.forEach((value, row) => {
+        categories.forEach((category, column) => {
+          const key = `${column}-${row}`;
+          const tile = document.createElement("button");
+          tile.type = "button";
+          tile.className = "tile";
+          tile.dataset.column = String(column);
+          tile.dataset.row = String(row);
+          tile.dataset.key = key;
+          tile.dataset.value = String(value);
+          tile.textContent = `$${value}`;
+          tile.setAttribute("aria-label", `${category.name}, ${money(value)}`);
+          if (used.has(key)) {
+            tile.disabled = true;
+            tile.classList.add("used");
+            tile.textContent = "";
+            tile.setAttribute("aria-label", `${category.name}, ${money(value)}, used`);
+          }
+          board.appendChild(tile);
+        });
+      });
+    }
+
+    function setModal(content, className = "") {
+      modalCard.className = `modal-card ${className}`.trim();
+      modalContent.innerHTML = content;
+      clueOverlay.hidden = false;
+      window.requestAnimationFrame(() => {
+        const focusTarget = modalContent.querySelector("input, button");
+        focusTarget?.focus();
+      });
+    }
+
+    function closeModal() {
+      stopFinalCountdown();
+      clueOverlay.hidden = true;
+      modalContent.innerHTML = "";
+      current = null;
+      if (gameStarted) audio.startIdle();
+      renderBoard();
+      finalButton.disabled = finalUsed;
+      returnFocus?.focus();
+      returnFocus = null;
+    }
+
+    function normalizedWords(value) {
+      const stop = new Set(["what", "who", "is", "are", "was", "were", "the", "a", "an", "of", "and", "in", "to", "years", "year"]);
+      return value.toLowerCase()
+        .replace(/[^a-z0-9.]+/g, " ")
+        .trim()
+        .split(/\s+/)
+        .filter(word => word && !stop.has(word));
+    }
+
+    function updateHint(input, expected, hintElement) {
+      const typed = new Set(normalizedWords(input));
+      const keywords = normalizedWords(expected);
+      const matches = keywords.filter(word => typed.has(word)).length;
+      if (!input.trim()) {
+        hintElement.textContent = "Type a response; normalized-keyword feedback will appear here.";
+      } else if (matches >= Math.max(1, Math.ceil(keywords.length * .6))) {
+        hintElement.textContent = "Keyword check: likely match. Presenter ruling remains authoritative.";
+      } else {
+        hintElement.textContent = "Keyword check: no clear match yet. Presenter ruling remains authoritative.";
+      }
+    }
+
+    function showNormalClue(column, row, tile) {
+      const category = categories[column];
+      const [clue, response] = category.clues[row];
+      current = {
+        mode: "normal",
+        column,
+        row,
+        value: values[row],
+        clue,
+        response,
+        tile
+      };
+      showClueInput();
+    }
+
+    function showDailySplash(column, row, tile) {
+      const category = categories[column];
+      const [clue, response] = category.clues[row];
+      current = {
+        mode: "daily",
+        column,
+        row,
+        value: values[row],
+        clue,
+        response,
+        wager: 5,
+        tile
+      };
+      audio.dailySting();
+      setModal(`
+        <p class="eyebrow">${category.name}</p>
+        <div class="daily-burst" id="modal-title">Daily Double!</div>
+        <p class="clue">The Veritas vault is open.</p>
+        <div class="button-row">
+          <button class="action-btn primary" id="daily-wager-next" type="button">Place Your Wager</button>
+        </div>
+      `, "daily");
+      document.getElementById("daily-wager-next").addEventListener("click", showDailyWager);
+    }
+
+    function showDailyWager() {
+      const maximum = Math.max(score, 1000);
+      setModal(`
+        <p class="eyebrow">Daily Double • ${categories[current.column].name}</p>
+        <h2 id="modal-title">Make It Count</h2>
+        <p class="clue">Wager from $5 through ${money(maximum)} before the clue is revealed.</p>
+        <div class="field-wrap">
+          <label for="wager-input">Daily Double Wager</label>
+          <input class="text-input" id="wager-input" type="number" inputmode="numeric" min="5" max="${maximum}" step="1" value="${Math.min(1000, maximum)}">
+          <p class="hint" id="wager-hint">Allowed range: $5–${maximum.toLocaleString("en-US")}.</p>
+        </div>
+        <div class="button-row">
+          <button class="action-btn primary" id="confirm-wager" type="button">Reveal Clue</button>
+        </div>
+      `, "daily");
+      const input = document.getElementById("wager-input");
+      const hint = document.getElementById("wager-hint");
+      const confirm = () => {
+        const raw = Number(input.value);
+        const wager = Math.min(maximum, Math.max(5, Number.isFinite(raw) ? Math.round(raw) : 5));
+        input.value = String(wager);
+        current.wager = wager;
+        showClueInput();
+      };
+      input.addEventListener("input", () => {
+        const raw = Number(input.value);
+        hint.textContent = raw < 5 || raw > maximum || !Number.isFinite(raw)
+          ? `Wager will be clamped to $5–${maximum.toLocaleString("en-US")}.`
+          : `Accepted wager: ${money(Math.round(raw))}.`;
+      });
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") confirm();
+      });
+      document.getElementById("confirm-wager").addEventListener("click", confirm);
+    }
+
+    function showClueInput() {
+      const isDaily = current.mode === "daily";
+      const isFinal = current.mode === "final";
+      const categoryName = isFinal ? finalClue.category : categories[current.column].name;
+      const label = isFinal ? "Final Jeopardy" : isDaily ? `Daily Double • ${money(current.wager)}` : money(current.value);
+      setModal(`
+        <p class="eyebrow">${categoryName} • ${label}</p>
+        <h2 class="sr-only" id="modal-title">${label} clue</h2>
+        ${isFinal ? `<div class="timer" id="final-timer" role="timer" aria-label="30 seconds remaining">30</div>` : ""}
+        <p class="clue">${current.clue}</p>
+        <div class="field-wrap">
+          <label for="response-input">Your Response</label>
+          <input class="text-input" id="response-input" type="text" autocomplete="off" placeholder="What is… / Who is…">
+          <p class="hint" id="response-hint">Type a response; normalized-keyword feedback will appear here.</p>
+        </div>
+        <div class="button-row">
+          <button class="action-btn primary" id="lock-response" type="button">Lock Response</button>
+        </div>
+      `, isFinal ? "final" : isDaily ? "daily" : "");
+      const input = document.getElementById("response-input");
+      const hint = document.getElementById("response-hint");
+      const lock = () => revealResponse(input.value);
+      input.addEventListener("input", () => updateHint(input.value, current.response, hint));
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") lock();
+      });
+      document.getElementById("lock-response").addEventListener("click", lock);
+      if (isFinal) startFinalCountdown();
+    }
+
+    function revealResponse(playerResponse) {
+      stopFinalCountdown();
+      current.playerResponse = playerResponse.trim() || "(No response)";
+      const isFinal = current.mode === "final";
+      const isDaily = current.mode === "daily";
+      const amount = isFinal || isDaily ? current.wager : current.value;
+      setModal(`
+        <p class="eyebrow">${isFinal ? finalClue.category : categories[current.column].name}</p>
+        <h2 id="modal-title">Presenter’s Ruling</h2>
+        <div class="answer-panel"><strong>Player:</strong> ${escapeHtml(current.playerResponse)}</div>
+        <div class="answer-panel"><strong>Expected:</strong> ${escapeHtml(current.response)}</div>
+        <p class="hint">Normalized-keyword hints are informational. Awarding remains a manual presenter decision.</p>
+        <div class="button-row">
+          <button class="action-btn correct" id="mark-correct" type="button">Correct +${money(amount)}</button>
+          <button class="action-btn incorrect" id="mark-incorrect" type="button">Incorrect −${money(amount)}</button>
+        </div>
+      `, isFinal ? "final" : isDaily ? "daily" : "");
+      document.getElementById("mark-correct").addEventListener("click", () => settle(true));
+      document.getElementById("mark-incorrect").addEventListener("click", () => settle(false));
+    }
+
+    function settle(correct) {
+      const amount = current.mode === "normal" ? current.value : current.wager;
+      score += correct ? amount : -amount;
+      updateScore();
+      if (correct) {
+        audio.correct();
+        celebrate();
+      } else {
+        audio.incorrect();
+      }
+      const isFinal = current.mode === "final";
+      const message = correct ? `Correct! ${money(amount)} added.` : `Incorrect. ${money(amount)} deducted.`;
+      announce(`${message} Score ${money(score)}.`);
+      setModal(`
+        <p class="eyebrow">${isFinal ? "Final Result" : "Score Update"}</p>
+        <h2 id="modal-title">${correct ? "Brilliant!" : "Not This Time"}</h2>
+        <p class="result-message">${message}<br>New score: ${money(score)}</p>
+        <div class="button-row">
+          <button class="action-btn primary" id="return-board" type="button">Return to Board</button>
+        </div>
+      `, isFinal ? "final" : "");
+      document.getElementById("return-board").addEventListener("click", closeModal);
+    }
+
+    function showFinalCategory() {
+      if (finalUsed) return;
+      finalUsed = true;
+      finalButton.disabled = true;
+      returnFocus = finalButton;
+      audio.pauseIdle();
+      audio.finalReveal();
+      current = { mode: "final", wager: 0, clue: finalClue.clue, response: finalClue.response };
+      setModal(`
+        <p class="eyebrow">Final Jeopardy</p>
+        <h2 id="modal-title">Category</h2>
+        <p class="clue">${finalClue.category}</p>
+        <div class="button-row">
+          <button class="action-btn primary" id="final-wager-next" type="button">Make Your Wager</button>
+        </div>
+      `, "final");
+      document.getElementById("final-wager-next").addEventListener("click", showFinalWager);
+    }
+
+    function showFinalWager() {
+      const maximum = Math.max(0, score);
+      setModal(`
+        <p class="eyebrow">${finalClue.category}</p>
+        <h2 id="modal-title">Final Wager</h2>
+        <p class="clue">Risk from $0 through ${money(maximum)}.</p>
+        <div class="field-wrap">
+          <label for="final-wager-input">Final Wager</label>
+          <input class="text-input" id="final-wager-input" type="number" inputmode="numeric" min="0" max="${maximum}" step="1" value="${maximum}">
+          <p class="hint" id="final-wager-hint">${maximum === 0 ? "A non-positive score permits a $0 wager." : `Allowed range: $0–${maximum.toLocaleString("en-US")}.`}</p>
+        </div>
+        <div class="button-row">
+          <button class="action-btn primary" id="confirm-final-wager" type="button">Reveal Final Clue</button>
+        </div>
+      `, "final");
+      const input = document.getElementById("final-wager-input");
+      const hint = document.getElementById("final-wager-hint");
+      const confirm = () => {
+        const raw = Number(input.value);
+        const wager = Math.min(maximum, Math.max(0, Number.isFinite(raw) ? Math.round(raw) : 0));
+        input.value = String(wager);
+        current.wager = wager;
+        showClueInput();
+      };
+      input.addEventListener("input", () => {
+        const raw = Number(input.value);
+        hint.textContent = raw < 0 || raw > maximum || !Number.isFinite(raw)
+          ? `Wager will be clamped to $0–${maximum.toLocaleString("en-US")}.`
+          : `Accepted wager: ${money(Math.round(raw))}.`;
+      });
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") confirm();
+      });
+      document.getElementById("confirm-final-wager").addEventListener("click", confirm);
+    }
+
+    function startFinalCountdown() {
+      stopFinalCountdown();
+      finalSeconds = 30;
+      audio.startFinalMusic();
+      const timer = document.getElementById("final-timer");
+      finalCountdownId = window.setInterval(() => {
+        finalSeconds -= 1;
+        if (timer) {
+          timer.textContent = String(finalSeconds);
+          timer.setAttribute("aria-label", `${finalSeconds} seconds remaining`);
+        }
+        if (finalSeconds <= 0) {
+          stopFinalCountdown();
+          const input = document.getElementById("response-input");
+          if (input) revealResponse(input.value);
+        }
+      }, 1000);
+    }
+
+    function stopFinalCountdown() {
+      window.clearInterval(finalCountdownId);
+      finalCountdownId = null;
+      audio.stopFinalMusic();
+    }
+
+    function escapeHtml(value) {
+      const element = document.createElement("div");
+      element.textContent = value;
+      return element.innerHTML;
+    }
+
+    function celebrate() {
+      if (reduceMotion) return;
+      const container = document.getElementById("confetti");
+      const colors = ["#A51C30", "#ffd65a", "#ffffff", "#2457ff", "#53e08c"];
+      for (let i = 0; i < 52; i += 1) {
+        const piece = document.createElement("i");
+        piece.className = "confetti-piece";
+        piece.style.setProperty("--x", `${45 + Math.random() * 10}%`);
+        piece.style.setProperty("--c", colors[i % colors.length]);
+        piece.style.setProperty("--r", `${Math.random() * 180}deg`);
+        piece.style.setProperty("--dx", `${(Math.random() - .5) * 90}vw`);
+        piece.style.setProperty("--dy", `${-30 - Math.random() * 60}vh`);
+        container.appendChild(piece);
+        window.setTimeout(() => piece.remove(), 1500);
+      }
+    }
+
+    function resetGame() {
+      stopFinalCountdown();
+      audio.pauseIdle();
+      score = 0;
+      used = new Set();
+      finalUsed = false;
+      current = null;
+      chooseDaily();
+      updateScore();
+      renderBoard();
+      finalButton.disabled = false;
+      clueOverlay.hidden = true;
+      helpOverlay.hidden = true;
+      announce("Game reset. A new Daily Double has been hidden.");
+      if (gameStarted) audio.startIdle();
+    }
+
+    function openHelp() {
+      returnFocus = document.activeElement;
+      helpOverlay.hidden = false;
+      document.getElementById("close-help-btn").focus();
+    }
+
+    function closeHelp() {
+      helpOverlay.hidden = true;
+      returnFocus?.focus();
+      returnFocus = null;
+    }
+
+    board.addEventListener("click", event => {
+      const tile = event.target.closest(".tile");
+      if (!tile || tile.disabled) return;
+      const column = Number(tile.dataset.column);
+      const row = Number(tile.dataset.row);
+      const key = tile.dataset.key;
+      returnFocus = tile;
+      used.add(key);
+      tile.disabled = true;
+      tile.classList.add("used");
+      tile.textContent = "";
+      audio.pauseIdle();
+      if (key === dailyKey) showDailySplash(column, row, tile);
+      else showNormalClue(column, row, tile);
+    });
+
+    board.addEventListener("keydown", event => {
+      const tile = event.target.closest(".tile");
+      if (!tile || !["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(event.key)) return;
+      event.preventDefault();
+      let column = Number(tile.dataset.column);
+      let row = Number(tile.dataset.row);
+      if (event.key === "ArrowLeft") column = (column + 4) % 5;
+      if (event.key === "ArrowRight") column = (column + 1) % 5;
+      if (event.key === "ArrowUp") row = (row + 4) % 5;
+      if (event.key === "ArrowDown") row = (row + 1) % 5;
+      const candidate = board.querySelector(`[data-column="${column}"][data-row="${row}"]:not(:disabled)`);
+      candidate?.focus();
+    });
+
+    document.getElementById("start-btn").addEventListener("click", async () => {
+      await audio.init();
+      gameStarted = true;
+      startOverlay.hidden = true;
+      audio.startIdle();
+      board.querySelector(".tile:not(:disabled)")?.focus();
+      announce("Game started. Select a clue.");
+    });
+
+    document.getElementById("help-btn").addEventListener("click", openHelp);
+    document.getElementById("close-help-btn").addEventListener("click", closeHelp);
+    document.getElementById("reset-btn").addEventListener("click", resetGame);
+    finalButton.addEventListener("click", showFinalCategory);
+    muteButton.addEventListener("click", () => {
+      const muted = audio.toggleMute();
+      muteButton.textContent = muted ? "Sound On" : "Mute";
+      muteButton.setAttribute("aria-pressed", String(muted));
+      announce(muted ? "Audio muted." : "Audio enabled.");
+    });
+
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && !helpOverlay.hidden) {
+        closeHelp();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const activeOverlay = !helpOverlay.hidden ? helpOverlay : !clueOverlay.hidden ? clueOverlay : !startOverlay.hidden ? startOverlay : null;
+      if (!activeOverlay) return;
+      const focusable = [...activeOverlay.querySelectorAll("button:not(:disabled), input:not(:disabled), [href], [tabindex]:not([tabindex='-1'])")];
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (!gameStarted) return;
+      if (document.hidden) {
+        audio.pauseIdle();
+        if (finalCountdownId) audio.stopFinalMusic();
+      } else if (clueOverlay.hidden) {
+        audio.startIdle();
+      } else if (current?.mode === "final" && finalCountdownId) {
+        audio.startFinalMusic();
+      }
+    });
+
+    function makeSparkles() {
+      const container = document.getElementById("sparkles");
+      for (let i = 0; i < 30; i += 1) {
+        const spark = document.createElement("i");
+        spark.className = "spark";
+        spark.style.left = `${Math.random() * 100}%`;
+        spark.style.top = `${Math.random() * 100}%`;
+        spark.style.setProperty("--d", `${2.2 + Math.random() * 4}s`);
+        spark.style.setProperty("--delay", `${-Math.random() * 5}s`);
+        container.appendChild(spark);
+      }
+    }
+
+    chooseDaily();
+    updateScore();
+    renderBoard();
+    makeSparkles();
+  </script>
+</body>
+</html>
