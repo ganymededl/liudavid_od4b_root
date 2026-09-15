@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Useful Utilities (MSFT only) — David Shih Chun Liu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060609; --bg2: #0d0d14;
+    --c1: #00d9ff; --c2: #00ffa3; --c3: #7b61ff; --c4: #ff6b35;
+    --t1: #f4f4f8; --t2: rgba(244,244,248,0.55); --t3: rgba(244,244,248,0.30);
+    --card: rgba(255,255,255,0.04); --cardh: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.09);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: radial-gradient(1200px 600px at 20% -10%, rgba(123,97,255,0.16), transparent),
+                radial-gradient(1000px 600px at 100% 0%, rgba(0,217,255,0.10), transparent),
+                var(--bg);
+    color: var(--t1);
+    font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--t2); text-decoration: none; font-size: 13px; margin-bottom: 28px;
+  }
+  .back:hover { color: var(--t1); }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--t2); font-size: 15px; margin-bottom: 8px; max-width: 640px; }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin: 16px 0 40px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    color: #2a0f00;
+    background: linear-gradient(135deg, #ffb454, #ff6b6b);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .card:hover { background: var(--cardh); }
+  .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .icon-box {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-box svg { width: 20px; height: 20px; }
+  .card h2 { font-size: 19px; font-weight: 600; }
+  .card p.desc { color: var(--t2); font-size: 14px; line-height: 1.55; margin-bottom: 18px; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .pill {
+    font-size: 11.5px; color: var(--t2);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    text-decoration: none;
+    color: #06060a;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn svg { width: 15px; height: 15px; }
+  .btn.secondary {
+    color: var(--t1);
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+  }
+  .note {
+    font-size: 12.5px;
+    color: var(--t3);
+    margin-top: 4px;
+  }
+  code {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 12.5px;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  footer { color: var(--t3); font-size: 12px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="index.html">&larr; Back to Hub</a>
+  <h1>Useful Utilities</h1>
+  <p class="subtitle">Small, self-installing Windows tools built for day-to-day M365 workflows. Each installer is a standalone Inno Setup package — no separate runtime install required.</p>
+  <div class="gate-badge">🔒 OD4B / Microsoft sign-in required to download</div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="icon-box" style="background: linear-gradient(135deg, #00d9ff, #0099cc);">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8 A5 5 0 1 1 8 13"/><polyline points="3 4 3 8 7 8"/></svg>
+      </div>
+      <h2>Extract Transcript</h2>
+    </div>
+    <p class="desc">
+      Pulls the <strong>complete</strong> transcript from a Microsoft Stream / SharePoint meeting
+      recording — even when the "Download transcript" button is greyed out because the recording
+      is organizer-only. Signs in as you and calls the same media API your browser uses to render
+      captions, then converts every VTT to a clean, timestamped, speaker-labeled TXT file.
+    </p>
+    <div class="meta-row">
+      <span class="pill">Windows 10/11</span>
+      <span class="pill">Requires Microsoft Edge (Conditional Access)</span>
+      <span class="pill">~23 MB installer</span>
+      <span class="pill">Bundled Node runtime — no separate install</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn" style="background: linear-gradient(135deg, #00d9ff, #00ffa3);"
+         href="https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FExtractTranscript%2DSetup%2Eexe&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&share=cQqvVMURrle9Qp1ZQhp60RMFEgUCeqGHchPKEF5T4edM32QtDA">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1 L8 10 M4.5 6.5 L8 10 L11.5 6.5 M2 12.5 L14 12.5"/></svg>
+        Download ExtractTranscript-Setup.exe
+      </a>
+    </div>
+    <p class="note">Silent lab/unattended install: <code>ExtractTranscript-Setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART</code></p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="icon-box" style="background: linear-gradient(135deg, #7b61ff, #ff6b35);">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 8 L7 10 L11 5.5"/></svg>
+      </div>
+      <h2>Relabel Downloads</h2>
+    </div>
+    <p class="desc">
+      Scans a folder (or a single file) for Office documents carrying a <strong>Confidential /
+      Highly Confidential</strong> Microsoft Purview sensitivity label and relabels them to
+      <strong>General</strong>, so tools like Copilot can open and reason over them. Drives the real
+      Office ribbon "Sensitivity" control via UI Automation and answers the mandatory justification
+      prompt automatically — skips files that are already open, locked, or already at a
+      General/Public/Non-Business label.
+    </p>
+    <div class="meta-row">
+      <span class="pill">Windows 10/11</span>
+      <span class="pill">Requires Word / PowerPoint / Excel installed</span>
+      <span class="pill">Requires Microsoft Purview sensitivity labels</span>
+      <span class="pill">~2 MB installer</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn" style="background: linear-gradient(135deg, #ff6b35, #f59e0b);"
+         href="https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FRelabelDownloads%2DSetup%2Eexe&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&share=cQo8x1XZMceQRoWn2wnQAwHaEgUCKomUANZkRPcX47x7kWvyUA">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1 L8 10 M4.5 6.5 L8 10 L11.5 6.5 M2 12.5 L14 12.5"/></svg>
+        Download RelabelDownloads-Setup.exe
+      </a>
+    </div>
+    <p class="note">Silent lab/unattended install: <code>RelabelDownloads-Setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART</code></p>
+  </div>
+
+  <footer>
+    Both installers are self-contained (Inno Setup, per-user install, no admin rights required) and
+    create Start Menu / optional Desktop shortcuts on first run. Links are Microsoft/OD4B-gated —
+    sign in with a Microsoft work account to download.
+  </footer>
+</div>
+</body>
+</html>
