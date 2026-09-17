@@ -18,3 +18,6 @@ config.local.js
 # Private build-log automation state
 data/builds.pending.json
 data/build-log-state.json
+
+# Restricted OD4B newsletter packages; never publish their contents to Pages.
+/NewsletterStudio/
