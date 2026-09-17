@@ -4,13 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#6550b9">
-  <title>The SLED CSU Review | Newsletter Studio</title>
+  <title>IMPACT | Newsletter Studio</title>
   <link rel="stylesheet" href="styles.css">
   <script src="email.js" defer></script>
-  <link rel="stylesheet" href="review.css">
-  <script src="review-model.js" defer></script>
-  <script src="review-email.js" defer></script>
-  <script src="review-app.js" defer></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
   <header class="app-header">
@@ -27,22 +24,19 @@
 
   <div class="workspace">
     <aside class="sidebar" aria-label="Newsletter sections">
-      <div class="sidebar-intro"><div class="overline">THE SLED CSU REVIEW</div><h1>Less scroll. More signal.</h1><p>Seven sections. One clear story.</p></div>
+      <div class="sidebar-intro"><div class="overline">YOUR WORKSPACE</div><h1>Let’s make an impact.</h1><p>Good stories. Beautifully delivered.</p></div>
       <div class="edition-card"><span class="edition-icon" data-icon="calendar"></span><div><strong id="edition-label">September 2026</strong><span>Monthly edition <span class="tiny-dot"></span> Draft</span></div></div>
       <div class="section-list-heading"><h2>CONTENT</h2><span id="section-count">7 sections</span></div>
       <nav id="section-nav" aria-label="Select a section"></nav>
-      <p class="fixed-order-note">Section order is fixed. Add rows, not more sections. Omit empty optional sections.</p>
-      <div class="draft-tools"><button class="button secondary" id="backup-draft" type="button">Back up draft</button><label class="import-label" for="restore-draft">Restore draft JSON<input id="restore-draft" type="file" accept=".json,application/json"></label></div>
-      <div class="sidebar-bottom"><a class="sample-link" href="./sample.html" target="_blank" rel="noopener">Read the complete Review sample &rarr;</a><a class="sample-link" href="./legacy.html">Open classic editor / previous drafts &rarr;</a><div class="local-note"><span data-icon="shield"></span><span>Drafts stay in this browser.<br><strong>Classic drafts are preserved separately.</strong></span></div><button id="reset-button" class="text-button" type="button">Reset Review to fictional sample</button></div>
+      <button class="add-section" id="add-section-button" type="button"><span data-icon="plus"></span>Add a section</button>
+      <div class="sidebar-bottom"><a class="sample-link" href="./sample.html" target="_blank" rel="noopener">Read the full sample newsletter &rarr;</a><div class="local-note"><span data-icon="shield"></span><span>Your stories stay yours.<br><strong>Saved in this browser. No server.</strong></span></div><button id="reset-button" class="text-button" type="button">Reset to sample edition</button></div>
     </aside>
 
     <main class="studio">
       <div class="studio-heading">
-        <div><div class="overline">THE EDITOR’S ROOM</div><h2>Make every line count<span>.</span></h2></div>
+        <div><div class="overline">THE EDITOR’S ROOM</div><h2>Your next great edition<span>.</span></h2></div>
         <span id="save-status" class="save-status" role="status"><span class="status-dot"></span>All changes saved</span>
       </div>
-      <div class="readiness"><strong id="export-status">Reviewing fields</strong><span id="reading-status"></span></div>
-      <div id="editorial-checks" aria-live="polite"></div>
       <div class="small-screen-tabs" aria-label="Workspace view"><button type="button" id="show-editor" aria-pressed="true">Edit content</button><button type="button" id="show-preview" aria-pressed="false">Live preview</button></div>
       <div class="panels">
         <section class="editor-panel" aria-label="Section editor">
@@ -69,9 +63,14 @@
     </main>
   </div>
 
+  <dialog id="add-dialog" aria-labelledby="add-dialog-title">
+    <div class="dialog-heading"><div><div class="overline">BUILD YOUR EDITION</div><h2 id="add-dialog-title">Every impact starts with a story.</h2></div><button type="button" class="icon-button" data-close-dialog="add-dialog" aria-label="Close add section dialog"><span data-icon="close"></span></button></div>
+    <p class="dialog-description">Choose a section. We’ll add a ready-to-edit starting point.</p>
+    <div id="section-type-options" class="section-type-options"></div>
+  </dialog>
   <dialog id="confirm-dialog" aria-labelledby="confirm-title">
     <div class="dialog-heading"><h2 id="confirm-title">Reset this edition?</h2><button type="button" class="icon-button" data-close-dialog="confirm-dialog" aria-label="Cancel reset"><span data-icon="close"></span></button></div>
-    <p>Your current Review draft will be replaced with fictional sample content. Back up the draft JSON first to keep an editable copy. Classic IMPACT drafts will not be changed.</p>
+    <p>Your saved edits will be replaced with the sample edition. Download your HTML first if you’d like to keep a copy.</p>
     <div class="dialog-actions"><button type="button" class="button secondary" data-close-dialog="confirm-dialog">Keep editing</button><button id="confirm-reset" type="button" class="button primary">Reset edition</button></div>
   </dialog>
   <dialog id="copy-dialog" aria-labelledby="copy-dialog-title">
