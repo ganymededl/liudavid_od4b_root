@@ -1,0 +1,1486 @@
+<!doctype html>
+<html lang="en-US" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>AB-620 Audience Study Guide</title>
+  <style>
+    :root {
+      --paint-1: rgba(24, 90, 189, 0.35);
+      --paint-2: #123b75;
+      --paint-3: #185abd;
+      --paint-4: #7048b5;
+      --paint-5: #ffffff;
+      --paint-6: rgba(255,255,255,0.25);
+      --paint-7: rgba(255,255,255,0.13);
+      --paint-8: #8ef0bd;
+      --paint-9: #e7c772;
+      --paint-10: rgba(20, 47, 85, 0.06);
+      --paint-11: #000000;
+
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --surface-2: #eef4fb;
+      --text: #172033;
+      --muted: #5c687d;
+      --primary: #185abd;
+      --primary-strong: #0f3f87;
+      --accent: #7f4cc9;
+      --success: #157a45;
+      --success-bg: #e8f6ee;
+      --warning: #8a5a00;
+      --warning-bg: #fff4d6;
+      --danger: #b42318;
+      --danger-bg: #fff0ee;
+      --border: #d7dfeb;
+      --shadow: 0 12px 30px rgba(20, 47, 85, 0.1);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    button, input, select { font: inherit; }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    button:focus-visible, input:focus-visible, select:focus-visible {
+      outline: 3px solid var(--paint-1);
+      outline-offset: 2px;
+    }
+
+    .shell {
+      max-inline-size: 1280px;
+      margin-inline: auto;
+      padding: 24px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 18px;
+      padding: 28px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, var(--paint-2), var(--paint-3) 58%, var(--paint-4));
+      color: var(--paint-5);
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      letter-spacing: -0.04em;
+    }
+
+    .hero p { margin: 0; max-inline-size: 760px; }
+
+    .score-card {
+      align-self: stretch;
+      padding: 18px;
+      border: 1px solid var(--paint-6);
+      border-radius: 16px;
+      background: var(--paint-7);
+      backdrop-filter: blur(6px);
+    }
+
+    .score-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      margin-block-end: 8px;
+    }
+
+    .score-big { font-size: 2rem; font-weight: 750; }
+
+    .progress-track {
+      block-size: 12px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: var(--paint-6);
+    }
+
+    .progress-fill {
+      block-size: 100%;
+      inline-size: 0;
+      border-radius: inherit;
+      background: var(--paint-8);
+      transition: width 220ms ease;
+    }
+
+    .notice {
+      margin-block: 18px;
+      padding: 14px 16px;
+      border: 1px solid var(--paint-9);
+      border-radius: 12px;
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-block: 18px;
+    }
+
+    .tab {
+      padding: 10px 14px;
+      color: var(--primary-strong);
+      background: var(--surface);
+      border: 1px solid var(--border);
+    }
+
+    .tab.active {
+      color: var(--paint-5);
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+
+    .card {
+      grid-column: span 4;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: 0 6px 18px var(--paint-10);
+    }
+
+    .card.wide { grid-column: span 8; }
+    .card.full { grid-column: 1 / -1; }
+
+    .card h2, .card h3 { margin-block-start: 0; }
+    .metric { font-size: 2rem; font-weight: 760; color: var(--primary); }
+    .muted { color: var(--muted); }
+
+    .priority-list {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .priority-list li {
+      padding: 12px;
+      border-inline-start: 5px solid var(--accent);
+      border-radius: 8px;
+      background: var(--surface-2);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+      margin-block-end: 16px;
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .field {
+      display: grid;
+      gap: 5px;
+      min-inline-size: 180px;
+    }
+
+    .field label { font-size: 0.86rem; color: var(--muted); }
+
+    select, input[type="text"], input[type="file"] {
+      inline-size: 100%;
+      padding: 10px;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+    }
+
+    .btn {
+      padding: 10px 15px;
+      color: var(--paint-5);
+      background: var(--primary);
+      font-weight: 650;
+    }
+
+    .btn.secondary {
+      color: var(--primary-strong);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+    }
+
+    .btn.danger { background: var(--danger); }
+    .btn.small { padding: 6px 9px; font-size: 0.85rem; }
+    .btn:disabled { cursor: not-allowed; opacity: 0.5; }
+
+    .question-card {
+      padding: 22px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .question-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-block-end: 12px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      color: var(--primary-strong);
+      font-size: 0.82rem;
+      font-weight: 650;
+    }
+
+    .stem {
+      margin-block: 6px 18px;
+      font-size: 1.18rem;
+      font-weight: 650;
+    }
+
+    .choices {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .choice:hover { border-color: var(--primary); }
+
+    .sequence-list {
+      display: grid;
+      gap: 9px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .sequence-item {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface-2);
+    }
+
+    .sequence-item.dragging { opacity: 0.45; }
+    .drag-handle { color: var(--muted); cursor: grab; font-weight: 800; }
+
+    .move-buttons { display: flex; gap: 5px; }
+
+    .feedback {
+      display: none;
+      margin-block-start: 16px;
+      padding: 16px;
+      border-radius: 12px;
+    }
+
+    .feedback.show { display: block; }
+    .feedback.correct { color: var(--success); background: var(--success-bg); }
+    .feedback.incorrect { color: var(--danger); background: var(--danger-bg); }
+
+    .question-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-block-start: 18px;
+    }
+
+    .plan-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .plan-day {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+    }
+
+    .plan-day.done { background: var(--success-bg); }
+    .plan-day strong { display: block; }
+
+    .error-list {
+      display: grid;
+      gap: 10px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .error-item {
+      padding: 13px;
+      border-inline-start: 5px solid var(--danger);
+      border-radius: 8px;
+      background: var(--danger-bg);
+    }
+
+    .empty {
+      padding: 22px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+    }
+
+    .storage-status {
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: var(--surface-2);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .footer {
+      margin-block-start: 28px;
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      .hero { grid-template-columns: 1fr; }
+      .card, .card.wide { grid-column: 1 / -1; }
+      .shell { padding: 14px; }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f1520;
+        --surface: #182131;
+        --surface-2: #202c3f;
+        --text: #eef4ff;
+        --muted: #b5c0d2;
+        --primary: #67a7ff;
+        --primary-strong: #b9d7ff;
+        --accent: #c09bff;
+        --success: #7ee2aa;
+        --success-bg: #143425;
+        --warning: #ffd47a;
+        --warning-bg: #3b2d0d;
+        --danger: #ff9a91;
+        --danger-bg: #3e1c1a;
+        --border: #344359;
+        --shadow: 0 12px 30px rgba(0,0,0,0.25);
+      }
+    }
+
+    @media print {
+      .tabs, .toolbar, .question-actions, .move-buttons, .storage-status { display: none !important; }
+      .panel { display: block !important; break-before: page; }
+      body { background: var(--paint-5); color: var(--paint-11); }
+      .card, .question-card { box-shadow: none; }
+    }
+  
+    :root { --focus: #6f42c1; --button-text: #ffffff; --button-bg: #185abd; --danger-button: #a51f18; --print-bg: #fff; --print-text: #111; }
+    .btn, .tab.active { background: var(--button-bg); color: var(--button-text); }
+    .btn.danger { background: var(--danger-button); }
+    .eyebrow { font-size: .78rem; letter-spacing: .12em; font-weight: 750; margin-block-end: .8rem; }
+    .score-card h2 { margin-block-start: 0; }
+    .score-card ol { padding-inline-start: 1.3rem; }
+    .score-card li { margin-block-end: .6rem; }
+    .card { min-inline-size: 0; }
+    a { color: var(--primary-strong); overflow-wrap: anywhere; }
+    .hero a { color: var(--button-text); }
+    details { border-block-start: 1px solid var(--border); padding-block: 1rem; }
+    summary { cursor: pointer; font-weight: 700; }
+    .lab { border-inline-start: 4px solid var(--accent); background: var(--surface-2); padding: 1rem; border-radius: .6rem; margin-block-start: .75rem; }
+    .lab h3 { margin-block-start: 0; }
+    .glossary { display: grid; grid-template-columns: minmax(8rem,1fr) 3fr; gap: .8rem; }
+    dt { font-weight: 700; } dd { margin: 0; }
+    .resource-list { padding-inline-start: 1.2rem; } .resource-list li { margin-block-end: 1rem; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    .skip-link { position: absolute; inset-block-start: .25rem; inset-inline-start: .5rem; transform: translateY(-150%); background: var(--surface); padding: .5rem; z-index: 5; }
+    .skip-link:focus { transform: none; }
+    @media (max-width: 540px) {
+      .hero { padding: 20px; }
+      .card, .question-card { padding: 16px; }
+      .field { min-inline-size: 0; inline-size: 100%; }
+      .sequence-item { grid-template-columns: auto 1fr; }
+      .move-buttons { grid-column: 2; }
+      .glossary { grid-template-columns: 1fr; gap: .4rem; }
+      dd { margin-block-end: .6rem; }
+      input[type="file"] { max-inline-size: 100%; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    @media print {
+      :root { --bg: var(--print-bg); --surface: var(--print-bg); --surface-2: var(--print-bg); --text: var(--print-text); --muted: var(--print-text); }
+      .hero { background: var(--print-bg); color: var(--print-text); }
+      #practice, #dashboard, #progress, #review, .skip-link { display: none !important; }
+      .grid { display: block; } .card { margin-block-end: 1rem; }
+      details > * { display: block !important; }
+    }
+</style>
+</head>
+<body>
+  <a class="skip-link" href="#guide-nav">Skip to study navigation</a>
+  <noscript><p>This interactive guide needs JavaScript enabled. Download and open it in Edge or Chrome to use practice and progress.</p></noscript>
+  <main class="shell">
+    <section class="hero" aria-labelledby="guide-title">
+      <div>
+        <div class="eyebrow">AFTER THE MEETING · AUDIENCE EDITION</div>
+        <h1 id="guide-title">AB-620<br>Learn. Build. Practice.</h1>
+        <p>A fresh-start study companion for designing and building integrated AI agent solutions in Copilot Studio.</p>
+      </div>
+      <div class="score-card">
+        <h2>Start here</h2>
+        <ol>
+          <li>Download this HTML file and open it in Edge or Chrome.</li>
+          <li>Read a Learn section, try its lab, then answer a few questions.</li>
+          <li>Use the 21-day plan at your own pace. Review explanations, not just answers.</li>
+        </ol>
+        <p>Share the HTML file—not your progress backup. Each learner starts fresh in a browser with no saved guide progress.</p>
+      </div>
+    </section>
+
+    <div class="notice">
+      <strong>Independent practice, not an exam simulation.</strong> The 24 original practice questions are not actual Microsoft exam questions and are not a complete or exam-weighted bank. Practice accuracy is not a Microsoft scaled exam score or a prediction of passing. Content follows the public study guide verified September 15, 2026; product availability can change.
+    </div>
+    <div class="storage-status" id="storage-banner" role="status"></div>
+
+    <nav id="guide-nav" tabindex="-1" class="tabs" aria-label="Study guide sections">
+      <button class="tab active" data-panel="learn">Learn</button>
+      <button class="tab" data-panel="dashboard">Dashboard</button>
+      <button class="tab" data-panel="practice">Practice</button>
+      <button class="tab" data-panel="plan">21-Day Plan</button>
+      <button class="tab" data-panel="review">Review Errors</button>
+      <button class="tab" data-panel="progress">Progress</button>
+    </nav>
+
+
+    <section class="panel active" id="learn" aria-label="Learn the concepts">
+      <div class="grid">
+        <article class="card full">
+          <span class="eyebrow">YOUR LEARNING MAP</span>
+          <h2>Think in outcomes, boundaries, and evidence</h2>
+          <p>For every scenario, identify the audience, what the agent must know or do, which identity can access it, how failure is handled, and how success will be measured. Learn the distinctions below before using the practice bank.</p>
+          <p class="muted">Official domain weights describe the exam outline—not this small practice bank. This guide is a starting point; use Microsoft Learn to cover every objective.</p>
+        </article>
+        <article class="card full">
+          <span class="pill">01 · Plan and configure agent solutions · 30–35%</span>
+          <h2>Design a safe, useful agent</h2>
+          <p><strong>Start with a bounded business outcome.</strong> Define internal or external audience, supported tasks, escalation, channels, and deployment needs. List enterprise systems and reusable components before choosing tools. Separate maker permissions, the signed-in user's access, and the connection identity used by each action.</p>
+          <details open><summary>Identity, governance, and responsible AI</summary>
+            <p><strong>Authentication</strong> establishes who is acting; <strong>authorization</strong> decides what that identity may access. A signed-in user is not automatically allowed to read every source or execute every action. Preserve source permissions and test access with different roles.</p>
+            <p>Use least privilege and approved environments and connectors. Data policies (often called DLP) govern connector use and data movement; they do not replace authorization checks. Define sensitive-data handling, retention, transparent limitations, and human escalation. Treat retrieved text as untrusted data—not instructions to override policy.</p>
+          </details>
+          <details><summary>Agent flows, topics, and response design</summary>
+            <p><strong>A topic</strong> manages a conversation path with variables, conditions, tools, knowledge, and responses. <strong>An agent flow</strong> performs work through mapped inputs, actions, and outputs. A topic can call a flow; avoid confusing the conversational path with the transaction.</p>
+            <p>For a flow, define inputs and outputs, connect actions, validate data, handle failures, and use human review for consequential work. Test approval, rejection, timeout, and connector-error paths. Inspect run history rather than assuming a friendly response means the action succeeded.</p>
+            <p>Use generative answers for grounded synthesis, custom prompts for a focused transformation, HTTP/API requests for endpoint calls, and adaptive cards for structured display or input. Validate card outputs and missing values before using them in actions.</p>
+          </details>
+          <div class="lab"><h3>Try it · Design an employee request assistant</h3>
+            <p>In an approved nonproduction environment with synthetic data, sketch an internal assistant that explains a policy and creates a mock request. Define allowed roles, the knowledge source, the action identity, one approval step, and a fallback. Build a simple topic and a flow that accepts a request type and returns a mock reference.</p>
+            <p><strong>Evidence to keep:</strong> an architecture sketch, input/output mapping, and test results for an allowed request, missing input, denied access, and rejection. Explain why a public anonymous design would need different access boundaries.</p>
+          </div>
+        </article>
+        <article class="card full">
+          <span class="pill">02 · Integrate and extend agents in Copilot Studio · 40–45%</span>
+          <h2>Choose the right integration—not just an available one</h2>
+          <details open><summary>Knowledge versus actions</summary>
+            <p><strong>Knowledge grounding</strong> retrieves evidence to answer a question. <strong>A tool or action</strong> performs work or retrieves structured data through a defined operation. “Explain our return policy” and “submit a return” require different capabilities and safeguards.</p>
+            <ul>
+              <li><strong>Copilot connectors:</strong> make enterprise content available through supported Microsoft 365/Copilot knowledge integrations. Check source indexing, identity, and permission behavior.</li>
+              <li><strong>Power Platform connectors:</strong> expose service capabilities, including supported data and action operations. Review the connector's supported knowledge or tool use and connection identity.</li>
+              <li><strong>Azure AI Search:</strong> retrieval over an indexed corpus. Check index quality, connection authorization, relevance, and citations; do not assume an index automatically preserves every source permission.</li>
+            </ul>
+          </details>
+          <details><summary>Connectors, REST APIs, MCP, and computer use</summary>
+            <p>Reuse a governed custom connector when it already fits. Use a supported REST API integration for an endpoint with a clear schema and authentication model. MCP (Model Context Protocol) exposes tools through a standard interface; still inspect permissions, descriptions, inputs, outputs, and failure behavior.</p>
+            <p>Computer use interacts with an application UI. Consider it when appropriate interfaces are unavailable; UI changes, credentials, and unexpected screens create extra risks. Bound actions to approved applications, use nonproduction identities, monitor execution, and stop or escalate on uncertainty. Never treat computer use as a shortcut around authorization.</p>
+          </details>
+          <details><summary>Multi-agent collaboration and Azure</summary>
+            <p>Give each specialist a distinct responsibility and define routing, handoff inputs/outputs, timeout, and fallback. Reuse existing Copilot Studio agents where appropriate. Foundry agents support specialist agent capabilities; Fabric data agents support governed analytical questions. A2A (agent-to-agent) supports agent interoperability; MCP is primarily a tool interface, not the same collaboration contract.</p>
+            <p><strong>Azure AI Search</strong> provides retrieval; the <strong>Foundry model catalog</strong> supports model selection for supported custom prompt scenarios; <strong>Application Insights</strong> provides runtime telemetry. Choosing a model does not grant data access or ensure grounding. Check region, licensing, availability, and identity requirements in current documentation.</p>
+          </details>
+          <div class="lab"><h3>Try it · Compare two integration designs</h3>
+            <p>Using synthetic policy documents and a mock order service, draw one path to answer a policy question and another to retrieve an order status. Choose a knowledge source and a tool separately; document schemas, identity, permission checks, and failure responses. Then sketch a handoff to an analytical specialist.</p>
+            <p><strong>Evidence to keep:</strong> a decision table explaining why you selected a connector, API, or MCP interface; a denied-access test; and a failed-handoff response. If resources are available, test a small approved sample index and inspect retrieval and telemetry. A paper walkthrough is fine when you lack access.</p>
+          </div>
+        </article>
+        <article class="card full">
+          <span class="pill">03 · Test and manage agents · 20–25%</span>
+          <h2>Prove quality, then move changes safely</h2>
+          <details open><summary>Evaluation and operational evidence</summary>
+            <p>Create representative test sets covering normal questions, ambiguity, missing knowledge, denied access, unsafe requests, tool failure, and handoff failure. Choose evaluation methods and success criteria before running tests. Inspect failed results, categorize causes, make a targeted change, then rerun the same tests to compare outcomes.</p>
+            <p><strong>Evaluation</strong> checks response and task quality against test cases. <strong>Monitoring</strong> observes runtime health, latency, and failures. Use flow run history for a failed action, Application Insights for telemetry, and evaluation results for quality regressions. Collect only appropriate data and avoid unnecessary sensitive content in logs.</p>
+          </details>
+          <details><summary>Application lifecycle management (ALM)</summary>
+            <p>Package agents and dependencies in solutions. Use environment variables for environment-specific settings and connection references to bind connector connections. Neither mechanism is a blanket secret store: use approved credential handling. Validate dependencies and target settings when moving changes through Power Platform Pipelines.</p>
+            <p>Separate development, test, and production. Test permissions, connections, and user journeys after deployment and before activation. Keep a versioned baseline and a recovery plan; successful import alone is not proof of runtime correctness.</p>
+          </details>
+          <div class="lab"><h3>Try it · Run a controlled improvement cycle</h3>
+            <p>Write six synthetic test cases: two normal, one ambiguous, one denied-access, one missing-knowledge, and one failed-tool case. Define the expected behavior for each. Run a baseline, change one instruction or tool mapping, and rerun. Walk through packaging the agent and dependencies in a solution with target environment values.</p>
+            <p><strong>Evidence to keep:</strong> a before/after results table, one categorized failure, and a deployment checklist with connection validation and a recovery step.</p>
+          </div>
+        </article>
+        <article class="card wide">
+          <h2>Quick glossary</h2>
+          <dl class="glossary">
+            <dt>Grounding</dt><dd>Using retrieved evidence to inform an answer; still verify relevance and access.</dd>
+            <dt>Orchestration</dt><dd>Selecting and coordinating conversation paths, tools, and specialist agents.</dd>
+            <dt>Connection reference</dt><dd>A solution component referring to a connector connection for environment-aware use.</dd>
+            <dt>Environment variable</dt><dd>A configurable value that can differ between environments.</dd>
+            <dt>MCP / A2A</dt><dd>Tool interoperability / agent-to-agent interoperability; choose by what must communicate.</dd>
+            <dt>Test set</dt><dd>A repeatable collection of cases used to assess behavior and compare changes.</dd>
+            <dt>Telemetry</dt><dd>Operational signals such as failures, latency, and execution events.</dd>
+            <dt>Least privilege</dt><dd>Granting only the access necessary for a defined task.</dd>
+          </dl>
+        </article>
+        <article class="card">
+          <h2>Official resources</h2>
+          <p>These links need internet access. All guide content and practice work offline.</p>
+          <ul class="resource-list">
+            <li><a href="https://learn.microsoft.com/en-us/credentials/certifications/resources/study-guides/ab-620" target="_blank" rel="noopener noreferrer">AB-620 official study guide (opens a new tab)</a></li>
+            <li><a href="https://learn.microsoft.com/en-us/credentials/certifications/ai-agent-builder-associate/" target="_blank" rel="noopener noreferrer">AI Agent Builder Associate certification (opens a new tab)</a></li>
+          </ul>
+          <p class="muted">Outline verified September 15, 2026; study guide updated April 21, 2026. Use the official guide's objective links for current product documentation.</p>
+        </article>
+        <article class="card full notice">
+          <h2>Practice safely</h2><p>Hands-on work is optional and separate from this offline file. Use an approved nonproduction environment, synthetic data, least-privileged test accounts, and budget controls. Do not put real customer data, secrets, or production credentials into exercises. Ask your administrator before enabling connectors, agents, or Azure resources; availability and charges vary.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="dashboard">
+      <div class="grid">
+        <article class="card">
+          <h2>Questions attempted</h2>
+          <div class="metric" id="metric-attempted">0</div>
+          <p class="muted">Distinct questions with a checked answer (24 in the bank)</p>
+        </article>
+        <article class="card">
+          <h2>Current accuracy</h2>
+          <div class="metric" id="metric-accuracy">Not started</div>
+          <p class="muted">Latest checked answer per attempted question; no partial credit</p>
+        </article>
+        <article class="card">
+          <h2>Plan completed</h2>
+          <div class="metric" id="metric-plan">0/21</div>
+          <p class="muted">Check off each day as you finish</p>
+        </article>
+        <article class="card wide">
+          <h2>A balanced study loop</h2>
+          <ol class="priority-list">
+            <li><strong>Learn:</strong> work through all three official domains.</li>
+            <li><strong>Build:</strong> try a safe lab and explain your architecture choices.</li>
+            <li><strong>Practice and reflect:</strong> answer questions, read the explanations, and revisit missed concepts.</li>
+          </ol>
+        </article>
+        <article class="card">
+          <h2>Recommended next action</h2>
+          <p id="next-action">Read the Learn sections, then try mixed practice.</p>
+          <button class="btn" id="start-recommended">Start recommended practice</button>
+        </article>
+        <article class="card full">
+          <h2>How to use the practice bank</h2>
+          <p>The bank has 10 single-choice, 6 multi-select, 5 sequence, and 3 matching questions. Domain coverage is 5 planning, 14 integration, and 5 testing questions, so use the Learn sections and official resources for balanced study. Unanswered questions are offered first within each filter, then questions repeat. There is no timed exam simulation. Explain why alternatives do not fit.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="panel" id="practice">
+      <div class="toolbar">
+        <div class="field">
+          <label for="mode-filter">Practice mode</label>
+          <select id="mode-filter">
+            <option value="mixed">Mixed practice</option>
+            <option value="sequence">Sequences only</option>
+            <option value="single">Single choice</option>
+            <option value="multi">Select all that apply</option>
+            <option value="match">Matching</option>
+            <option value="incorrect">Previously incorrect</option>
+            <option value="bookmarked">Bookmarked</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="domain-filter">Domain</label>
+          <select id="domain-filter">
+            <option value="all">All domains</option>
+            <option value="Plan and configure">Plan and configure</option>
+            <option value="Integrate and extend">Integrate and extend</option>
+            <option value="Test and manage">Test and manage</option>
+          </select>
+        </div>
+        <button class="btn" id="new-question">New question</button>
+      </div>
+      <div id="question-host"></div>
+    </section>
+
+    <section class="panel" id="plan">
+      <div class="card full">
+        <h2>Your flexible 21-day study plan</h2>
+        <p>Suggested daily rhythm: recall a concept, read, try a safe lab, answer a few questions, and explain mistakes. Split or repeat days to suit your schedule. All checkpoints reuse this 24-question bank; repeated answers are not new independent evidence. Use nonproduction environments and synthetic data for every build task.</p>
+        <div class="plan-list" id="plan-list"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="review">
+      <div class="card full">
+        <h2>Error Review</h2>
+        <p>Re-answer missed questions after one day, three days, and seven days. Focus on the clue and dependency that changed the answer.</p>
+        <div id="error-host"></div>
+      </div>
+    </section>
+
+    <section class="panel" id="progress">
+      <div class="grid">
+        <article class="card wide">
+          <h2>Domain accuracy</h2>
+          <div id="domain-stats"></div>
+        </article>
+        <article class="card">
+          <h2>Continue next week</h2>
+          <p>Only your attempts, bookmarks, and day completions are saved locally when browser storage is available. There is no account sync, tracking, or upload. Other people using this same browser/file may see that local progress; use a separate browser profile or reset. Export your own JSON backup to restore in this audience edition. Browser storage may be cleared or scoped differently when the file moves. Sharing the HTML does not embed your saved progress.</p>
+          <div class="storage-status" id="storage-status"></div>
+          <div class="question-actions">
+            <button class="btn" id="export-progress">Export progress</button>
+            <label for="import-progress">Import your audience-edition backup</label>
+            <input id="import-progress" type="file" accept=".json,application/json">
+            <button class="btn danger" id="reset-progress">Reset</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      Use Microsoft Learn and product documentation to verify changing product behavior. This study tool is not affiliated with the exam delivery provider and contains no exam dumps.
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const questions = [
+      {
+        id: "plan-identity-1", type: "single", domain: "Plan and configure", skill: "Plan an agent solution",
+        stem: "A public-facing agent must call an enterprise API while preventing anonymous users from directly accessing the API. Which design decision should be made first?",
+        choices: [
+          ["a", "Choose the agent and API identity and authentication pattern"],
+          ["b", "Create an evaluation test set"],
+          ["c", "Configure Application Insights"],
+          ["d", "Add an adaptive card"]
+        ],
+        answer: ["a"],
+        explanation: "Identity is a prerequisite. The API connection and authorization boundary must be designed before tools, monitoring, or response presentation. Key clue: public-facing plus protected enterprise API."
+      },
+      {
+        id: "plan-audience-2", type: "single", domain: "Plan and configure", skill: "Plan an agent solution",
+        stem: "An agent is intended only for employees and uses knowledge that must honor each employee's existing permissions. Which planning combination is most important?",
+        choices: [
+          ["a", "Internal channel, authenticated users, and permission-aware knowledge access"],
+          ["b", "Anonymous website channel and shared service credentials"],
+          ["c", "Public website channel and an unrestricted index"],
+          ["d", "Computer use with a common administrator account"]
+        ],
+        answer: ["a"],
+        explanation: "The audience, channel, identity, and knowledge authorization model must align. Existing permissions should be preserved rather than replaced with a shared high-privilege identity."
+      },
+      {
+        id: "plan-reuse-3", type: "multi", domain: "Plan and configure", skill: "Plan an agent solution",
+        stem: "You are planning reusable agent components across development, test, and production. Which TWO choices best support reuse and environment-specific configuration?",
+        choices: [
+          ["a", "Package the agent and related components in a solution"],
+          ["b", "Use environment variables and connection references"],
+          ["c", "Hard-code production URLs in every topic"],
+          ["d", "Create separate unmanaged copies with different names"]
+        ],
+        answer: ["a", "b"],
+        explanation: "Solutions provide the ALM container, while environment variables and connection references separate configuration from the component definition."
+      },
+      {
+        id: "flow-human-4", type: "sequence", domain: "Plan and configure", skill: "Create and monitor agent flows",
+        stem: "Put the steps for a human-in-the-loop agent flow in the best order.",
+        sequence: [
+          "Define the flow trigger and required input parameters",
+          "Add automated actions and map their inputs",
+          "Add the approval or human review step",
+          "Handle approval, rejection, and failure outcomes",
+          "Return output values and test the complete flow",
+          "Add the tested flow to the agent or topic"
+        ],
+        explanation: "Inputs and automated work come before human review. Every human outcome needs handling before outputs are returned. The flow should be tested before being exposed through the agent."
+      },
+      {
+        id: "topic-response-5", type: "multi", domain: "Plan and configure", skill: "Configure topics",
+        stem: "A topic must call an external endpoint and then present a structured interactive response. Which TWO capabilities directly address the requirement?",
+        choices: [
+          ["a", "Send an HTTP request or use an API tool"],
+          ["b", "Use an adaptive card for the response"],
+          ["c", "Create a deployment pipeline"],
+          ["d", "Create a test set before adding the topic"]
+        ],
+        answer: ["a", "b"],
+        explanation: "The endpoint call provides the data, and the adaptive card provides structured interaction. ALM and evaluation matter later but do not directly implement the requested runtime behavior."
+      },
+      {
+        id: "knowledge-choice-6", type: "single", domain: "Integrate and extend", skill: "Connect to enterprise knowledge sources",
+        stem: "A large curated document corpus already uses Azure AI Search indexes and must provide grounded responses. Which integration is the closest fit?",
+        choices: [
+          ["a", "Connect the agent to Azure AI Search"],
+          ["b", "Use computer use to open every document"],
+          ["c", "Create a Fabric data agent for transactional clicking"],
+          ["d", "Use only an adaptive card"]
+        ],
+        answer: ["a"],
+        explanation: "The scenario explicitly identifies an existing Azure AI Search index and grounded retrieval requirement."
+      },
+      {
+        id: "mcp-purpose-7", type: "single", domain: "Integrate and extend", skill: "Add tools to agents",
+        stem: "A team wants a standardized way for an agent to discover and invoke tools exposed by an MCP server. What should be configured?",
+        choices: [
+          ["a", "An MCP tool connection"],
+          ["b", "A test set only"],
+          ["c", "A knowledge-only website source"],
+          ["d", "A Power Platform pipeline"]
+        ],
+        answer: ["a"],
+        explanation: "MCP is the named interoperability mechanism for discovering and invoking tools exposed by an MCP server."
+      },
+      {
+        id: "api-choice-8", type: "single", domain: "Integrate and extend", skill: "Add tools to agents",
+        stem: "An organization already has a governed Power Platform custom connector for an internal API. What is the most direct way to reuse it in an agent?",
+        choices: [
+          ["a", "Add a tool using the existing custom connector"],
+          ["b", "Rebuild the API as a computer-use action"],
+          ["c", "Copy the OpenAPI operations into agent instructions"],
+          ["d", "Create a Fabric data agent"]
+        ],
+        answer: ["a"],
+        explanation: "The custom connector already encapsulates the governed API definition and connection behavior, so reusing it is the direct choice."
+      },
+      {
+        id: "multi-design-9", type: "multi", domain: "Integrate and extend", skill: "Configure multi-agent collaboration",
+        stem: "You are designing an orchestrator with specialist agents. Which THREE definitions reduce routing ambiguity?",
+        choices: [
+          ["a", "A clear responsibility and boundary for each specialist"],
+          ["b", "The handoff inputs and expected outputs"],
+          ["c", "Fallback behavior when no specialist can complete the task"],
+          ["d", "Identical broad instructions for every agent"],
+          ["e", "A requirement that all agents call every tool"]
+        ],
+        answer: ["a", "b", "c"],
+        explanation: "Boundaries, handoff contracts, and fallback behavior reduce routing ambiguity. Overlapping instructions and unnecessary tool calls increase ambiguity."
+      },
+      {
+        id: "multi-sequence-10", type: "sequence", domain: "Integrate and extend", skill: "Configure multi-agent collaboration",
+        stem: "Order the major steps for implementing a multi-agent solution.",
+        sequence: [
+          "Define the business outcome and specialist agent responsibilities",
+          "Select the collaboration pattern and participating agent types",
+          "Integrate or add the specialist agents",
+          "Configure routing, handoff data, and fallback behavior",
+          "Test normal, ambiguous, and failed handoffs",
+          "Monitor results and refine boundaries"
+        ],
+        explanation: "Design precedes integration. Handoff behavior can be configured only after agents are available, and testing should include boundary and failure cases before operational refinement."
+      },
+      {
+        id: "foundry-agent-11", type: "single", domain: "Integrate and extend", skill: "Configure multi-agent collaboration",
+        stem: "A specialist agent already exists in Microsoft Foundry and must participate in a Copilot Studio multi-agent solution. What is the relevant integration choice?",
+        choices: [
+          ["a", "Integrate the Foundry agent"],
+          ["b", "Convert it to an adaptive card"],
+          ["c", "Use it only as a static knowledge file"],
+          ["d", "Replace it with a deployment pipeline"]
+        ],
+        answer: ["a"],
+        explanation: "The public AB-620 outline explicitly includes integrating a Foundry agent as part of multi-agent collaboration."
+      },
+      {
+        id: "fabric-agent-12", type: "single", domain: "Integrate and extend", skill: "Configure multi-agent collaboration",
+        stem: "A specialist must answer analytical questions over governed Fabric data. Which agent type is the most direct participant?",
+        choices: [
+          ["a", "A Fabric data agent"],
+          ["b", "A computer-use agent that clicks through reports"],
+          ["c", "An anonymous website agent"],
+          ["d", "An adaptive card with hard-coded totals"]
+        ],
+        answer: ["a"],
+        explanation: "A Fabric data agent is designed for governed data-oriented analytical interaction and is a named multi-agent integration in the skills outline."
+      },
+      {
+        id: "a2a-13", type: "single", domain: "Integrate and extend", skill: "Configure multi-agent collaboration",
+        stem: "Two independently built agents must collaborate through an agent-to-agent interoperability protocol. Which approach aligns to the requirement?",
+        choices: [
+          ["a", "Use the A2A protocol"],
+          ["b", "Use an adaptive card"],
+          ["c", "Use only environment variables"],
+          ["d", "Use a test set as the runtime transport"]
+        ],
+        answer: ["a"],
+        explanation: "A2A is the protocol named for agent-to-agent interoperability. The other choices serve presentation, configuration, or evaluation."
+      },
+      {
+        id: "azure-grounding-14", type: "sequence", domain: "Integrate and extend", skill: "Integrate agents with Azure",
+        stem: "Order the high-level steps for grounding an agent with Azure AI Search through Foundry.",
+        sequence: [
+          "Prepare or select the Azure AI Search resource and searchable index",
+          "Configure the required identity, permissions, and connection",
+          "Connect the Azure AI Search capability through the Foundry integration",
+          "Configure the agent's grounded response behavior",
+          "Test retrieval relevance, permissions, and citations",
+          "Monitor results and refine the index or instructions"
+        ],
+        explanation: "The resource and index must exist before connection. Access must be authorized before use. Runtime configuration is followed by testing and operational refinement."
+      },
+      {
+        id: "foundry-model-15", type: "single", domain: "Integrate and extend", skill: "Integrate agents with Azure",
+        stem: "A custom prompt requires a model available through the Foundry model catalog. Which capability should be configured?",
+        choices: [
+          ["a", "Configure the custom prompt to use the selected Foundry model"],
+          ["b", "Create a website knowledge source"],
+          ["c", "Use a Power Platform pipeline as the model"],
+          ["d", "Replace the prompt with an environment variable"]
+        ],
+        answer: ["a"],
+        explanation: "The requirement directly names a custom prompt and the Foundry model catalog. Environment variables may hold configuration but are not the model execution capability."
+      },
+      {
+        id: "appinsights-16", type: "multi", domain: "Integrate and extend", skill: "Integrate agents with Azure",
+        stem: "Which TWO goals best fit Application Insights in an agent solution?",
+        choices: [
+          ["a", "Observe runtime telemetry and failures"],
+          ["b", "Investigate performance and operational behavior"],
+          ["c", "Define the agent's business audience"],
+          ["d", "Replace the agent's authentication strategy"]
+        ],
+        answer: ["a", "b"],
+        explanation: "Application Insights is an operational monitoring and troubleshooting capability. Audience and authentication are architecture decisions."
+      },
+      {
+        id: "azure-match-17", type: "match", domain: "Integrate and extend", skill: "Integrate agents with Azure",
+        stem: "Match each requirement to the best-fit capability.",
+        options: ["Azure AI Search", "Application Insights", "Foundry model catalog", "A2A protocol"],
+        pairs: [
+          ["Ground responses over a searchable enterprise corpus", "Azure AI Search"],
+          ["Monitor runtime failures and performance", "Application Insights"],
+          ["Select a model for a custom prompt", "Foundry model catalog"],
+          ["Enable protocol-based agent-to-agent collaboration", "A2A protocol"]
+        ],
+        explanation: "The options map to retrieval, monitoring, model selection, and agent interoperability respectively."
+      },
+      {
+        id: "eval-method-18", type: "single", domain: "Test and manage", skill: "Evaluate agent performance",
+        stem: "You need repeatable evidence that a change improved agent responses across representative prompts. What should you do first?",
+        choices: [
+          ["a", "Create a representative test set"],
+          ["b", "Publish immediately"],
+          ["c", "Change the production connection"],
+          ["d", "Add more channels"]
+        ],
+        answer: ["a"],
+        explanation: "A repeatable evaluation starts with representative test cases. The evaluation method and result review follow."
+      },
+      {
+        id: "eval-sequence-19", type: "sequence", domain: "Test and manage", skill: "Evaluate agent performance",
+        stem: "Order the continuous evaluation cycle.",
+        sequence: [
+          "Create or update a representative test set",
+          "Choose an evaluation method and success criteria",
+          "Run the evaluation",
+          "Review and categorize failed results",
+          "Revise instructions, knowledge, or tools",
+          "Rerun the test set and compare results"
+        ],
+        explanation: "The test set and criteria define what will be measured. Results then guide targeted changes, which must be retested against the same evidence."
+      },
+      {
+        id: "alm-components-20", type: "multi", domain: "Test and manage", skill: "Implement ALM",
+        stem: "Which THREE items are central to moving an agent solution between environments?",
+        choices: [
+          ["a", "A solution containing the agent and related components"],
+          ["b", "Environment variables for environment-specific values"],
+          ["c", "Connection references for connectors"],
+          ["d", "Hard-coded production endpoints in instructions"],
+          ["e", "A different unmanaged copy for every maker"]
+        ],
+        answer: ["a", "b", "c"],
+        explanation: "Solutions, environment variables, and connection references support controlled, environment-aware movement. Hard-coded values and unmanaged copies undermine ALM."
+      },
+      {
+        id: "alm-sequence-21", type: "sequence", domain: "Test and manage", skill: "Implement ALM",
+        stem: "Order the high-level ALM process for an existing agent.",
+        sequence: [
+          "Create or select a solution",
+          "Add the existing agent and dependent components",
+          "Define environment variables and connection references",
+          "Validate the solution in the source environment",
+          "Move the solution through the Power Platform pipeline",
+          "Set target-environment values, validate, and activate"
+        ],
+        explanation: "The solution container and dependencies come first. Environment-aware configuration must be defined before deployment. Target settings and validation occur after movement."
+      },
+      {
+        id: "monitor-match-22", type: "match", domain: "Test and manage", skill: "Evaluate and monitor",
+        stem: "Match the symptom to the most useful first evidence source.",
+        options: ["Agent flow run history", "Application Insights", "Evaluation test results", "Environment variable configuration"],
+        pairs: [
+          ["A connector action failed during a flow run", "Agent flow run history"],
+          ["Runtime latency and exceptions increased", "Application Insights"],
+          ["A response-quality regression appeared after instruction changes", "Evaluation test results"],
+          ["A deployment calls the wrong endpoint", "Environment variable configuration"]
+        ],
+        explanation: "Start with the evidence source closest to the failure layer: flow execution, operational telemetry, evaluation quality, or environment configuration."
+      },
+      {
+        id: "computer-use-23", type: "multi", domain: "Integrate and extend", skill: "Configure computer use",
+        stem: "Which THREE controls are especially important when configuring computer use for an agent?",
+        choices: [
+          ["a", "Bounded actions and approved applications"],
+          ["b", "Credential and identity handling"],
+          ["c", "Exception handling and human escalation"],
+          ["d", "Unrestricted administrator access for every session"],
+          ["e", "Skipping monitoring to improve speed"]
+        ],
+        answer: ["a", "b", "c"],
+        explanation: "Computer use needs constrained scope, secure identity handling, and safe exception paths. Unrestricted privilege and absent monitoring increase risk."
+      },
+      {
+        id: "integration-choice-24", type: "match", domain: "Integrate and extend", skill: "Choose an integration pattern",
+        stem: "Match each scenario to the most direct integration pattern.",
+        options: ["Existing custom connector", "MCP tool", "REST API tool", "Fabric data agent"],
+        pairs: [
+          ["A governed connector already exists in Power Platform", "Existing custom connector"],
+          ["Tools are exposed through a Model Context Protocol server", "MCP tool"],
+          ["An endpoint must be added directly from an API definition", "REST API tool"],
+          ["A specialist answers analytical questions over governed Fabric data", "Fabric data agent"]
+        ],
+        explanation: "Choose the integration that directly matches the existing asset or protocol instead of rebuilding it through a less suitable mechanism."
+      }
+    ];
+
+    const planDays = [
+      ["Day 1", "Baseline and architecture", "Read the learning map. Try 3 mixed questions, then map audience, channels, deployment, reuse, and responsible AI."],
+      ["Day 2", "Identity, security, and governance", "Map maker identity, user identity, authentication, data access, DLP, and least privilege."],
+      ["Day 3", "Agent flows", "Build inputs, outputs, connector actions, error handling, and human review."],
+      ["Day 4", "Topics and tools", "Practice variables, agent flows, generative answers, custom prompts, APIs, and response formatting."],
+      ["Day 5", "Adaptive cards", "Create information and input cards; map outputs and test missing values."],
+      ["Day 6", "Planning case study", "Design a complete enterprise agent solution from a blank page."],
+      ["Day 7", "Planning checkpoint", "Review the 5 planning-domain questions and explain each answer. Revisit one concept that needs clarification."],
+      ["Day 8", "Enterprise knowledge", "Compare Copilot connectors, Power Platform connectors, and Azure AI Search."],
+      ["Day 9", "MCP, connectors, and APIs", "Practice authentication, schemas, input/output mapping, and error handling."],
+      ["Day 10", "Computer use", "Study readiness, credentials, action boundaries, monitoring, and escalation."],
+      ["Day 11", "Multi-agent design", "Define an orchestrator and specialist boundaries, inputs, outputs, and fallbacks."],
+      ["Day 12", "Multi-agent implementation", "Integrate a Foundry, Fabric, existing, or A2A-connected agent."],
+      ["Day 13", "Azure integration", "Practice Azure AI Search, Foundry models, identity, and Application Insights."],
+      ["Day 14", "Integration checkpoint", "Review the 14 integration-domain questions over one or more sittings. Explain the integration choice and its access boundary."],
+      ["Day 15", "Evaluation", "Create a test set, choose methods, review failures, revise, and rerun."],
+      ["Day 16", "ALM", "Package an agent, configure variables and connections, and walk through a pipeline."],
+      ["Day 17", "Monitoring", "Map symptoms to test results, flow history, permissions, and Application Insights."],
+      ["Day 18", "Dependency practice", "Work through the 5 sequence questions. Explain each dependency; reorder again later without reading the explanation."],
+      ["Day 19", "Whole-bank review", "Use mixed practice to cover all 24 questions across several sittings. Repeated questions are revision, not a fresh exam."],
+      ["Day 20", "Concept repair", "Use your latest missed answers and bookmarks to choose a concept to rebuild. Explain the correction aloud."],
+      ["Day 21", "Consolidate and continue", "Review all three domains, repeat selected missed questions, and compare your coverage with the official study guide. Plan further learning beyond this bank."]
+    ];
+
+    const APP = "ab620-audience-study-guide";
+    const STORAGE_KEY = "ab620-audience-study-guide-v1-20260915";
+    const defaultState = { attempts: {}, bookmarks: [], completedDays: [] };
+
+    let storageAvailable = false;
+    let state = loadState();
+    let currentQuestion = null;
+    let currentSequence = [];
+
+    function loadState() {
+      try {
+        const probe = STORAGE_KEY + "-probe";
+        localStorage.setItem(probe, "1");
+        localStorage.removeItem(probe);
+        storageAvailable = true;
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return structuredClone(defaultState);
+        try { return validatePayload(JSON.parse(saved)); }
+        catch { return structuredClone(defaultState); }
+      } catch {
+        storageAvailable = false;
+        return structuredClone(defaultState);
+      }
+    }
+
+    function saveState() {
+      if (storageAvailable) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify({app: APP, version: 1, state})); }
+        catch { storageAvailable = false; }
+      }
+      updateStorageStatus();
+    }
+
+    function updateStorageStatus() {
+      const message = storageAvailable
+        ? "Local saving is active in this browser. Progress is not uploaded or included in the HTML; export a personal backup before moving or clearing browser data."
+        : "Local saving is unavailable. Progress lasts only while this page is open. Export a personal backup before closing, and import it next time.";
+      document.getElementById("storage-status").textContent = message;
+      document.getElementById("storage-banner").textContent = message;
+    }
+
+    function validatePayload(payload) {
+      const exact = (obj, keys) => obj && typeof obj === "object" && !Array.isArray(obj)
+        && Object.keys(obj).length === keys.length && keys.every(k => Object.hasOwn(obj, k));
+      const fail = () => { throw new Error("Invalid audience progress"); };
+      if (!exact(payload, ["app", "version", "state"]) || payload.app !== APP || payload.version !== 1) fail();
+      const s = payload.state;
+      if (!exact(s, ["attempts", "bookmarks", "completedDays"])) fail();
+      if (!s.attempts || typeof s.attempts !== "object" || Array.isArray(s.attempts)) fail();
+      const ids = new Set(questions.map(q => q.id));
+      if (!Array.isArray(s.bookmarks) || s.bookmarks.some(id => !ids.has(id)) || new Set(s.bookmarks).size !== s.bookmarks.length) fail();
+      if (!Array.isArray(s.completedDays) || s.completedDays.some(d => !Number.isInteger(d) || d < 0 || d >= planDays.length)
+        || new Set(s.completedDays).size !== s.completedDays.length) fail();
+      const clean = structuredClone(defaultState);
+      for (const [id, a] of Object.entries(s.attempts)) {
+        const q = questions.find(item => item.id === id);
+        if (!q || !exact(a, ["count", "correct", "lastAnswer", "lastAttempt"])) fail();
+        if (!Number.isSafeInteger(a.count) || a.count < 1 || a.count > 1000000 || typeof a.correct !== "boolean") fail();
+        if (typeof a.lastAttempt !== "string" || !/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/.test(a.lastAttempt) || !Number.isFinite(Date.parse(a.lastAttempt))) fail();
+        const answer = a.lastAnswer;
+        if (!Array.isArray(answer) || answer.some(v => typeof v !== "string")) fail();
+        let expected;
+        if (q.type === "single" || q.type === "multi") {
+          if (!answer.length || new Set(answer).size !== answer.length || answer.some(v => !q.choices.some(c => c[0] === v)) || (q.type === "single" && answer.length !== 1)) fail();
+          expected = arraysEqual([...answer].sort(), [...q.answer].sort());
+        } else if (q.type === "sequence") {
+          if (answer.length !== q.sequence.length || new Set(answer).size !== answer.length || answer.some(v => !q.sequence.includes(v))) fail();
+          expected = arraysEqual(answer, q.sequence);
+        } else {
+          if (answer.length !== q.pairs.length || answer.some(v => !q.options.includes(v))) fail();
+          expected = q.pairs.every((pair, i) => pair[1] === answer[i]);
+        }
+        if (expected !== a.correct) fail();
+        clean.attempts[id] = {count: a.count, correct: expected, lastAnswer: [...answer], lastAttempt: a.lastAttempt};
+      }
+      clean.bookmarks = [...s.bookmarks];
+      clean.completedDays = [...s.completedDays];
+      return clean;
+    }
+
+    function shuffled(items) {
+      const copy = [...items];
+      for (let index = copy.length - 1; index > 0; index -= 1) {
+        const target = Math.floor(Math.random() * (index + 1));
+        [copy[index], copy[target]] = [copy[target], copy[index]];
+      }
+      return copy;
+    }
+
+    function switchPanel(panelId) {
+      document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active", panel.id === panelId));
+      document.querySelectorAll(".tab").forEach(tab => {
+        const active = tab.dataset.panel === panelId;
+        tab.classList.toggle("active", active);
+        tab.setAttribute("aria-current", active ? "page" : "false");
+      });
+      if (panelId === "review") renderErrors();
+      if (panelId === "progress") renderProgress();
+    }
+
+    function filteredQuestions() {
+      const mode = document.getElementById("mode-filter").value;
+      const domain = document.getElementById("domain-filter").value;
+      let pool = questions.filter((question) => domain === "all" || question.domain === domain);
+      if (["single", "multi", "sequence", "match"].includes(mode)) pool = pool.filter((question) => question.type === mode);
+      if (mode === "incorrect") pool = pool.filter((question) => state.attempts[question.id] && !state.attempts[question.id].correct);
+      if (mode === "bookmarked") pool = pool.filter((question) => state.bookmarks.includes(question.id));
+      return pool;
+    }
+
+    function chooseQuestion() {
+      const pool = filteredQuestions();
+      if (!pool.length) {
+        document.getElementById("question-host").innerHTML = '<div class="empty">No questions match this filter yet. Try another practice mode.</div>';
+        currentQuestion = null;
+        return;
+      }
+      const unattempted = pool.filter((question) => !state.attempts[question.id]);
+      const source = unattempted.length ? unattempted : pool;
+      const candidates = source.filter((question) => question.id !== currentQuestion?.id);
+      currentQuestion = shuffled(candidates.length ? candidates : source)[0];
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const host = document.getElementById("question-host");
+      if (!currentQuestion) return;
+      const bookmarked = state.bookmarks.includes(currentQuestion.id);
+      let interaction = "";
+
+      if (currentQuestion.type === "single" || currentQuestion.type === "multi") {
+        const inputType = currentQuestion.type === "single" ? "radio" : "checkbox";
+        const choices = shuffled(currentQuestion.choices);
+        interaction = `<div class="choices">${choices.map(([id, text]) => `
+          <label class="choice">
+            <input type="${inputType}" name="answer" value="${id}">
+            <span>${escapeHtml(text)}</span>
+          </label>`).join("")}</div>`;
+      }
+
+      if (currentQuestion.type === "sequence") {
+        currentSequence = shuffled(currentQuestion.sequence);
+        interaction = `<ol class="sequence-list" id="sequence-list">${currentSequence.map((text, index) => sequenceItem(text, index)).join("")}</ol>`;
+      }
+
+      if (currentQuestion.type === "match") {
+        interaction = `<div class="choices">${currentQuestion.pairs.map(([prompt], index) => `
+          <div class="choice">
+            <div class="field">
+              <label for="match-${index}">${escapeHtml(prompt)}</label>
+              <select id="match-${index}" data-match-index="${index}">
+                <option value="">Choose a match</option>
+                ${shuffled(currentQuestion.options).map((option) => `<option value="${escapeHtml(option)}">${escapeHtml(option)}</option>`).join("")}
+              </select>
+            </div>
+          </div>`).join("")}</div>`;
+      }
+
+      host.innerHTML = `
+        <article class="question-card" aria-labelledby="question-stem">
+          <div class="question-meta">
+            <span class="pill">${escapeHtml(currentQuestion.domain)}</span>
+            <span class="pill">${escapeHtml(currentQuestion.skill)}</span>
+            <span class="pill">${labelForType(currentQuestion.type)}</span>
+          </div>
+          <h2 class="stem" id="question-stem">${escapeHtml(currentQuestion.stem)}</h2>
+          ${interaction}
+          <div class="question-actions">
+            <button class="btn" id="submit-answer">Check answer</button>
+            <button class="btn secondary" id="bookmark-question">${bookmarked ? "Remove bookmark" : "Bookmark"}</button>
+            <button class="btn secondary" id="skip-question">Skip</button>
+          </div>
+          <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
+        </article>`;
+
+      document.getElementById("submit-answer").addEventListener("click", submitAnswer);
+      document.getElementById("bookmark-question").addEventListener("click", toggleBookmark);
+      document.getElementById("skip-question").addEventListener("click", chooseQuestion);
+      if (currentQuestion.type === "sequence") wireSequence();
+    }
+
+    function sequenceItem(text, index) {
+      return `<li class="sequence-item" draggable="true" data-index="${index}">
+        <span class="drag-handle" aria-hidden="true">::</span>
+        <span>${escapeHtml(text)}</span>
+        <span class="move-buttons">
+          <button class="btn secondary small move-up" type="button" aria-label="Move step ${index + 1} up">Up</button>
+          <button class="btn secondary small move-down" type="button" aria-label="Move step ${index + 1} down">Down</button>
+        </span>
+      </li>`;
+    }
+
+    function wireSequence() {
+      const list = document.getElementById("sequence-list");
+      let dragged = null;
+      list.querySelectorAll(".sequence-item").forEach((item) => {
+        item.addEventListener("dragstart", () => {
+          dragged = item;
+          item.classList.add("dragging");
+        });
+        item.addEventListener("dragend", () => {
+          item.classList.remove("dragging");
+          dragged = null;
+          syncSequence();
+        });
+        item.addEventListener("dragover", (event) => {
+          event.preventDefault();
+          if (!dragged || dragged === item) return;
+          const rect = item.getBoundingClientRect();
+          const after = event.clientY > rect.top + rect.height / 2;
+          list.insertBefore(dragged, after ? item.nextSibling : item);
+        });
+      });
+      list.querySelectorAll(".move-up").forEach((button) => button.addEventListener("click", (event) => moveSequence(event, -1)));
+      list.querySelectorAll(".move-down").forEach((button) => button.addEventListener("click", (event) => moveSequence(event, 1)));
+    }
+
+    function moveSequence(event, direction) {
+      const item = event.target.closest(".sequence-item");
+      const sibling = direction < 0 ? item.previousElementSibling : item.nextElementSibling;
+      if (!sibling) return;
+      if (direction < 0) item.parentElement.insertBefore(item, sibling);
+      else item.parentElement.insertBefore(sibling, item);
+      syncSequence();
+      event.target.focus();
+    }
+
+    function syncSequence() {
+      currentSequence = [...document.querySelectorAll("#sequence-list .sequence-item span:nth-child(2)")].map((node) => node.textContent);
+    }
+
+    function submitAnswer() {
+      if (!currentQuestion || document.getElementById("submit-answer").disabled) return;
+      let userAnswer = [];
+      let correct = false;
+
+      if (currentQuestion.type === "single" || currentQuestion.type === "multi") {
+        userAnswer = [...document.querySelectorAll('input[name="answer"]:checked')].map((input) => input.value).sort();
+        if (!userAnswer.length) return showPrompt("Choose at least one answer.");
+        correct = arraysEqual(userAnswer, [...currentQuestion.answer].sort());
+      }
+
+      if (currentQuestion.type === "sequence") {
+        syncSequence();
+        userAnswer = [...currentSequence];
+        correct = arraysEqual(userAnswer, currentQuestion.sequence);
+      }
+
+      if (currentQuestion.type === "match") {
+        userAnswer = currentQuestion.pairs.map((pair, index) => document.getElementById(`match-${index}`).value);
+        if (userAnswer.some((answer) => !answer)) return showPrompt("Complete every match.");
+        correct = currentQuestion.pairs.every((pair, index) => userAnswer[index] === pair[1]);
+      }
+
+      const previous = state.attempts[currentQuestion.id] || { count: 0 };
+      state.attempts[currentQuestion.id] = {
+        count: previous.count + 1,
+        correct,
+        lastAnswer: userAnswer,
+        lastAttempt: new Date().toISOString()
+      };
+      saveState();
+      showFeedback(correct);
+      updateDashboard();
+    }
+
+    function showPrompt(message) {
+      const feedback = document.getElementById("feedback");
+      feedback.className = "feedback show incorrect";
+      feedback.textContent = message;
+    }
+
+    function showFeedback(correct) {
+      const feedback = document.getElementById("feedback");
+      feedback.className = `feedback show ${correct ? "correct" : "incorrect"}`;
+      let answerText = "";
+      if (currentQuestion.type === "single" || currentQuestion.type === "multi") {
+        const correctTexts = currentQuestion.choices.filter(([id]) => currentQuestion.answer.includes(id)).map(([, text]) => text);
+        answerText = `<p><strong>Correct answer:</strong> ${correctTexts.map(escapeHtml).join("; ")}</p>`;
+      }
+      if (currentQuestion.type === "sequence") {
+        answerText = `<p><strong>Correct order:</strong></p><ol>${currentQuestion.sequence.map((step) => `<li>${escapeHtml(step)}</li>`).join("")}</ol>`;
+      }
+      if (currentQuestion.type === "match") {
+        answerText = `<p><strong>Correct matches:</strong></p><ul>${currentQuestion.pairs.map(([prompt, answer]) => `<li>${escapeHtml(prompt)} -> ${escapeHtml(answer)}</li>`).join("")}</ul>`;
+      }
+      feedback.innerHTML = `<strong>${correct ? "Correct." : "Not yet."}</strong>${answerText}<p>${escapeHtml(currentQuestion.explanation)}</p>`;
+      document.getElementById("submit-answer").disabled = true;
+      document.querySelectorAll('#question-host input, #question-host select, #question-host .move-buttons button').forEach(node => node.disabled = true);
+      document.querySelectorAll('#question-host [draggable]').forEach(node => node.draggable = false);
+    }
+
+    function toggleBookmark() {
+      const id = currentQuestion.id;
+      if (state.bookmarks.includes(id)) state.bookmarks = state.bookmarks.filter((item) => item !== id);
+      else state.bookmarks.push(id);
+      saveState();
+      document.getElementById("bookmark-question").textContent = state.bookmarks.includes(id) ? "Remove bookmark" : "Bookmark";
+    }
+
+    function renderPlan() {
+      const host = document.getElementById("plan-list");
+      host.innerHTML = planDays.map(([day, title, detail], index) => {
+        const done = state.completedDays.includes(index);
+        return `<label class="plan-day ${done ? "done" : ""}">
+          <input type="checkbox" data-day="${index}" ${done ? "checked" : ""}>
+          <span><strong>${escapeHtml(day)} - ${escapeHtml(title)}</strong>${escapeHtml(detail)}</span>
+        </label>`;
+      }).join("");
+      host.querySelectorAll("input[data-day]").forEach((input) => {
+        input.addEventListener("change", () => {
+          const day = Number(input.dataset.day);
+          if (input.checked && !state.completedDays.includes(day)) state.completedDays.push(day);
+          if (!input.checked) state.completedDays = state.completedDays.filter((item) => item !== day);
+          saveState();
+          input.closest(".plan-day").classList.toggle("done", input.checked);
+          updateDashboard();
+        });
+      });
+    }
+
+    function renderErrors() {
+      const errors = questions.filter((question) => state.attempts[question.id] && !state.attempts[question.id].correct);
+      const host = document.getElementById("error-host");
+      if (!errors.length) {
+        host.innerHTML = '<div class="empty">No incorrect answers recorded. Complete a practice session first.</div>';
+        return;
+      }
+      host.innerHTML = `<ul class="error-list">${errors.map((question) => `
+        <li class="error-item">
+          <strong>${escapeHtml(question.skill)}</strong>
+          <div>${escapeHtml(question.stem)}</div>
+          <div class="muted">${escapeHtml(question.explanation)}</div>
+          <button class="btn small retry-question" data-question="${question.id}">Retry</button>
+        </li>`).join("")}</ul>`;
+      host.querySelectorAll(".retry-question").forEach((button) => button.addEventListener("click", () => {
+        currentQuestion = questions.find((question) => question.id === button.dataset.question);
+        switchPanel("practice");
+        renderQuestion();
+      }));
+    }
+
+    function renderProgress() {
+      const domains = ["Plan and configure", "Integrate and extend", "Test and manage"];
+      document.getElementById("domain-stats").innerHTML = domains.map(domain => {
+        const pool = questions.filter(q => q.domain === domain);
+        const attempted = pool.filter(q => state.attempts[q.id]);
+        const correct = attempted.filter(q => state.attempts[q.id].correct).length;
+        const label = attempted.length ? `${Math.round(correct / attempted.length * 100)}%` : "Not started";
+        return `<p><strong>${domain}:</strong> ${label} (${correct}/${attempted.length} latest answers correct; ${pool.length} questions available)</p>`;
+      }).join("");
+      updateStorageStatus();
+    }
+
+    function updateDashboard() {
+      const records = Object.values(state.attempts);
+      const correct = records.filter(a => a.correct).length;
+      document.getElementById("metric-attempted").textContent = records.length;
+      document.getElementById("metric-accuracy").textContent = records.length ? `${Math.round(correct / records.length * 100)}%` : "Not started";
+      document.getElementById("metric-plan").textContent = `${state.completedDays.length}/21`;
+      let message = "Read the Learn sections, then try mixed practice.";
+      if (records.length > 0 && records.length < questions.length) message = "Continue mixed practice to explore the bank. Revisit explanations and cover all three Learn sections.";
+      if (records.length === questions.length) message = "You have tried the full bank. Revisit concepts and use the official guide to broaden your coverage; repeated questions are revision.";
+      if (records.length >= 6 && records.some(a => !a.correct)) message = "Your own latest answers include missed questions. Review their explanations, then retry; this is a study prompt, not a readiness verdict.";
+      document.getElementById("next-action").textContent = message;
+    }
+
+    function exportProgress() {
+      const payload = { app: APP, version: 1, state };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `AB-620-audience-progress-${new Date().toISOString().slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importProgress(file) {
+      if (file.size > 200000) { window.alert("Progress file is too large."); return; }
+      const reader = new FileReader();
+      reader.addEventListener("load", () => {
+        try {
+          const next = validatePayload(JSON.parse(reader.result));
+          if (!window.confirm("Replace your current local progress with this audience-edition backup?")) return;
+          state = next;
+          saveState();
+          document.getElementById("mode-filter").value = "mixed";
+          document.getElementById("domain-filter").value = "all";
+          currentQuestion = null;
+          renderPlan();
+          updateDashboard();
+          renderErrors();
+          renderProgress();
+          chooseQuestion();
+          window.alert("Your audience-edition progress was imported.");
+        } catch {
+          window.alert("Invalid backup. Choose a valid JSON progress export from this audience edition. Nothing was changed.");
+        }
+      });
+      reader.addEventListener("error", () => window.alert("The file could not be read. Nothing was changed."));
+      reader.readAsText(file);
+    }
+
+    function resetProgress() {
+      if (!window.confirm("Reset this guide's local attempts, bookmarks, and completed days? This does not delete downloaded backups.")) return;
+      state = structuredClone(defaultState);
+      document.getElementById("mode-filter").value = "mixed";
+      document.getElementById("domain-filter").value = "all";
+      currentQuestion = null;
+      saveState();
+      renderPlan();
+      updateDashboard();
+      renderErrors();
+      renderProgress();
+      chooseQuestion();
+    }
+
+    function arraysEqual(first, second) {
+      return first.length === second.length && first.every((value, index) => value === second[index]);
+    }
+
+    function labelForType(type) {
+      return {
+        single: "Single choice",
+        multi: "Select all that apply",
+        sequence: "Sequence · use Up/Down buttons or drag",
+        match: "Matching"
+      }[type];
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click", () => switchPanel(tab.dataset.panel)));
+    document.getElementById("new-question").addEventListener("click", chooseQuestion);
+    document.getElementById("mode-filter").addEventListener("change", chooseQuestion);
+    document.getElementById("domain-filter").addEventListener("change", chooseQuestion);
+    document.getElementById("start-recommended").addEventListener("click", () => {
+      document.getElementById("mode-filter").value = Object.keys(state.attempts).length >= 6 && Object.values(state.attempts).some(a => !a.correct) ? "incorrect" : "mixed";
+      document.getElementById("domain-filter").value = "all";
+      switchPanel("practice");
+      chooseQuestion();
+    });
+    document.getElementById("export-progress").addEventListener("click", exportProgress);
+    document.getElementById("import-progress").addEventListener("change", (event) => {
+      if (event.target.files[0]) importProgress(event.target.files[0]);
+      event.target.value = "";
+    });
+    document.getElementById("reset-progress").addEventListener("click", resetProgress);
+
+    document.getElementById("mode-filter").value = "mixed";
+    document.getElementById("domain-filter").value = "all";
+    switchPanel("learn");
+    renderPlan();
+    updateDashboard();
+    renderProgress();
+    chooseQuestion();
+  </script>
+</body>
+</html>
