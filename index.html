@@ -531,6 +531,27 @@
   }
   .lib:hover .lib-cta svg { transform: translateX(3px); }
 
+  /* Secondary action on a card that is itself an anchor, so it is a span, not a nested link. */
+  .lib-download {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 5px 10px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--c1);
+    border: 1px solid color-mix(in srgb, var(--c1) 45%, transparent);
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+  }
+  .lib-download:hover, .lib-download:focus-visible {
+    background: var(--c1);
+    color: #05060c;
+    outline: none;
+  }
+
   .lib-public-badge {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 8px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
@@ -1119,8 +1140,10 @@ const CONFIG = {
   tools: [
     {
       name:  "NL Studios (MSFT only)",
-      desc:  "NL Studio — opens straight to the newsletter builder. Client-side and Outlook-safe, with the SLED CSU Review house rules and a live preflight check built in. Version history and downloads are linked inside. OD4B permissions and Microsoft work sign-in required",
+      desc:  "NL Studio — opens straight to the newsletter builder. Client-side and Outlook-safe, with the SLED CSU Review house rules and a live preflight check built in. Opening it here runs it inside OneDrive's sandboxed viewer, which browsers forbid from saving drafts or downloading files — use Download a copy and run it from your own machine for the full experience. OD4B permissions and Microsoft work sign-in required",
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/NL-Studio.html",
+      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FNL%2DStudio%2Ehtml",
+      downloadLabel: "Download a copy (saving + downloads work)",
       icon:  "list",
       color: ["#0078d4", "#7b61ff"]
     },
@@ -1453,7 +1476,20 @@ const toolsEl = document.getElementById("tools");
     <div class="lib-name">${t.name}</div>
     <div class="lib-desc">${t.desc}</div>
     <div class="lib-cta">Open ${ICONS.arrow}</div>
+    ${t.downloadHref ? `<span class="lib-download" role="link" tabindex="0">${t.downloadLabel || "Download a copy"}</span>` : ""}
   `;
+  // The card itself is an anchor, so a nested <a> would be invalid. Drive the secondary
+  // download from a span and stop the click before the card's own navigation fires.
+  const dl = a.querySelector(".lib-download");
+  if (dl) {
+    const go = event => {
+      event.preventDefault();
+      event.stopPropagation();
+      window.open(t.downloadHref, "_blank", "noopener");
+    };
+    dl.addEventListener("click", go);
+    dl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
+  }
   toolsEl.appendChild(a);
 });
 
