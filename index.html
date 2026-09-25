@@ -274,7 +274,6 @@
   .music.playing .viz span:nth-child(1) { animation: bounce1 0.7s ease-in-out infinite alternate; }
   .music.playing .viz span:nth-child(2) { animation: bounce2 0.5s ease-in-out infinite alternate; }
   .music.playing .viz span:nth-child(3) { animation: bounce3 0.9s ease-in-out infinite alternate; }
-  @media (max-width: 480px) { .station { display: none; } }
   @keyframes bounce1 { from { height: 3px } to { height: 13px } }
   @keyframes bounce2 { from { height: 6px } to { height: 10px } }
   @keyframes bounce3 { from { height: 2px } to { height: 14px } }
@@ -774,6 +773,7 @@
     .music { max-width: 200px; }
     .station .sn { max-width: 70px; }
     .vol { display: none; }
+    .station .sn, #stationGenre { display: none; }
   }
 </style>
 </head>
@@ -969,7 +969,7 @@ const CONFIG = {
     {
       name:  "DemoIQ Backdated · Config Builder",
       desc:  "Customer demos from the SLED use-case library, seeded before the demo date.",
-      note:  "Built for liudavid. Pick the customer, demo date, cast and routine tasks; content is seeded into the working week before the demo. Opening it here runs inside OneDrive's viewer, which blocks downloads - use Download setup to install the skill and run the builder from your own machine. OD4B permissions and Microsoft work sign-in required.",
+      note:  "Pick the customer, demo date, cast and routine tasks; content is seeded into the working week before the demo. Opening it here runs inside OneDrive's viewer, which blocks downloads - use Download setup to install the skill and run the builder from your own machine. OD4B permissions and Microsoft work sign-in required.",
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/DemoIQ-Config-Builder.html",
       downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FDemoIQ%2DBackdated%2DSetup%2Ezip",
       downloadLabel: "Download setup (skill + builder, double-click install)",
