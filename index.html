@@ -215,7 +215,7 @@
   }
   .now-playing {
     display: none;
-    font-size: 9px;
+    font-size: 10px;
     color: var(--t2);
     white-space: nowrap;
     overflow: hidden;
@@ -1455,7 +1455,6 @@ let stalledTimer = null;
 
 const musicEl = document.getElementById("music");
 const playBtn = document.getElementById("playBtn");
-const playIcon = document.getElementById("playIcon");
 const stationName = document.getElementById("stationName");
 const stationGenre = document.getElementById("stationGenre");
 const navNowPlaying = document.getElementById("navNowPlaying");
@@ -1476,18 +1475,19 @@ volEl.addEventListener("input", () => {
 
 // Play icon state
 function setPlayIcon(playing) {
+  const icon = document.getElementById("playIcon");
   if (playing) {
-    playIcon.outerHTML = '<svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><rect x="2" y="1.5" width="2.4" height="7" rx="0.5"/><rect x="5.6" y="1.5" width="2.4" height="7" rx="0.5"/></svg>';
+    icon.outerHTML = '<svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><rect x="2" y="1.5" width="2.4" height="7" rx="0.5"/><rect x="5.6" y="1.5" width="2.4" height="7" rx="0.5"/></svg>';
   } else {
-    playIcon.outerHTML = '<svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>';
+    icon.outerHTML = '<svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>';
   }
 }
 
 function setPlayingState(on) {
   isPlaying = on;
   musicEl.classList.toggle("playing", on);
-  setPlayIcon(on);
   updateNavNowPlaying();
+  setPlayIcon(on);
 }
 
 // ── Genre modal ─────────────────────────────────────────────
