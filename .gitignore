@@ -25,3 +25,7 @@ data/build-log-state.json
 # Local backups of hub files (never publish)
 _archive/
 DemoIQ_Liudavid_Files/
+
+# Python bytecode cache
+__pycache__/
+*.pyc
