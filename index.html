@@ -4,6 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>David Shih Chun Liu — Hub</title>
+<meta name="description" content="David Shih Chun Liu's personal hub — Microsoft SLED Copilot Customer Success Architect. Creative experiments, internal tools, and podcasts in one place.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="David Shih Chun Liu — Hub">
+<meta property="og:description" content="Microsoft SLED Copilot Customer Success Architect. Creative experiments, internal tools, and podcasts in one place.">
+<meta property="og:image" content="https://ganymededl.github.io/liudavid_od4b_root/volatility-noir-thumb.png">
+<meta property="og:url" content="https://ganymededl.github.io/liudavid_od4b_root/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="David Shih Chun Liu — Hub">
+<meta name="twitter:description" content="Microsoft SLED Copilot Customer Success Architect. Creative experiments, internal tools, and podcasts in one place.">
+<meta name="twitter:image" content="https://ganymededl.github.io/liudavid_od4b_root/volatility-noir-thumb.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -118,7 +128,7 @@
     will-change: opacity, transform;
     /* Normalize bright/high-key photos (blue sky, light stone) into the
        same tonal range as moody night shots, so text/card contrast is
-       consistent regardless of which Pexels photo loads. */
+       consistent regardless of which photo loads. */
     filter: brightness(0.62) saturate(0.78) contrast(1.08);
   }
   [data-light="true"] .slide {
@@ -195,18 +205,10 @@
     min-width: 0;
   }
   .nav-name .nm {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     line-height: 1.1;
     color: var(--t1);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .nav-name .rl {
-    font-size: 9px;
-    color: var(--t2);
-    line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -283,7 +285,7 @@
     line-height: 1.1;
   }
   .station .sn {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--t1);
     max-width: 100px;
@@ -292,7 +294,7 @@
     text-overflow: ellipsis;
   }
   .station .sg {
-    font-size: 8px;
+    font-size: 10px;
     color: var(--t2);
     display: flex;
     gap: 6px;
@@ -364,9 +366,9 @@
     background: rgba(0,217,255,0.07);
     border: 0.5px solid rgba(0,217,255,0.18);
     color: var(--c1);
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.10em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     border-radius: 4px;
     padding: 4px 10px;
@@ -418,7 +420,7 @@
     margin-top: 4px;
   }
   .pill {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 500;
     padding: 5px 10px;
     border-radius: 100px;
@@ -429,16 +431,16 @@
   }
 
   .section-label {
-    font-size: 8px;
+    font-size: 11px;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--t3);
+    color: var(--t2);
     margin: 0 0 12px 0;
   }
 
   /* ── Libraries ──────────────────────────────────────── */
-  .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap, .build-log-wrap {
+  .libraries-wrap, .tools-wrap, .podcasts-wrap {
     padding: 20px 32px;
   }
   /* Shared frosted backdrop behind the tile grids: each .lib/.pod card
@@ -504,22 +506,22 @@
   .lib-icon svg { width: 15px; height: 15px; display: block; }
 
   .lib-name {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: -0.1px;
     margin-bottom: 4px;
   }
   .lib-desc {
-    font-size: 9.5px;
+    font-size: 12px;
     color: var(--t2);
-    line-height: 1.35;
+    line-height: 1.4;
     margin-bottom: 12px;
   }
   .lib-cta {
     display: flex;
     align-items: center;
     gap: 4px;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
     color: var(--c1);
     text-transform: uppercase;
@@ -536,7 +538,7 @@
     display: inline-block;
     margin-top: 8px;
     padding: 5px 10px;
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -554,202 +556,18 @@
 
   .lib-public-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 8px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff);
     padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
   }
   .lib-access-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 8px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
     padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
   }
   .lib-access-badge.public { color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff); }
-  .lib-access-badge.gated { color: #2a0f00; background: linear-gradient(135deg, #ffb454, #ff6b6b); }
-
-  /* ── Recent ─────────────────────────────────────────── */
-  .recent {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
-    gap: 6px;
-  }
-  .rec {
-    background: var(--card);
-    border: 0.5px solid var(--border);
-    border-radius: 10px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .rec-dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    margin-top: 6px;
-    flex-shrink: 0;
-  }
-  .rec-body { min-width: 0; flex: 1; }
-  .rec-title {
-    font-size: 10.5px;
-    font-weight: 600;
-    color: var(--t1);
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .rec-meta {
-    font-size: 8.5px;
-    color: var(--t2);
-    margin-top: 3px;
-    letter-spacing: 0.02em;
-  }
-
-  /* ── Build log ───────────────────────────────────────── */
-  .build-log-head {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 12px;
-  }
-  .build-log-head .section-label { margin-bottom: 4px; }
-  .build-log-intro {
-    max-width: 560px;
-    color: var(--t2);
-    font-size: 10px;
-    line-height: 1.45;
-  }
-  .build-count {
-    flex-shrink: 0;
-    color: var(--t2);
-    font-size: 9px;
-  }
-  .build-filters {
-    display: grid;
-    grid-template-columns: minmax(150px, 1.5fr) repeat(3, minmax(110px, 1fr));
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-  .build-filter {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-  }
-  .build-filter label {
-    color: var(--t3);
-    font-size: 7.5px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-  .build-filter input,
-  .build-filter select {
-    width: 100%;
-    min-height: 34px;
-    padding: 7px 10px;
-    border: 0.5px solid var(--border);
-    border-radius: 9px;
-    background: var(--card);
-    color: var(--t1);
-    font: inherit;
-    font-size: 10px;
-    outline: none;
-  }
-  .build-filter input:focus,
-  .build-filter select:focus {
-    border-color: var(--c1);
-    box-shadow: 0 0 0 2px rgba(0,217,255,0.12);
-  }
-  .build-filter option {
-    background: var(--bg2);
-    color: var(--t1);
-  }
-  .build-grid {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 10px;
-  }
-  .build-table thead {
-    background: var(--card);
-    border-bottom: 0.5px solid var(--border2);
-  }
-  .build-table th {
-    padding: 12px 10px;
-    text-align: left;
-    color: var(--t1);
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    font-size: 9px;
-    text-transform: uppercase;
-  }
-  .build-table tbody tr {
-    border-bottom: 0.5px solid var(--border);
-    transition: background 0.15s;
-  }
-  .build-table tbody tr:hover {
-    background: var(--card);
-  }
-  .build-table tbody tr:last-child {
-    border-bottom: none;
-  }
-  .build-table td {
-    padding: 10px;
-    color: var(--t1);
-    vertical-align: top;
-    line-height: 1.35;
-  }
-  .build-table td:nth-child(1) {
-    white-space: nowrap;
-    font-size: 9px;
-    color: var(--t2);
-  }
-  .build-table td:nth-child(2) {
-    font-weight: 700;
-    max-width: 200px;
-  }
-  .build-table td:nth-child(3) {
-    font-size: 9px;
-    color: var(--t2);
-    max-width: 280px;
-  }
-  .build-table td:nth-child(4),
-  .build-table td:nth-child(5),
-  .build-table td:nth-child(6) {
-    font-size: 8.5px;
-    color: var(--t2);
-  }
-  .build-table td:nth-child(4) .build-type {
-    display: inline-block;
-  }
-  .build-table .build-type {
-    border: 0.5px solid var(--border2);
-    background: rgba(0,217,255,0.08);
-    color: var(--c1);
-    padding: 3px 7px;
-    border-radius: 100px;
-    font-size: 7.5px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-  .build-table td:nth-child(7) {
-    white-space: nowrap;
-  }
-  .build-links {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .build-link {
-    color: var(--c1);
-    font-size: 8px;
-    font-weight: 700;
-    text-decoration: none;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .build-link:hover { text-decoration: underline; }
+  /* Calm, neutral "internal" indicator — not an error/warning color, just a quiet lock. */
+  .lib-access-badge.gated { color: var(--t1); background: rgba(0,217,255,0.10); border: 0.5px solid rgba(0,217,255,0.25); }
 
   /* ── Dots ───────────────────────────────────────────── */
   .dots-wrap {
@@ -783,8 +601,8 @@
   .footer {
     text-align: center;
     padding: 8px 24px 20px;
-    font-size: 8px;
-    color: var(--t3);
+    font-size: 10px;
+    color: var(--t2);
     letter-spacing: 0.05em;
   }
 
@@ -818,11 +636,11 @@
     margin-bottom: 4px;
   }
   .modal .sub {
-    font-size: 9px;
+    font-size: 11px;
     font-weight: 600;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--t3);
+    color: var(--t2);
     margin-bottom: 18px;
   }
   .genres {
@@ -838,7 +656,7 @@
     padding: 10px 8px;
     font: inherit;
     color: var(--t1);
-    font-size: 10.5px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     transition: background 0.18s, border-color 0.18s;
@@ -860,7 +678,7 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    font-size: 10px;
+    font-size: 12px;
     border: none;
     border-radius: 10px;
     padding: 12px;
@@ -909,10 +727,10 @@
   .pod-body { padding: 13px 15px 15px; display: flex; flex-direction: column; flex: 1; }
   .pod-head { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
   .pod-badge { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .pod-name { font-size: 11.5px; font-weight: 700; letter-spacing: -0.1px; }
+  .pod-name { font-size: 13px; font-weight: 700; letter-spacing: -0.1px; }
   .pod-host {
-    font-size: 8px; font-weight: 700; color: var(--t2);
-    text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 11px;
+    font-size: 10px; font-weight: 700; color: var(--t2);
+    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 11px;
   }
   .pod-latest {
     display: flex; align-items: center; gap: 9px; text-decoration: none;
@@ -929,36 +747,32 @@
   .pod-play svg { width: 10px; height: 10px; display: block; }
   .pod-latest-txt { min-width: 0; }
   .pod-latest-label {
-    display: block; font-size: 7.5px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.1em; color: var(--c1);
+    display: block; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.08em; color: var(--c1);
   }
   .pod-latest-title {
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    overflow: hidden; font-size: 10px; font-weight: 500; color: var(--t1);
-    line-height: 1.25; margin-top: 2px;
+    overflow: hidden; font-size: 12px; font-weight: 500; color: var(--t1);
+    line-height: 1.3; margin-top: 2px;
   }
   .pod-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .pod-sub {
     display: flex; align-items: center; gap: 5px; text-decoration: none;
-    font-size: 9px; font-weight: 600; color: var(--c1);
+    font-size: 11px; font-weight: 600; color: var(--c1);
     text-transform: uppercase; letter-spacing: 0.03em;
   }
   .pod-sub svg { width: 10px; height: 10px; transition: transform 0.18s; }
   .pod:hover .pod-sub svg { transform: translateX(3px); }
-  .pod-date { font-size: 8.5px; color: var(--t2); white-space: nowrap; }
+  .pod-date { font-size: 10.5px; color: var(--t2); white-space: nowrap; }
+  .pod-date:empty { display: none; }
 
   @media (max-width: 560px) {
     .hero { padding: 40px 20px 24px; }
-    .libraries-wrap, .recent-wrap, .tools-wrap, .podcasts-wrap, .build-log-wrap { padding: 16px 20px; }
+    .libraries-wrap, .tools-wrap, .podcasts-wrap { padding: 16px 20px; }
     .nav { padding: 12px 16px; }
     .music { max-width: 200px; }
     .station .sn { max-width: 70px; }
     .vol { display: none; }
-    .build-log-head { align-items: flex-start; flex-direction: column; gap: 6px; }
-    .build-filters { grid-template-columns: 1fr 1fr; }
-  }
-  @media (max-width: 380px) {
-    .build-filters { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -981,7 +795,6 @@
         </div>
         <div class="nav-name">
           <span class="nm" id="navName">David Shih Chun Liu</span>
-          <span class="rl" id="navRole">Microsoft SLED</span>
         </div>
       </div>
       <div class="nav-right">
@@ -999,7 +812,7 @@
           </div>
           <input type="range" class="vol" id="vol" min="0" max="100" value="70" aria-label="Volume">
         </div>
-        <button class="theme" id="themeBtn" aria-label="Toggle theme">
+        <button class="theme" id="themeBtn" aria-label="Switch to light mode">
           <svg id="themeIcon" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
             <path d="M11.5 8.5 A4.5 4.5 0 1 1 5.5 2.5 A3.5 3.5 0 0 0 11.5 8.5 Z"/>
           </svg>
@@ -1009,7 +822,7 @@
 
     <!-- HERO -->
     <section class="hero">
-      <span class="city-pill" id="cityPill">Volatility Noir / GPT-6 Astra</span>
+      <span class="city-pill" id="cityPill">Public sector Copilot enablement, hands-on</span>
       <h1 class="owner" id="ownerName">
         <span class="first">David</span>
         <span class="middle">Shih Chun</span>
@@ -1064,7 +877,7 @@
 
   <!-- GENRE MODAL -->
   <div class="modal-bg" id="modalBg">
-    <div class="modal" role="dialog" aria-labelledby="mTitle">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
       <h3 id="mTitle">Focus soundtrack</h3>
       <p class="sub">Pick a vibe</p>
       <div class="genres" id="genreGrid"></div>
@@ -1086,7 +899,11 @@ const CONFIG = {
       middle: "Shih Chun",
       last:   "Liu"
     },
-    role: "Microsoft SLED · Copilot Customer Success Architect"
+    role: "Microsoft SLED · Copilot Customer Success Architect",
+    // Shown in the pill above the name. Swaps for the current city while the
+    // photo background is on, so that slot always shows something useful
+    // instead of repeating the "Built with ..." credit already in the footer.
+    positioning: "Public sector Copilot enablement, hands-on"
   },
 
   // ── LIBRARY CARDS ────────────────────────────────────────────
@@ -1140,7 +957,8 @@ const CONFIG = {
   tools: [
     {
       name:  "NL Studios (MSFT only)",
-      desc:  "NL Studio — opens straight to the newsletter builder. Client-side and Outlook-safe, with the SLED CSU Review house rules and a live preflight check built in. Opening it here runs it inside OneDrive's sandboxed viewer, which browsers forbid from saving drafts or downloading files — use Download a copy and run it from your own machine for the full experience. OD4B permissions and Microsoft work sign-in required",
+      desc:  "Newsletter builder with SLED CSU house rules and preflight checks.",
+      note:  "Opens inside OneDrive's sandboxed viewer, which browsers forbid from saving drafts or downloading files — use Download a copy to run it from your own machine for the full experience.",
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/NL-Studio.html",
       downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FNL%2DStudio%2Ehtml",
       downloadLabel: "Download a copy (saving + downloads work)",
@@ -1186,20 +1004,14 @@ const CONFIG = {
     }
   ],
 
-  // ── TRAVEL PHOTO BACKGROUNDS ─────────────────────────────────
-  pexels: {
-    apiKey: "8NggS47fBRwsewIjcK8geNLsw6mgKhfbmrwnBn33Y92JFbVmPy5Vqoqj",
-    photosPerCity: 3,
+  // ── TRAVEL PHOTO BACKGROUND ────────────────────────────────
+  // No live third-party API is called from this public page (a client-side
+  // key can't be kept secret and Pexels has no domain-restriction option).
+  // The photo set below is a small fixed, self-hosted-friendly list.
+  photoBackground: {
     rotateSecs:   10,
     kenBurnsSecs:  9
   },
-  cities: [
-    "Rome, Italy",
-    "London Paris",
-    "Northern Spain",
-    "Siena Tuscany Italy",
-    "Salamanca Spain"
-  ],
 
   // ── PODCASTS ─────────────────────────────────────────
   // The daily automation refreshes latestUrl / latestTitle / latestDate.
@@ -1278,7 +1090,8 @@ const ICONS = {
   code:  '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 4 1 8 5 12"/><polyline points="11 4 15 8 11 12"/></svg>',
   arrow: '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="5" x2="9" y2="5"/><polyline points="6 2 9 5 6 8"/></svg>',
   sun:   '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="2.6"/><line x1="7" y1="0.8" x2="7" y2="2.3"/><line x1="7" y1="11.7" x2="7" y2="13.2"/><line x1="0.8" y1="7" x2="2.3" y2="7"/><line x1="11.7" y1="7" x2="13.2" y2="7"/><line x1="2.4" y1="2.4" x2="3.5" y2="3.5"/><line x1="10.5" y1="10.5" x2="11.6" y2="11.6"/><line x1="2.4" y1="11.6" x2="3.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="11.6" y2="2.4"/></svg>',
-  moon:  '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 8.5 A4.5 4.5 0 1 1 5.5 2.5 A3.5 3.5 0 0 0 11.5 8.5 Z"/></svg>'
+  moon:  '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 8.5 A4.5 4.5 0 1 1 5.5 2.5 A3.5 3.5 0 0 0 11.5 8.5 Z"/></svg>',
+  lock:  '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><rect x="2.5" y="5.3" width="7" height="5.2" rx="1"/><path d="M4 5.3V3.6a2 2 0 0 1 4 0v1.7"/></svg>'
 };
 
 // ── THEME ───────────────────────────────────────────────────
@@ -1290,6 +1103,7 @@ function applyTheme(mode) {
   const light = mode === "light";
   root.setAttribute("data-light", light ? "true" : "false");
   document.getElementById("themeIcon").outerHTML = (light ? ICONS.sun : ICONS.moon).replace('<svg', '<svg id="themeIcon"');
+  themeBtn.setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode");
   document.documentElement.style.background = getComputedStyle(root).getPropertyValue("--bg");
   syncNoirBackground();
 }
@@ -1304,9 +1118,11 @@ themeBtn.addEventListener("click", () => {
 });
 
 // ── RENDER: nav name / tagline ──────────────────────────────
+// The role appears once, in the hero tagline — the nav shows only the name
+// (it also has less room, and used to truncate the role on phones).
 document.getElementById("navName").textContent = CONFIG.owner.name;
-document.getElementById("navRole").textContent = CONFIG.owner.role;
 document.getElementById("tagline").textContent = CONFIG.owner.role;
+document.getElementById("cityPill").textContent = CONFIG.owner.positioning;
 const own = CONFIG.owner.nameDisplay;
 document.querySelector(".owner .first").textContent = own.first + " ";
 document.querySelector(".owner .middle").textContent = own.middle;
@@ -1329,127 +1145,6 @@ CONFIG.libraries.forEach(lib => {
   `;
   libsEl.appendChild(a);
 });
-
-// ── RENDER: build log ───────────────────────────────────────
-const buildGrid = document.getElementById("buildGrid");
-const buildCount = document.getElementById("buildCount");
-const buildSearch = document.getElementById("buildSearch");
-const buildType = document.getElementById("buildType");
-const buildCustomer = document.getElementById("buildCustomer");
-const buildAudience = document.getElementById("buildAudience");
-let builds = [];
-
-function safeWebUrl(value) {
-  if (!value) return "";
-  try {
-    const url = new URL(value, window.location.href);
-    return ["http:", "https:"].includes(url.protocol) ? url.href : "";
-  } catch {
-    return "";
-  }
-}
-
-function appendText(parent, className, text) {
-  const element = document.createElement("span");
-  element.className = className;
-  element.textContent = text;
-  parent.appendChild(element);
-  return element;
-}
-
-function addFilterOptions(select, values) {
-  [...new Set(values.filter(Boolean))].sort((a, b) => a.localeCompare(b)).forEach(value => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value;
-    select.appendChild(option);
-  });
-}
-
-function createBuildLink(label, href) {
-  const url = safeWebUrl(href);
-  if (!url) return null;
-  const link = document.createElement("a");
-  link.className = "build-link";
-  link.href = url;
-  link.target = "_blank";
-  link.rel = "noopener";
-  link.textContent = label;
-  return link;
-}
-
-function renderBuilds() {
-  const query = buildSearch.value.trim().toLowerCase();
-  const filtered = builds.filter(build => {
-    const haystack = [build.title, build.description, build.customer, build.type, build.createdWith]
-      .filter(Boolean).join(" ").toLowerCase();
-    return (!query || haystack.includes(query))
-      && (!buildType.value || build.type === buildType.value)
-      && (!buildCustomer.value || build.customer === buildCustomer.value)
-      && (!buildAudience.value || build.audience === buildAudience.value);
-  });
-
-  buildGrid.replaceChildren();
-  buildCount.textContent = `${filtered.length} of ${builds.length} build${builds.length === 1 ? "" : "s"}`;
-
-  if (!filtered.length) {
-    const row = document.createElement("tr");
-    row.innerHTML = `<td colspan="7" style="text-align: center; padding: 22px; color: var(--t2); font-size: 10px;">${builds.length ? "No builds match these filters." : "No builds have been logged yet."}</td>`;
-    buildGrid.appendChild(row);
-    return;
-  }
-
-  filtered.forEach(build => {
-    const row = document.createElement("tr");
-    const audience = build.customer ? `${build.audience} · ${build.customer}` : build.audience;
-
-    const links = [];
-    const artifactLink = createBuildLink("Open", build.artifactUrl);
-    const sessionLink = createBuildLink("Session", build.sessionUrl);
-    if (artifactLink) links.push(artifactLink.outerHTML);
-    if (sessionLink) links.push(sessionLink.outerHTML);
-
-    row.innerHTML = `
-      <td>${build.builtDate}</td>
-      <td>${build.title}</td>
-      <td>${build.description}</td>
-      <td><span class="build-type">${build.type}</span></td>
-      <td>${build.createdWith}</td>
-      <td>${audience}</td>
-      <td><div class="build-links">${links.join("")}</div></td>
-    `;
-    buildGrid.appendChild(row);
-  });
-}
-
-async function initBuildLog() {
-  try {
-    const response = await fetch("./data/builds.json", { cache: "no-store" });
-    if (!response.ok) throw new Error(`Build log request failed: ${response.status}`);
-    const data = await response.json();
-    if (!Array.isArray(data)) throw new Error("Build log must be an array");
-    builds = data.slice().sort((a, b) => b.builtDate.localeCompare(a.builtDate));
-    addFilterOptions(buildType, builds.map(build => build.type));
-    addFilterOptions(buildCustomer, builds.map(build => build.customer));
-    addFilterOptions(buildAudience, builds.map(build => build.audience));
-    renderBuilds();
-  } catch (error) {
-    buildCount.textContent = "Build log unavailable";
-    buildGrid.replaceChildren();
-    const empty = document.createElement("div");
-    empty.className = "build-empty";
-    empty.textContent = "The build log could not be loaded.";
-    buildGrid.appendChild(empty);
-    console.error(error);
-  }
-}
-
-if (buildGrid && buildCount && buildSearch && buildType && buildCustomer && buildAudience) {
-  [buildSearch, buildType, buildCustomer, buildAudience].forEach(control => {
-    control.addEventListener(control === buildSearch ? "input" : "change", renderBuilds);
-  });
-  initBuildLog();
-}
 
 // ── RENDER: tools / quick access ────────────────────────────
 const creativeEl = document.getElementById("creative");
@@ -1478,14 +1173,14 @@ const toolsEl = document.getElementById("tools");
   a.target = "_blank";
   a.rel = "noopener";
   a.innerHTML = `
-    <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : "OD4B / Microsoft sign-in"}</div>
+    <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : `${ICONS.lock} Internal · Microsoft sign-in`}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
       ${ICONS[t.icon] || ICONS.star}
     </div>
     <div class="lib-name">${t.name}</div>
     <div class="lib-desc">${t.desc}</div>
     <div class="lib-cta">Open ${ICONS.arrow}</div>
-    ${t.downloadHref ? `<span class="lib-download" role="link" tabindex="0">${t.downloadLabel || "Download a copy"}</span>` : ""}
+    ${t.downloadHref ? `<span class="lib-download" role="link" tabindex="0"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${t.downloadLabel || "Download a copy"}</span>` : ""}
   `;
   // The card itself is an anchor, so a nested <a> would be invalid. Drive the secondary
   // download from a span and stop the click before the card's own navigation fires.
@@ -1532,7 +1227,10 @@ const podEl = document.getElementById("podcasts");
   `;
   card.querySelector(".pod-latest").href = p.latestUrl;
   card.querySelector(".pod-latest-title").textContent = p.latestTitle;
-  card.querySelector(".pod-date").textContent = p.latestDate;
+  // "Latest" is a placeholder the daily refresh writes when it couldn't resolve
+  // a real publish date; showing "Latest episode" and "Latest" side by side reads
+  // as broken, so just omit the date pill in that case (:empty rule hides it).
+  card.querySelector(".pod-date").textContent = p.latestDate === "Latest" ? "" : p.latestDate;
   podEl.appendChild(card);
 });
 
@@ -1563,28 +1261,10 @@ function shuffle(arr) {
   return a;
 }
 
-async function fetchPexels() {
-  try {
-    const promises = CONFIG.cities.map(city =>
-      fetch(`https://api.pexels.com/v1/search?query=${encodeURIComponent(city)}&orientation=landscape&per_page=${CONFIG.pexels.photosPerCity}&page=1`, {
-        headers: { Authorization: CONFIG.pexels.apiKey }
-      }).then(r => r.ok ? r.json() : null).then(j => ({ city, data: j }))
-    );
-    const results = await Promise.all(promises);
-    const photos = [];
-    results.forEach(({ city, data }) => {
-      if (data && Array.isArray(data.photos)) {
-        data.photos.forEach(p => {
-          const url = (p.src && (p.src.landscape || p.src.original || p.src.large2x));
-          if (url) photos.push({ city, url });
-        });
-      }
-    });
-    if (photos.length === 0) throw new Error("No photos returned");
-    return photos;
-  } catch (e) {
-    return FALLBACK_PHOTOS.slice();
-  }
+// No live photo API is called here on purpose — see the CONFIG.photoBackground
+// comment above. This just hands back the fixed, checked-in photo set.
+async function fetchPhotos() {
+  return FALLBACK_PHOTOS.slice();
 }
 
 function renderDots() {
@@ -1612,7 +1292,7 @@ function buildSlides() {
     const d = document.createElement("div");
     d.className = "slide";
     d.style.backgroundImage = `url("${p.url}")`;
-    d.style.setProperty("--kb", CONFIG.pexels.kenBurnsSecs + "s");
+    d.style.setProperty("--kb", CONFIG.photoBackground.kenBurnsSecs + "s");
     slidesEl.appendChild(d);
   });
 }
@@ -1645,12 +1325,13 @@ function advanceSlide() {
 
 function restartTimer() {
   if (slideTimer) clearInterval(slideTimer);
+  // Reduced motion also stops the periodic photo swap, not just the Ken Burns zoom.
   if (motionPreference.matches || !photosActive) return;
-  slideTimer = setInterval(advanceSlide, CONFIG.pexels.rotateSecs * 1000);
+  slideTimer = setInterval(advanceSlide, CONFIG.photoBackground.rotateSecs * 1000);
 }
 
 async function initSlideshow() {
-  const photos = await fetchPexels();
+  const photos = await fetchPhotos();
   photoQueue = shuffle(photos);
   buildSlides();
   renderDots();
@@ -1712,7 +1393,7 @@ backgroundSwitch.addEventListener("click", async () => {
   dotsEl.hidden = !photosActive;
   backgroundPause.hidden = photosActive;
   backgroundSwitch.textContent = photosActive ? "Use sculpture background" : "Use photo background";
-  backgroundCredit.textContent = photosActive ? "Photos provided by Pexels" : "Volatility Noir / Built with GPT-6 Astra / Silent generative background";
+  backgroundCredit.textContent = photosActive ? "Photos via Unsplash" : "Volatility Noir / Built with GPT-6 Astra / Silent generative background";
   syncNoirBackground();
   if (photosActive) {
     if (!photosInitialized) {
@@ -1722,7 +1403,7 @@ backgroundSwitch.addEventListener("click", async () => {
     } else { showSlide(currentSlide); restartTimer(); }
   } else {
     clearInterval(slideTimer);
-    cityPill.textContent = "Volatility Noir / GPT-6 Astra";
+    cityPill.textContent = CONFIG.owner.positioning;
   }
 });
 updateBackgroundPause();
@@ -1813,8 +1494,37 @@ function buildGenreGrid() {
 function openModal() {
   buildGenreGrid();
   modalBg.classList.add("open");
+  document.addEventListener("keydown", handleModalKeydown);
+  // Move focus inside the dialog so screen-reader/keyboard users land in it immediately.
+  (modalDone || modalBg).focus();
 }
-function closeModal() { modalBg.classList.remove("open"); }
+function closeModal() {
+  modalBg.classList.remove("open");
+  document.removeEventListener("keydown", handleModalKeydown);
+  changeBtn.focus();
+}
+
+function handleModalKeydown(e) {
+  if (e.key === "Escape") {
+    e.preventDefault();
+    closeModal();
+    return;
+  }
+  if (e.key !== "Tab") return;
+  // Trap focus: cycle Tab/Shift+Tab within the modal's focusable elements only.
+  const focusable = [...modalBg.querySelectorAll("button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])")]
+    .filter(el => !el.disabled && el.offsetParent !== null);
+  if (!focusable.length) return;
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault();
+    last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault();
+    first.focus();
+  }
+}
 
 changeBtn.addEventListener("click", openModal);
 modalBg.addEventListener("click", e => { if (e.target === modalBg) closeModal(); });

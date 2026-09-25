@@ -32,6 +32,25 @@ def date_from_entry(entry: dict) -> str:
     return f"{MONTHS[published.month - 1]} {published.day}, {published.year}"
 
 
+def video_publish_date(downloader, video_id: str) -> str:
+    """Look up a single video directly to recover its publish date.
+
+    A flattened playlist entry (extract_flat="in_playlist") generally omits
+    upload_date/timestamp entirely, which is why the date used to fall back to
+    "Latest" for every show. This does one extra, cheap, non-flat lookup for
+    just the top video so the real date can be resolved. Any failure here is
+    non-fatal: the caller keeps showing "Latest" (and the UI hides that case)
+    rather than failing the whole playlist read over a secondary lookup.
+    """
+    try:
+        info = downloader.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
+    except Exception:
+        return "Latest"
+    if not isinstance(info, dict):
+        return "Latest"
+    return date_from_entry(info)
+
+
 def newest_episode(source: str) -> Episode:
     """Read item #1 directly from the configured YouTube playlist."""
     # The publisher never imports this module or the network/dependency stack.
@@ -57,13 +76,16 @@ def newest_episode(source: str) -> Episode:
             if not isinstance(playlist, dict):
                 raise ValueError("The playlist returned no metadata")
             entry = next((item for item in (playlist.get("entries") or []) if item), None)
-        if not isinstance(entry, dict):
-            raise ValueError("The playlist returned no first entry")
-        video_id = entry.get("id")
-        title = entry.get("title")
-        if type(video_id) is not str or type(title) is not str:
-            raise ValueError("The playlist returned an invalid video ID or title")
-        episode = Episode(title.strip(), video_id.strip(), date_from_entry(entry))
+            if not isinstance(entry, dict):
+                raise ValueError("The playlist returned no first entry")
+            video_id = entry.get("id")
+            title = entry.get("title")
+            if type(video_id) is not str or type(title) is not str:
+                raise ValueError("The playlist returned an invalid video ID or title")
+            display_date = date_from_entry(entry)
+            if display_date == "Latest":
+                display_date = video_publish_date(downloader, video_id.strip())
+            episode = Episode(title.strip(), video_id.strip(), display_date)
         validate_episode(episode)
         return episode
     except (DownloadError, OSError, ValueError, OverflowError) as exc:
