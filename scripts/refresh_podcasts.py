@@ -44,7 +44,9 @@ def video_publish_date(downloader, video_id: str) -> str:
     """
     try:
         info = downloader.extract_info(f"https://www.youtube.com/watch?v={video_id}", download=False)
-    except Exception:
+    except Exception as exc:
+        message = str(exc).replace("%", "%25").replace("\r", "%0D").replace("\n", "%0A")
+        print(f"::warning title=Podcast date lookup failed::{video_id}: {message}", file=sys.stderr)
         return "Latest"
     if not isinstance(info, dict):
         return "Latest"
