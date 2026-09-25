@@ -1015,6 +1015,15 @@ const CONFIG = {
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/useful-utilities.html",
       icon:  "code",
       color: ["#ff6b35", "#7b61ff"]
+    },
+    {
+      name:  "Automations Playbook",
+      desc:  "Every Scout automation: what it does, how often it runs, what to do when it fails, and the prompt to rebuild it in any AI client.",
+      note:  "Private to David only — stored in a personal OneDrive folder that is not shared with anyone. Opening it requires his own Microsoft sign-in; no one else in Microsoft can see it.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/automations-playbook.html",
+      icon:  "code",
+      color: ["#b11f4b", "#f59e0b"],
+      privateOnly: true
     }
   ],
 
@@ -1187,7 +1196,7 @@ const toolsEl = document.getElementById("tools");
   a.target = "_blank";
   a.rel = "noopener";
   a.innerHTML = `
-    <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : `${ICONS.lock} Internal · Microsoft sign-in`}</div>
+    <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : t.privateOnly ? `${ICONS.lock} Private · my sign-in only` : `${ICONS.lock} Internal · Microsoft sign-in`}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
       ${ICONS[t.icon] || ICONS.star}
     </div>
