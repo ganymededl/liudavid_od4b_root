@@ -21,3 +21,7 @@ data/build-log-state.json
 
 # Restricted OD4B newsletter packages; never publish their contents to Pages.
 /NewsletterStudio/
+
+# Local backups of hub files (never publish)
+_archive/
+DemoIQ_Liudavid_Files/
