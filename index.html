@@ -213,6 +213,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .now-playing {
+    display: none;
+    font-size: 9px;
+    color: var(--t2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
   .nav-right {
     display: flex;
     align-items: center;
@@ -310,7 +319,6 @@
     font: inherit;
   }
   .station .sg .change:hover { text-decoration: underline; }
-
   .vol {
     -webkit-appearance: none;
     appearance: none;
@@ -774,6 +782,8 @@
     .station .sn { max-width: 70px; }
     .vol { display: none; }
     .station .sn, #stationGenre { display: none; }
+    .station .sg .change { padding: 4px 6px; margin: -4px -6px; }
+    .now-playing:not([hidden]) { display: block; }
   }
 </style>
 </head>
@@ -796,6 +806,7 @@
         </div>
         <div class="nav-name">
           <span class="nm" id="navName">David Shih Chun Liu</span>
+          <span class="now-playing" id="navNowPlaying" hidden></span>
         </div>
       </div>
       <div class="nav-right">
@@ -1447,6 +1458,7 @@ const playBtn = document.getElementById("playBtn");
 const playIcon = document.getElementById("playIcon");
 const stationName = document.getElementById("stationName");
 const stationGenre = document.getElementById("stationGenre");
+const navNowPlaying = document.getElementById("navNowPlaying");
 const volEl = document.getElementById("vol");
 const modalBg = document.getElementById("modalBg");
 const genreGrid = document.getElementById("genreGrid");
@@ -1475,6 +1487,7 @@ function setPlayingState(on) {
   isPlaying = on;
   musicEl.classList.toggle("playing", on);
   setPlayIcon(on);
+  updateNavNowPlaying();
 }
 
 // ── Genre modal ─────────────────────────────────────────────
@@ -1604,12 +1617,29 @@ function updateStationDisplay() {
   if (!s) {
     stationName.textContent = "No station";
     stationGenre.textContent = "—";
+    updateNavNowPlaying();
     return;
   }
   stationName.textContent = s.name || "Unknown";
   const g = GENRES.find(x => x.id === currentGenre);
   const glabel = g ? (g.id === "taylor" ? "Taylor Swift" : g.label) : currentGenre;
   stationGenre.textContent = `${glabel.toLowerCase()} · ${(s.country || "").toLowerCase() || "radio"}`;
+  updateNavNowPlaying();
+}
+
+// Mirrors the (desktop-only) station name in the nav's subtitle line while
+// music plays, since the station name/genre text is hidden on phones below
+// 560px to leave room for the full name — this keeps "what's playing"
+// visible there too, just relocated instead of removed.
+function updateNavNowPlaying() {
+  if (!navNowPlaying) return;
+  const s = currentStation();
+  if (isPlaying && s && s.name) {
+    navNowPlaying.textContent = `♫ ${s.name}`;
+    navNowPlaying.hidden = false;
+  } else {
+    navNowPlaying.hidden = true;
+  }
 }
 
 function playCurrent() {
