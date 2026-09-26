@@ -3,6 +3,31 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<script>
+  (() => {
+    const optOutKey = "liudavid-clarity-opt-out";
+    const url = new URL(window.location.href);
+    const ownerMode = url.searchParams.get("owner");
+
+    try {
+      if (ownerMode === "1") localStorage.setItem(optOutKey, "1");
+      if (ownerMode === "0") localStorage.removeItem(optOutKey);
+      if (ownerMode !== null) {
+        url.searchParams.delete("owner");
+        history.replaceState(null, "", url.pathname + url.search + url.hash);
+      }
+      if (localStorage.getItem(optOutKey) === "1") return;
+    } catch {
+      // If storage is unavailable, keep analytics functional for ordinary visitors.
+    }
+
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "yo4f54o07k");
+  })();
+</script>
 <title>David Shih Chun Liu — Hub</title>
 <meta name="description" content="David Shih Chun Liu's personal hub — Microsoft SLED Copilot Customer Success Architect. Creative experiments, internal tools, and podcasts in one place.">
 <meta property="og:type" content="website">
@@ -884,7 +909,7 @@
       <div class="dots" id="dots" hidden></div>
     </div>
 
-    <footer class="footer" id="backgroundCredit">Volatility Noir &middot; Built with GPT-6 Astra &middot; Silent generative background</footer>
+    <footer class="footer" id="backgroundCredit">Volatility Noir &middot; Built with GPT-6 Astra &middot; Silent generative background &middot; Anonymous traffic measured with Microsoft Clarity</footer>
   </div>
 
   <!-- GENRE MODAL -->
@@ -1017,10 +1042,10 @@ const CONFIG = {
       color: ["#ff6b35", "#7b61ff"]
     },
     {
-      name:  "Automations Playbook",
-      desc:  "Every Scout automation: what it does, how often it runs, what to do when it fails, and the prompt to rebuild it in any AI client.",
+      name:  "liudavid's Personal Vault",
+      desc:  "Private visitor analytics and Scout automation controls for David.",
       note:  "Private to David only — stored in a personal OneDrive folder that is not shared with anyone. Opening it requires his own Microsoft sign-in; no one else in Microsoft can see it.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/automations-playbook.html",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html",
       icon:  "code",
       color: ["#b11f4b", "#f59e0b"],
       privateOnly: true
