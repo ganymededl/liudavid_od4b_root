@@ -1048,7 +1048,17 @@ const CONFIG = {
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html",
       icon:  "code",
       color: ["#b11f4b", "#f59e0b"],
-      privateOnly: true
+      privateOnly: true,
+      actions: [
+        {
+          label: "Open visitor analytics",
+          href: "https://clarity.microsoft.com/projects/view/yo4f54o07k/dashboard"
+        },
+        {
+          label: "Open Automations Playbook",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/automations-playbook.html"
+        }
+      ]
     }
   ],
 
@@ -1228,20 +1238,26 @@ const toolsEl = document.getElementById("tools");
     <div class="lib-name">${t.name}</div>
     <div class="lib-desc">${t.desc}</div>
     <div class="lib-cta">Open ${ICONS.arrow}</div>
-    ${t.downloadHref ? `<span class="lib-download" role="link" tabindex="0"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${t.downloadLabel || "Download a copy"}</span>` : ""}
+    ${[
+      ...(t.actions || []),
+      ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
+    ].map((action, index) => `<span class="lib-download" role="link" tabindex="0" data-action-index="${index}"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</span>`).join("")}
   `;
-  // The card itself is an anchor, so a nested <a> would be invalid. Drive the secondary
-  // download from a span and stop the click before the card's own navigation fires.
-  const dl = a.querySelector(".lib-download");
-  if (dl) {
+  // The card itself is an anchor, so nested actions are spans that open their own URLs.
+  const actions = [
+    ...(t.actions || []),
+    ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
+  ];
+  a.querySelectorAll(".lib-download").forEach(dl => {
+    const action = actions[Number(dl.dataset.actionIndex)];
     const go = event => {
       event.preventDefault();
       event.stopPropagation();
-      window.open(t.downloadHref, "_blank", "noopener");
+      window.open(action.href, "_blank", "noopener");
     };
     dl.addEventListener("click", go);
     dl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
-  }
+  });
   toolsEl.appendChild(a);
 });
 
