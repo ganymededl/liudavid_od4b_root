@@ -526,6 +526,35 @@
     box-shadow: 0 10px 26px rgba(0,0,0,0.32);
   }
   .lib:active { transform: scale(0.97); }
+  .lib-collection { cursor: default; }
+
+  .lib-group-items {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .lib-group-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .lib-group-item:last-child { border-bottom: 0; padding-bottom: 0; }
+  .lib-group-item-name {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .lib-group-item-desc {
+    font-size: 11px;
+    color: var(--t2);
+    line-height: 1.4;
+    margin-bottom: 3px;
+  }
+  .lib-group-links {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
 
   .lib-icon {
     width: 34px;
@@ -993,17 +1022,6 @@ const CONFIG = {
   ],
   tools: [
     {
-      name:  "Copilot Workshops & Billable Hours",
-      desc:  "Compare Copilot, Cowork, agents, security and governance service variants, US catalog prices, and estimated billable hours.",
-      note:  "Private planning dashboard in OneDrive. Sign-in and file permissions required. If preview stalls, download a copy and open it locally. Hours are estimates; approved scope and billing rules still apply.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/copilot-workshops-billable-hours.html",
-      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FHub%2FPrivate%2Fcopilot-workshops-billable-hours.html",
-      downloadLabel: "Download dashboard (open locally)",
-      icon:  "list",
-      color: ["var(--c1)", "var(--c2)"],
-      privateOnly: true
-    },
-    {
       name:  "NL Studios (MSFT only)",
       desc:  "Newsletter builder with SLED CSU house rules and preflight checks.",
       note:  "Opens inside OneDrive's sandboxed viewer, which browsers forbid from saving drafts or downloading files — use Download a copy to run it from your own machine for the full experience.",
@@ -1031,19 +1049,24 @@ const CONFIG = {
       color: ["#00d9ff", "#00ffa3"]
     },
     {
-      name: "Copilot Q&A - Editable Catalog",
-      desc: "Search answered Q&As and save Hide / Restore changes to Dataverse. Microsoft sign-in required.",
-      href: "https://apps.powerapps.com/play/e/082fa88c-b03e-ef7d-b3d6-4ac681662603/a/7b52a126-a6d2-495a-ba75-5f9cde750c6b?tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47",
-      icon: "list",
-      color: ["var(--c1)", "var(--c2)"],
-      public: false
-    },
-    {
       name:  "Copilot Q&A Hub",
-      desc:  "Searchable answered Q&A across Copilot Teams channels & chats (Commercial + GCC) — OD4B sign-in required",
-      href:  "https://onedrive.cloud.microsoft/my?viewid=d2d242d5%2Ded2d%2D46ef%2Db5a3%2Dd3339deee25e&id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FMicrosoft%2DCopilot%2DQA%2DHub%2Ehtml&parent=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&routeid=a%40xu96zg3b&share=cQrYFZsSlCcuSKQqeALzfE52EgUCZGGSegg0wNJkxahsZBJrgA",
+      desc:  "Search answered Q&As. The editable catalog is listed first; use the read-only hub to browse.",
       icon:  "list",
-      color: ["#7b61ff", "#00d9ff"]
+      color: ["#7b61ff", "#00d9ff"],
+      groupItems: [
+        {
+          name: "Editable Catalog",
+          desc: "Search answers and save Hide / Restore changes to Dataverse.",
+          href: "https://apps.powerapps.com/play/e/082fa88c-b03e-ef7d-b3d6-4ac681662603/a/7b52a126-a6d2-495a-ba75-5f9cde750c6b?tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47",
+          cta: "Open editable catalog"
+        },
+        {
+          name: "Read-only Hub",
+          desc: "Browse answered Q&A across Copilot Teams channels and chats (Commercial + GCC).",
+          href: "https://onedrive.cloud.microsoft/my?viewid=d2d242d5%2Ded2d%2D46ef%2Db5a3%2Dd3339deee25e&id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FMicrosoft%2DCopilot%2DQA%2DHub%2Ehtml&parent=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&routeid=a%40xu96zg3b&share=cQrYFZsSlCcuSKQqeALzfE52EgUCZGGSegg0wNJkxahsZBJrgA",
+          cta: "Open read-only hub"
+        }
+      ]
     },
     {
       name:  "Utilities",
@@ -1051,6 +1074,17 @@ const CONFIG = {
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/useful-utilities.html",
       icon:  "code",
       color: ["#ff6b35", "#7b61ff"]
+    },
+    {
+      name:  "Copilot Workshops & Billable Hours",
+      desc:  "Compare Copilot, Cowork, agents, security and governance service variants, US catalog prices, and estimated billable hours.",
+      note:  "Private planning dashboard in OneDrive. Sign-in and file permissions required. If preview stalls, download a copy and open it locally. Hours are estimates; approved scope and billing rules still apply.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/copilot-workshops-billable-hours.html",
+      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FHub%2FPrivate%2Fcopilot-workshops-billable-hours.html",
+      downloadLabel: "Download dashboard (open locally)",
+      icon:  "list",
+      color: ["var(--c1)", "var(--c2)"],
+      privateOnly: true
     },
     {
       name:  "liudavid's Personal Vault",
@@ -1072,40 +1106,6 @@ const CONFIG = {
       ]
     },
     {
-      name:  "Copilot & Cowork – Purview Controls Quick Guide",
-      desc:  "11 cards on checking Copilot Chat and Cowork prompts with Purview: eDiscovery, Audit, DLP, Communication Compliance, Insider Risk, retention, labels and more. Each card covers roles, licensing, wait times and where to check results, with a narrated video walkthrough and PDF export.",
-      note:  "Microsoft-only, view-only access to the guide, video walkthroughs and PDFs. Microsoft work sign-in required.",
-      href:  "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQopq53KQHgwT4dGkVTy7cFOEgUCPbXeA7FOpWexAQbfYxcUVQ",
-      icon:  "lock",
-      color: ["#0078d4", "#b11f4b"],
-      privateOnly: false,
-      actions: [
-        {
-          label: "Video walkthroughs",
-          href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQraeAxX8NTxSJ3DZvaI0RYOEgUC-bYsowaXDalDzL_pDDZrCQ"
-        },
-        {
-          label: "PDF",
-          href: "https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQqYy0WigY7WQ6k6fOabiJc2EgUCL0IWO-HFTmTkEQFPf5yQdA"
-        }
-      ]
-    },
-    {
-      name:  "Agents – Purview Controls Quick Guide",
-      desc:  "11 agent-specific control cards in the Copilot/Cowork quick-guide format: roles, click paths, wait times, result checks and video walkthroughs. Public-guidance reconstructions, not live tenant validation.",
-      note:  "Microsoft-only, view-only access to the guide, video walkthroughs and PDFs. Microsoft work sign-in required.",
-      href:  "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQoy23ccartCQay4i09vMvHuEgUCAjpGOd7RomvPa0joNLrKFQ",
-      icon:  "lock",
-      color: ["var(--c1)", "var(--c2)"],
-      privateOnly: false,
-      actions: [
-        {
-          label: "Video walkthroughs",
-          href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQoezS9q4_IAQYQfQOWw_qENEgUCLLtQELX9AiYqxRNFlnjmSQ"
-        }
-      ]
-    },
-    {
       name:  "CW Skills",
       desc:  "Private guide to 20 Copilot skills, with readiness notes, trial prompts, and linked skill files.",
       note:  "Private · Microsoft sign-in required. Stored in OneDrive Hub/Private/Skills.",
@@ -1113,6 +1113,42 @@ const CONFIG = {
       icon:  "lock",
       color: ["#0078d4", "#00d9ff"],
       privateOnly: true
+    },
+    {
+      name:  "Purview Controls",
+      desc:  "Two Microsoft sign-in guides, stacked by product: Copilot and Cowork first, then agents.",
+      icon:  "lock",
+      color: ["#0078d4", "#b11f4b"],
+      groupItems: [
+        {
+          name: "Copilot & Cowork Controls",
+          desc: "11 guide cards for eDiscovery, Audit, DLP, Communication Compliance, Insider Risk, retention, and labels.",
+          href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQopq53KQHgwT4dGkVTy7cFOEgUCPbXeA7FOpWexAQbfYxcUVQ",
+          cta: "Open Copilot & Cowork guide",
+          actions: [
+            {
+              label: "Video walkthroughs",
+              href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQraeAxX8NTxSJ3DZvaI0RYOEgUC-bYsowaXDalDzL_pDDZrCQ"
+            },
+            {
+              label: "PDF",
+              href: "https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQqYy0WigY7WQ6k6fOabiJc2EgUCL0IWO-HFTmTkEQFPf5yQdA"
+            }
+          ]
+        },
+        {
+          name: "Agents Controls",
+          desc: "11 agent-specific control cards with roles, click paths, wait times, and result checks. Based on public guidance, not live tenant validation.",
+          href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQoy23ccartCQay4i09vMvHuEgUCAjpGOd7RomvPa0joNLrKFQ",
+          cta: "Open Agents guide",
+          actions: [
+            {
+              label: "Video walkthroughs",
+              href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQoezS9q4_IAQYQfQOWw_qENEgUCLLtQELX9AiYqxRNFlnjmSQ"
+            }
+          ]
+        }
+      ]
     }
   ],
 
@@ -1279,30 +1315,46 @@ const creativeEl = document.getElementById("creative");
 });
 const toolsEl = document.getElementById("tools");
 (CONFIG.tools || []).forEach(t => {
-  const a = document.createElement("a");
-  a.href = t.href;
-  a.className = "lib";
-  a.target = "_blank";
-  a.rel = "noopener";
-  a.innerHTML = `
+  const card = document.createElement(t.groupItems ? "div" : "a");
+  card.className = `lib${t.groupItems ? " lib-collection" : ""}`;
+  if (!t.groupItems) {
+    card.href = t.href;
+    card.target = "_blank";
+    card.rel = "noopener";
+  }
+  card.innerHTML = `
     <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : t.privateOnly ? `${ICONS.lock} Private · my sign-in only` : `${ICONS.lock} Internal · Microsoft sign-in`}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
       ${ICONS[t.icon] || ICONS.star}
     </div>
     <div class="lib-name">${t.name}</div>
     <div class="lib-desc">${t.desc}</div>
-    <div class="lib-cta">Open ${ICONS.arrow}</div>
+    ${t.groupItems ? `
+      <div class="lib-group-items">
+        ${t.groupItems.map(item => `
+          <section class="lib-group-item">
+            <div class="lib-group-item-name">${item.name}</div>
+            <div class="lib-group-item-desc">${item.desc}</div>
+            <div class="lib-group-links">
+              <a class="lib-download" href="${item.href}" target="_blank" rel="noopener">${item.cta || "Open"} ${ICONS.arrow}</a>
+              ${(item.actions || []).map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener">${action.label}</a>`).join("")}
+            </div>
+          </section>
+        `).join("")}
+      </div>
+    ` : `<div class="lib-cta">Open ${ICONS.arrow}</div>`}
     ${[
       ...(t.actions || []),
       ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
     ].map((action, index) => `<span class="lib-download" role="link" tabindex="0" data-action-index="${index}"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</span>`).join("")}
   `;
+  if (!t.groupItems) {
   // The card itself is an anchor, so nested actions are spans that open their own URLs.
   const actions = [
     ...(t.actions || []),
     ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
   ];
-  a.querySelectorAll(".lib-download").forEach(dl => {
+  card.querySelectorAll(".lib-download").forEach(dl => {
     const action = actions[Number(dl.dataset.actionIndex)];
     const go = event => {
       event.preventDefault();
@@ -1312,7 +1364,8 @@ const toolsEl = document.getElementById("tools");
     dl.addEventListener("click", go);
     dl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
   });
-  toolsEl.appendChild(a);
+  }
+  toolsEl.appendChild(card);
 });
 
 // ── RENDER: podcasts ────────────────────────────────────────
