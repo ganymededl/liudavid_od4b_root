@@ -112,7 +112,7 @@
 <div class="wrap">
   <a class="back" href="index.html">&larr; Back to Hub</a>
   <h1>Useful Utilities</h1>
-  <p class="subtitle">Small, self-installing Windows tools built for day-to-day M365 workflows. Each installer is a standalone Inno Setup package — no separate runtime install required.</p>
+  <p class="subtitle">Small, self-installing Windows tools and admin kits built for day-to-day M365 workflows. Installers are standalone Inno Setup packages — no separate runtime install required.</p>
   <div class="gate-badge">🔒 OD4B / Microsoft sign-in required to download</div>
 
   <div class="card">
@@ -175,10 +175,47 @@
     <p class="note">Silent lab/unattended install: <code>RelabelDownloads-Setup.exe /VERYSILENT /SUPPRESSMSGBOXES /NORESTART</code></p>
   </div>
 
+  <div class="card">
+    <div class="card-head">
+      <div class="icon-box" style="background: linear-gradient(135deg, #00ffa3, #7b61ff);">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="1.5" y="3" width="13" height="9" rx="1.5"/><path d="M6.5 5.5 L10 7.5 L6.5 9.5 Z"/><path d="M5 14.5 L11 14.5"/></svg>
+      </div>
+      <h2>Purview Copilot Walkthrough Kit</h2>
+    </div>
+    <p class="desc">
+      One-command SharePoint install of the <strong>Microsoft Purview controls for Microsoft 365 Copilot and Cowork</strong>
+      walkthrough: an interactive guide with 11 narrated videos and per-card PDFs, deployed to a private communication site
+      whose Home page links straight to the guide. <code>Content.zip</code> holds the guide and videos; pair it with the
+      scripts on GitHub, or take the all-in-one admin package.
+    </p>
+    <div class="meta-row">
+      <span class="pill">Windows PowerShell 5.1</span>
+      <span class="pill">SharePoint or Global Admin to install</span>
+      <span class="pill">Commercial &amp; GCC (Moderate)</span>
+      <span class="pill">Content.zip ~47 MB</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn" style="background: linear-gradient(135deg, #00ffa3, #00d9ff);" target="_top" rel="noopener"
+         href="https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fhub-downloads%2Fpurview-copilot-walkthrough-kit%2FContent.zip&amp;parent=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fhub-downloads%2Fpurview-copilot-walkthrough-kit">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1 L8 10 M4.5 6.5 L8 10 L11.5 6.5 M2 12.5 L14 12.5"/></svg>
+        Download Content.zip
+      </a>
+      <a class="btn secondary" target="_top" rel="noopener"
+         href="https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fhub-downloads%2Fpurview-copilot-walkthrough-kit%2FVideoWalkthrough-Admin-Package-v2.2.1.zip&amp;parent=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fhub-downloads%2Fpurview-copilot-walkthrough-kit">
+        Admin package (all-in-one)
+      </a>
+      <a class="btn secondary" target="_blank" rel="noopener noreferrer"
+         href="https://github.com/ganymededl/purview-copilot-walkthrough-kit">
+        Scripts on GitHub
+      </a>
+    </div>
+    <p class="note">Integrity check: Deploy prints <code>Verified payload ... SHA-256 80a4ae0b...7826</code> for this Content.zip.</p>
+  </div>
+
   <footer>
-    Both installers are self-contained (Inno Setup, per-user install, no admin rights required) and
-    create Start Menu / optional Desktop shortcuts on first run. Links are Microsoft/OD4B-gated —
-    sign in with a Microsoft work account to download.
+    The installers are self-contained (Inno Setup, per-user install, no admin rights required) and
+    create Start Menu / optional Desktop shortcuts on first run. The walkthrough kit scripts are public on GitHub;
+    its content package and every download link here are Microsoft/OD4B-gated — sign in with a Microsoft work account to download.
   </footer>
 </div>
 </body>
