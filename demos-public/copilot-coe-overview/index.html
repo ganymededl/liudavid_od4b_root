@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inside a Microsoft 365 Copilot CoE Site - Quickstart Tour</title>
-  <meta name="description" content="A plain-language tour for IT admins of a live Microsoft 365 Copilot Center of Excellence site: what's in it, how it's organized, and how it supports training, support, and governance. Built from the open-source CopilotCoE-Kit.">
+  <meta name="description" content="A plain-language tour for IT admins of a live Microsoft 365 Copilot Center of Excellence site: what's in it, how it's organized, and where users go for training, help, and governance guidance. Built from the open-source CopilotCoE-Kit.">
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -146,21 +146,13 @@
       font-weight: 600;
       margin-right: 6px;
     }
-    .stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 12px 0 0;
-    }
-    .stats span {
-      display: inline-block;
-      background: var(--cp-accent-soft);
-      color: var(--cp-accent);
-      border: 1px solid var(--cp-accent);
-      border-radius: 999px;
-      padding: 3px 12px;
-      font-size: 0.82rem;
-      font-weight: 600;
+    .admin-label {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--cp-text-muted);
+      margin: 4px 0 8px;
     }
     figure { margin: 0 0 10px; }
     .shot {
@@ -273,18 +265,11 @@
 
     <header id="tour-00" data-tour="0">
       <h1>Inside a Microsoft 365 Copilot CoE site</h1>
-      <p class="meta">A plain-language tour for IT admins: what's in a Copilot Center of Excellence (CoE) site, how it's organized, and how it supports training, support, and governance. Built with the open-source <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>.</p>
-      <p>The CoE brings a Team and a SharePoint site together so users can find training, prompts, reviewed agents, usage rules, and support in one place.</p>
-      <p>These screenshots show a deployed demo site, not mockups. After installation, the kit reported:</p>
-      <div class="stats">
-        <span>98 of 98 automated checks passed</span>
-        <span>230 role-based prompts</span>
-        <span>6 Teams channels</span>
-        <span>Private Team; external SharePoint sharing disabled by default</span>
-      </div>
+      <p class="meta">A plain-language tour for IT admins of what's included in a Copilot Center of Excellence (CoE) site, how it's organized, and how it supports training, governance, and user support. Built with the open-source <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>.</p>
+      <p>The CoE brings Microsoft Teams and SharePoint together so users can find training, prompts, reviewed agents, guidance, and support in one place.</p>
       <div id="tourBar" class="tour-bar">
         <button id="tourPlay" class="tour-btn tour-btn-primary" type="button">&#9658; Play the guided walkthrough</button>
-        <span id="tourHint" class="tour-hint">Narrated, section by section &mdash; about 3&ndash;4 minutes.</span>
+        <span id="tourHint" class="tour-hint">A narrated tour of the site, about 4 minutes.</span>
       </div>
     </header>
 
@@ -294,7 +279,7 @@
         <img class="shot" src="images/01-home.png" alt="Copilot CoE home page with five tiles: Start in 10 minutes, Learning paths by role, Prompt library by role, Agent Showcase, and Get help">
         <figcaption>Home page (<code>Home</code> in the site menu)</figcaption>
       </figure>
-      <p>The home page has five tiles: <em>Start in 10 minutes, Learning paths by role, Prompt library by role, Agent Showcase,</em> and <em>Get help</em>. Each tile takes users directly to a common task. A banner below the tiles identifies the site as a demo and states that its sample guidance is not official policy.</p>
+      <p>The home page has five tiles: <em>Start in 10 minutes, Learning paths by role, Prompt library by role, Agent Showcase,</em> and <em>Get help</em>. Each tile leads to a common task. A banner below the tiles identifies the site as a demo and states that its sample guidance is not official policy.</p>
     </section>
 
     <section class="step" id="tour-02" data-tour="2">
@@ -303,7 +288,7 @@
         <img class="shot" src="images/02-start-10-min.png" alt="Start in 10 minutes guide page with four numbered steps">
         <figcaption><code>Start</code> in the site menu &rarr; <em>Guide-Start-in-10-Minutes.aspx</em></figcaption>
       </figure>
-      <p>Four short steps walk new users through signing in, checking what data they can use, trying a prompt for their role, and reviewing the response. The goal is to help someone complete a useful first task without enrolling in a training course.</p>
+      <p>Four short steps walk new users through signing in, reviewing their organization's data guidance, trying a prompt for their role, and reviewing the response. Users can try a first task without signing up for a course.</p>
     </section>
 
     <section class="step" id="tour-03" data-tour="3">
@@ -312,7 +297,7 @@
         <img class="shot" src="images/03-learning-paths.png" alt="Training and Enablement page showing learning paths organized by role">
         <figcaption><code>Learn</code> in the site menu &rarr; <em>CoE-Training-and-Enablement.aspx</em></figcaption>
       </figure>
-      <p>Training is grouped for faculty, staff, students, and IT. Each path links to scheduled sessions or prompts users can practice with. The page organizes training resources; it does not track completion. That remains in the organization's learning system.</p>
+      <p>Training is grouped by role so users can find relevant sessions, resources, and prompts to practice with. The page organizes training resources; it does not track completion. Organizations can continue using their existing learning system for that purpose.</p>
     </section>
 
     <section class="step" id="tour-04" data-tour="4">
@@ -330,7 +315,7 @@
         <img class="shot" src="images/05-agent-showcase.png" alt="Agent Showcase catalog page listing approved Copilot agents">
         <figcaption><code>Agents</code> in the site menu &rarr; <em>CoE-Agent-Showcase.aspx</em></figcaption>
       </figure>
-      <p>Each listing identifies the agent's data sources, access requirements, and owner. Users can check whether an existing agent meets their needs before requesting another one. New submissions require SharePoint content approval before publication. Drafts are visible to the reviewer group rather than the wider site audience.</p>
+      <p>Each listing identifies the agent's data sources, access requirements, and owner. Users can check whether an existing agent meets their needs before requesting another one. New submissions go through content approval before publication and remain visible only to reviewers until approved.</p>
     </section>
 
     <section class="step" id="tour-06" data-tour="6">
@@ -339,16 +324,16 @@
         <img class="shot" src="images/06-service-catalog.png" alt="Service Catalog and Support page with a table of request types and how to ask for each">
         <figcaption><code>Get help</code> in the site menu &rarr; <em>CoE-Service-Catalog-and-Support.aspx</em></figcaption>
       </figure>
-      <p>A service table shows users where to go for help using Copilot, license requests, department workshops, new agent proposals, and data or safety concerns. Each request type has its own route. Data and safety reports are listed separately from general feedback.</p>
+      <p>A service table shows users where to go for help using Copilot, license requests, training requests, new agent proposals, and data or safety concerns. The table lists the contact or submission link for each request type, with data and safety reports listed separately from general feedback.</p>
     </section>
 
     <section class="step" id="tour-07" data-tour="7">
-      <h2><span class="badge">07</span>Governance and Responsible AI &mdash; data rules and decision owners</h2>
+      <h2><span class="badge">07</span>Governance and Responsible AI &mdash; data rules and responsibilities</h2>
       <figure>
         <img class="shot" src="images/07-governance.png" alt="Governance and Responsible AI page with a data classification table and risk tiers">
         <figcaption><code>Governance</code> in the site menu &rarr; <em>CoE-Governance-and-Responsible-AI.aspx</em></figcaption>
       </figure>
-      <p>This page addresses a common question: &ldquo;Can I put this data into Copilot?&rdquo; It includes a public, internal, and confidential data-classification table, a three-tier agent risk model, and a sample RACI for decision ownership. Organizations replace the sample guidance and role names with their approved policies and responsibilities.</p>
+      <p>This page addresses a common question: &ldquo;Can I put this data into Copilot?&rdquo; The page includes sample data-classification guidance, an agent risk model, and a RACI showing example decision ownership. Organizations replace these examples with their approved policies, classifications, roles, and responsibilities.</p>
     </section>
 
     <section class="step" id="tour-08" data-tour="8">
@@ -357,7 +342,7 @@
         <img class="shot" src="images/08-success-stories.png" alt="Success Stories catalog page with approved videos and write-ups">
         <figcaption>Quick link from Home &rarr; <em>CoE-Success-Stories.aspx</em> (also available through the Success Stories channel)</figcaption>
       </figure>
-      <p>Users can submit short videos showing how they use Copilot in their work. The submission instructions exclude student, health, financial, and ID data; require consent from everyone shown; and require captions. Stories need content approval before publication.</p>
+      <p>Users can submit short videos showing how they use Copilot in their work. Submission guidance excludes sensitive or regulated information, requires consent from everyone shown, and requires captions. Stories go through content approval before publication.</p>
     </section>
 
     <section class="step" id="tour-09" data-tour="9">
@@ -371,12 +356,13 @@
 
     <section id="tour-10" data-tour="10">
       <h2>Get the kit</h2>
-      <p>The site is provisioned by a configuration-driven PowerShell kit. Organization-specific settings live in <code>Deployment-Settings.json</code> in a separate organization folder, so admins can reuse the scripts without editing the kit for each deployment.</p>
+      <p>The site is deployed through a PowerShell-based kit. Organization-specific settings are kept separately from the deployment scripts, making the kit easier to reuse and update.</p>
+      <p class="admin-label">For administrators</p>
       <ul class="checklist">
         <li><strong>Private by default.</strong> The Team is private, and external SharePoint sharing is disabled unless an admin explicitly enables it for a reviewed lab preview.</li>
         <li><strong>Interactive provisioning.</strong> The kit uses delegated sign-in through a tenant-owned Entra app, with no certificates or stored secrets.</li>
-        <li><strong>Update and removal scripts.</strong> The update script republishes edited content. The removal script removes the deployment, using soft deletion by default.</li>
-        <li><strong>Post-install validation.</strong> A test script checks pages, navigation, catalogs, permissions, and links. The 98-check result above came from that script, not a manual review.</li>
+        <li><strong>Update and removal scripts.</strong> The update script republishes edited content. The removal script tears down the deployment, with soft deletion by default.</li>
+        <li><strong>Post-install validation.</strong> A test script checks pages, navigation, catalogs, permissions, and links before a deployment is considered complete.</li>
       </ul>
       <p style="margin-top:12px;">
         <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
@@ -386,7 +372,7 @@
       <div class="warning"><strong>About the screenshots:</strong> they come from a demo tenant used to validate the kit, not a customer production site. The on-page banner identifies the content as sample guidance, not official policy.</div>
     </section>
 
-    <footer>Documented by David Shih Chun Liu &middot; companion to the CopilotCoE-Kit</footer>
+    <footer>Site walkthrough by David Shih Chun Liu &middot; Built with CopilotCoE-Kit</footer>
   </main>
 
   <div id="tourDock" class="tour-dock">
@@ -413,15 +399,15 @@
         { id: "tour-02", label: "Start in 10 minutes", audio: "audio/02-start.mp3",
           caption: "Start in 10 minutes: a first-use guide for brand-new users." },
         { id: "tour-03", label: "Learning paths by role", audio: "audio/03-learning.mp3",
-          caption: "Learning paths by role: training grouped by faculty, staff, students, and IT." },
+          caption: "Learning paths by role: training organized by role, with relevant sessions and prompts to practice with." },
         { id: "tour-04", label: "Prompt library by role", audio: "audio/04-prompts.mp3",
           caption: "Prompt library by role: 230 ready-to-adapt prompts." },
         { id: "tour-05", label: "Agent Showcase", audio: "audio/05-agents.mp3",
           caption: "Agent Showcase: reviewed agents with owners and data sources listed." },
         { id: "tour-06", label: "Get help", audio: "audio/06-help.mp3",
-          caption: "Get help: separate routes for support, licenses, and safety reports." },
+          caption: "Get help: a service table with contacts for support, licenses, and safety reports." },
         { id: "tour-07", label: "Governance and Responsible AI", audio: "audio/07-governance.mp3",
-          caption: "Governance and Responsible AI: data classification and decision owners." },
+          caption: "Governance and Responsible AI: data classification and responsibilities." },
         { id: "tour-08", label: "Success Stories", audio: "audio/08-stories.mp3",
           caption: "Success Stories: colleague videos, reviewed before they publish." },
         { id: "tour-09", label: "Feedback and Roadmap", audio: "audio/09-roadmap.mp3",
