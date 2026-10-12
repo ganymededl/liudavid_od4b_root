@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Addendum: Sharing a CoE Site Externally (GCC) - Copilot CoE Tour</title>
+  <meta name="description" content="A concise, screenshot-by-screenshot addendum for IT admins: what to check in Microsoft Entra ID and SharePoint, and exactly where to flip the one switch that's off by default, to share a Copilot CoE site with a single external guest as a read-only visitor.">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    .back {
+      display: inline-block;
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 14px;
+    }
+    .back:hover { color: var(--cp-accent); }
+    header, section {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      margin-bottom: 16px;
+      padding: 20px;
+    }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.2rem; color: var(--cp-accent); }
+    h3 { font-size: 1.02rem; }
+    p { margin: 0 0 12px; }
+    a { color: var(--cp-link); }
+    code, pre {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.92rem;
+    }
+    code {
+      background: var(--cp-surface-soft);
+      border-radius: 0.3rem;
+      padding: 0 4px;
+    }
+    .meta {
+      color: var(--cp-text-muted);
+      font-size: 0.95rem;
+    }
+    .warning {
+      background: color-mix(in srgb, var(--cp-warning) 20%, var(--cp-surface));
+      border: 2px solid var(--cp-warning);
+      border-radius: 0.625rem;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .step {
+      border-left: 6px solid var(--cp-accent);
+    }
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .checklist li {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      padding: 10px 12px;
+      background: var(--cp-surface-soft);
+    }
+    .checklist li::before {
+      content: "\2713  ";
+      color: var(--cp-success);
+      font-weight: 700;
+    }
+    .gotchas li::before {
+      content: "\26A0  ";
+      color: var(--cp-warning);
+      font-weight: 700;
+    }
+    .steplist {
+      margin: 10px 0 14px;
+      padding-left: 22px;
+    }
+    .steplist li { margin-bottom: 8px; }
+    .badge {
+      display: inline-block;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 0.625rem;
+      padding: 2px 8px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .admin-label {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--cp-text-muted);
+      margin: 4px 0 8px;
+    }
+    figure { margin: 0 0 10px; }
+    .shot {
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      box-shadow: var(--cp-shadow);
+    }
+    figcaption {
+      color: var(--cp-text-soft);
+      font-size: 0.82rem;
+      margin-top: 6px;
+    }
+    table { border-collapse: collapse; margin: 0.5rem 0 1rem; width: 100%; }
+    th, td { border: 1px solid #c8c8c8; padding: 6px 8px; text-align: left; vertical-align: top; }
+    footer {
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 8px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="index.html">&larr; Back to the site tour</a>
+
+    <header>
+      <h1>Addendum: sharing this site with one external guest</h1>
+      <p class="meta">What we checked in Microsoft Entra ID and SharePoint, and exactly where the one switch lives that's off by default in this kit &mdash; so you can invite a single external person as a <strong>read-only visitor</strong> without loosening anything tenant-wide. Screenshots below are from a GCC (Government Community Cloud) demo tenant used to validate this; menu names are the same in a commercial tenant.</p>
+      <p>As the main tour notes under <em>Get the kit</em>: this kit's sites are private by default, and external sharing is off until an admin explicitly turns it on. Nothing here changes that default &mdash; it documents how to open the door for one site and one guest, deliberately.</p>
+    </header>
+
+    <section class="step">
+      <h2><span class="badge">1</span>What we checked first &mdash; Microsoft Entra ID</h2>
+      <p>Before touching SharePoint, confirm the tenant isn't blocking guests upstream. In <strong>Microsoft Entra admin center &rarr; Entra ID &rarr; External Identities &rarr; External collaboration settings</strong>, two settings matter:</p>
+      <ul class="checklist">
+        <li><strong>Guest invite settings:</strong> "Anyone in the organization can invite guest users" (most inclusive) &mdash; not restricted to admins only.</li>
+        <li><strong>Collaboration restrictions:</strong> "Allow invitations to be sent to any domain" (most inclusive) &mdash; the external person's domain isn't deny-listed or excluded from an allow-list.</li>
+      </ul>
+      <figure>
+        <img class="shot" src="images/addendum-00c-entra-collab-restrictions.png" alt="Microsoft Entra admin center External collaboration settings page showing Guest invite restrictions set to most inclusive and Collaboration restrictions set to allow invitations to any domain">
+        <figcaption>Entra ID &rarr; External Identities &rarr; External collaboration settings. Both settings shown here were already at their most permissive, out-of-the-box value &mdash; nothing to change.</figcaption>
+      </figure>
+      <p>We also checked <strong>External Identities &rarr; Cross-tenant access settings &rarr; Default settings</strong>: B2B collaboration (not B2B direct connect, which is a different feature) was "All allowed" for both inbound and outbound, with no tenant-specific override configured for the guest's organization. Also open by default &mdash; nothing to change.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">2</span>What we checked next &mdash; the SharePoint tenant policy</h2>
+      <p>In <strong>SharePoint admin center &rarr; Policies &rarr; Sharing</strong>, the org-wide default controls what any site is <em>allowed</em> to do before a site-level setting narrows it further.</p>
+      <figure>
+        <img class="shot" src="images/addendum-00-tenant-sharing-open.png" alt="SharePoint admin center Sharing page showing the external sharing slider for SharePoint and OneDrive set to Anyone, the most permissive level">
+        <figcaption>SharePoint admin center &rarr; Policies &rarr; Sharing. The tenant-wide slider was already set to <em>Anyone</em> (most permissive) for both SharePoint and OneDrive. This is the ceiling &mdash; individual sites can only be <em>more</em> restrictive than this, never less.</figcaption>
+      </figure>
+      <p>Also confirmed off: <em>Limit external sharing by domain</em> and <em>Allow only users in specific security groups to share externally</em> were both unchecked, so no hidden allow-list or group restriction was in play.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">3</span>Where the switch actually is &mdash; the site-level override</h2>
+      <p>With the tenant wide open, the only thing blocking a new guest was a <strong>per-site</strong> setting, set to the most restrictive option by design when the kit deploys a site. This is the exact location:</p>
+      <ol class="steplist">
+        <li>Go to the <strong>SharePoint admin center &rarr; Active sites</strong>.</li>
+        <li>Select the site by name (for example, <code>MNITCopilotCoE1</code>) to open its details panel.</li>
+        <li>Open the <strong>Settings</strong> tab.</li>
+        <li>Under <strong>External file sharing</strong>, change the dropdown from <em>Only people in your organization</em> to <strong>New and existing guests</strong>.</li>
+        <li>Select <strong>Save</strong>.</li>
+      </ol>
+      <figure>
+        <img class="shot" src="images/addendum-01-site-external-sharing-switch.png" alt="SharePoint admin center Active sites panel for MNITCopilotCoE1, Settings tab, External file sharing dropdown open showing four options with New and existing guests selected">
+        <figcaption>SharePoint admin center &rarr; Active sites &rarr; <em>[site]</em> &rarr; Settings tab &rarr; External file sharing. This is the one switch, shown here already moved from "Only people in your organization" to "New and existing guests." It only affects this one site.</figcaption>
+      </figure>
+      <div class="warning">
+        <p style="margin:0;"><strong>Why "New and existing guests" and not "Anyone":</strong> "Anyone" issues sign-in-free links for files/folders, which is unrelated to inviting a named person to browse a site. "New and existing guests" is the lowest setting that still lets you invite someone who isn't already a guest in your directory &mdash; they must sign in or verify with a one-time code. Use "Existing guests" instead if everyone you'll ever invite is already a guest.</p>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">4</span>Adding the person as read-only (browse only, no edit)</h2>
+      <p>Once the site allows guests, add the person directly to the site's built-in <strong>Visitors</strong> group &mdash; don't use the small "Add members" flyout from the site header (see the callout below).</p>
+      <ol class="steplist">
+        <li>On the site, go to <strong>Settings (gear icon) &rarr; Site permissions &rarr; Advanced permissions settings</strong> (or browse directly to <code>/_layouts/15/user.aspx</code> on the site).</li>
+        <li>On the <strong>Permissions</strong> ribbon, select <strong>Grant Permissions</strong>.</li>
+        <li>Type the person's email address and select it once it resolves &mdash; SharePoint will label it <em>"is outside of your organization"</em> to confirm it recognized a guest.</li>
+        <li>Select <strong>Show options</strong>.</li>
+        <li>Under <strong>Select a permission level</strong>, choose <code>&lt;Site name&gt; Visitors [Read]</code>. This grants browse/view access only.</li>
+        <li>Leave or clear <strong>Send an email invitation</strong> as you prefer, then select <strong>Share</strong>.</li>
+      </ol>
+      <figure>
+        <img class="shot" src="images/addendum-02-grant-permissions-readonly.png" alt="SharePoint Share dialog with an external email address entered and the Select a permission level dropdown set to Visitors Read, instead of the default Members Edit">
+        <figcaption>Grant Permissions &rarr; Show options. The dropdown defaults to the Members group (<strong>Edit</strong>) &mdash; switch it to the Visitors group (<strong>Read</strong>) for browse-only access, as shown here.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2>Two things that look like dead ends but aren't the problem</h2>
+      <p class="admin-label">Gotchas we ran into along the way</p>
+      <ul class="checklist gotchas">
+        <li>The modern <strong>"Add members"</strong> flyout (opened from the member count next to the site name) only adds people to the site's Microsoft 365 Group, and says so directly: <em>"To add external guests, go to Outlook to invite others."</em> It's the wrong panel for a one-off external guest &mdash; use Grant Permissions (Step 4) instead.</li>
+        <li>At the time of this check, that Outlook "Add members" panel itself failed to load in this tenant (a generic connector/loading error, unrelated to any sharing policy). The classic Grant Permissions / Share path in Step 4 worked reliably and is also the only one of the options that lets you choose <strong>Read</strong> instead of defaulting to <strong>Edit</strong>.</li>
+      </ul>
+    </section>
+
+    <footer>Addendum by David Shih Chun Liu &middot; Companion to the Copilot CoE site tour</footer>
+  </main>
+</body>
+</html>

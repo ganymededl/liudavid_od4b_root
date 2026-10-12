@@ -359,7 +359,7 @@
       <p>The site is deployed through a PowerShell-based kit. Organization-specific settings are kept separately from the deployment scripts, making the kit easier to reuse and update.</p>
       <p class="admin-label">For administrators</p>
       <ul class="checklist">
-        <li><strong>Private by default.</strong> The Team is private, and external SharePoint sharing is disabled unless an admin explicitly enables it for a reviewed lab preview.</li>
+        <li><strong>Private by default.</strong> The Team is private, and external SharePoint sharing is disabled unless an admin explicitly enables it for a reviewed lab preview. See the <a href="external-sharing-addendum.html">sharing addendum</a> for exactly where that switch lives and how to add one external guest as a read-only visitor.</li>
         <li><strong>Interactive provisioning.</strong> The kit uses delegated sign-in through a tenant-owned Entra app, with no certificates or stored secrets.</li>
         <li><strong>Update and removal scripts.</strong> The update script republishes edited content. The removal script tears down the deployment, with soft deletion by default.</li>
         <li><strong>Post-install validation.</strong> A test script checks pages, navigation, catalogs, permissions, and links before a deployment is considered complete.</li>
@@ -368,6 +368,8 @@
         <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
         &nbsp;&middot;&nbsp;
         <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.6" target="_blank" rel="noopener">v3.6 release (includes the vendor site template)</a>
+        &nbsp;&middot;&nbsp;
+        <a href="external-sharing-addendum.html">Addendum: sharing this site with an external guest &rarr;</a>
       </p>
       <div class="warning">
         <p style="margin:0 0 8px;"><strong>About the screenshots:</strong> they come from a demo tenant used to validate the kit, not a customer production site.</p>
