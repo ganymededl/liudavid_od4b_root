@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inside a Microsoft 365 Copilot CoE Site - Quickstart Tour</title>
+  <meta name="description" content="A plain-language, screenshot-led tour of a live Microsoft 365 Copilot Center of Excellence site, built from the open-source CopilotCoE-Kit.">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    .back {
+      display: inline-block;
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 14px;
+    }
+    .back:hover { color: var(--cp-accent); }
+    header, section {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      margin-bottom: 16px;
+      padding: 20px;
+    }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 1.85rem; }
+    h2 { font-size: 1.25rem; color: var(--cp-accent); }
+    p { margin: 0 0 12px; }
+    a { color: var(--cp-link); }
+    code, pre {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.95rem;
+    }
+    code {
+      background: var(--cp-surface-soft);
+      border-radius: 0.3rem;
+      padding: 0 4px;
+    }
+    .meta {
+      color: var(--cp-text-muted);
+      font-size: 0.95rem;
+    }
+    .warning {
+      background: color-mix(in srgb, var(--cp-warning) 20%, var(--cp-surface));
+      border: 2px solid var(--cp-warning);
+      border-radius: 0.625rem;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .step {
+      border-left: 6px solid var(--cp-accent);
+    }
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .checklist li {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      padding: 10px 12px;
+      background: var(--cp-surface-soft);
+    }
+    .badge {
+      display: inline-block;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 0.625rem;
+      padding: 2px 8px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 0;
+    }
+    .stats span {
+      display: inline-block;
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      border: 1px solid var(--cp-accent);
+      border-radius: 999px;
+      padding: 3px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    figure { margin: 0 0 10px; }
+    .shot {
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      box-shadow: var(--cp-shadow);
+    }
+    figcaption {
+      color: var(--cp-text-soft);
+      font-size: 0.82rem;
+      margin-top: 6px;
+    }
+    table { border-collapse: collapse; margin: 0.5rem 0 1rem; width: 100%; }
+    th, td { border: 1px solid #c8c8c8; padding: 6px 8px; text-align: left; vertical-align: top; }
+    footer {
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 8px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="../index.html">&larr; Back to Demos &amp; Artifacts</a>
+
+    <header>
+      <h1>Inside a Microsoft 365 Copilot CoE site</h1>
+      <p class="meta">A screenshot-led, plain-language tour for IT admins &mdash; what each section of a Copilot Center of Excellence (CoE) hub does, and why it's there. Built from the open-source <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>.</p>
+      <p>A <strong>Copilot CoE</strong> is a single Team + SharePoint site that gives an organization one place to learn Copilot, find vetted prompts and agents, read the real AI rules, and ask for help &mdash; instead of scattering that across email threads and one-off Teams posts. The screenshots below are from a real, fully deployed demo build (not mockups), captured right after its install script reported:</p>
+      <div class="stats">
+        <span>98 / 98 automated checks passed</span>
+        <span>230 role-based prompts</span>
+        <span>6 Teams channels</span>
+        <span>Private team, external sharing off by default</span>
+      </div>
+    </header>
+
+    <section class="step">
+      <h2><span class="badge">01</span>Home &mdash; one page, five next steps</h2>
+      <figure>
+        <img class="shot" src="images/01-home.png" alt="Copilot CoE home page with five tiles: Start in 10 minutes, Learning paths by role, Prompt library by role, Agent Showcase, and Get help">
+        <figcaption>Home page (<code>Home</code> in the site menu)</figcaption>
+      </figure>
+      <p>Instead of a wall of links, the home page is five tiles: <em>Start in 10 minutes, Learning paths by role, Prompt library by role, Agent Showcase, Get help</em>. A first-time visitor always has an obvious next click. A one-line banner under the tiles plainly states this is a demo build with sample guidance, not official policy.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">02</span>Start in 10 minutes &mdash; the on-ramp for novices</h2>
+      <figure>
+        <img class="shot" src="images/02-start-10-min.png" alt="Start in 10 minutes guide page with four numbered steps">
+        <figcaption><code>Start</code> in the site menu &rarr; <em>Guide-Start-in-10-Minutes.aspx</em></figcaption>
+      </figure>
+      <p>This is the first click on purpose: most people have never opened Copilot. Four timed steps take someone from "never used it" to "got one good result" &mdash; sign in the right way (look for the green shield), know what's safe to paste, try a prompt written for their role, then check the answer before trusting it. No training enrollment required.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">03</span>Learning paths by role &mdash; training sorted so people skip what doesn't apply</h2>
+      <figure>
+        <img class="shot" src="images/03-learning-paths.png" alt="Training and Enablement page showing learning paths organized by role">
+        <figcaption><code>Learn</code> in the site menu &rarr; <em>CoE-Training-and-Enablement.aspx</em></figcaption>
+      </figure>
+      <p>Faculty, staff, students and IT don't need the same training, so steps are grouped by role and each one links to the live session calendar or a ready-made prompt to practice with &mdash; not a blank box. This page doesn't track who finished what; that stays in the organization's own learning system.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">04</span>Prompt library by role &mdash; 230 starting points instead of a blank page</h2>
+      <figure>
+        <img class="shot" src="images/04-prompt-library.png" alt="Prompt library page listing prompts organized by role and task type">
+        <figcaption><code>Prompts</code> in the site menu &rarr; <em>Guide-Prompt-Library.aspx</em></figcaption>
+      </figure>
+      <p>The blank prompt box is one of the biggest adoption blockers. This catalog ships 230 ready-to-adapt prompts by role and task type &mdash; copy one, fill in the brackets, done. An organization can add its own CSV files to extend or replace any of these without touching the kit itself.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">05</span>Agent Showcase &mdash; a reviewed catalog, not a free-for-all</h2>
+      <figure>
+        <img class="shot" src="images/05-agent-showcase.png" alt="Agent Showcase catalog page listing approved Copilot agents">
+        <figcaption><code>Agents</code> in the site menu &rarr; <em>CoE-Agent-Showcase.aspx</em></figcaption>
+      </figure>
+      <p>Every listed agent shows its data sources, access requirements and an owner, so people reuse something vetted instead of requesting a brand-new build. New submissions go through native SharePoint content approval before they appear &mdash; a reviewer group, not the whole site, sees drafts.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">06</span>Get help &mdash; turns a question into a specific request</h2>
+      <figure>
+        <img class="shot" src="images/06-service-catalog.png" alt="Service Catalog and Support page with a table of request types and how to ask for each">
+        <figcaption><code>Get help</code> in the site menu &rarr; <em>CoE-Service-Catalog-and-Support.aspx</em></figcaption>
+      </figure>
+      <p>A simple table replaces a generic "contact us" box: get help using Copilot, request a license, book a department workshop, propose a new agent, or report a data/safety concern &mdash; each routed differently so nothing gets stuck in one inbox. Data or safety reports are called out separately from ordinary feedback.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">07</span>Governance and Responsible AI &mdash; the actual rules, in one place</h2>
+      <figure>
+        <img class="shot" src="images/07-governance.png" alt="Governance and Responsible AI page with a data classification table and risk tiers">
+        <figcaption><code>Governance</code> in the site menu &rarr; <em>CoE-Governance-and-Responsible-AI.aspx</em></figcaption>
+      </figure>
+      <p>Answers the question people actually ask: "can I paste this into Copilot?" A data-classification table (public / internal / confidential) and a three-tier risk model for agents means most of that question is answerable here, without a committee meeting every time. A sample RACI shows who owns what decision; organizations swap in their real role names.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">08</span>Success Stories &mdash; peer proof, with guardrails built into the submission steps</h2>
+      <figure>
+        <img class="shot" src="images/08-success-stories.png" alt="Success Stories catalog page with approved videos and write-ups">
+        <figcaption>Quick link from Home &rarr; <em>CoE-Success-Stories.aspx</em> (Success Stories channel)</figcaption>
+      </figure>
+      <p>A short video from a real colleague beats a vendor pitch. The submission steps bake in the guardrails &mdash; no student, health, financial or ID data, consent from everyone shown, captions required &mdash; and every story goes through content approval before it's published.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">09</span>Feedback and Roadmap &mdash; keeps the program from going stale</h2>
+      <figure>
+        <img class="shot" src="images/09-feedback-roadmap.png" alt="Feedback and Roadmap page with roadmap decks and a plan table">
+        <figcaption>Feedback and Roadmap channel &rarr; <em>CoE-Feedback-and-Roadmap.aspx</em></figcaption>
+      </figure>
+      <p>One page for "what's coming" (Microsoft's own Copilot release notes and roadmap) and "what we're doing about it" (the organization's own milestone plan), plus a channel to ask for what's missing &mdash; so every suggestion doesn't need its own new form.</p>
+    </section>
+
+    <section>
+      <h2>Get the kit</h2>
+      <p>Everything above is produced by one config-driven PowerShell kit: the same scripts build this for any organization by changing an <code>Deployment-Settings.json</code> file in a separate organization folder &mdash; nothing organization-specific is edited inside the kit itself.</p>
+      <ul class="checklist">
+        <li><strong>Private by default.</strong> The Team is Private and external SharePoint sharing is Disabled unless an admin explicitly turns it on for a reviewed lab preview.</li>
+        <li><strong>Delegated, interactive sign-in only.</strong> A tenant-owned Entra app is used for provisioning &mdash; no certificates or stored secrets.</li>
+        <li><strong>Re-runnable and reversible.</strong> An update script republishes edited content; a removal script tears the whole thing down (soft-delete by default).</li>
+        <li><strong>Self-checking.</strong> A test script verifies pages, navigation, catalogs, permissions and links after every install &mdash; the 98-check pass above came from that script, not a manual review.</li>
+      </ul>
+      <p style="margin-top:12px;">
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.6" target="_blank" rel="noopener">v3.6 release (includes the vendor site template)</a>
+      </p>
+      <div class="warning"><strong>About these screenshots:</strong> they're from a real Microsoft-built demo tenant used to validate the kit, not a live customer's production site. The on-page banner in the screenshots says so too: "DEMO SITE ... sample guidance, not official policy."</div>
+    </section>
+
+    <footer>Documented by David Shih Chun Liu &middot; companion to the CopilotCoE-Kit</footer>
+  </main>
+</body>
+</html>
