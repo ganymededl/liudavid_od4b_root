@@ -1049,26 +1049,6 @@ const CONFIG = {
       ]
     },
     {
-      name:  "Copilot Workshops & Billable Hours",
-      desc:  "Compare Copilot, Cowork, agents, security and governance service variants, US catalog prices, and estimated billable hours.",
-      note:  "Private planning dashboard in OneDrive. Sign-in and file permissions required. If preview stalls, download a copy and open it locally. Hours are estimates; approved scope and billing rules still apply.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/copilot-workshops-billable-hours.html",
-      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FHub%2FPrivate%2Fcopilot-workshops-billable-hours.html",
-      downloadLabel: "Download dashboard (open locally)",
-      icon:  "list",
-      color: ["var(--c1)", "var(--c2)"],
-      privateOnly: true
-    },
-    {
-      name:  "CW Skills",
-      desc:  "Private guide to 20 Copilot skills, with readiness notes, trial prompts, and linked skill files.",
-      note:  "Private · Microsoft sign-in required. Stored in OneDrive Hub/Private/Skills.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/Skills/README.html",
-      icon:  "lock",
-      color: ["#0078d4", "#00d9ff"],
-      privateOnly: true
-    },
-    {
       name:  "DemoIQ Backdated · Config Builder",
       desc:  "Customer demos from the SLED use-case library, seeded before the demo date.",
       note:  "Pick the customer, demo date, cast and routine tasks; content is seeded into the working week before the demo. Opening it here runs inside OneDrive's viewer, which blocks downloads - use Download setup to install the skill and run the builder from your own machine. OD4B permissions and Microsoft work sign-in required.",
@@ -1077,36 +1057,6 @@ const CONFIG = {
       downloadLabel: "Download setup (skill + builder, double-click install)",
       icon:  "star",
       color: ["#14b8a6", "#f59e0b"]
-    },
-    {
-      name:  "GCC Copilot Parity Tracker",
-      desc:  "Commercial feature differences, parity dates, exclusions, evidence links, and open GCC field questions.",
-      note:  "Private to David only. Microsoft sign-in and app permissions required; if OneDrive preview blocks the workbench link, download a copy and open it locally.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/gcc-copilot-parity-tracker.html",
-      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FHub%2FPrivate%2Fgcc-copilot-parity-tracker.html",
-      downloadLabel: "Download tracker (open locally)",
-      icon:  "lock",
-      color: ["#0078d4", "#00d9ff"],
-      privateOnly: true
-    },
-    {
-      name:  "liudavid's Personal Vault",
-      desc:  "Private visitor analytics and Scout automation controls for David.",
-      note:  "Private to David only — stored in a personal OneDrive folder that is not shared with anyone. Opening it requires his own Microsoft sign-in; no one else in Microsoft can see it.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html",
-      icon:  "code",
-      color: ["#b11f4b", "#f59e0b"],
-      privateOnly: true,
-      actions: [
-        {
-          label: "Open visitor analytics",
-          href: "https://clarity.microsoft.com/projects/view/yo4f54o07k/dashboard"
-        },
-        {
-          label: "Open Automations Playbook",
-          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/automations-playbook.html"
-        }
-      ]
     },
     {
       name:  "NL Studios (MSFT only)",
@@ -1160,6 +1110,56 @@ const CONFIG = {
       href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/useful-utilities.html",
       icon:  "code",
       color: ["#ff6b35", "#7b61ff"]
+    },
+    {
+      name:  "Copilot Workshops & Billable Hours",
+      desc:  "Compare Copilot, Cowork, agents, security and governance service variants, US catalog prices, and estimated billable hours.",
+      note:  "Private planning dashboard in OneDrive. Sign-in and file permissions required. If preview stalls, download a copy and open it locally. Hours are estimates; approved scope and billing rules still apply.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/copilot-workshops-billable-hours.html",
+      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FHub%2FPrivate%2Fcopilot-workshops-billable-hours.html",
+      downloadLabel: "Download dashboard (open locally)",
+      icon:  "list",
+      color: ["var(--c1)", "var(--c2)"],
+      privateOnly: true
+    },
+    {
+      name:  "CW Skills",
+      desc:  "Private guide to 20 Copilot skills, with readiness notes, trial prompts, and linked skill files.",
+      note:  "Private · Microsoft sign-in required. Stored in OneDrive Hub/Private/Skills.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/Skills/README.html",
+      icon:  "lock",
+      color: ["#0078d4", "#00d9ff"],
+      privateOnly: true
+    },
+    {
+      name:  "GCC Copilot Parity Tracker",
+      desc:  "Commercial feature differences, parity dates, exclusions, evidence links, and open GCC field questions.",
+      note:  "Private to David only. Microsoft sign-in and app permissions required; if OneDrive preview blocks the workbench link, download a copy and open it locally.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/gcc-copilot-parity-tracker.html",
+      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid_microsoft_com%2FDocuments%2FHub%2FPrivate%2Fgcc-copilot-parity-tracker.html",
+      downloadLabel: "Download tracker (open locally)",
+      icon:  "lock",
+      color: ["#0078d4", "#00d9ff"],
+      privateOnly: true
+    },
+    {
+      name:  "liudavid's Personal Vault",
+      desc:  "Private visitor analytics and Scout automation controls for David.",
+      note:  "Private to David only — stored in a personal OneDrive folder that is not shared with anyone. Opening it requires his own Microsoft sign-in; no one else in Microsoft can see it.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html",
+      icon:  "code",
+      color: ["#b11f4b", "#f59e0b"],
+      privateOnly: true,
+      actions: [
+        {
+          label: "Open visitor analytics",
+          href: "https://clarity.microsoft.com/projects/view/yo4f54o07k/dashboard"
+        },
+        {
+          label: "Open Automations Playbook",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/automations-playbook.html"
+        }
+      ]
     }
   ],
 
