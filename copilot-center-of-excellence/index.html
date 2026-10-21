@@ -96,6 +96,10 @@
       font-family: Consolas, "Courier New", Courier, monospace;
       font-size: 0.88rem;
     }
+    p code, li code, td code {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
     .meta { color: var(--cp-text-muted); font-size: 0.93rem; }
     .badge {
       display: inline-block;
@@ -400,16 +404,30 @@ $expectedHash = '&lt;SHA256 from the release receipt&gt;'
 $installRoot = 'C:\CoE-Install\DemoOrg'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
+$profileSource = Join-Path $kitRoot 'Org-Template' # Higher education
+# State/local government: $profileSource = Join-Path $kitRoot 'ContentPacks\Government-StateLocal'
 
 if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
   throw 'The chosen release ZIP does not match its receipt.'
 }
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
-Copy-Item (Join-Path $kitRoot 'Org-Template') $orgPath -Recurse</pre>
+Copy-Item $profileSource $orgPath -Recurse</pre>
       <p class="meta">The release receipt supplied with the package records the expected SHA256 for that ZIP. Verify
         the hash before extracting, and use a new, empty install folder for each clean run.</p>
       <p class="meta">The separate organization folder holds settings, content overrides, and approved assets outside
         the install folder, so extracting a newer release does not overwrite them.</p>
+      <div class="boundary-card">
+        <h3>Which GitHub ZIP can I install?</h3>
+        <p><strong>Use a prebuilt release asset</strong> only when the GitHub release explicitly lists a file named
+          <code>Copilot-CoE-Implementation-Kit.zip</code> and its published receipt or release notes give the SHA256
+          you verify above. If that asset is present and the hash matches, it is valid installation media.</p>
+        <p><strong>Do not substitute GitHub's generated source archives:</strong> <em>Source code (zip)</em>,
+          <em>Source code (tar.gz)</em>, or the repository's <em>Code &gt; Download ZIP</em>. Those files are source
+          snapshots, not the frozen implementation package.</p>
+        <p class="meta">Release 3.8.21 currently has no binary assets on GitHub. Obtain the reviewed implementation ZIP
+          and matching receipt through the approved distribution channel. The warning is about source archives, not
+          about a genuine, hash-matched implementation ZIP downloaded from a future GitHub release asset.</p>
+      </div>
     </section>
 
     <section class="step" id="tour-04" data-tour="4">
@@ -418,19 +436,52 @@ Copy-Item (Join-Path $kitRoot 'Org-Template') $orgPath -Recurse</pre>
         <img class="shot" src="Images/ps-settings-json.png" alt="Deployment Settings JSON open in an editor showing tenant, identity, security and environment fields">
         <figcaption>Deployment settings used in the lab recording.</figcaption>
       </figure>
-      <p>Open <code>Deployment-Settings.json</code> in the organization folder. Enter the tenant, SharePoint hosts,
-        organization name, and alias.</p>
+      <p>Open <code>$orgPath\Deployment-Settings.json</code>. This is the organization copy created in step 03; do not
+        edit the generic file under <code>$kitRoot</code> or <code>$kitRoot\Org-Template</code>.</p>
+      <table class="source-table">
+        <thead><tr><th scope="col">JSON field</th><th scope="col">Value to enter</th><th scope="col">Where it comes from</th></tr></thead>
+        <tbody>
+          <tr><td><code>Tenant</code></td><td><code>yourtenant.onmicrosoft.com</code></td><td>The tenant's primary <code>.onmicrosoft.com</code> domain.</td></tr>
+          <tr><td><code>AdminFQDN</code></td><td><code>yourtenant-admin.sharepoint.com</code></td><td>The SharePoint admin-center host, without <code>https://</code> or a path.</td></tr>
+          <tr><td><code>SiteFQDN</code></td><td><code>yourtenant.sharepoint.com</code></td><td>The SharePoint content host, without <code>https://</code> or a path.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Blank for the tenant's first kit registration</td><td>Step 06 writes the new tenant-owned app ID. Never carry a client ID into another tenant.</td></tr>
+          <tr><td><code>SharedChannelOwnerUPN</code></td><td><code>coe-owner@your-domain</code></td><td>An existing in-tenant Member account approved to own the restricted governance channels.</td></tr>
+          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>The approved full name, reader-facing noun, and abbreviation</td><td>Examples: <code>Contoso County</code>, <code>county</code>, <code>CC</code>.</td></tr>
+          <tr><td><code>MailNickname</code></td><td>A unique Microsoft 365 group alias</td><td>This value chooses the Team alias and SharePoint site path. Changing only <code>$siteUrl</code> does not change the installation target.</td></tr>
+          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title</td><td>Reader-facing; do not put lab wording in a customer profile.</td></tr>
+          <tr><td><code>TeamVisibility</code></td><td><code>Private</code></td><td>Required by the installer.</td></tr>
+          <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code></td><td>Customer default. External preview is a separate, approved lab decision.</td></tr>
+          <tr><td><code>OrganizationEmailDomains</code></td><td>Approved UPN domains for this tenant</td><td>Used to flag out-of-domain Team members; do not copy domains from another deployment.</td></tr>
+          <tr><td><code>GovernanceAdditionalAllowedMembers</code></td><td>Approved in-tenant UPNs, or <code>[]</code></td><td>Additional people allowed in the restricted governance shared channels.</td></tr>
+          <tr><td><code>CatalogReviewerUPNs</code></td><td>Approved in-tenant reviewer UPNs, or <code>[]</code></td><td>Reviewers receive the catalog approval role; no guests are invited.</td></tr>
+          <tr><td><code>EnvironmentLabel</code></td><td><code>Production</code>, <code>Pilot</code>, or another approved label</td><td>Reader-facing environment name.</td></tr>
+          <tr><td><code>SampleNotice</code></td><td><code>none</code> for approved Customer content</td><td>Use a visible disclaimer for Demo mode. Blank does not mean no notice; <code>none</code> does.</td></tr>
+          <tr><td><code>SupportEmail</code></td><td>An approved, monitored mailbox</td><td>Used by generated support mail links. A public contact is not automatically an approved support route.</td></tr>
+          <tr><td><code>LearningEnvironment</code></td><td><code>HigherEducation</code> or <code>Government</code></td><td>Selects the supported learning and tool experience.</td></tr>
+          <tr><td><code>GuidesIntro</code>, <code>StoryAudiences</code>, <code>ScenarioLibraryUrl</code></td><td>Use the values supplied by the selected content pack, then review them</td><td>The Government pack supplies government audiences and scenario links; do not leave education defaults in a government profile.</td></tr>
+          <tr><td><code>TimeZone</code></td><td>A Windows time-zone ID</td><td>For example, <code>Eastern Standard Time</code> or <code>Central Standard Time</code>.</td></tr>
+        </tbody>
+      </table>
       <p>If this is the tenant's first installation, leave <code>PnPClientID</code> blank for now. Step 06 registers
-        the provisioning app and saves its client ID. This recording reuses an existing approved lab app.</p>
-      <p>Set <code>LearningEnvironment</code> to <code>HigherEducation</code>. Keep
+        the provisioning app and saves its client ID. An additional organization profile in the same tenant may use
+        the client ID of a kit-created app that is already approved there. Do not reuse that ID across tenants.</p>
+      <p>For this higher-education walkthrough, set <code>LearningEnvironment</code> to
+        <code>HigherEducation</code>. State and local government administrators should copy
+        <code>ContentPacks\Government-StateLocal</code> in step 03 and retain its
+        <code>LearningEnvironment: Government</code> setting. Keep
         <code>TeamVisibility</code> set to <code>Private</code> and <code>CoESiteSharingCapability</code> set to
         <code>Disabled</code>, unless the organization has explicitly approved a different configuration.</p>
-      <p>Choose the alias carefully: it becomes the site path and must meet Microsoft 365 naming requirements.</p>
+      <p>Choose the alias carefully: it becomes the site path and must meet Microsoft 365 naming requirements. After
+        saving the JSON, define the checker URL and content mode from the same values:</p>
+      <pre class="code-panel">$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+$siteUrl = "https://$($settings.SiteFQDN)/sites/$($settings.MailNickname)"
+$contentMode = 'Customer' # Use Demo only for a clearly labeled synthetic demonstration.</pre>
     </section>
 
     <section class="step" id="tour-05" data-tour="5">
       <h2><span class="badge">05</span>Configure support, governance, and content</h2>
-      <p>In the same <code>Deployment-Settings.json</code> file, set the support and governance links:</p>
+      <p>Continue editing <code>$orgPath\Deployment-Settings.json</code>. Use routes approved by the teams that own
+        them; do not infer internal mailboxes, ticket queues, or incident endpoints from a public website.</p>
       <pre class="code-panel">"Links": {
   "ServiceDesk": "https://www.techservices.illinois.edu/get-help/it-service-desk/",
   "TechnologyRequest": "https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog",
@@ -442,15 +493,37 @@ Copy-Item (Join-Path $kitRoot 'Org-Template') $orgPath -Recurse</pre>
   { "label": "Data handling and intellectual property best practices", "url": "https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/" },
   { "label": "Microsoft Copilot Chat guidance", "url": "https://genai.illinois.edu/ai-apps-copilot-chat/" }
 ]</pre>
-      <p>Use the complete approved URLs shown here. Also review the training links, champion departments, prompt
-        library setting, and sample agent entries before installation.</p>
+      <table class="source-table">
+        <thead><tr><th scope="col">Field</th><th scope="col">What it must contain</th></tr></thead>
+        <tbody>
+          <tr><td><code>SupportEmail</code></td><td>A monitored mailbox approved for the generated CoE support links.</td></tr>
+          <tr><td><code>Links.ServiceDesk</code></td><td>The general IT support or service-center route.</td></tr>
+          <tr><td><code>Links.TechnologyRequest</code></td><td>The approved service, software, or AI-technology request process.</td></tr>
+          <tr><td><code>Links.DataSafetyIncident</code></td><td>The approved security or data-incident reporting route; keep it separate from ordinary feedback.</td></tr>
+          <tr><td><code>Links.AIGuidelines</code></td><td>The organization's current AI or responsible-use guidance.</td></tr>
+          <tr><td><code>Links.AboutOrg</code></td><td>The organization's official public page.</td></tr>
+          <tr><td><code>Links.PromptLibrary</code>, <code>Links.LearningSystem</code></td><td>Optional approved existing destinations; blank is allowed.</td></tr>
+          <tr><td><code>GovernanceLinks</code>, <code>TrainingLinks</code></td><td>Reviewed label-and-URL entries shown on generated pages.</td></tr>
+          <tr><td><code>ChampionDepartments</code>, <code>Agents</code></td><td>Real approved units and agent entries. Remove template examples you are not adopting.</td></tr>
+        </tbody>
+      </table>
+      <p>Put organization text overrides under <code>$orgPath\Content</code> and approved hosted files under
+        <code>$orgPath\Assets</code>. Do not edit <code>$kitRoot\SeedContent</code>. Run the local structured-content
+        check before authentication:</p>
+      <pre class="code-panel">Set-Location $kitRoot
+. .\Internal\ContentPreflight.ps1
+Assert-CoEStructuredOrganizationContent -OrgPath $orgPath</pre>
     </section>
 
     <section class="step" id="tour-06" data-tour="6">
       <h2><span class="badge">06</span>Install PnP.PowerShell and register the app</h2>
-      <pre class="code-panel">$PSVersionTable.PSVersion
+      <pre class="code-panel">Set-Location $kitRoot
+$PSVersionTable.PSVersion
 Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
-.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive</pre>
+.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
+
+# Confirm script 01 saved a non-empty client ID before installation.
+(Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
       <p class="meta">This recording uses PowerShell 7.6.7. The kit requires PowerShell 7.4 or later and
         PnP.PowerShell 3.2.0.</p>
       <p class="meta">Someone authorized to grant the required app permissions runs the registration script once per
@@ -463,13 +536,13 @@ Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
       <pre class="code-panel">Set-Location $kitRoot
 .\02_Install-CopilotCoE.ps1 `
   -OrgPath $orgPath `
-  -ContentMode Demo `
+  -ContentMode $contentMode `
   -SeedDemoContent</pre>
       <p><code>-SeedDemoContent</code> publishes the pages, catalogs, calendar, and governance content. Without it,
         the installer creates only the Team and an empty SharePoint site.</p>
-      <p>This lab uses <code>-ContentMode Demo</code> to retain the kit's generated demonstration notices. An approved
-        production deployment uses <code>-ContentMode Customer</code>. Review the source files and existing site
-        content, and remove any sample items yourself; changing the mode does not replace that review.</p>
+      <p>The command above uses the <code>$contentMode</code> selected in step 04. Set it to <code>Customer</code> for
+        an approved customer deployment. This recorded lab used <code>Demo</code> to retain demonstration notices.
+        Review source files and existing site content yourself; changing the mode does not replace that review.</p>
       <p>This is a clean install, so <code>-ResumeExisting</code> is not used. If an earlier attempt already created a
         Team or site, investigate first. Then either resume that exact deployment or use
         <code>04_Remove-CopilotCoE.ps1</code> before starting again. Deleting only the SharePoint site leaves the Team
@@ -528,7 +601,7 @@ Disabling non-owner sharing</pre>
 <span class="ok">Submitted the prepared welcome post to 'Share Your Prompt'. Verify it in Teams.
 Submitted the prepared welcome post to 'Ask Us Anything'. Verify it in Teams.
 Submitted the prepared welcome post to 'General'. Verify it in Teams.</span>
-Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization folder&gt; -SiteUrl https://yourtenant.sharepoint.com/sites/CopilotCoEDemo
+Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization folder&gt; -SiteUrl $siteUrl -ContentMode $contentMode
 <span class="ok">02_Install-CopilotCoE finished in 2143s (about 36 minutes).</span></pre>
       <p class="meta">Save the site address exactly as printed. The installer saves
         <code>CoE-Revision-Report.json</code> beside <code>Deployment-Settings.json</code> in the organization folder.
@@ -539,10 +612,10 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
       <h2><span class="badge">11</span>Run the read-only checker</h2>
       <pre class="code-panel">.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
-  -SiteUrl 'https://yourtenant.sharepoint.com/sites/CopilotCoEDemo' `
-  -ContentMode Demo
+  -SiteUrl $siteUrl `
+  -ContentMode $contentMode
 
-<span class="ok">ALL CHECKS PASSED (292)</span></pre>
+<span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
       <figure>
         <img class="shot" src="Images/ps-checker-pass-rows.png" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
         <figcaption>Checker result from this lab run: 292 checks passed.</figcaption>
@@ -614,7 +687,7 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
   -Scope All `
   -RepairCapturedPages `
   -AuthenticationMode Interactive `
-  -ContentMode Demo</pre>
+        -ContentMode $contentMode</pre>
       <p class="meta">In this recorded run, the update preserved existing catalog rows and checked the security
         configuration again. Review the output for your own deployment rather than assuming every update will have
         the same result.</p>
@@ -628,10 +701,10 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
       </figure>
       <pre class="code-panel">.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
-  -SiteUrl 'https://yourtenant.sharepoint.com/sites/CopilotCoEDemo' `
-  -ContentMode Demo
+  -SiteUrl $siteUrl `
+  -ContentMode $contentMode
 
-<span class="ok">ALL CHECKS PASSED (292)</span></pre>
+<span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
       <p class="meta">Keep <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, the
         <code>RevisionAudit</code> run transcripts, automated test results, and manual review records together for
         the handoff.</p>
@@ -685,9 +758,16 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
     <section id="get-kit">
       <h2>Get the kit for this walkthrough</h2>
       <p>Use the reviewed release 3.8.21 implementation ZIP and its release receipt. The receipt identifies the
-        expected SHA256 hash. GitHub's automatic source-code archives are not the prebuilt implementation ZIP;
-        the source release also documents its template dependency.</p>
-      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21" target="_blank" rel="noopener">Release 3.8.21 notes and source</a>
+        expected SHA256 hash: <code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code>.</p>
+      <p><strong>A GitHub ZIP is valid only when it is a named prebuilt release asset</strong>, such as
+        <code>Copilot-CoE-Implementation-Kit.zip</code>, and its hash matches the release receipt. GitHub's automatic
+        <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository <em>Download ZIP</em> are source
+        snapshots, not installation packages.</p>
+      <p>Release 3.8.21 currently publishes source and release notes but no binary asset. For this release, obtain the
+        frozen implementation ZIP and receipt through the approved distribution channel. If a future release publishes
+        the implementation ZIP as a GitHub release asset, download it there, verify its published hash, and use it in
+        step 03.</p>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21" target="_blank" rel="noopener">Release 3.8.21 notes (source release; no binary asset)</a>
         &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">Kit repository and documentation</a></p>
       <p class="meta">Keep organization settings and approved overrides outside the extracted kit. This recording
         uses delegated interactive sign-in through a tenant-owned Entra app. Installation, content updates,
