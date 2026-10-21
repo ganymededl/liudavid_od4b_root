@@ -311,11 +311,24 @@
         <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>
         release 3.8.21.</p>
       <nav class="pill-row" aria-label="Written references">
+        <a class="pill" href="government-install.html">Government install runbook</a>
         <a class="pill" href="#site-tour-reference">What users get</a>
         <a class="pill" href="#get-kit">Get the kit</a>
         <a class="pill" href="#admin-faq">Admin FAQ</a>
         <a class="pill" href="#external-sharing">External-sharing addendum</a>
       </nav>
+      <div class="boundary-grid" aria-label="Choose an installation path">
+        <div class="boundary-card">
+          <h3>Higher education</h3>
+          <p>This page and video use <code>Org-Template</code> with
+            <code>LearningEnvironment: HigherEducation</code>.</p>
+        </div>
+        <div class="boundary-card">
+          <h3>State and local government</h3>
+          <p>Use the separate <a href="government-install.html">Government Customer-mode runbook</a>. It starts from
+            <code>ContentPacks\Government-StateLocal</code> and keeps cloud support as a separate decision.</p>
+        </div>
+      </div>
       <div class="player-slot" id="playerSlot">
         <div class="player-frame" id="playerFrame">
           <video id="walkVideo" controls preload="metadata" playsinline poster="Images/video-poster.jpg"
@@ -773,6 +786,7 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
         uses delegated interactive sign-in through a tenant-owned Entra app. Installation, content updates,
         removal, and read-only validation are separate operations; use the administrator quickstart supplied
         with the same release.</p>
+      <p><a href="government-install.html">Open the separate state and local government Customer-mode runbook &rarr;</a></p>
     </section>
 
     <section id="admin-faq">

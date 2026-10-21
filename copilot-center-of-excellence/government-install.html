@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Government Copilot CoE installation runbook - Release 3.8.21</title>
+  <meta name="description" content="Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.21.">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+    }
+    a { color: var(--cp-link); }
+    code, pre { font-family: Consolas, "Courier New", Courier, monospace; }
+    p code, li code, td code { overflow-wrap: anywhere; word-break: break-word; }
+    .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar {
+      border-bottom: 1px solid var(--cp-border);
+      background: var(--cp-bg-elevated);
+    }
+    .topbar .shell {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+    .topbar nav { display: flex; gap: 12px; flex-wrap: wrap; }
+    .topbar a { font-weight: 600; text-decoration: none; }
+    header { padding: 44px 0 24px; }
+    .eyebrow {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 0.625rem;
+      color: var(--cp-accent);
+      background: var(--cp-accent-soft);
+      font-weight: 700;
+      font-size: 0.84rem;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.08; margin: 0 0 14px; }
+    h2 { color: var(--cp-accent); font-size: 1.35rem; margin: 0 0 12px; }
+    h3 { margin: 0 0 8px; font-size: 1rem; }
+    p { margin: 0 0 12px; }
+    .lede { max-width: 850px; color: var(--cp-text-muted); font-size: 1.08rem; }
+    .toc {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .toc a, .button {
+      display: inline-block;
+      padding: 7px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .toc a:hover, .button:hover { border-color: var(--cp-accent); }
+    main { padding-bottom: 80px; }
+    section, .callout {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      padding: 22px;
+      margin-bottom: 16px;
+    }
+    .warning {
+      border-left: 5px solid var(--cp-warning);
+      background: var(--cp-surface-soft);
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .danger {
+      border-left: 5px solid var(--cp-danger);
+      background: var(--cp-surface-soft);
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .success {
+      border-left: 5px solid var(--cp-success);
+      background: var(--cp-surface-soft);
+      padding: 14px 16px;
+      margin: 14px 0;
+    }
+    .step-title { display: flex; gap: 10px; align-items: center; }
+    .step-number {
+      display: inline-grid;
+      place-items: center;
+      min-width: 32px;
+      height: 32px;
+      border-radius: 0.625rem;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-size: 0.86rem;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .card {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--cp-surface-soft);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+    }
+    th, td {
+      border: 1px solid var(--cp-border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    th { background: var(--cp-surface-soft); }
+    pre {
+      margin: 12px 0;
+      padding: 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-bg-elevated);
+      color: var(--cp-text);
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .command-head {
+      display: flex;
+      justify-content: flex-end;
+      margin: 4px 0 -6px;
+    }
+    button.copy {
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 6px 10px;
+      font: 600 0.8rem "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      cursor: pointer;
+    }
+    button.copy:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin-bottom: 6px; }
+    .meta { color: var(--cp-text-muted); font-size: 0.9rem; }
+    footer {
+      border-top: 1px solid var(--cp-border);
+      color: var(--cp-text-muted);
+      padding: 24px 0 40px;
+    }
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 20px, 1120px); }
+      header { padding-top: 28px; }
+      section { padding: 16px; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <div class="shell">
+      <strong>Copilot Center of Excellence</strong>
+      <nav aria-label="Related guides">
+        <a href="index.html">Higher education walkthrough</a>
+        <a href="admin-faq.html">Administrator FAQ</a>
+        <a href="external-sharing-addendum.html">External sharing</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="shell">
+    <span class="eyebrow">Release 3.8.21 · Government-StateLocal · Customer mode</span>
+    <h1>Government installation runbook</h1>
+    <p class="lede">Use this page for state and local government content. It follows the same package verification,
+      extraction, registration, installation, validation, update, and final-validation sequence as the higher
+      education walkthrough, without mixing in education defaults or Demo mode.</p>
+    <nav class="toc" aria-label="Runbook sections">
+      <a href="#cloud">Cloud boundary</a>
+      <a href="#package">Package</a>
+      <a href="#settings">Settings</a>
+      <a href="#register">Register</a>
+      <a href="#install">Install</a>
+      <a href="#accept">Accept</a>
+    </nav>
+  </header>
+
+  <main class="shell">
+    <section id="cloud">
+      <h2>Choose content and cloud separately</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Content profile</h3>
+          <p>State and local government uses <code>ContentPacks\Government-StateLocal</code> and
+            <code>LearningEnvironment: Government</code>.</p>
+        </div>
+        <div class="card">
+          <h3>Cloud environment</h3>
+          <p>The content pack does not select a cloud or prove cloud compatibility. Confirm the target tenant
+            separately.</p>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th scope="col">Cloud</th><th scope="col">Release 3.8.21 status</th></tr></thead>
+        <tbody>
+          <tr><td>Commercial Microsoft 365</td><td>Validated for this release.</td></tr>
+          <tr><td>GCC Moderate</td><td>Design target; not yet validated. Complete your own acceptance before use.</td></tr>
+          <tr><td>GCC High and DoD</td><td>Unsupported.</td></tr>
+        </tbody>
+      </table>
+      <div class="warning"><strong>Do not label this page “GCC installation.”</strong> Government content may be used
+        in a commercial tenant, and GCC Moderate remains unvalidated for release 3.8.21.</div>
+    </section>
+
+    <section id="package">
+      <h2 class="step-title"><span class="step-number">01</span>Verify and extract the implementation package</h2>
+      <p>Use the frozen implementation ZIP and its matching release receipt. Release 3.8.21 SHA256:</p>
+      <p><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></p>
+      <div class="warning"><strong>GitHub ZIP distinction:</strong> a named
+        <code>Copilot-CoE-Implementation-Kit.zip</code> release asset is valid when its published hash matches.
+        GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository
+        <em>Download ZIP</em> are not installation packages. The v3.8.21 GitHub release currently has no binary
+        asset.</div>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package">Copy command</button></div>
+      <pre id="cmd-package">$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
+$expectedHash = 'B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F'
+$installRoot = 'C:\CoE-Install\GovernmentOrg'
+$kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\GovernmentOrg'
+
+if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
+  throw 'The chosen release ZIP does not match its receipt.'
+}
+if (Test-Path -LiteralPath $installRoot) {
+  throw "Use a new, empty install folder: $installRoot"
+}
+if (Test-Path -LiteralPath $orgPath) {
+  throw "Use a new organization folder: $orgPath"
+}
+
+Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
+Copy-Item (Join-Path $kitRoot 'ContentPacks\Government-StateLocal') $orgPath -Recurse
+Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
+      <p class="meta">Keep the organization folder outside the extracted kit. Future kit extraction must not overwrite
+        settings, content, assets, transcripts, or deployment identity records.</p>
+    </section>
+
+    <section id="settings">
+      <h2 class="step-title"><span class="step-number">02</span>Edit the organization settings file</h2>
+      <p>Edit <code>$orgPath\Deployment-Settings.json</code>. Do not edit the copies under
+        <code>$kitRoot</code>.</p>
+      <table>
+        <thead><tr><th scope="col">Field</th><th scope="col">Government customer value</th></tr></thead>
+        <tbody>
+          <tr><td><code>Tenant</code></td><td>The tenant's primary <code>.onmicrosoft.com</code> domain.</td></tr>
+          <tr><td><code>AdminFQDN</code></td><td>The SharePoint admin host, without protocol or path.</td></tr>
+          <tr><td><code>SiteFQDN</code></td><td>The SharePoint content host, without protocol or path.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Blank for the first kit registration in a new tenant. Script 01 writes it.</td></tr>
+          <tr><td><code>SharedChannelOwnerUPN</code></td><td>An approved, existing in-tenant Member account.</td></tr>
+          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved organization name, <code>agency</code>, and abbreviation.</td></tr>
+          <tr><td><code>MailNickname</code></td><td>A unique group alias. It controls the Team alias and SharePoint site path.</td></tr>
+          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title.</td></tr>
+          <tr><td><code>TeamVisibility</code></td><td><code>Private</code>.</td></tr>
+          <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code> for Customer deployments.</td></tr>
+          <tr><td><code>OrganizationEmailDomains</code></td><td>Approved UPN domains from this tenant only.</td></tr>
+          <tr><td><code>GovernanceAdditionalAllowedMembers</code></td><td>Approved in-tenant UPNs, or <code>[]</code>.</td></tr>
+          <tr><td><code>CatalogReviewerUPNs</code></td><td>Approved in-tenant reviewers, or <code>[]</code>.</td></tr>
+          <tr><td><code>EnvironmentLabel</code></td><td><code>Production</code>, <code>Pilot</code>, or another approved reader-facing label.</td></tr>
+          <tr><td><code>SampleNotice</code></td><td><code>none</code> only after Customer content is approved.</td></tr>
+          <tr><td><code>SupportEmail</code></td><td>An approved, monitored mailbox.</td></tr>
+          <tr><td><code>TimeZone</code></td><td>A Windows time-zone ID, such as <code>Central Standard Time</code>.</td></tr>
+          <tr><td><code>LearningEnvironment</code></td><td><code>Government</code>.</td></tr>
+          <tr><td><code>GuidesIntro</code></td><td>Government-pack wording for staff, supervisors, and IT; review before use.</td></tr>
+          <tr><td><code>StoryAudiences</code></td><td><code>Staff</code>, <code>Supervisors</code>, and <code>IT</code>, or approved replacements.</td></tr>
+          <tr><td><code>ScenarioLibraryUrl</code></td><td><code>https://adoption.microsoft.com/en-us/scenario-library/government/</code></td></tr>
+        </tbody>
+      </table>
+      <div class="danger"><strong>New tenant:</strong> do not copy <code>PnPClientID</code>,
+        <code>CoE-Revision-Report.json</code>, <code>CoE-Removal-Manifest.json</code>,
+        <code>CoE-Purge-Receipt.json</code>, advisory decisions, wrapper state, or
+        <code>RevisionAudit</code> from another deployment.</div>
+    </section>
+
+    <section>
+      <h2 class="step-title"><span class="step-number">03</span>Configure support, governance, and reviewed content</h2>
+      <p>Use routes supplied or approved by their owners. Do not infer private mailboxes, ticket queues, incident
+        endpoints, or tenant values from a public website.</p>
+      <table>
+        <thead><tr><th scope="col">Field or folder</th><th scope="col">Required review</th></tr></thead>
+        <tbody>
+          <tr><td><code>SupportEmail</code></td><td>Monitored mailbox behind generated CoE mail links.</td></tr>
+          <tr><td><code>Links.ServiceDesk</code></td><td>General technical-support route.</td></tr>
+          <tr><td><code>Links.TechnologyRequest</code></td><td>Approved software, service, or AI request process.</td></tr>
+          <tr><td><code>Links.DataSafetyIncident</code></td><td>Approved security/data incident route, separate from ordinary feedback.</td></tr>
+          <tr><td><code>Links.AIGuidelines</code></td><td>Current responsible-AI or acceptable-use guidance.</td></tr>
+          <tr><td><code>GovernanceLinks</code>, <code>TrainingLinks</code></td><td>Reviewed labels and URLs shown on generated pages.</td></tr>
+          <tr><td><code>$orgPath\Content</code></td><td>Agency text overrides. Review Low/Moderate/High classifications and all illustrative governance drafts.</td></tr>
+          <tr><td><code>$orgPath\Assets</code></td><td>Approved files only. Review before using <code>-AcceptOrgAssets</code>.</td></tr>
+        </tbody>
+      </table>
+      <p>Customer mode removes generated demo notices and sample catalog rows. It does not approve or rewrite your
+        organization files. The Government pack contains illustrative governance drafts that must be reviewed,
+        replaced, or intentionally omitted before customer use.</p>
+    </section>
+
+    <section>
+      <h2 class="step-title"><span class="step-number">04</span>Run local preflight before authentication</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-preflight">Copy command</button></div>
+      <pre id="cmd-preflight">Set-Location $kitRoot
+. .\Internal\ContentPreflight.ps1
+Assert-CoEStructuredOrganizationContent -OrgPath $orgPath</pre>
+      <p class="meta">This checks organization content locally. It does not validate tenant identity, permissions,
+        URLs, support monitoring, policy approval, or reader experience.</p>
+    </section>
+
+    <section id="register">
+      <h2 class="step-title"><span class="step-number">05</span>Install PnP.PowerShell and register the tenant app</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-register">Copy command</button></div>
+      <pre id="cmd-register">Set-Location $kitRoot
+$PSVersionTable.PSVersion
+Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
+.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
+
+# Confirm script 01 saved a non-empty client ID.
+(Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
+      <p>Run script 01 once per tenant as an approved consent approver. It creates the single-tenant
+        <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings file.
+        Never copy that ID to another tenant.</p>
+      <p>In Microsoft Entra, grant tenant-wide admin consent and confirm these delegated permissions show
+        <strong>Granted</strong>:</p>
+      <ul>
+        <li>Microsoft Graph: <code>Group.ReadWrite.All</code>, <code>ChannelMember.ReadWrite.All</code>,
+          <code>User.Read</code>, and <code>User.Read.All</code></li>
+        <li>SharePoint: <code>AllSites.FullControl</code></li>
+      </ul>
+    </section>
+
+    <section id="install">
+      <h2 class="step-title"><span class="step-number">06</span>Derive the target and run the clean Customer install</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-install">Copy command</button></div>
+      <pre id="cmd-install">Set-Location $kitRoot
+$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
+  throw 'Run script 01 and grant admin consent before installation.'
+}
+$siteUrl = "https://$($settings.SiteFQDN)/sites/$($settings.MailNickname)"
+$contentMode = 'Customer'
+
+.\02_Install-CopilotCoE.ps1 `
+  -OrgPath $orgPath `
+  -ContentMode $contentMode `
+  -SeedDemoContent</pre>
+      <p><code>MailNickname</code> chooses the Team alias and SharePoint site path. <code>$siteUrl</code> is derived
+        for validation; changing that variable alone does not change the install target.</p>
+      <p><code>-SeedDemoContent</code> is still required in Customer mode because it publishes the managed pages,
+        catalogs, calendar, and governance content. Customer mode filters generated demonstration notices and sample
+        rows.</p>
+      <div class="warning">Before creation, read the signed-in account, tenant, group-naming-policy warning, alias,
+        owner, and target URL printed by the script. Stop if any value is wrong.</div>
+    </section>
+
+    <section id="accept">
+      <h2 class="step-title"><span class="step-number">07</span>Run the checker and complete manual acceptance</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-check">Copy command</button></div>
+      <pre id="cmd-check">.\Test-CoEInstall.ps1 `
+  -OrgPath $orgPath `
+  -SiteUrl $siteUrl `
+  -ContentMode $contentMode</pre>
+      <p>Fix every FAIL. Read every WARN and retain evidence for each manual check. At minimum:</p>
+      <ol>
+        <li>Confirm the Home page, navigation, tools, learning paths, support, governance, and catalog views.</li>
+        <li>Confirm exactly one welcome post in General, Share Your Prompt, and Ask Us Anything.</li>
+        <li>Confirm no demo notice or sample row remains in Customer mode.</li>
+        <li>Confirm Team visibility is Private and all three SharePoint sites have external sharing disabled.</li>
+        <li>Confirm support, technology-request, AI-guidance, and incident links reach approved destinations.</li>
+        <li>Review as a regular reader, not only as an owner.</li>
+        <li>Obtain required security, privacy, records, accessibility, licensing, legal, and operational approval.</li>
+      </ol>
+      <div class="warning">The provisioning app can send welcome posts but normally cannot read them back without
+        <code>ChannelMessage.Read.All</code>. A checker WARN for that permission is resolved by visual review; do not
+        add the permission solely to eliminate the WARN.</div>
+    </section>
+
+    <section>
+      <h2 class="step-title"><span class="step-number">08</span>Publish the reviewed update and check again</h2>
+      <p>For this fresh acceptance run, use the same repair/update sequence documented by the implementation guide.
+        <code>-RepairCapturedPages</code> rewrites managed captured-page elements; review direct SharePoint edits
+        before using it on an established site.</p>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-update">Copy command</button></div>
+      <pre id="cmd-update">.\03_Update-CoEContent.ps1 `
+  -OrgPath $orgPath `
+  -Scope All `
+  -RepairCapturedPages `
+  -AuthenticationMode Interactive `
+  -ContentMode $contentMode
+
+.\Test-CoEInstall.ps1 `
+  -OrgPath $orgPath `
+  -SiteUrl $siteUrl `
+  -ContentMode $contentMode</pre>
+      <div class="success"><strong>Complete only after both checker runs and manual review.</strong> Keep
+        <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, all
+        <code>RevisionAudit</code> transcripts, checker output, and manual acceptance evidence together.</div>
+    </section>
+
+    <section>
+      <h2>Failure and recovery boundary</h2>
+      <ul>
+        <li>If the intended Team/site exists after an interrupted run, investigate and resume that exact deployment
+          with <code>-ResumeExisting</code>.</li>
+        <li>Do not start a second clean install against the same alias.</li>
+        <li>Do not delete only the SharePoint site; the Team and Microsoft 365 group remain.</li>
+        <li>Use <code>04_Remove-CopilotCoE.ps1 -Purge -WhatIf</code> before any reviewed permanent removal.</li>
+        <li>Keep the provisioning app until removal reports <code>AliasReusable : True</code>.</li>
+      </ul>
+      <p><a class="button" href="admin-faq.html">Open the full Administrator FAQ</a></p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <p>Release 3.8.21 · Government-StateLocal content · Customer mode</p>
+      <p>Government content is not proof of GCC acceptance. GCC High and DoD are unsupported.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll("[data-copy]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const target = document.getElementById(button.dataset.copy);
+        if (!target) return;
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(target.textContent);
+          button.textContent = "Copied";
+        } catch {
+          button.textContent = "Select and copy";
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1800);
+      });
+    });
+  </script>
+</body>
+</html>
