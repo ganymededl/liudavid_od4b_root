@@ -16,6 +16,7 @@
     }
   })();
 </script>
+<script src="artwork-background.js"></script>
 <style>
 :root {
   color-scheme: light;
@@ -236,7 +237,8 @@ body.immersive .art-hint { z-index: 4; }
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
-  const backgroundMode = document.documentElement.dataset.background === "true";
+  const background = window.artworkBackground;
+  const backgroundMode = background.enabled;
   const parameters = new URLSearchParams(location.search);
   const initialTension = parameters.get("preset") === "rupture" || backgroundMode ? 94 : 32;
   const canvas = $("sculpture");
@@ -253,7 +255,7 @@ body.immersive .art-hint { z-index: 4; }
     error.hidden = false;
     error.textContent = message;
     ["sound", "motion", "save"].forEach(id => { $(id).disabled = true; });
-    if (backgroundMode) parent.postMessage({type:"noir-error"}, location.origin);
+    if (backgroundMode) background.fail(message);
   }
   if (!gl) {
     fail("This sculpture needs WebGL. Enable graphics acceleration in your browser and reload.");
@@ -442,6 +444,7 @@ body.immersive .art-hint { z-index: 4; }
   let aspect=1, distance=9.8;
   function resize() {
     const rect=canvas.getBoundingClientRect();
+    if(rect.width<2||rect.height<2)return;
     const dpr=Math.min(window.devicePixelRatio||1,backgroundMode?1:1.6);
     canvas.width=Math.round(rect.width*dpr); canvas.height=Math.round(rect.height*dpr);
     gl.viewport(0,0,canvas.width,canvas.height); aspect=rect.width/rect.height;
@@ -450,22 +453,17 @@ body.immersive .art-hint { z-index: 4; }
     gl.uniformMatrix4fv(uniforms.uProjection,false,matrix);
     distance=aspect<0.85?12.3:9.8;
     gl.uniform1f(uniforms.uDistance,distance);
+    if(backgroundMode)background.invalidate();
   }
   new ResizeObserver(resize).observe(canvas);
   const reduced=matchMedia("(prefers-reduced-motion: reduce)");
   let reducedSetting=reduced.matches;
   let paused=reducedSetting, time=0, previous=0, yaw=0.30, pitch=-0.30;
   let targetTension=initialTension/100, tension=initialTension/100, geometryTension=-1, dragging=false, lastX=0, lastY=0;
-  let backgroundPaused=false, backgroundHidden=false, lastBackgroundFrame=0;
+  let backgroundPaused=false;
   if(backgroundMode) {
     canvas.tabIndex=-1;
-    addEventListener("message",event=>{
-      if(event.source!==parent || event.origin!==location.origin || event.data?.type!=="noir-settings")return;
-      backgroundPaused=event.data.paused===true;
-      backgroundHidden=event.data.hidden===true;
-      const theme=event.data.theme;
-      if(theme==="light"||theme==="dark"){document.documentElement.dataset.theme=theme;colors();}
-    });
+    background.onThemeChange(colors);
   }
   function rotation(x,y,z) {
     const cx=Math.cos(x),sx=Math.sin(x),cy=Math.cos(y),sy=Math.sin(y),cz=Math.cos(z),sz=Math.sin(z);
@@ -598,14 +596,11 @@ body.immersive .art-hint { z-index: 4; }
     if(lost)return;
     if(reduced.matches!==reducedSetting){
       reducedSetting=reduced.matches;paused=reducedSetting;motionUI();
-      if(backgroundMode)parent.postMessage({type:"noir-motion-preference"},location.origin);
     }
-    if(backgroundMode&&(backgroundHidden||now-lastBackgroundFrame<1000/24)){
-      if(backgroundHidden)previous=now;
-      requestAnimationFrame(render);return;
-    }
-    lastBackgroundFrame=now;
-    const dt=previous?Math.min((now-previous)/1000,.05):0;previous=now;
+    const tick=backgroundMode?background.tick(now):null;
+    if(backgroundMode&&!tick){requestAnimationFrame(render);return;}
+    backgroundPaused=backgroundMode&&!tick.animate;
+    const dt=backgroundMode?tick.dt:previous?Math.min((now-previous)/1000,.05):0;previous=now;
     if(!document.hidden) {
       if(!paused&&!dragging&&!backgroundPaused)time+=dt;
       tension+=(targetTension-tension)*(reduced.matches?1:1-Math.exp(-dt*5));
@@ -653,7 +648,7 @@ body.immersive .art-hint { z-index: 4; }
     fail("The browser lost its graphics context. Reload this page to restore the sculpture.");
   });
   setTension(initialTension);resize();mesh(tension);geometryTension=tension;requestAnimationFrame(render);
-  if(backgroundMode)parent.postMessage({type:"noir-ready"},location.origin);
+  if(backgroundMode)background.ready();
 })();
 </script>
 </body>

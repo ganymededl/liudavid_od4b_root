@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Mini Soundtrack Lab</title>
+  <script src="artwork-background.js"></script>
   <style>
     :root{
       --bg:#090b16; --panel:#11162b; --text:#eef2ff; --muted:#98a4d9;
@@ -56,6 +57,14 @@
     .small{font-size:.84rem;color:var(--muted)}
     .title{font-size:1.04rem;font-weight:700;margin:0 0 8px}
     .mono{font-family:ui-monospace,Consolas,monospace}
+    html[data-background="true"], html[data-background="true"] body { background: transparent; overflow: hidden; }
+    html[data-background="true"] .wrap, html[data-background="true"] .grid,
+    html[data-background="true"] .panel { margin: 0; padding: 0; border: 0; background: none; }
+    html[data-background="true"] h1, html[data-background="true"] .sub,
+    html[data-background="true"] .grid > .panel:first-child,
+    html[data-background="true"] .panel > p { display: none; }
+    html[data-background="true"] #viz { position: fixed; inset: 0; width: 100%; height: 100%;
+      max-width: none; border: 0; border-radius: 0; object-fit: cover; }
   </style>
 </head>
 <body>
@@ -111,6 +120,7 @@
   </main>
   <script>
     const $ = (id) => document.getElementById(id);
+    const background = window.artworkBackground;
     const el = {
       mood: $("mood"), tempo: $("tempo"), swing: $("swing"), density: $("density"),
       startStop: $("startStop"), regen: $("regen"), capture: $("capture"),
@@ -121,6 +131,7 @@
 
     let audioCtx, master, analyser;
     let running = false, step = 0, nextTick = 0, timer;
+    let visualTime = 0;
     let mood = "focus", bpm = 104, swing = 0.08, density = 0.65;
     let seed = Math.floor(Math.random() * 1e9);
     const grid = Array.from({ length: 16 }, () => ({ k: 0, s: 0, h: 0 }));
@@ -251,6 +262,7 @@
     }
 
     function start() {
+      if (background.enabled) return;
       setupAudio();
       audioCtx.resume();
       running = true;
@@ -282,21 +294,23 @@
       for (let i=0;i<48;i++){
         const a = i / 48 * Math.PI * 2;
         const amp = 200 + e * 220 + (melody[i % 16] ? 60 : 0);
-        const x = 500 + Math.cos(a + performance.now() * 0.0003) * amp;
-        const y = 500 + Math.sin(a + performance.now() * 0.0003) * amp;
+        const phase = background.enabled ? visualTime * 0.3 : performance.now() * 0.0003;
+        const x = 500 + Math.cos(a + phase) * amp;
+        const y = 500 + Math.sin(a + phase) * amp;
         ctx2d.beginPath();
         ctx2d.fillStyle = cfg.palette[i % 3] + "66";
         ctx2d.arc(x,y,10 + e * 40,0,Math.PI*2);
         ctx2d.fill();
       }
-      ctx2d.fillStyle = "rgba(0,0,0,.34)";
-      ctx2d.fillRect(65,760,870,180);
-      ctx2d.fillStyle = "#fff";
-      ctx2d.font = "700 66px Segoe UI";
-      ctx2d.fillText(el.mood.options[el.mood.selectedIndex].text.toUpperCase(), 92, 840);
-      ctx2d.font = "500 34px Segoe UI";
-      ctx2d.fillText(`${bpm} BPM · SWING ${swing.toFixed(2)} · SEED ${seed}`, 92, 898);
-      requestAnimationFrame(() => draw(false));
+      if (!background.enabled) {
+        ctx2d.fillStyle = "rgba(0,0,0,.34)";
+        ctx2d.fillRect(65,760,870,180);
+        ctx2d.fillStyle = "#fff";
+        ctx2d.font = "700 66px Segoe UI";
+        ctx2d.fillText(el.mood.options[el.mood.selectedIndex].text.toUpperCase(), 92, 840);
+        ctx2d.font = "500 34px Segoe UI";
+        ctx2d.fillText(`${bpm} BPM · SWING ${swing.toFixed(2)} · SEED ${seed}`, 92, 898);
+      }
     }
 
     function syncControls(){
@@ -327,6 +341,16 @@
     syncControls();
     buildPattern();
     draw(true);
+    function animate(now) {
+      requestAnimationFrame(animate);
+      if (document.hidden) return;
+      const tick = background.enabled ? background.tick(now) : null;
+      if (background.enabled && !tick) return;
+      if (tick) visualTime += tick.dt;
+      draw(false);
+    }
+    requestAnimationFrame(animate);
+    if (background.enabled) background.ready();
   </script>
 </body>
 </html>

@@ -13,6 +13,7 @@
     document.documentElement.setAttribute("data-theme", theme);
   })();
 </script>
+<script src="artwork-background.js"></script>
 <style>
 :root {
   color-scheme: light;
@@ -153,6 +154,13 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
   .hint { bottom: 4px; font-size: 8px; }
   .marker { display: none; } .marker.edge { display: block; }
 }
+html[data-background="true"], html[data-background="true"] body { background: transparent; overflow: hidden; }
+html[data-background="true"] .edition { display: block; min-height: 0; }
+html[data-background="true"] header, html[data-background="true"] footer,
+html[data-background="true"] aside, html[data-background="true"] .phase-name,
+html[data-background="true"] .hint { display: none; }
+html[data-background="true"] .gallery { position: fixed; inset: 0; height: 100%; padding: 0; }
+html[data-background="true"] .room { position: absolute; inset: 0; }
 </style>
 </head>
 <body>
@@ -237,6 +245,7 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
+  const background = window.artworkBackground;
   const canvas = $("stage");
   const gl = canvas.getContext("webgl", { antialias: false, alpha: false, preserveDrawingBuffer: true });
   const statusEl = $("status");
@@ -250,6 +259,7 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
     $("error").hidden = false;
     $("error").textContent = message;
     ["play", "mute", "frame"].forEach(id => { $(id).disabled = true; });
+    if (background.enabled) background.fail(message);
   }
   if (!gl) {
     fail("This piece needs WebGL. Enable graphics acceleration in your browser and reload.");
@@ -550,6 +560,7 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
     canvas.height = Math.max(2, Math.round(rect.height * scale));
     gl.viewport(0, 0, canvas.width, canvas.height);
     gl.uniform2f(uniforms.uResolution, canvas.width, canvas.height);
+    if (background.enabled) background.invalidate();
   }
   new ResizeObserver(resize).observe(canvas);
 
@@ -777,6 +788,7 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
   }
 
   async function enableSound() {
+    if (background.enabled) return;
     if (!audio) audio = buildAudio();
     await audio.ctx.resume();
     soundOn = true;
@@ -876,11 +888,16 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
     if (lost) return;
     requestAnimationFrame(render);
     if (document.hidden) { previous = now; return; }
-    const dt = previous ? Math.min((now - previous) / 1000, 0.05) : 0;
+    const tick = background.enabled ? background.tick(now) : null;
+    if (background.enabled && !tick) return;
+    const dt = background.enabled ? tick.dt : previous ? Math.min((now - previous) / 1000, 0.05) : 0;
     previous = now;
     if (!reducedMotion.matches) clock += dt;
 
-    if (autoPlaying) {
+    if (background.enabled) {
+      morph = (clock / background.durationSeconds) % 1;
+      presentMorph();
+    } else if (autoPlaying) {
       morph = Math.min(1, morph + dt / DURATION);
       presentMorph();
       if (morph >= 1) {
@@ -900,6 +917,10 @@ footer { margin: 0 44px; padding: 18px 0 24px; border-top: 1px solid var(--cp-bo
   transportUI();
   soundUI();
   requestAnimationFrame(render);
+  if (background.enabled) {
+    background.onThemeChange(colours);
+    background.ready();
+  }
   if (reducedMotion.matches) $("hint").textContent = "Reduced motion \u00a0/\u00a0 drag the timeline to move the room";
 })();
 </script>

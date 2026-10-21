@@ -974,7 +974,7 @@
 </head>
 <body>
 <div class="app" id="app">
-  <iframe class="noir-backdrop" id="noirBackdrop" title="Decorative Volatility Noir sculpture" aria-hidden="true" tabindex="-1" inert></iframe>
+  <iframe class="noir-backdrop" id="noirBackdrop" title="Decorative generative artwork" aria-hidden="true" tabindex="-1" inert></iframe>
   <div class="slides" id="slides" hidden></div>
   <div class="vignette"></div>
 
@@ -1027,7 +1027,8 @@
       <hr class="hero-rule">
       <p class="tagline" id="tagline">Microsoft SLED · Copilot Customer Success Architect</p>
       <div class="backdrop-controls">
-        <button id="backgroundPause" type="button" aria-pressed="false">Pause sculpture</button>
+        <button id="backgroundPause" type="button" aria-pressed="false">Pause artworks</button>
+        <button id="backgroundNext" type="button">Next artwork</button>
         <button id="backgroundSwitch" type="button">Use photo background</button>
       </div>
     </section>
@@ -1324,6 +1325,15 @@ const CONFIG = {
   // No live third-party API is called from this public page (a client-side
   // key can't be kept secret and Pexels has no domain-restriction option).
   // The photo set below is a small fixed, self-hosted-friendly list.
+  artworkBackground: {
+    rotateSecs: 45,
+    artworks: [
+      {name: "Volatility Noir", file: "volatility-noir.html", credit: "Built with GPT-6 Astra"},
+      {name: "Midnight Transit Orchestra", file: "midnight-transit-orchestra.html", credit: "Built with Claude Opus 5"},
+      {name: "Reno Noise / Luxe Score", file: "reno-noise-luxe-score.html", credit: "Built with Claude Opus 5"},
+      {name: "Mini Soundtrack Lab", file: "mini-soundtrack-lab.html", credit: "Original browser synth and cover art"}
+    ]
+  },
   photoBackground: {
     rotateSecs:   10,
     kenBurnsSecs:  9
@@ -1422,7 +1432,7 @@ function applyTheme(mode) {
   document.getElementById("themeIcon").outerHTML = (light ? ICONS.sun : ICONS.moon).replace('<svg', '<svg id="themeIcon"');
   themeBtn.setAttribute("aria-label", light ? "Switch to dark mode" : "Switch to light mode");
   document.documentElement.style.background = getComputedStyle(root).getPropertyValue("--bg");
-  syncNoirBackground();
+  syncArtworkBackground();
 }
 (function initTheme() {
   const saved = localStorage.getItem("dsc-theme") || "dark";
@@ -1655,43 +1665,104 @@ async function initSlideshow() {
 }
 
 // The public artwork is the default; the previous photo slideshow remains opt-in.
-var noirPaused = false;
+var artworkPaused = false;
 var photosActive = false;
 var photosInitialized = false;
 const noirFrame = document.getElementById("noirBackdrop");
 const backgroundPause = document.getElementById("backgroundPause");
+const backgroundNext = document.getElementById("backgroundNext");
 const backgroundSwitch = document.getElementById("backgroundSwitch");
 const backgroundCredit = document.getElementById("backgroundCredit");
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
-function syncNoirBackground() {
+const artworks = CONFIG.artworkBackground.artworks;
+let artworkIndex = Math.floor(Math.random() * artworks.length);
+let artworkReady = false, artworkTimer = null, artworkTimerStarted = 0;
+let artworkRemaining = CONFIG.artworkBackground.rotateSecs * 1000, artworkLoadTimer = null;
+const failedArtworks = new Set();
+function syncArtworkBackground() {
   const frame = document.getElementById("noirBackdrop");
   if (!frame?.contentWindow) return;
   frame.contentWindow.postMessage({
-    type: "noir-settings",
+    type: "artwork-settings",
     theme: document.getElementById("app").getAttribute("data-light") === "true" ? "light" : "dark",
-    paused: noirPaused === true,
+    paused: artworkPaused === true || matchMedia("(prefers-reduced-motion: reduce)").matches,
     hidden: photosActive === true || document.hidden
   }, location.origin);
 }
-function updateBackgroundPause() {
-  const held = noirPaused || motionPreference.matches;
-  backgroundPause.textContent = motionPreference.matches ? "Reduced motion enabled" : held ? "Resume sculpture" : "Pause sculpture";
-  backgroundPause.disabled = motionPreference.matches;
-  backgroundPause.setAttribute("aria-pressed", String(held));
-  syncNoirBackground();
+function updateArtworkCredit() {
+  const item = artworks[artworkIndex];
+  backgroundCredit.textContent = (photosActive ? "Photos via Unsplash"
+    : item.name + " / " + item.credit + " / Silent generative background")
+    + " / Anonymous traffic measured with Microsoft Clarity";
 }
-noirFrame.addEventListener("load", syncNoirBackground);
+function syncArtworkTimer() {
+  const held = artworkPaused || photosActive || document.hidden || motionPreference.matches || !artworkReady;
+  if (held && artworkTimer !== null) {
+    artworkRemaining = Math.max(0, artworkRemaining - (performance.now() - artworkTimerStarted));
+    clearTimeout(artworkTimer);
+    artworkTimer = null;
+  } else if (!held && artworkTimer === null) {
+    artworkTimerStarted = performance.now();
+    artworkTimer = setTimeout(() => { artworkTimer = null; advanceArtwork(); }, artworkRemaining);
+  }
+}
+function loadArtwork() {
+  artworkReady = false;
+  syncArtworkTimer();
+  artworkRemaining = CONFIG.artworkBackground.rotateSecs * 1000;
+  const item = artworks[artworkIndex];
+  noirFrame.title = "Decorative " + item.name;
+  noirFrame.dataset.artwork = item.file;
+  updateArtworkCredit();
+  clearTimeout(artworkLoadTimer);
+  artworkLoadTimer = setTimeout(() => artworkFailed("The artwork did not initialize."), 15000);
+  const url = new URL(item.file, location.href);
+  url.searchParams.set("background", "1");
+  url.searchParams.set("duration", String(CONFIG.artworkBackground.rotateSecs));
+  url.searchParams.set("scoutTheme", root.getAttribute("data-light") === "true" ? "light" : "dark");
+  noirFrame.src = url.href;
+}
+function advanceArtwork() {
+  for (let offset = 1; offset <= artworks.length; offset++) {
+    const next = (artworkIndex + offset) % artworks.length;
+    if (!failedArtworks.has(next)) { artworkIndex = next; loadArtwork(); return; }
+  }
+}
+function artworkFailed(message) {
+  clearTimeout(artworkLoadTimer);
+  failedArtworks.add(artworkIndex);
+  artworkReady = false;
+  syncArtworkTimer();
+  console.error(artworks[artworkIndex].name + ": " + message);
+  if (failedArtworks.size < artworks.length) { advanceArtwork(); return; }
+  backgroundCredit.textContent = "Artwork backgrounds unavailable. Use photo background instead.";
+  backgroundPause.disabled = true;
+  backgroundNext.disabled = true;
+}
+function updateBackgroundPause() {
+  const held = artworkPaused || motionPreference.matches;
+  backgroundPause.textContent = motionPreference.matches ? "Reduced motion enabled" : held ? "Resume artworks" : "Pause artworks";
+  backgroundPause.disabled = motionPreference.matches || failedArtworks.size === artworks.length;
+  backgroundPause.setAttribute("aria-pressed", String(held));
+  syncArtworkBackground();
+  syncArtworkTimer();
+}
+noirFrame.addEventListener("load", syncArtworkBackground);
 addEventListener("message", event => {
   if (event.origin !== location.origin || event.source !== noirFrame.contentWindow) return;
-  if (event.data?.type === "noir-ready") syncNoirBackground();
-  if (event.data?.type === "noir-motion-preference") updateBackgroundPause();
-  if (event.data?.type === "noir-error") {
-    backgroundCredit.textContent = "Sculpture unavailable: WebGL graphics acceleration required. Photo background is available.";
-    backgroundPause.disabled = true;
+  if (event.data?.artwork !== artworks[artworkIndex].file) return;
+  if (event.data.type === "artwork-ready") {
+    clearTimeout(artworkLoadTimer);
+    artworkReady = true;
+    syncArtworkBackground();
+    syncArtworkTimer();
   }
+  if (event.data.type === "artwork-motion-preference") updateBackgroundPause();
+  if (event.data.type === "artwork-error") artworkFailed(event.data.message);
 });
-noirFrame.src = "volatility-noir.html?background=1&scoutTheme=" + (root.getAttribute("data-light") === "true" ? "light" : "dark");
-backgroundPause.addEventListener("click", () => { noirPaused = !noirPaused; updateBackgroundPause(); });
+loadArtwork();
+backgroundPause.addEventListener("click", () => { artworkPaused = !artworkPaused; updateBackgroundPause(); });
+backgroundNext.addEventListener("click", advanceArtwork);
 motionPreference.addEventListener("change", () => {
   updateBackgroundPause();
   if (photosActive) {
@@ -1699,16 +1770,18 @@ motionPreference.addEventListener("change", () => {
     else restartTimer();
   }
 });
-document.addEventListener("visibilitychange", syncNoirBackground);
+document.addEventListener("visibilitychange", () => { syncArtworkBackground(); syncArtworkTimer(); });
 backgroundSwitch.addEventListener("click", async () => {
   photosActive = !photosActive;
   noirFrame.hidden = photosActive;
   slidesEl.hidden = !photosActive;
   dotsEl.hidden = !photosActive;
   backgroundPause.hidden = photosActive;
-  backgroundSwitch.textContent = photosActive ? "Use sculpture background" : "Use photo background";
-  backgroundCredit.textContent = photosActive ? "Photos via Unsplash" : "Volatility Noir / Built with GPT-6 Astra / Silent generative background";
-  syncNoirBackground();
+  backgroundNext.hidden = photosActive;
+  backgroundSwitch.textContent = photosActive ? "Use artwork background" : "Use photo background";
+  updateArtworkCredit();
+  syncArtworkBackground();
+  syncArtworkTimer();
   if (photosActive) {
     if (!photosInitialized) {
       photosInitialized = true;

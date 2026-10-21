@@ -13,6 +13,7 @@
     document.documentElement.setAttribute("data-theme", theme);
   })();
 </script>
+<script src="artwork-background.js"></script>
 <style>
 :root {
   color-scheme: light;
@@ -148,6 +149,13 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
   footer { margin: 0 18px; grid-template-columns: 1fr; gap: 14px; }
   .phase { bottom: 6px; font-size: 8px; }
 }
+html[data-background="true"], html[data-background="true"] body { background: transparent; overflow: hidden; }
+html[data-background="true"] .edition { display: block; min-height: 0; }
+html[data-background="true"] header, html[data-background="true"] footer,
+html[data-background="true"] aside, html[data-background="true"] .clock,
+html[data-background="true"] .phase { display: none; }
+html[data-background="true"] .gallery { position: fixed; inset: 0; height: 100%; padding: 0; }
+html[data-background="true"] .art { position: absolute; inset: 0; }
 </style>
 </head>
 <body>
@@ -226,6 +234,7 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
 (() => {
   "use strict";
   const $ = id => document.getElementById(id);
+  const background = window.artworkBackground;
   const scarCanvas = $("scar"), liveCanvas = $("live");
   const scarCtx = scarCanvas.getContext("2d"), liveCtx = liveCanvas.getContext("2d");
   const waveCanvas = $("waveform"), waveCtx = waveCanvas.getContext("2d");
@@ -406,7 +415,7 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
   function resize() {
     const rect = scarCanvas.getBoundingClientRect();
     if (rect.width < 2 || rect.height < 2) return;
-    dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    dpr = Math.min(window.devicePixelRatio || 1, background.enabled ? 1 : 1.75);
     [scarCanvas, liveCanvas].forEach(c => {
       c.width = Math.round(rect.width * dpr);
       c.height = Math.round(rect.height * dpr);
@@ -416,6 +425,7 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
     liveCtx.setTransform(1, 0, 0, 1, 0, 0);
     computeInsets();
     paintBase();
+    if (background.enabled) background.invalidate();
   }
   new ResizeObserver(resize).observe(scarCanvas);
 
@@ -690,6 +700,7 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
   }
 
   async function render() {
+    if (background.enabled) return;
     if (playing) { stop(false); return; }
     $("render").disabled = true;
     try {
@@ -786,17 +797,39 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
   }
 
   // ── Frame loop: scars, head, transfer blooms ──────────────────────
-  let lastFrame = 0;
+  let lastFrame = 0, backgroundElapsed = 0, backgroundMinute = DAY_START;
   function frame(now) {
     requestAnimationFrame(frame);
     if (document.hidden || !day || W === 0) return;
-    if (now - lastFrame < 1000 / 60) return;
+    const tick = background.enabled ? background.tick(now) : null;
+    if (background.enabled && !tick) return;
+    if (!background.enabled && now - lastFrame < 1000 / 60) return;
     lastFrame = now;
 
     liveCtx.clearRect(0, 0, W, H);
-    const progress = playing && audio ? Math.min(1, (audio.ctx.currentTime - startedAt) / TRACK_SECONDS) : 0;
+    if (background.enabled) {
+      backgroundElapsed += tick.dt;
+      if (backgroundElapsed >= background.durationSeconds) {
+        backgroundElapsed %= background.durationSeconds;
+        backgroundMinute = DAY_START;
+        strikes = [];
+        paintBase();
+      }
+    }
+    const progress = background.enabled ? backgroundElapsed / background.durationSeconds
+      : playing && audio ? Math.min(1, (audio.ctx.currentTime - startedAt) / TRACK_SECONDS) : 0;
     const trackTime = progress * TRACK_SECONDS;
     const minute = trackTimeToMinute(trackTime);
+    const visualPlaying = playing || background.enabled;
+    const visualNow = background.enabled ? backgroundElapsed * 1000 : now;
+    if (background.enabled) {
+      day.transfers.forEach(transfer => {
+        if (transfer.minute > backgroundMinute && transfer.minute <= minute) {
+          strikes.push({station: transfer.at, severity: Math.min(1, transfer.wait / 16), born: visualNow});
+        }
+      });
+      backgroundMinute = minute;
+    }
 
     if (playing) {
       const hours = Math.floor(minute / 60) % 24, mins = Math.floor(minute % 60);
@@ -813,8 +846,8 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
       const from = leg.start, to = leg.start + leg.duration;
       const active = minute >= from && minute <= to;
       const row = document.querySelector('.leg[data-index="' + index + '"]');
-      if (row) row.classList.toggle("on", active && playing);
-      if (!active || !playing) return;
+      if (row) row.classList.toggle("on", active && visualPlaying);
+      if (!active || !visualPlaying) return;
       const pts = routePath(day.stations[leg.from], day.stations[leg.to]);
       const t = (minute - from) / leg.duration;
       const head = pointAt(pts, t);
@@ -854,7 +887,7 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
     // Transfer strikes: radial cracks scored into the map.
     for (let i = strikes.length - 1; i >= 0; i--) {
       const s = strikes[i];
-      const age = (now - s.born) / 1000;
+      const age = (visualNow - s.born) / 1000;
       const station = day.stations[s.station];
       const x = toX(station.x), y = toY(station.y);
       if (age < 0.05) {
@@ -939,6 +972,10 @@ footer { margin: 0 44px; padding: 20px 0 24px; border-top: 1px solid var(--cp-bo
   presentDay();
   transportUI();
   requestAnimationFrame(frame);
+  if (background.enabled) {
+    background.onThemeChange(() => { readPalette(); paintBase(); });
+    background.ready();
+  }
   if (reducedMotion.matches) {
     $("phase").textContent = "Reduced motion detected \u00a0/\u00a0 rendering still available on demand";
   }
