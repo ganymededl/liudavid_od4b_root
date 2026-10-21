@@ -417,9 +417,12 @@ Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
         <li>PowerPoint: <code>com.microsoft.teamspace.tab.file.staticviewer.powerpoint</code></li>
         <li>SharePoint pages/lists: <code>2a527703-1f6f-4559-a332-d8a7d288cd88</code></li>
       </ul>
-      <p>Use <strong>Teams apps &gt; Manage apps</strong>. Under app-centric management, check
-        <strong>Users and groups &gt; Availability</strong>. Under legacy app permission policies, verify the policy
-        assigned to the installer and intended users. Policy changes can take hours and up to 24 hours.</p>
+      <p>Use <strong>Teams apps &gt; Manage apps</strong>. Under app-centric management, <strong>App status:
+        Unblocked</strong> is not sufficient when <strong>Available to</strong> says <strong>No one</strong>; that
+        still denies every user. Select the Microsoft app row and choose <strong>Edit availability</strong> (or
+        <strong>Users and groups &gt; Availability</strong>) for the approved users/groups. Do not use
+        <strong>Add to team</strong> as a substitute. Under legacy app permission policies, verify the policy assigned
+        to the installer and intended users. Policy changes can take hours and up to 24 hours.</p>
     </section>
 
     <section id="install">
@@ -514,8 +517,10 @@ if (-not $?) {
         <li>Keep the provisioning app until removal reports <code>AliasReusable : True</code>.</li>
       </ul>
       <div class="warning"><strong>If Teams reports “App is blocked by app permission policy” for
-        <code>com.microsoft.teamspace.tab.web</code>:</strong> allow the built-in Website app for the installer and
-        intended CoE audience, wait for policy propagation, then resume the existing deployment. Do not start clean
+        <code>com.microsoft.teamspace.tab.web</code>:</strong> a Website row showing <strong>Unblocked</strong> but
+        <strong>Available to: No one</strong> is still denied. Select the Microsoft Website row, use
+        <strong>Edit availability</strong>, and choose Everyone or an approved group containing the installer and
+        intended CoE audience. Do not use <strong>Add to team</strong>. Wait for policy propagation, then resume the existing deployment. Do not start clean
         or purge. Inspect General, Share Your Prompt, and Ask Us Anything first; pass only confirmed missing welcome
         posts:</div>
       <pre>$missingWelcomeChannels = @('General', 'Share Your Prompt', 'Ask Us Anything 📢')
