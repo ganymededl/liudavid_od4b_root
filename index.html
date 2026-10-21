@@ -850,6 +850,112 @@
   .pod-date { font-size: 10.5px; color: var(--t2); white-space: nowrap; }
   .pod-date:empty { display: none; }
 
+  /* ── Live TV picture-in-picture ─────────────────────── */
+  .tv-pip,
+  .tv-launcher {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 20;
+  }
+  .tv-pip {
+    width: 395px;
+    max-width: calc(100% - 36px);
+    overflow: hidden;
+    background: var(--bg2);
+    border: 0.5px solid var(--border2);
+    border-radius: 14px;
+    box-shadow: 0 18px 48px rgba(0,0,0,0.42);
+  }
+  [data-light="true"] .tv-pip {
+    box-shadow: 0 18px 42px rgba(0,0,0,0.18);
+  }
+  .tv-pip-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 48px;
+    padding: 8px 8px 8px 14px;
+    background: var(--glass);
+    border-bottom: 0.5px solid var(--border);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .tv-pip-link {
+    min-width: 0;
+    color: var(--t1);
+    text-decoration: none;
+  }
+  .tv-pip-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .tv-live-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--c2);
+  }
+  .tv-pip-source {
+    display: block;
+    margin: 2px 0 0 14px;
+    color: var(--t2);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .tv-pip-close {
+    display: grid;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    place-items: center;
+    color: var(--t1);
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+  .tv-pip-close:hover { background: var(--cardh); border-color: var(--border2); }
+  .tv-pip-frame {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: var(--bg);
+    border: 0;
+  }
+  .tv-launcher {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 9px 13px;
+    color: var(--t1);
+    background: var(--glass);
+    border: 0.5px solid var(--border2);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.34);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    cursor: pointer;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .tv-launcher:hover { background: var(--cardh); }
+  .tv-pip-link:focus-visible,
+  .tv-pip-close:focus-visible,
+  .tv-launcher:focus-visible {
+    outline: 2px solid var(--c1);
+    outline-offset: 3px;
+  }
+
   @media (max-width: 560px) {
     .hero { padding: 40px 20px 24px; }
     .libraries-wrap, .tools-wrap, .podcasts-wrap { padding: 16px 20px; }
@@ -860,6 +966,9 @@
     .station .sn, #stationGenre { display: none; }
     .station .sg .change { padding: 4px 6px; margin: -4px -6px; }
     .now-playing:not([hidden]) { display: block; }
+    .tv-pip,
+    .tv-launcher { right: 12px; bottom: 12px; }
+    .tv-pip { width: calc(100% - 24px); max-width: none; }
   }
 </style>
 </head>
@@ -957,6 +1066,34 @@
       <button class="done" id="modalDone">Done</button>
     </div>
   </div>
+
+  <aside class="tv-pip" id="tvPip" aria-label="Bloomberg live video">
+    <div class="tv-pip-bar">
+      <a class="tv-pip-link" href="https://www.parsatv.com/name=Bloomberg" target="_blank" rel="noopener">
+        <span class="tv-pip-title"><span class="tv-live-dot" aria-hidden="true"></span>Bloomberg Live</span>
+        <span class="tv-pip-source">via Parsa TV</span>
+      </a>
+      <button class="tv-pip-close" id="tvPipClose" type="button" aria-label="Minimize Bloomberg live player" title="Minimize">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M3 7h8"/>
+        </svg>
+      </button>
+    </div>
+    <iframe
+      class="tv-pip-frame"
+      id="tvPipFrame"
+      title="Bloomberg Live"
+      data-src="https://www.parsatv.com/embed.php?name=Bloomberg&amp;auto=false"
+      loading="lazy"
+      sandbox="allow-scripts allow-same-origin allow-presentation"
+      referrerpolicy="strict-origin-when-cross-origin"
+      allow="autoplay; encrypted-media; picture-in-picture; fullscreen">
+    </iframe>
+  </aside>
+  <button class="tv-launcher" id="tvLauncher" type="button" aria-controls="tvPip" aria-expanded="false" hidden>
+    <span class="tv-live-dot" aria-hidden="true"></span>
+    Watch Bloomberg
+  </button>
 </div>
 
 <script>
@@ -1899,6 +2036,27 @@ if (matchMedia("(hover: hover) and (pointer: fine)").matches && !matchMedia("(pr
     });
   }, { passive: true });
 }
+
+// ── LIVE TV PICTURE-IN-PICTURE ──────────────────────────────
+const tvPip = document.getElementById("tvPip");
+const tvPipFrame = document.getElementById("tvPipFrame");
+const tvPipClose = document.getElementById("tvPipClose");
+const tvLauncher = document.getElementById("tvLauncher");
+
+function setTvPipOpen(open) {
+  tvPip.hidden = !open;
+  tvLauncher.hidden = open;
+  tvLauncher.setAttribute("aria-expanded", String(open));
+  if (open) {
+    if (!tvPipFrame.hasAttribute("src")) tvPipFrame.src = tvPipFrame.dataset.src;
+  } else {
+    tvPipFrame.removeAttribute("src");
+  }
+}
+
+tvPipClose.addEventListener("click", () => setTvPipOpen(false));
+tvLauncher.addEventListener("click", () => setTvPipOpen(true));
+setTvPipOpen(!matchMedia("(max-width: 560px)").matches);
 </script>
 </body>
 </html>
