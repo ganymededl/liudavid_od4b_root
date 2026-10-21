@@ -395,21 +395,6 @@
     align-items: flex-start;
     gap: 16px;
   }
-  .city-pill {
-    background: rgba(0,217,255,0.07);
-    border: 0.5px solid rgba(0,217,255,0.18);
-    color: var(--c1);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    border-radius: 4px;
-    padding: 4px 10px;
-    display: inline-block;
-    transition: letter-spacing 0.6s ease;
-  }
-  .city-pill.flash { letter-spacing: 0.20em; }
-
   .owner {
     font-size: clamp(40px, 7vw, 76px);
     font-weight: 300;
@@ -444,23 +429,6 @@
     font-weight: 400;
     max-width: 540px;
     line-height: 1.5;
-  }
-
-  .pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 4px;
-  }
-  .pill {
-    font-size: 12px;
-    font-weight: 500;
-    padding: 5px 10px;
-    border-radius: 100px;
-    background: var(--card);
-    border: 0.5px solid var(--border);
-    color: var(--t1);
-    letter-spacing: 0.01em;
   }
 
   .section-label {
@@ -888,7 +856,6 @@
 
     <!-- HERO -->
     <section class="hero">
-      <span class="city-pill" id="cityPill">Public sector Copilot enablement, hands-on</span>
       <h1 class="owner" id="ownerName">
         <span class="first">David</span>
         <span class="middle">Shih Chun</span>
@@ -896,14 +863,6 @@
       </h1>
       <hr class="hero-rule">
       <p class="tagline" id="tagline">Microsoft SLED · Copilot Customer Success Architect</p>
-      <div class="pills">
-        <span class="pill">Copilot</span>
-        <span class="pill">Azure AI</span>
-        <span class="pill">Prompt engineering</span>
-        <span class="pill">PowerShell</span>
-        <span class="pill">SharePoint</span>
-        <span class="pill">Public sector</span>
-      </div>
       <div class="backdrop-controls">
         <button id="backgroundPause" type="button" aria-pressed="false">Pause sculpture</button>
         <button id="backgroundSwitch" type="button">Use photo background</button>
@@ -965,15 +924,28 @@ const CONFIG = {
       middle: "Shih Chun",
       last:   "Liu"
     },
-    role: "Microsoft SLED · Copilot Customer Success Architect",
-    // Shown in the pill above the name. Swaps for the current city while the
-    // photo background is on, so that slot always shows something useful
-    // instead of repeating the "Built with ..." credit already in the footer.
-    positioning: "Public sector Copilot enablement, hands-on"
+    role: "Microsoft SLED · Copilot Customer Success Architect"
   },
 
   // ── LIBRARY CARDS ────────────────────────────────────────────
+  // Public library cards, kept in alphabetical order by name.
   libraries: [
+    {
+      name:  "Copilot Center of Excellence",
+      desc:  "Copilot CoE guidance and resources, coming soon",
+      href:  "copilot-center-of-excellence/index.html",
+      icon:  "hub",
+      color: ["#ff6bb5", "#ff3d81"],
+      public: true
+    },
+    {
+      name:  "Demos & Artifacts",
+      desc:  "Cowork outputs, dashboards, HTML tools",
+      href:  "demos-public/index.html",
+      icon:  "list",
+      color: ["#00ffa3", "#00b377"],
+      public: true
+    },
     {
       name:  "Games",
       desc:  "Browser games, Copilot Arcade, interactive tools",
@@ -988,14 +960,6 @@ const CONFIG = {
       href:  "prompt-engineering-public/index.html",
       icon:  "star",
       color: ["#7b61ff", "#a855f7"],
-      public: true
-    },
-    {
-      name:  "Demos & Artifacts",
-      desc:  "Cowork outputs, dashboards, HTML tools",
-      href:  "demos-public/index.html",
-      icon:  "list",
-      color: ["#00ffa3", "#00b377"],
       public: true
     },
     {
@@ -1247,6 +1211,7 @@ const ICONS = {
   star:  '<svg viewBox="0 0 16 16" fill="#000"><path d="M8 1 L10 6 L15 6.2 L11 9.5 L12.3 14.5 L8 11.8 L3.7 14.5 L5 9.5 L1 6.2 L6 6 Z"/></svg>',
   list:  '<svg viewBox="0 0 16 16" fill="#000"><rect x="1" y="3" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="11" width="14" height="2" rx="1"/></svg>',
   code:  '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 4 1 8 5 12"/><polyline points="11 4 15 8 11 12"/></svg>',
+  hub:   '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.2"/><circle cx="8" cy="2.4" r="1.4"/><circle cx="13" cy="11.2" r="1.4"/><circle cx="3" cy="11.2" r="1.4"/><path d="M8 5.8V3.8M9.9 9.2L11.8 10.4M6.1 9.2L4.2 10.4"/></svg>',
   arrow: '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="5" x2="9" y2="5"/><polyline points="6 2 9 5 6 8"/></svg>',
   sun:   '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="2.6"/><line x1="7" y1="0.8" x2="7" y2="2.3"/><line x1="7" y1="11.7" x2="7" y2="13.2"/><line x1="0.8" y1="7" x2="2.3" y2="7"/><line x1="11.7" y1="7" x2="13.2" y2="7"/><line x1="2.4" y1="2.4" x2="3.5" y2="3.5"/><line x1="10.5" y1="10.5" x2="11.6" y2="11.6"/><line x1="2.4" y1="11.6" x2="3.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="11.6" y2="2.4"/></svg>',
   moon:  '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 8.5 A4.5 4.5 0 1 1 5.5 2.5 A3.5 3.5 0 0 0 11.5 8.5 Z"/></svg>',
@@ -1281,7 +1246,6 @@ themeBtn.addEventListener("click", () => {
 // (it also has less room, and used to truncate the role on phones).
 document.getElementById("navName").textContent = CONFIG.owner.name;
 document.getElementById("tagline").textContent = CONFIG.owner.role;
-document.getElementById("cityPill").textContent = CONFIG.owner.positioning;
 const own = CONFIG.owner.nameDisplay;
 document.querySelector(".owner .first").textContent = own.first + " ";
 document.querySelector(".owner .middle").textContent = own.middle;
@@ -1419,7 +1383,6 @@ const podEl = document.getElementById("podcasts");
 // ── SLIDES ──────────────────────────────────────────────────
 const slidesEl = document.getElementById("slides");
 const dotsEl = document.getElementById("dots");
-const cityPill = document.getElementById("cityPill");
 
 const FALLBACK_PHOTOS = [
   // 5 hardcoded Unsplash travel photo IDs via permanent URLs
@@ -1460,14 +1423,6 @@ function renderDots() {
   });
 }
 
-function updateCityPill(city) {
-  cityPill.textContent = city;
-  cityPill.classList.add("flash");
-  // force reflow so animation re-plays
-  void cityPill.offsetWidth;
-  setTimeout(() => cityPill.classList.remove("flash"), 650);
-}
-
 function buildSlides() {
   slidesEl.innerHTML = "";
   photoQueue.forEach((p, i) => {
@@ -1490,7 +1445,6 @@ function showSlide(i) {
       s.classList.remove("active");
     }
   });
-  updateCityPill(photoQueue[i].city);
   [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
 }
 
@@ -1585,7 +1539,6 @@ backgroundSwitch.addEventListener("click", async () => {
     } else { showSlide(currentSlide); restartTimer(); }
   } else {
     clearInterval(slideTimer);
-    cityPill.textContent = CONFIG.owner.positioning;
   }
 });
 updateBackgroundPause();

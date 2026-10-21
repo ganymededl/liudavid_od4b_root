@@ -170,8 +170,8 @@ background: repeating-linear-gradient(
 │  NAV: logo+name  |  music widget  | theme   │  ← compact, glassmorphism
 ├─────────────────────────────────────────────┤
 │                                             │
-│  HERO: city pill · name · rule · tagline    │  ← over travel photo BG
-│        skill pills                          │
+│  HERO: name · rule · tagline (no pills)     │  ← over travel photo BG
+│                                             │
 │                                             │
 ├─────────────────────────────────────────────┤
 │  LIBRARIES GRID  (2×2 auto-fit, min 132px)  │
@@ -218,12 +218,9 @@ background: linear-gradient(180deg,
 );
 ```
 
-### City pill in hero
-- Updates with city name on each slide transition
-- Re-triggers a letter-spacing expand animation (`0.20em → 0.10em`) on change
-- Styled: `background: rgba(0,217,255,0.07)`, `border: 0.5px solid rgba(0,217,255,0.18)`,
-  `color: #00d9ff`, `font-size: 9px`, `font-weight: 600`, `letter-spacing: 0.10em`,
-  `text-transform: uppercase`, `border-radius: 4px`, `padding: 4px 10px`
+### No pills in the hero
+The hero shows only the name, rule and tagline. Do not add a city pill or skill pills;
+they were removed because they no longer describe the owner.
 
 ### Fallback
 If Pexels API is unreachable (network error, rate limit), fall back silently
