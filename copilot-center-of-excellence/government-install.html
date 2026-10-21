@@ -291,11 +291,12 @@
       <h2 class="step-title"><span class="step-number">01</span>Verify and extract the implementation package</h2>
       <p>Use the frozen implementation ZIP and its matching release receipt. Release 3.8.21 SHA256:</p>
       <p><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></p>
-      <div class="warning"><strong>GitHub ZIP distinction:</strong> a named
-        <code>Copilot-CoE-Implementation-Kit.zip</code> release asset is valid when its published hash matches.
+      <div class="warning"><strong>GitHub ZIP distinction:</strong> download the named
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
+        release asset and verify it against the attached
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.
         GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository
-        <em>Download ZIP</em> are not installation packages. The v3.8.21 GitHub release currently has no binary
-        asset.</div>
+        <em>Download ZIP</em> are source snapshots, not installation packages.</div>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-package">Copy command</button></div>
       <pre id="cmd-package">$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
 $expectedHash = 'B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F'

@@ -435,15 +435,15 @@ Copy-Item $profileSource $orgPath -Recurse</pre>
         the install folder, so extracting a newer release does not overwrite them.</p>
       <div class="boundary-card">
         <h3>Which GitHub ZIP can I install?</h3>
-        <p><strong>Use a prebuilt release asset</strong> only when the GitHub release explicitly lists a file named
-          <code>Copilot-CoE-Implementation-Kit.zip</code> and its published receipt or release notes give the SHA256
-          you verify above. If that asset is present and the hash matches, it is valid installation media.</p>
+        <p><strong>Download the named
+          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
+          release asset</strong> and verify it against the attached
+          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.</p>
         <p><strong>Do not substitute GitHub's generated source archives:</strong> <em>Source code (zip)</em>,
           <em>Source code (tar.gz)</em>, or the repository's <em>Code &gt; Download ZIP</em>. Those files are source
           snapshots, not the frozen implementation package.</p>
-        <p class="meta">Release 3.8.21 currently has no binary assets on GitHub. Obtain the reviewed implementation ZIP
-          and matching receipt through the approved distribution channel. The warning is about source archives, not
-          about a genuine, hash-matched implementation ZIP downloaded from a future GitHub release asset.</p>
+        <p class="meta">The warning is about GitHub's automatic source snapshots, not the named, hash-matched
+          implementation asset attached to release 3.8.21.</p>
       </div>
     </section>
 
@@ -776,15 +776,11 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
       <h2>Get the kit for this walkthrough</h2>
       <p>Use the reviewed release 3.8.21 implementation ZIP and its release receipt. The receipt identifies the
         expected SHA256 hash: <code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code>.</p>
-      <p><strong>A GitHub ZIP is valid only when it is a named prebuilt release asset</strong>, such as
-        <code>Copilot-CoE-Implementation-Kit.zip</code>, and its hash matches the release receipt. GitHub's automatic
-        <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository <em>Download ZIP</em> are source
-        snapshots, not installation packages.</p>
-      <p>Release 3.8.21 currently publishes source and release notes but no binary asset. For this release, obtain the
-        frozen implementation ZIP and receipt through the approved distribution channel. If a future release publishes
-        the implementation ZIP as a GitHub release asset, download it there, verify its published hash, and use it in
-        step 03.</p>
-      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21" target="_blank" rel="noopener">Release 3.8.21 notes (source release; no binary asset)</a>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip">Download the v3.8.21 implementation ZIP</a>
+        &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip.sha256">Download its SHA256 receipt</a></p>
+      <p>Do not choose GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository
+        <em>Download ZIP</em>. Those are source snapshots and are not installation packages.</p>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21" target="_blank" rel="noopener">Release 3.8.21 notes and assets</a>
         &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">Kit repository and documentation</a></p>
       <p class="meta">Keep organization settings and approved overrides outside the extracted kit. This recording
         uses delegated interactive sign-in through a tenant-owned Entra app. Installation, content updates,
