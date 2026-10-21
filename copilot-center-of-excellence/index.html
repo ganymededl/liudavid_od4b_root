@@ -587,6 +587,10 @@ Disabling non-owner sharing</pre>
         to remove it. The warning also does not prove that no policy exists: confirm the policy manually. If the run
         creates and finds the exact configured alias and proceeds to template application, the alias was not rewritten
         for that run.</p>
+      <p class="meta">Before a customer run, Teams must also allow the built-in Website
+        (<code>com.microsoft.teamspace.tab.web</code>), PDF, PowerPoint and SharePoint page/list tab providers for the
+        installer and intended CoE users. If Teams blocks one after the Team/site is created, correct the app policy
+        and use <code>-ResumeExisting</code>; do not start clean or purge.</p>
     </section>
 
     <section class="step" id="tour-09" data-tour="9">

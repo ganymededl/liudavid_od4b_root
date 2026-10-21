@@ -409,6 +409,17 @@ Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
           <code>User.Read</code>, and <code>User.Read.All</code></li>
         <li>SharePoint: <code>AllSites.FullControl</code></li>
       </ul>
+      <p>Before installation, confirm in Teams admin center that the installer and intended CoE users can use these
+        built-in tab providers:</p>
+      <ul>
+        <li>Website: <code>com.microsoft.teamspace.tab.web</code></li>
+        <li>PDF: <code>com.microsoft.teamspace.tab.file.staticviewer.pdf</code></li>
+        <li>PowerPoint: <code>com.microsoft.teamspace.tab.file.staticviewer.powerpoint</code></li>
+        <li>SharePoint pages/lists: <code>2a527703-1f6f-4559-a332-d8a7d288cd88</code></li>
+      </ul>
+      <p>Use <strong>Teams apps &gt; Manage apps</strong>. Under app-centric management, check
+        <strong>Users and groups &gt; Availability</strong>. Under legacy app permission policies, verify the policy
+        assigned to the installer and intended users. Policy changes can take hours and up to 24 hours.</p>
     </section>
 
     <section id="install">
@@ -422,10 +433,14 @@ if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
 $siteUrl = "https://$($settings.SiteFQDN)/sites/$($settings.MailNickname)"
 $contentMode = 'Customer'
 
-.\02_Install-CopilotCoE.ps1 `
+& .\02_Install-CopilotCoE.ps1 `
   -OrgPath $orgPath `
   -ContentMode $contentMode `
-  -SeedDemoContent</pre>
+  -SeedDemoContent
+
+if (-not $?) {
+  throw 'Installer did not complete. Stop here; do not read the report, start clean, or purge.'
+}</pre>
       <p><code>MailNickname</code> chooses the Team alias and SharePoint site path. <code>$siteUrl</code> is derived
         for validation; changing that variable alone does not change the install target.</p>
       <p><code>-SeedDemoContent</code> is still required in Customer mode because it publishes the managed pages,
@@ -498,6 +513,22 @@ $contentMode = 'Customer'
         <li>Use <code>04_Remove-CopilotCoE.ps1 -Purge -WhatIf</code> before any reviewed permanent removal.</li>
         <li>Keep the provisioning app until removal reports <code>AliasReusable : True</code>.</li>
       </ul>
+      <div class="warning"><strong>If Teams reports “App is blocked by app permission policy” for
+        <code>com.microsoft.teamspace.tab.web</code>:</strong> allow the built-in Website app for the installer and
+        intended CoE audience, wait for policy propagation, then resume the existing deployment. Do not start clean
+        or purge. Inspect General, Share Your Prompt, and Ask Us Anything first; pass only confirmed missing welcome
+        posts:</div>
+      <pre>$missingWelcomeChannels = @('General', 'Share Your Prompt', 'Ask Us Anything 📢')
+.\02_Install-CopilotCoE.ps1 `
+  -OrgPath $orgPath `
+  -ContentMode $contentMode `
+  -SeedDemoContent `
+  -ResumeExisting `
+  -PublishWelcomeToChannels $missingWelcomeChannels `
+  -AuthenticationMode Interactive `
+  -ForceAuthentication</pre>
+      <p><code>CoE-Revision-Report.json</code> is written only after installation completes. Its absence after a
+        partial failure is expected; do not continue to report-reading or checker commands until resume succeeds.</p>
       <p><a class="button" href="admin-faq.html">Open the full Administrator FAQ</a></p>
     </section>
   </main>
