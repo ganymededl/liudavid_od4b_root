@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fieldforge | From scattered assets to a field-ready mission</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15px/1.55 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+button, select, input { font: inherit; }
+button, select { cursor: pointer; }
+button, .button { border: 1px solid var(--cp-border); border-radius: .625rem; background: var(--cp-surface); color: var(--cp-text); padding: 9px 14px; text-decoration: none; }
+button:hover, .button:hover { border-color: var(--cp-accent); }
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 4px; }
+button:disabled { cursor: not-allowed; opacity: .5; }
+a { color: var(--cp-link); text-underline-offset: 3px; }
+h1, h2, h3, p { margin: 0; }
+h2 { font-size: 20px; font-weight: 600; letter-spacing: -.5px; }
+h3 { font-size: 16px; font-weight: 600; }
+.mono, .eyebrow, .tag, .number { font-family: Consolas, "Courier New", Courier, monospace; }
+.eyebrow { text-transform: uppercase; font-size: 11px; letter-spacing: 1.6px; color: var(--cp-text-muted); }
+.muted { color: var(--cp-text-muted); }
+.small { font-size: 12px; }
+.accent { color: var(--cp-accent); }
+.primary { color: var(--cp-accent-fg); background: var(--cp-accent); border-color: var(--cp-accent); font-weight: 600; }
+.primary:hover { background: var(--cp-accent-hover); }
+.topbar { border-bottom: 1px solid var(--cp-border); background: var(--cp-bg-elevated); }
+.topbar-inner { max-width: 1512px; margin: auto; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.brand { display: flex; gap: 12px; align-items: center; }
+.brand-mark { width: 36px; height: 36px; background: var(--cp-accent); color: var(--cp-accent-fg); display: grid; place-items: center; border-radius: .625rem; font: 22px Consolas, monospace; }
+.brand strong { font-size: 18px; letter-spacing: -1px; }
+.top-actions, .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.tag { display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--cp-border); border-radius: 6px; font-size: 10px; letter-spacing: .5px; }
+.tag::before { content: ""; width: 5px; height: 5px; background: var(--cp-accent); border-radius: 50%; }
+main { max-width: 1512px; margin: auto; padding: 40px 32px 48px; }
+.hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+h1 { font-size: clamp(32px, 3.8vw, 54px); line-height: 1.08; font-weight: 600; letter-spacing: -2.5px; margin: 10px 0 16px; }
+h1 span { color: var(--cp-accent); }
+.hero p { max-width: 680px; color: var(--cp-text-muted); }
+.hero-stamp { max-width: 260px; border-left: 2px solid var(--cp-accent); padding-left: 16px; font-size: 12px; }
+.layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 24px; align-items: start; }
+.panel { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; }
+.panel-head { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; border-bottom: 1px solid var(--cp-border); }
+.sidebar { padding: 20px; }
+.sidebar h2 { margin: 5px 0 18px; }
+.mission { display: block; text-align: left; width: 100%; margin-bottom: 8px; padding: 13px; }
+.mission strong { display: block; font-size: 13px; }
+.mission span { display: block; font-size: 11px; color: var(--cp-text-muted); margin-top: 4px; }
+.mission[aria-pressed="true"] { border-color: var(--cp-accent); background: var(--cp-accent-soft); box-shadow: inset 3px 0 var(--cp-accent); }
+.divider { border: 0; border-top: 1px solid var(--cp-border); margin: 22px 0; }
+.field { margin-bottom: 18px; }
+.field > label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+select { width: 100%; padding: 9px; border: 1px solid var(--cp-border); border-radius: .625rem; background: var(--cp-bg-elevated); color: var(--cp-text); }
+input[type="range"] { width: 100%; accent-color: var(--cp-accent); }
+input[type="checkbox"] { accent-color: var(--cp-accent); width: 16px; height: 16px; flex-shrink: 0; margin: 2px 0 0; }
+.check { display: flex; gap: 9px; align-items: flex-start; margin: 12px 0; font-size: 12px; cursor: pointer; }
+.workspace { min-width: 0; display: grid; gap: 20px; }
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.metric { padding: 16px 20px; }
+.metric .number { display: block; font-size: 29px; letter-spacing: -1px; margin: 4px 0; line-height: 1.2; }
+.metric .number small { font-size: 14px; color: var(--cp-text-muted); }
+.metric .small { font-size: 11px; }
+.canvas { position: relative; overflow: hidden; }
+.canvas-body { padding: 24px; background-image: radial-gradient(var(--cp-border) 1px, var(--cp-surface) 1px); background-size: 20px 20px; }
+.mission-title { font-size: 26px; letter-spacing: -1px; max-width: 620px; margin: 8px 0; }
+.canvas-sub { max-width: 680px; font-size: 13px; color: var(--cp-text-muted); }
+.route { position: relative; margin: 32px 0 24px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px 36px; }
+.route::before { content: ""; position: absolute; left: 12%; right: 12%; top: 24%; bottom: 24%; border: 1px dashed var(--cp-border-strong); border-radius: 16px; pointer-events: none; }
+.node { position: relative; text-align: left; padding: 16px; min-height: 143px; background: var(--cp-surface); transition: border-color .2s, transform .2s; }
+.node:hover { transform: translateY(-3px); }
+.node.selected { border-color: var(--cp-accent); outline: 1px solid var(--cp-accent); }
+.node .node-top { display: flex; justify-content: space-between; gap: 8px; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--cp-text-muted); }
+.node h3 { margin: 12px 0 4px; font-size: 15px; }
+.node p { font-size: 11px; color: var(--cp-text-muted); }
+.node .node-state { display: block; color: var(--cp-accent); font-size: 10px; margin-top: 10px; }
+.node.gap { border-style: dashed; background: var(--cp-bg-elevated); }
+.node.blocked .node-state { color: var(--cp-danger); }
+.node .node-top b { font-size: 12px; color: var(--cp-accent); }
+.signal-line { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; background: var(--cp-bg-elevated); border: 1px solid var(--cp-border); border-radius: .625rem; font-size: 12px; }
+.signal-line > span { font-size: 20px; line-height: 1.2; color: var(--cp-accent); }
+.lower { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.body { padding: 20px 24px; }
+.source-link { display: block; margin: 16px 0; font-size: 14px; font-weight: 600; }
+.detail-label { margin-top: 16px; margin-bottom: 6px; }
+.reason { font-size: 13px; line-height: 1.65; }
+.detail-note { background: var(--cp-accent-soft); padding: 12px; border-radius: .625rem; font-size: 12px; margin-top: 16px; }
+.steps { list-style: none; padding: 0; margin: 0; }
+.steps li { display: flex; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--cp-border); }
+.steps li:last-child { border-bottom: 0; }
+.step-num { font: 12px Consolas, monospace; padding-top: 3px; color: var(--cp-accent); }
+.step-body { flex: 1; }
+.steps strong { font-size: 12px; }
+.steps p { font-size: 11px; color: var(--cp-text-muted); margin-top: 3px; }
+.steps .hours { white-space: nowrap; font: 12px Consolas, monospace; padding-top: 3px; }
+.stress-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+.stress-buttons button { font-size: 12px; padding: 8px 12px; }
+.stress-buttons button[aria-pressed="true"] { background: var(--cp-accent-soft); border-color: var(--cp-accent); color: var(--cp-accent); }
+.decision { border-left: 2px solid var(--cp-accent); padding-left: 16px; margin: 16px 0; }
+.decision strong { font-size: 14px; }
+.decision p { font-size: 12px; color: var(--cp-text-muted); margin-top: 5px; }
+.gate-list { display: grid; gap: 8px; margin-top: 16px; }
+.gate { display: flex; gap: 10px; font-size: 12px; padding: 10px 12px; background: var(--cp-bg-elevated); border-radius: 8px; }
+.gate .indicator { color: var(--cp-danger); font-weight: 700; }
+.gate.met .indicator { color: var(--cp-success); }
+.gate strong { display: block; }
+.gate span:last-child { color: var(--cp-text-muted); }
+.bar { height: 6px; background: var(--cp-border); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+.bar > span { display: block; height: 100%; background: var(--cp-accent); transition: width .3s ease; }
+.replay { display: grid; gap: 8px; margin-top: 16px; }
+.replay-line { padding: 9px 12px; border: 1px solid var(--cp-border); border-radius: 8px; font-size: 12px; }
+.replay-line span { color: var(--cp-accent); font: 10px Consolas, monospace; margin-right: 10px; }
+.footnote { padding: 16px 24px; border-top: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 11px; }
+details summary { cursor: pointer; font-size: 13px; font-weight: 600; }
+details p { margin-top: 12px; font-size: 12px; color: var(--cp-text-muted); }
+.footer { padding-top: 24px; display: flex; justify-content: space-between; gap: 20px; font-size: 11px; color: var(--cp-text-muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 20px; top: 12px; z-index: 10; background: var(--cp-surface); padding: 12px; }
+@media (max-width: 1150px) {
+  .layout { grid-template-columns: 250px minmax(0, 1fr); gap: 16px; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .lower { grid-template-columns: 1fr; }
+  .route { gap: 12px; }
+  .node { padding: 12px; }
+}
+@media (max-width: 760px) {
+  main { padding: 28px 16px; }
+  .topbar-inner { padding: 12px 16px; flex-wrap: wrap; }
+  .brand .small { display: none; }
+  .top-actions { gap: 8px; }
+  .top-actions .tag { display: none; }
+  .hero { display: block; }
+  .hero-stamp { max-width: none; margin-top: 20px; }
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+  .sidebar .mission-picker, .sidebar .attestations { grid-column: 1 / -1; }
+  .sidebar hr { grid-column: 1 / -1; width: 100%; }
+  .sidebar .mission-picker { display: grid; gap: 8px; grid-template-columns: 1fr; }
+  .sidebar .mission-picker h2, .sidebar .mission-picker .eyebrow { grid-column: 1 / -1; }
+  .sidebar h2 { margin-bottom: 6px; }
+  .mission { margin: 0; }
+  .sidebar > .small { grid-column: 1 / -1; }
+  .route { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .route::before { display: none; }
+  .canvas-body, .body, .panel-head { padding: 18px; }
+  .panel-head { flex-wrap: wrap; }
+  .metric { padding: 14px; }
+  .metric .number { font-size: 26px; }
+  .footer { flex-direction: column; }
+  h1 { letter-spacing: -1.5px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; }
+}
+@media print {
+  .top-actions, .sidebar, .stress-buttons, #export, #pin { display: none; }
+  .layout, .lower { display: block; }
+  .panel { break-inside: avoid; margin-bottom: 16px; }
+  main { padding: 0; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#workspace">Skip to mission canvas</a>
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-mark" aria-hidden="true">F/</span><div><strong>FIELDFORGE</strong><div class="small muted">David's field intelligence lab</div></div></div>
+    <nav class="top-actions" aria-label="Page actions">
+      <span class="tag">LOCAL SCENARIO ENGINE</span>
+      <a class="button small" href="index.html">Personal Hub &#8599;</a>
+      <button type="button" id="theme" class="small" aria-label="Toggle color theme">Light / dark</button>
+      <button type="button" id="export" class="primary small">Export mission brief &#8595;</button>
+    </nav>
+  </div>
+</header>
+<main>
+  <section class="hero" aria-labelledby="heading">
+    <div><div class="eyebrow">Not another dashboard. A decision instrument.</div><h1 id="heading">Your work, connected.<br><span>Your next move, rehearsed.</span></h1>
+      <p>Turn a library of useful things into a repeatable customer engagement. Compose a mission, stress-test the path, and see exactly what still needs evidence.</p>
+    </div>
+    <div class="hero-stamp"><strong>Prototype / synthetic missions</strong><br><span class="muted">Real Hub asset references. Illustrative effort. No live tenant connection, customer data, AI inference, or compliance certification.</span></div>
+  </section>
+  <div class="layout">
+    <aside class="panel sidebar" aria-label="Mission configuration">
+      <div class="mission-picker">
+        <div class="eyebrow">01 / Choose your mission</div><h2>The starting point</h2>
+        <button class="mission" type="button" data-mission="education" aria-pressed="true"><strong>01 &nbsp; Campus knowledge pilot</strong><span>Higher education / faculty enablement</span></button>
+        <button class="mission" type="button" data-mission="government" aria-pressed="false"><strong>02 &nbsp; Agency briefing workflow</strong><span>Government / governed productivity</span></button>
+        <button class="mission" type="button" data-mission="transit" aria-pressed="false"><strong>03 &nbsp; Operations handoff</strong><span>Transit / knowledge continuity</span></button>
+      </div>
+      <hr class="divider">
+      <div class="field"><label for="cloud">Target cloud</label><select id="cloud"><option value="commercial">Commercial</option><option value="gcc">GCC</option><option value="gcch">GCC High</option></select></div>
+      <div class="field"><label for="capacity">Planning capacity <output id="capacity-label">24 h</output></label><input id="capacity" type="range" min="8" max="40" step="1" value="24"><p class="small muted">Illustrative delivery effort, not billable hours.</p></div>
+      <div class="attestations">
+        <div class="eyebrow">02 / Rehearsal assumptions</div>
+        <p class="small muted" style="margin-top:8px">Check only to simulate evidence being available. These are not recorded approvals.</p>
+        <label class="check"><input type="checkbox" id="feature"><span>Exact feature, license &amp; cloud verified</span></label>
+        <label class="check"><input type="checkbox" id="scope"><span>Data scope &amp; permitted use reviewed</span></label>
+        <label class="check"><input type="checkbox" id="access"><span>Evidence access &amp; retention verified</span></label>
+        <label class="check"><input type="checkbox" id="owner"><span>Operational owner &amp; rollback agreed</span></label>
+        <label class="check"><input type="checkbox" id="baseline"><span>Outcome baseline &amp; review owner set</span></label>
+      </div>
+      <hr class="divider"><button type="button" id="reset" class="small">Reset scenario</button>
+      <p class="small muted" style="margin-top:12px">Nothing you enter is saved or transmitted. Export is an explicit local download.</p>
+    </aside>
+    <div class="workspace" id="workspace" tabindex="-1">
+      <section class="metrics" aria-label="Scenario summary">
+        <div class="panel metric"><span class="eyebrow">Reuse coverage</span><strong class="number" id="reuse">5<small> / 6 stages</small></strong><span class="small muted">Source candidate, not proven fit</span></div>
+        <div class="panel metric"><span class="eyebrow">Modeled effort</span><strong class="number" id="effort"></strong><span class="small muted" id="effort-note"></span></div>
+        <div class="panel metric"><span class="eyebrow">Evidence gaps</span><strong class="number" id="gaps"></strong><span class="small muted">Unmet rehearsal conditions</span></div>
+        <div class="panel metric"><span class="eyebrow">Since pinned</span><strong class="number" id="delta">--</strong><span class="small muted" id="delta-note">Pin a comparison below</span></div>
+      </section>
+      <section class="panel canvas" aria-labelledby="canvas-heading">
+        <div class="panel-head"><div><div class="eyebrow">03 / Connected mission canvas</div><h2 id="canvas-heading">From question to defensible outcome</h2></div><button type="button" id="pin" class="small">Pin comparison</button></div>
+        <div class="canvas-body">
+          <div class="row"><span class="tag" id="cloud-tag">COMMERCIAL</span><span class="eyebrow" id="mission-code">MISSION / EDU-01</span></div>
+          <h3 class="mission-title" id="mission-title"></h3><p class="canvas-sub" id="mission-description"></p>
+          <div class="route" id="route" aria-label="Mission stages; select a stage to inspect its source"></div>
+          <div class="signal-line"><span aria-hidden="true">&#8627;</span><div><strong id="recommendation"></strong><p class="muted" id="recommendation-detail"></p></div></div>
+        </div>
+        <div class="footnote">The links are real; the connections are proposed. Select any node to inspect provenance, reuse logic, and the missing proof. No node grants permission to deliver a service.</div>
+      </section>
+      <div class="lower">
+        <section class="panel" aria-labelledby="source-heading">
+          <div class="panel-head"><div><div class="eyebrow">04 / Inspect the connection</div><h2 id="source-heading">Why this asset belongs here</h2></div><span class="tag" id="source-status"></span></div>
+          <div class="body" id="source-detail"></div>
+        </section>
+        <section class="panel" aria-labelledby="plan-heading">
+          <div class="panel-head"><div><div class="eyebrow">05 / Proposed delivery sequence</div><h2 id="plan-heading">A plan, not a pile of links</h2></div><span class="small mono" id="total-hours"></span></div>
+          <div class="body"><ol class="steps" id="steps"></ol></div>
+          <div class="footnote">All stages remain visible when over capacity. No governance or evidence work is silently removed to make the numbers fit.</div>
+        </section>
+      </div>
+      <section class="panel" aria-labelledby="stress-heading">
+        <div class="panel-head"><div><div class="eyebrow">06 / Throw a wrench in it</div><h2 id="stress-heading">The meeting never goes to plan.</h2></div><span class="small muted">Single-event stress test</span></div>
+        <div class="body">
+          <p class="reason muted">Change the story halfway through. Watch the delivery route, estimate, evidence gaps, and recommended next move respond together.</p>
+          <div class="stress-buttons" aria-label="Inject a scenario complication">
+            <button type="button" data-shock="none" aria-pressed="true">No curveball</button>
+            <button type="button" data-shock="feature" aria-pressed="false">The feature isn't available</button>
+            <button type="button" data-shock="audit" aria-pressed="false">The auditor wants proof</button>
+            <button type="button" data-shock="capacity" aria-pressed="false">Your time is cut in half</button>
+          </div>
+          <div class="decision"><strong id="shock-title"></strong><p id="shock-detail"></p></div>
+          <div class="lower">
+            <div><div class="eyebrow">Evidence preflight / simulation only</div><div class="bar" aria-hidden="true"><span id="gate-bar"></span></div><div class="gate-list" id="gates"></div></div>
+            <div><div class="eyebrow">Decision replay / this tab only</div><div class="replay" id="replay"></div></div>
+          </div>
+        </div>
+      </section>
+      <section class="panel">
+        <details class="body">
+          <summary>Behind the instrument: provenance, model, and production boundary</summary>
+          <p><strong>Sources:</strong> Personal Hub index and public repository paths inspected on October 17, 2026. Private Q&amp;A and parity-tool descriptions are taken from their Hub cards only; their underlying content was not accessed. A source's existence does not establish quality, currency, compatibility, or customer authorization.</p>
+          <p><strong>Model:</strong> Deterministic, inspectable planning rules, not an AI recommendation service. Base stage hours are discovery 2, controls 3, prompt design 2, rehearsal 3, evidence 3, and measurement 2; transit rehearsal adds 1. Scenario allowances add 2 hours of cloud validation for GCC or 4 for GCC High; these are arbitrary planning assumptions, not statements about product availability. Feature loss adds 2 design and 1 rehearsal hours; an audit challenge adds 3 evidence hours. The capacity challenge halves the selected capacity. Checks affect evidence gaps, not the effort estimate. No ROI, usage, price, or savings is inferred.</p>
+          <p><strong>Limits:</strong> This is a static, local-first prototype. No sign-in, telemetry, cookies, external scripts, local storage, private-data imports, background fetches, tenant queries, or deployments. Exports contain synthetic scenario selections and public references only. Closing or reloading the tab clears the replay and comparison.</p>
+          <p><strong>Production path:</strong> Keep the public lab synthetic. A separate, authenticated internal edition would need approved data connectors, least-privilege access, tenant and cloud isolation, source freshness and provenance, retention and deletion policy, audited decisions, support ownership, and human approval before any write. Customer evidence must not be added to this public repository.</p>
+        </details>
+      </section>
+    </div>
+  </div>
+  <footer class="footer"><span>FIELDFORGE / A connected-work experiment for David's Personal Hub</span><span>Existing work &#8594; reusable playbook &#8594; evidence &#8594; better next engagement</span></footer>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+</main>
+<script>
+"use strict";
+const MISSIONS = {
+  education: { code: "EDU-01", title: "Make the next faculty pilot repeatable.", description: "Rehearse a synthetic faculty knowledge workflow: one task, a small approved content set, a clear evidence trail, and a measurable follow-up.", demo: "demos-public/edu-copilotchat/index.html", demoName: "Education Copilot Chat demo", task: "Prepare a faculty briefing from approved synthetic campus materials", outcome: "Compare briefing completion time and reviewer corrections against the same task without assistance.", extra: 0 },
+  government: { code: "GOV-02", title: "A briefing that can survive the follow-up question.", description: "Design a synthetic agency briefing pilot around source traceability, controlled content, and a handoff the governance team can actually review.", demo: "demos-public/nypd-copilotchat/nypd_copilotdemo/index.html", demoName: "Public-safety Copilot Chat demo", task: "Draft an internal briefing using synthetic, non-sensitive agency documents", outcome: "Track source-verification failures and review time on matched synthetic briefing tasks.", extra: 0 },
+  transit: { code: "OPS-03", title: "Keep the knowledge when the shift changes.", description: "Rehearse a synthetic transit operations handoff: turn approved notes into a usable briefing, test unsupported claims, and define a human escalation route.", demo: "demos-public/mta-copilot/index.html", demoName: "Transit Copilot demo", task: "Summarize synthetic shift notes into a source-linked operations handoff", outcome: "Count omitted handoff items and reviewer corrections; never automate safety-critical dispatch.", extra: 1 }
+};
+const STAGES = [
+  { id: "discover", label: "Frame", name: "The right question", short: "Q&A Hub", hours: 2, owner: "Engagement lead", action: "Define one workflow, its intended user, exclusions, and a pass/fail criterion.", source: "index.html", sourceName: "Copilot Q&A Hub / Hub listing", provenance: "Private tool; public listing only", why: "Reuse the existing Q&A catalog as a candidate discovery input instead of starting every engagement from a blank page.", verify: "An authorized reviewer must find a current, relevant answer and verify its citations. No private Q&A was read for this prototype." },
+  { id: "govern", label: "Bound", name: "The guardrails", short: "CoE + controls", hours: 3, owner: "Customer governance owner", action: "Document data boundaries, roles, permitted use, cloud/licensing checks, and a human approval route.", source: "demos-public/copilot-coe-overview/index.html", sourceName: "Copilot CoE overview", provenance: "Public artifact path verified", why: "Connect the existing CoE material to delivery planning so governance is a prerequisite, not an appendix.", verify: "Review the actual artifact for suitability. Confirm applicable controls, licenses, responsibilities, retention, and feature support in the target tenant." },
+  { id: "design", label: "Shape", name: "A reusable prompt", short: "Prompt workbench", hours: 2, owner: "Solution architect", action: "Build a source-grounded task prompt with explicit exclusions, escalation, and a reviewer rubric.", source: "prompt-engineering-public/cowork-prompt-workbench.html", sourceName: "Cowork prompt workbench", provenance: "Public artifact path verified", why: "Treat the prompt library as reusable design material rather than a separate browsing destination. Adapt patterns to the selected product; do not assume portability.", verify: "Confirm the prompt's product fit and permitted inputs. Test unsupported claims, instruction conflicts, refusal behavior, and source fidelity." },
+  { id: "rehearse", label: "Show", name: "A believable rehearsal", short: "Sector demo", hours: 3, owner: "Demo facilitator", action: "Run the task using synthetic data, preserve the reviewer rubric, and capture the questions the demo does not answer.", provenance: "Public artifact path verified", why: "Reuse the sector-specific demo as a storytelling starting point, then align it to the same workflow and evaluation rubric.", verify: "An existing demo is not proof of current product behavior, cloud parity, data rights, or customer readiness. Revalidate before a live demonstration." },
+  { id: "inspect", label: "Prove", name: "The evidence path", short: "Audit runbook", hours: 3, owner: "Compliance / evidence owner", action: "Identify the relevant evidence source; verify access, retention, capture limitations, and the approval needed to inspect it.", source: "scripts-public/CPStudio-Audit-Content-Search/README.md", sourceName: "Copilot Studio conversation export runbook", provenance: "Public runbook inspected", why: "Your audit work supplies a useful evidence-design pattern: check access and capture conditions before promising retrievable content.", verify: "This runbook is specific to Copilot Studio Dataverse transcripts. It is NOT an evidence connector for these Chat scenarios. Select and validate the correct product-specific evidence path; do not run this script on the assumption that it applies." },
+  { id: "measure", label: "Learn", name: "Close the loop", short: "New build opportunity", hours: 2, owner: "Adoption / outcome owner", action: "Capture a baseline, run a matched task comparison, and review quality as well as elapsed time.", provenance: "Proposed capability; not connected", why: "This is the missing bridge: connect what was built and demonstrated to a measured outcome that can inform the next engagement.", verify: "No telemetry or measured benefit exists here. Agree the sample, consent, baseline, reviewer, measurement method, and retention before collection." }
+];
+const CHECKS = [
+  { id: "feature", title: "Feature, license & cloud fit", pending: "Verify the exact workload, tenant, cloud and current documentation.", met: "Assumed verified for this rehearsal; attach actual dated evidence internally." },
+  { id: "scope", title: "Data scope & permitted use", pending: "A governance owner must review the content boundary and permitted use.", met: "Assumed reviewed for this rehearsal; not a permission or legal approval." },
+  { id: "access", title: "Evidence access & retention", pending: "Establish the correct evidence path, roles and capture window.", met: "Assumed verified for this rehearsal; no tenant evidence has been queried." },
+  { id: "owner", title: "Support owner & rollback", pending: "Assign operational responsibility, escalation and a reversible pilot boundary.", met: "Assumed agreed for this rehearsal; confirm the real support arrangement." },
+  { id: "baseline", title: "Outcome baseline", pending: "Set a matched task, reviewer rubric and outcome review owner.", met: "Assumed designed for this rehearsal; results have not been measured." }
+];
+const CLOUDS = { commercial: "Commercial", gcc: "GCC", gcch: "GCC High" };
+const state = { mission: "education", cloud: "commercial", capacity: 24, feature: false, scope: false, access: false, owner: false, baseline: false, shock: "none", selected: "govern" };
+let pinned = null;
+const replay = [];
+const $ = id => document.getElementById(id);
+function escapeHTML(value) {
+  return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+function computePlan(input) {
+  const mission = MISSIONS[input.mission];
+  const cloudHours = input.cloud === "gcch" ? 4 : input.cloud === "gcc" ? 2 : 0;
+  const capacity = input.shock === "capacity" ? input.capacity / 2 : input.capacity;
+  const gates = CHECKS.map(check => ({
+    ...check,
+    met: Boolean(input[check.id]) && !(input.shock === "feature" && check.id === "feature") && !(input.shock === "audit" && check.id === "access"),
+    forced: (input.shock === "feature" && check.id === "feature") || (input.shock === "audit" && check.id === "access")
+  }));
+  const stages = STAGES.map(stage => {
+    let hours = stage.hours;
+    if (stage.id === "govern") hours += cloudHours;
+    if (stage.id === "rehearse") hours += mission.extra + (input.shock === "feature" ? 1 : 0);
+    if (stage.id === "design" && input.shock === "feature") hours += 2;
+    if (stage.id === "inspect" && input.shock === "audit") hours += 3;
+    const blocked = (stage.id === "rehearse" && !gates.find(gate => gate.id === "feature").met) ||
+      (stage.id === "inspect" && !gates.find(gate => gate.id === "access").met) ||
+      (stage.id === "govern" && !gates.find(gate => gate.id === "scope").met) ||
+      (stage.id === "measure" && !gates.find(gate => gate.id === "baseline").met);
+    return { ...stage, hours, blocked,
+      source: stage.id === "rehearse" ? mission.demo : stage.source,
+      sourceName: stage.id === "rehearse" ? mission.demoName : stage.sourceName,
+      action: stage.id === "rehearse" && input.shock === "feature" ? "Use a static, synthetic storyboard instead of a live feature demonstration. Do not imply the feature is available." : stage.action
+    };
+  });
+  const hours = stages.reduce((sum, stage) => sum + stage.hours, 0);
+  const gapCount = gates.filter(gate => !gate.met).length;
+  let next = "Rehearsal conditions met; schedule a human decision.";
+  let detail = "This is still a synthetic planning result, not production readiness or permission to proceed.";
+  if (gapCount) {
+    const first = gates.find(gate => !gate.met);
+    next = `Next proof to obtain: ${first.title.toLowerCase()}.`;
+    detail = first.pending + " Keep the live pilot on hold; synthetic design work can continue.";
+  }
+  if (input.shock === "feature") {
+    next = "Reroute the demonstration, not the truth.";
+    detail = "The feature is unavailable in this scenario. Replace the live demo with a labeled storyboard; re-open feature validation before promising a pilot.";
+  }
+  const over = Math.max(0, hours - capacity);
+  if (over) {
+    detail += ` The modeled plan is ${over} h over capacity. Reduce workflow breadth or agree more time; retain governance and evidence work.`;
+  }
+  return { mission, stages, gates, hours, capacity, gapCount, over, next, detail, reuse: stages.filter(stage => stage.source).length };
+}
+function record(message) {
+  replay.unshift(message);
+  if (replay.length > 6) replay.pop();
+  $("replay").innerHTML = replay.map((line, index) => `<div class="replay-line"><span>${index === 0 ? "NOW" : `-${index}`}</span>${escapeHTML(line)}</div>`).join("");
+}
+function announce(message) { $("announcement").textContent = message; }
+function renderDetail(plan) {
+  const stage = plan.stages.find(item => item.id === state.selected);
+  $("source-status").textContent = stage.source ? "SOURCE CANDIDATE" : "NEW CAPABILITY";
+  $("source-detail").innerHTML = `
+    <div class="eyebrow">${escapeHTML(stage.label)} / ${escapeHTML(stage.provenance)}</div>
+    <h3 style="margin-top:8px">${escapeHTML(stage.name)}</h3>
+    ${stage.source ? `<a class="source-link" href="${escapeHTML(stage.source)}" target="_blank" rel="noopener noreferrer">${escapeHTML(stage.sourceName)} &#8599;</a>` : '<p class="detail-note">This is a new build opportunity, not an existing integration.</p>'}
+    <div class="eyebrow detail-label">The connection</div><p class="reason">${escapeHTML(stage.why)}</p>
+    <div class="eyebrow detail-label">Missing proof</div><p class="reason">${escapeHTML(stage.verify)}</p>
+    <div class="detail-note"><strong>Proposed owner:</strong> ${escapeHTML(stage.owner)}<br><strong>Output:</strong> ${escapeHTML(stage.action)}</div>`;
+}
+function render() {
+  const plan = computePlan(state);
+  $("capacity-label").textContent = `${state.capacity} h`;
+  $("effort").innerHTML = `${plan.hours}<small> h / ${plan.capacity} h cap</small>`;
+  $("effort-note").textContent = plan.over ? `${plan.over} h over; scope decision needed` : `${plan.capacity - plan.hours} h planning headroom`;
+  $("gaps").innerHTML = `${plan.gapCount}<small> / 5 conditions</small>`;
+  $("reuse").innerHTML = `${plan.reuse}<small> / 6 stages</small>`;
+  if (pinned) {
+    const delta = plan.hours - pinned.hours;
+    $("delta").innerHTML = `${delta > 0 ? "+" : ""}${delta}<small> h effort</small>`;
+    const gapDelta = plan.gapCount - pinned.gapCount;
+    $("delta-note").textContent = `${gapDelta > 0 ? "+" : ""}${gapDelta} gaps; ${pinned.label}`;
+  } else {
+    $("delta").textContent = "--";
+    $("delta-note").textContent = "Pin a comparison below";
+  }
+  $("cloud-tag").textContent = CLOUDS[state.cloud].toUpperCase();
+  $("mission-code").textContent = `MISSION / ${plan.mission.code}`;
+  $("mission-title").textContent = plan.mission.title;
+  $("mission-description").textContent = plan.mission.description;
+  $("route").innerHTML = plan.stages.map((stage, index) => `
+    <button type="button" class="node${stage.id === state.selected ? " selected" : ""}${stage.blocked ? " blocked" : ""}${!stage.source ? " gap" : ""}"
+      data-stage="${stage.id}" aria-pressed="${stage.id === state.selected}">
+      <span class="node-top"><span>${String(index + 1).padStart(2, "0")} / ${stage.label}</span><b>${stage.hours}h</b></span>
+      <h3>${stage.name}</h3><p>${stage.short}</p>
+      <span class="node-state">${stage.blocked ? "Evidence condition open" : !stage.source ? "New measurement bridge" : "Candidate for reuse"} &#8599;</span>
+    </button>`).join("");
+  $("recommendation").textContent = plan.next;
+  $("recommendation-detail").textContent = plan.detail;
+  $("total-hours").textContent = `${plan.hours} h modeled`;
+  $("steps").innerHTML = plan.stages.map((stage, index) => `<li><span class="step-num">${String(index + 1).padStart(2, "0")}</span><div class="step-body"><strong>${stage.name}</strong><p>${escapeHTML(stage.action)}</p><p>${escapeHTML(stage.owner)}</p></div><span class="hours">${stage.hours} h</span></li>`).join("");
+  $("gate-bar").style.width = `${(5 - plan.gapCount) * 20}%`;
+  $("gates").innerHTML = plan.gates.map(gate => `<div class="gate${gate.met ? " met" : ""}"><span class="indicator" aria-label="${gate.met ? "Assumed met" : "Open"}">${gate.met ? "&#10003;" : "!"}</span><div><strong>${gate.title}${gate.forced ? " / REOPENED" : ""}</strong><span>${escapeHTML(gate.met ? CHECKS.find(check => check.id === gate.id).met : gate.pending)}</span></div></div>`).join("");
+  const shockText = {
+    none: ["No curveball. Interrogate the baseline.", "Start with an honest evidence gap list. Check rehearsal assumptions to explore a different plan; checking a box does not verify anything."],
+    feature: ["Route changed / storyboard replaces live feature.", "Adds 3 modeled hours: 2 for redesign, 1 for rehearsal. Feature validation is reopened even if its assumption was checked. No assertion is made about any actual cloud's feature availability."],
+    audit: ["Evidence challenge / access condition reopened.", "Adds 3 modeled hours to evidence design. An assumed access check cannot answer a new proof request; identify the right product evidence source and independently validate capture, roles and retention."],
+    capacity: ["Capacity shock / half the room, same obligations.", `Available planning capacity is ${plan.capacity} h, half of the selected ${state.capacity} h. Stage effort is unchanged. Narrow the workflow or split the engagement; do not delete safeguards.`]
+  };
+  [$("shock-title").textContent, $("shock-detail").textContent] = shockText[state.shock];
+  document.querySelectorAll("[data-mission]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mission === state.mission)));
+  document.querySelectorAll("[data-shock]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.shock === state.shock)));
+  renderDetail(plan);
+}
+function buildBrief() {
+  const plan = computePlan(state);
+  const absoluteSource = path => `https://ganymededl.github.io/liudavid_od4b_root/${path}`;
+  return [
+    "# Fieldforge / synthetic mission brief",
+    "",
+    "DRAFT FOR HUMAN REVIEW. Not a customer plan, authorization, compliance attestation, quote, or measured result.",
+    "Source inventory inspected: 2026-10-17. Private tool contents were not accessed.",
+    "",
+    `## ${plan.mission.code} / ${plan.mission.title}`,
+    `Workflow: ${plan.mission.task}`,
+    `Cloud selection: ${CLOUDS[state.cloud]} (fit not inferred).`,
+    `Curveball: ${state.shock}.`,
+    `Modeled effort: ${plan.hours} h. Effective capacity: ${plan.capacity} h. Over capacity: ${plan.over} h.`,
+    `Candidate reuse coverage: ${plan.reuse} of 6 stages. This counts source references, not validated compatibility.`,
+    `Open rehearsal conditions: ${plan.gapCount} of 5.`,
+    "",
+    "## Recommended next decision",
+    plan.next, plan.detail,
+    "",
+    "## Evidence preflight",
+    ...plan.gates.map(gate => `- ${gate.met ? "[ASSUMED MET - NOT VERIFIED]" : "[OPEN]"} ${gate.title}${gate.forced ? " (reopened by challenge)" : ""}: ${gate.met ? CHECKS.find(check => check.id === gate.id).met : gate.pending}`),
+    "",
+    "## Proposed delivery sequence",
+    ...plan.stages.flatMap((stage, index) => [
+      `### ${index + 1}. ${stage.name} / ${stage.hours} modeled hours`,
+      `Owner role: ${stage.owner}`,
+      `Output: ${stage.action}`,
+      `Source: ${stage.source ? `${stage.sourceName} - ${absoluteSource(stage.source)}` : "NEW CAPABILITY; not connected"}`,
+      `Provenance: ${stage.provenance}`,
+      `Why reuse: ${stage.why}`,
+      `Required validation: ${stage.verify}`, ""
+    ]),
+    "## Measurement hypothesis",
+    plan.mission.outcome,
+    "Use matched synthetic tasks and a named reviewer. Capture time and quality; do not infer ROI or real savings.",
+    "",
+    "## Modeling assumptions",
+    "Base hours: discovery 2 + controls 3 + design 2 + rehearsal 3 + evidence 3 + measurement 2; transit rehearsal +1.",
+    "Illustrative cloud-validation allowance: Commercial +0, GCC +2, GCC High +4 hours. These are not product capability claims.",
+    "Feature-loss challenge: design +2 and rehearsal +1 hours. Audit challenge: evidence +3 hours. Capacity challenge: selected capacity / 2.",
+    "Checks affect open conditions, not modeled hours. No governance or evidence stage is omitted when over capacity.",
+    "",
+    "## Decision replay (latest first; last six changes in this tab)",
+    ...replay.map(line => `- ${line}`),
+    "",
+    "## Production boundary",
+    "Static, deterministic prototype. No private evidence was queried. All scenario results are illustrative.",
+    "Do not place real customer data or internal evidence in the public repository. Any internal edition needs authenticated approved connectors, least privilege, source freshness, retention rules, audited decisions, a support owner and human approval before writes.",
+    ""
+  ].join("\n");
+}
+$("route").addEventListener("click", event => {
+  const button = event.target.closest("[data-stage]");
+  if (!button) return;
+  state.selected = button.dataset.stage;
+  // Preserve the node's keyboard focus; only its selection state and detail need updating.
+  document.querySelectorAll("[data-stage]").forEach(node => {
+    const selected = node.dataset.stage === state.selected;
+    node.classList.toggle("selected", selected);
+    node.setAttribute("aria-pressed", String(selected));
+  });
+  renderDetail(computePlan(state));
+  announce(`Source details: ${STAGES.find(stage => stage.id === state.selected).name}`);
+});
+document.querySelectorAll("[data-mission]").forEach(button => button.addEventListener("click", () => {
+  state.mission = button.dataset.mission;
+  record(`Mission changed to ${MISSIONS[state.mission].code}; constraints and assumptions retained.`);
+  render();
+  announce(`Mission changed to ${MISSIONS[state.mission].code}`);
+}));
+document.querySelectorAll("[data-shock]").forEach(button => button.addEventListener("click", () => {
+  state.shock = button.dataset.shock;
+  record(`Challenge: ${button.textContent}.`);
+  render();
+  announce($("shock-title").textContent);
+}));
+$("cloud").addEventListener("change", event => {
+  state.cloud = event.target.value;
+  record(`Cloud changed to ${CLOUDS[state.cloud]}; planning allowance updated, actual availability not inferred.`);
+  render();
+  announce(`Cloud changed to ${CLOUDS[state.cloud]}`);
+});
+$("capacity").addEventListener("input", event => {
+  state.capacity = Number(event.target.value);
+  render();
+});
+$("capacity").addEventListener("change", () => {
+  record(`Selected capacity: ${state.capacity} h; effective capacity: ${computePlan(state).capacity} h.`);
+  announce(`Planning capacity ${computePlan(state).capacity} hours`);
+});
+CHECKS.forEach(check => $(check.id).addEventListener("change", event => {
+  state[check.id] = event.target.checked;
+  record(`${check.title}: ${event.target.checked ? "assumed met" : "open"}; simulation only.`);
+  render();
+  announce(`${computePlan(state).gapCount} evidence conditions remain open`);
+}));
+$("pin").addEventListener("click", () => {
+  const plan = computePlan(state);
+  pinned = { hours: plan.hours, gapCount: plan.gapCount, label: `${plan.mission.code} / ${CLOUDS[state.cloud]}` };
+  record(`Pinned ${pinned.label}: ${pinned.hours} h, ${pinned.gapCount} open conditions.`);
+  render();
+  announce("Current scenario pinned for comparison");
+});
+$("reset").addEventListener("click", () => {
+  Object.assign(state, { mission: "education", cloud: "commercial", capacity: 24, feature: false, scope: false, access: false, owner: false, baseline: false, shock: "none", selected: "govern" });
+  pinned = null;
+  replay.length = 0;
+  $("cloud").value = state.cloud;
+  $("capacity").value = state.capacity;
+  CHECKS.forEach(check => { $(check.id).checked = false; });
+  record("Scenario reset. All evidence conditions are open.");
+  render();
+  announce("Scenario reset");
+});
+$("theme").addEventListener("click", () => {
+  document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+});
+$("export").addEventListener("click", () => {
+  const url = URL.createObjectURL(new Blob([buildBrief()], { type: "text/markdown;charset=utf-8" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `fieldforge-${MISSIONS[state.mission].code.toLowerCase()}-draft.md`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  announce("Synthetic mission brief downloaded. It is a draft for human review.");
+});
+record("Started a synthetic campus mission. Five evidence conditions open; no live data connected.");
+render();
+</script>
+</body>
+</html>
