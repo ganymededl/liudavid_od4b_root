@@ -1,0 +1,1498 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>Copilot CoE Administrator FAQ - v3.8.21</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const theme = ["light", "dark"].includes(param)
+        ? param
+        : prefersDark ? "dark" : "light";
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.55;
+    }
+    a { color: var(--cp-link); }
+    code, pre {
+      font-family: Consolas, "Courier New", Courier, monospace;
+    }
+    code {
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 0.25rem;
+      padding: 0.05rem 0.28rem;
+      overflow-wrap: anywhere;
+    }
+    pre {
+      margin: 12px 0 0;
+      padding: 14px;
+      overflow-x: auto;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+      white-space: pre;
+    }
+    pre code {
+      border: 0;
+      padding: 0;
+      background: transparent;
+      overflow-wrap: normal;
+    }
+    .masthead {
+      background: var(--cp-bg-elevated);
+      border-bottom: 1px solid var(--cp-border);
+    }
+    .masthead-inner, .layout, .footer {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .masthead-inner { padding: 32px 0 24px; }
+    .eyebrow {
+      color: var(--cp-accent);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 6px 0 8px;
+      font-size: clamp(2rem, 4vw, 3.25rem);
+      line-height: 1.08;
+      letter-spacing: -0.03em;
+    }
+    .lede {
+      max-width: 820px;
+      margin: 0;
+      color: var(--cp-text-muted);
+      font-size: 1.06rem;
+    }
+    .release-card {
+      margin-top: 24px;
+      padding: 20px;
+      border: 1px solid var(--cp-border);
+      border-left: 5px solid var(--cp-accent);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      box-shadow: 0 0 2px var(--cp-border);
+    }
+    .release-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+    .release-label {
+      display: block;
+      color: var(--cp-text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .release-value { display: block; margin-top: 4px; font-weight: 650; overflow-wrap: anywhere; }
+    .integrity-note {
+      margin: 16px 0 0;
+      color: var(--cp-text-muted);
+      font-size: 0.92rem;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      border-bottom: 1px solid var(--cp-border);
+      background: var(--cp-panel-strong);
+    }
+    .toolbar-inner {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 12px 0;
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) auto auto;
+      gap: 8px;
+    }
+    input[type="search"] {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      padding: 8px 12px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font: inherit;
+    }
+    button {
+      min-height: 42px;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      padding: 8px 12px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font: inherit;
+      font-weight: 650;
+      cursor: pointer;
+    }
+    button:hover, button:focus-visible { border-color: var(--cp-accent); color: var(--cp-accent); }
+    .layout {
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 24px;
+      padding: 28px 0 56px;
+    }
+    aside {
+      align-self: start;
+      position: sticky;
+      top: 84px;
+    }
+    .side-card {
+      padding: 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+    }
+    .side-title { margin: 0 0 12px; font-size: 0.86rem; }
+    .category-list { display: grid; gap: 6px; }
+    .category-button {
+      min-height: 36px;
+      width: 100%;
+      text-align: left;
+      border-color: transparent;
+      padding: 7px 9px;
+      font-weight: 500;
+    }
+    .category-button.active {
+      border-color: var(--cp-accent);
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+      font-weight: 700;
+    }
+    .side-note { margin: 16px 0 0; color: var(--cp-text-muted); font-size: 0.82rem; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 12px;
+    }
+    .section-header h2 { margin: 0; font-size: 1.45rem; }
+    .count { color: var(--cp-text-muted); font-size: 0.88rem; }
+    .key-questions {
+      margin-bottom: 20px;
+      padding: 16px 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-accent-soft);
+    }
+    .key-questions strong { color: var(--cp-accent); }
+    .terms {
+      margin-bottom: 20px;
+      padding: 16px 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+    }
+    .terms h2 { margin: 0 0 10px; font-size: 1rem; }
+    .term-grid {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.35fr) 1fr;
+      gap: 8px 16px;
+      margin: 0;
+    }
+    .term-grid dt { font-weight: 700; }
+    .term-grid dd { margin: 0; color: var(--cp-text-muted); }
+    .faq-list { display: grid; gap: 10px; }
+    details {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      overflow: clip;
+      box-shadow: 0 0 2px var(--cp-border);
+    }
+    details[open] { border-color: var(--cp-border-strong); }
+    summary {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-weight: 680;
+      list-style: none;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::after {
+      content: "+";
+      color: var(--cp-accent);
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+    details[open] summary::after { content: "-"; }
+    .question-number {
+      min-width: 2.1rem;
+      color: var(--cp-accent);
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+    }
+    .tag {
+      display: inline-block;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 1px 7px;
+      color: var(--cp-text-muted);
+      font-size: 0.72rem;
+      font-weight: 650;
+    }
+    .answer {
+      padding: 0 16px 16px 58px;
+      border-top: 1px solid var(--cp-border);
+      color: var(--cp-text);
+    }
+    .answer p { margin: 12px 0 0; }
+    .answer ul, .answer ol { margin: 10px 0 0; padding-left: 22px; }
+    .answer li + li { margin-top: 5px; }
+    .answer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .answer-actions button, .copy-command { min-height: 34px; font-size: 0.82rem; }
+    .command-header {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+    .callout {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-left: 4px solid var(--cp-warning);
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+    }
+    .empty {
+      display: none;
+      padding: 28px;
+      border: 1px dashed var(--cp-border-strong);
+      border-radius: 16px;
+      text-align: center;
+      color: var(--cp-text-muted);
+    }
+    .noscript-note {
+      width: min(1180px, calc(100% - 32px));
+      margin: 12px auto 0;
+      padding: 10px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+    }
+    .footer {
+      padding: 24px 0 44px;
+      border-top: 1px solid var(--cp-border);
+      color: var(--cp-text-muted);
+      font-size: 0.84rem;
+    }
+    .footer p { margin: 6px 0; }
+    @media (max-width: 820px) {
+      .release-grid { grid-template-columns: 1fr; }
+      .layout { grid-template-columns: 1fr; }
+      aside { position: static; }
+      .category-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar-inner { grid-template-columns: 1fr 1fr; }
+      .toolbar-inner input { grid-column: 1 / -1; }
+      .answer { padding-left: 16px; }
+      .term-grid { grid-template-columns: 1fr; gap: 4px; }
+      .term-grid dd { margin-bottom: 8px; }
+      summary { grid-template-columns: auto 1fr; }
+      summary::after { display: none; }
+      .tag { display: none; }
+    }
+    @media print {
+      .toolbar, aside { display: none; }
+      .layout { display: block; width: 100%; padding: 16px 0; }
+      details { break-inside: avoid; box-shadow: none; }
+      details:not([open]) .answer { display: block; }
+      summary::after { display: none; }
+      .masthead-inner, .layout, .footer { width: 94%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div class="eyebrow">Microsoft 365 Copilot CoE implementation kit</div>
+      <h1>Administrator FAQ</h1>
+      <p class="lede">Find answers about installing, checking, customizing, and maintaining the Copilot CoE kit. Start with the six key questions below, or search by topic.</p>
+      <section class="release-card" aria-label="Current approved release">
+        <div class="release-grid">
+          <div><span class="release-label">Approved release</span><span class="release-value">v3.8.21</span></div>
+          <div><span class="release-label">Approved ZIP SHA-256</span><span class="release-value"><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></span></div>
+          <div><span class="release-label">Public source release</span><span class="release-value">github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21</span></div>
+        </div>
+        <p class="integrity-note">The approved ZIP is the installation package. GitHub publishes matching source code but does not publish this installation ZIP; GitHub-generated source archives are not substitutes. Keep the release receipt supplied with your deployment materials.</p>
+        <p class="integrity-note"><strong>Cloud support:</strong> validated in commercial tenants only for this release. GCC Moderate is a design target but has not yet been validated; GCC High and DoD are not supported. See <a href="#faq-013-which-microsoft-365-environments-are-supported">Question 13</a>.</p>
+      </section>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-inner">
+      <input id="search" type="search" aria-label="Search FAQs" placeholder="Search questions and answers">
+      <button id="expand" type="button">Expand results</button>
+      <button id="collapse" type="button">Collapse all</button>
+    </div>
+  </div>
+  <noscript><div class="noscript-note">Search and topic filters require JavaScript. All questions and answers remain available below.</div></noscript>
+
+  <div class="layout">
+    <aside>
+      <div class="side-card">
+        <h2 class="side-title">Filter by topic</h2>
+        <nav id="categories" class="category-list" aria-label="FAQ categories"></nav>
+        <p class="side-note">Question numbers make support references easier, and search checks both question and answer text. "Copy question reference" copies a link back to that question; from a local file, that link only opens for someone with the same file path.</p>
+      </div>
+    </aside>
+    <main>
+      <div class="key-questions"><strong>Start here:</strong> the first six questions cover the approved package, incident-reporting route, permissions, readiness checks, update effects, and failed-installation recovery.<br>Before your first run, also read Questions <a href="#faq-085-what-does-installation-create-in-the-tenant">85</a>, <a href="#faq-086-does-the-kit-change-any-tenant-level-settings">86</a>, <a href="#faq-088-how-do-i-register-the-app-with-script-01">88</a>, and <a href="#faq-091-what-should-i-do-before-the-first-run">91</a>.</div>
+      <section class="terms" aria-labelledby="kit-terms-title">
+        <h2 id="kit-terms-title">Kit-specific terms used in this FAQ</h2>
+        <dl class="term-grid">
+          <dt>Four prebuilt pages</dt><dd>Adoption Best Practices, CoE roles and contacts, Technical Readiness, and Microsoft Mechanics pages included with the kit.</dd>
+          <dt>Organization-provided reference files</dt><dd>Files supplied under the organization folder's <code>Assets</code> directory for reviewed hosting.</dd>
+          <dt>Restricted governance areas</dt><dd>The Leadership Governance and Program Governance shared channels and their separate SharePoint sites.</dd>
+          <dt>Starter files</dt><dd>Files used to add initial pages, documents, prompts, or list items.</dd>
+          <dt>Main CoE SharePoint site</dt><dd>The SharePoint site connected to the parent Microsoft Team, separate from the two governance sites.</dd>
+          <dt>Organization-provided installation wrapper</dt><dd>An optional script outside the kit that calls the numbered scripts with organization-specific arguments or state handling.</dd>
+        </dl>
+      </section>
+      <div class="section-header">
+        <h2 id="results-title">All administrator questions</h2>
+        <span id="count" class="count" aria-live="polite"></span>
+      </div>
+      <div id="faq-list" class="faq-list">
+      <details id="faq-001-which-release-should-i-deploy-and-what-is-its-hash" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 1</span>
+          <span>Which release should I deploy, where is the approved ZIP, and what is its hash?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p>Use the approved <strong>v3.8.21</strong> installation ZIP provided with your deployment materials.</p><p>Before extracting it, verify this SHA-256 hash:</p><p><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></p><p>Keep the matching release receipt with your deployment records. See <a href="#faq-007-how-do-i-verify-the-zip-before-extracting-it">Question 7</a> for the PowerShell command and <a href="#faq-008-how-do-i-check-whether-my-copy-is-the-correct-release">Question 8</a> for checking a copied package.</p><div class="callout">Do not use GitHub's automatically generated source ZIP as the installation package. The approved installation ZIP is distributed separately.</div>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-002-what-should-our-incident-reporting-page-contain" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 2</span>
+          <span>What should our security-incident reporting page contain?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>Configure an approved HTTPS reporting page in <code>Links.DataSafetyIncident</code>. It may direct users to a monitored mailbox or reporting form. Use your organization's existing security-reporting process; use a form or ticketing portal when the process requires tracking, assignment, and escalation.</p><p>The page should name the responsible team, explain urgent and after-hours reporting, and say when users should expect confirmation. The kit displays a link to this process; it does not provide incident management.</p><p>See <a href="#faq-033-what-information-should-users-provide-in-an-incident-r">Question 33</a> for report contents and <a href="#faq-037-how-do-we-verify-the-route-works-for-non-owners">Question 37</a> for testing the process.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-003-what-roles-and-permissions-are-required" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 3</span>
+          <span>What roles and permissions are required to register, install, validate, and maintain the CoE?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><p><strong>The minimum-role configuration has not yet been fully validated.</strong> Testing covered a Global Administrator installing as the configured owner and installing for a different owner.</p><p><strong>Verified requirements:</strong></p><ul><li>An approved consent approver must register the app and grant tenant-wide admin consent.</li><li>The configured shared-channel owner must be an existing in-tenant Member account.</li><li>The app must have delegated Graph <code>Group.ReadWrite.All</code>, <code>ChannelMember.ReadWrite.All</code>, <code>User.Read</code>, <code>User.Read.All</code>, and SharePoint <code>AllSites.FullControl</code>.</li><li>The person running each script must be permitted by your tenant to perform its Teams, Microsoft 365 group, user, and SharePoint operations.</li></ul><p><strong>Not yet tested:</strong> a non-Global-Administrator installing for a different owner. This may fail when the script writes governance files.</p><p><strong>Naming-policy requirement:</strong> Global Administrator and User Administrator are exempt from a Microsoft Entra group naming policy that changes aliases. That exemption alone does not grant every permission needed for installation.</p><p>See <a href="#faq-088-how-do-i-register-the-app-with-script-01">Question 88</a> to register the app and <a href="#faq-087-can-we-disable-or-remove-the-provisioning-app">Question 87</a> for what happens to it after installation.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-004-how-do-we-know-the-deployment-is-production-ready" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 4</span>
+          <span>How do we know the deployment is production-ready?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>A successful installation does not mean the site is ready for users.</p><p>Before launch:</p><ol><li>Run <code>Test-CoEInstall.ps1</code> from the same kit release, using the same <code>-ContentMode</code>.</li><li>Fix every FAIL.</li><li>Complete and record the manual checks and evidence listed in every WARN.</li><li>Test the site with a regular, non-owner account.</li><li>Check all three Teams welcome posts, their author, and their links.</li><li>Confirm that support and incident-reporting links work and are monitored by the responsible teams.</li><li>Obtain your organization's required security, privacy, records, accessibility, licensing, and operational approvals.</li></ol><p>See <a href="#faq-041-why-is-seeddemocontent-required-for-a-production-custo">Question 41</a> for the full installation command, <a href="#faq-050-which-checker-version-and-contentmode-should-i-use">Question 50</a> for the checker command, and <a href="#faq-056-what-evidence-should-we-retain-before-launch">Question 56</a> for retained evidence. <a href="#faq-085-what-does-installation-create-in-the-tenant">Question 85</a> lists everything installation creates, and <a href="#faq-086-does-the-kit-change-any-tenant-level-settings">Question 86</a> covers tenant-level settings.</p><div class="callout"><code>ALL CHECKS PASSED</code> confirms the automated checks passed. It does not replace the manual checks.</div>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-005-what-will-an-update-overwrite" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 5</span>
+          <span>What will an update overwrite?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>What gets replaced depends on the content type:</p><ul><li><strong>Generated guide and section pages:</strong> a <code>Guides</code> or <code>All</code> update rebuilds kit-managed page content from the organization folder. Direct SharePoint body edits are replaced.</li><li><strong>Home and the four prebuilt pages:</strong> ordinary updates preserve certain customized page elements. They can still change navigation, headers, comments, calendar controls, and other managed settings. <code>-RepairCapturedPages</code> replaces the managed elements listed in Question 61.</li><li><strong>Governance Word drafts:</strong> a difference stops the update unless <code>-ReplaceFiles</code> authorizes replacement.</li><li><strong>Organization-provided reference files:</strong> kept unless <code>-ReplaceOrgAssets</code> is used.</li><li><strong>Live lists:</strong> existing prompt, agent, learning, calendar, champion, and story rows are kept. The kit can still change fields, views, approval settings, and permissions on those lists.</li></ul><p>Make lasting generated-page changes in the organization folder, not only in SharePoint. See <a href="#faq-058-which-direct-sharepoint-edits-are-overwritten">Question 58</a> and <a href="#faq-061-what-does-repaircapturedpages-reset">Question 61</a> for details.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-006-what-should-i-do-after-a-failed-installation" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 6</span>
+          <span>What should I do after a failed installation?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Do not immediately run a new installation or delete the resources.</p><ol><li>Save the installation transcript under <code>&lt;OrgPath&gt;\RevisionAudit</code>.</li><li>Check whether the intended Team and SharePoint site were created.</li><li>Identify and fix the cause of the failure.</li><li>If the correct resources exist, resume that installation with <code>-ResumeExisting</code>.</li></ol><p>See <a href="#faq-076-when-is-resumeexisting-appropriate">Question 76</a> before resuming.</p><p><strong>If you decide to discard this deployment and start again:</strong></p><p>Back up any content you need before continuing. The commands below permanently delete the Team and related SharePoint sites.</p><p><strong>First, preview the removal:</strong></p><div class="command-header"><button type="button" class="copy-command" data-target="purge-preview-command">Copy preview command</button></div><pre><code id="purge-preview-command">$orgPath = 'C:\path\to\organization-folder'
+.\04_Remove-CopilotCoE.ps1 -OrgPath $orgPath -Purge -WhatIf</code></pre><p><strong>Only if you intend to permanently delete the resources shown in the preview, run:</strong></p><div class="command-header"><button type="button" class="copy-command" data-target="purge-command">Copy removal command</button></div><pre><code id="purge-command">$orgPath = 'C:\path\to\organization-folder'
+.\04_Remove-CopilotCoE.ps1 -OrgPath $orgPath -Purge</code></pre><p>The script will ask you to type the alias, and then type each exact site URL shown in the plan, before anything is purged (<a href="#faq-081-why-use-purge-whatif-instead-of-deleting-only-the-site">Question 81</a>). Wait for <code>AliasReusable : True</code> before installing again with the same alias.</p><div class="callout">Do not run these removal commands if you are continuing with the existing deployment. Resuming an interrupted installation tests recovery; it does not demonstrate that a new installation will succeed.</div>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-007-how-do-i-verify-the-zip-before-extracting-it" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 7</span>
+          <span>How do I verify the ZIP before extracting it?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p>Run this before extracting the package:</p><div class="command-header"><button type="button" class="copy-command" data-target="hash-command">Copy command</button></div><pre><code id="hash-command">$zip = 'full path to Copilot-CoE-Implementation-Kit.zip'
+$expected = 'B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F'
+if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
+    throw 'The ZIP does not match the approved release.'
+}</code></pre><p>Stop if the hash differs. Verify it again after copying the ZIP to another location.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-008-how-do-i-check-whether-my-copy-is-the-correct-release" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 8</span>
+          <span>How do I check whether my copy is the correct release?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p>Compare the ZIP's SHA-256 hash with the expected hash in the release receipt. Do not rely only on the filename, modified date, or folder name.</p><p>If the hash does not match, stop and obtain the approved package from the release owner.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-009-why-can-version-txt-differ-from-coe-revision-content-j" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 9</span>
+          <span>Why can VERSION.txt differ from CoE-Revision-Content.json?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p><code>VERSION.txt</code> identifies the packaged kit release, such as 3.8.21. The <code>version</code> inside <code>CoE-Revision-Content.json</code> in the base or Government content pack identifies a content revision. They serve different purposes and can legitimately differ. Do not relabel content revisions just to match the package version.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-010-how-do-i-determine-which-kit-and-content-revision-buil" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 10</span>
+          <span>How do I determine which kit and content revision built an existing deployment?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p>Use the retained ZIP and hash and its root <code>VERSION.txt</code> for the kit release. Use <code>CoE-Revision-Report.json</code> for the last completed deployment's site and content revision. The report is not a reliable substitute for the original package record, especially after a stopped update.</p><p>If the original ZIP, hash, and transcript were not retained, the exact kit release may not be provable from the live site alone.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-011-can-i-reuse-an-older-extracted-kit-folder" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 11</span>
+          <span>Can I reuse an older extracted kit folder?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p>Use a fresh extraction of the verified ZIP for each release and each validation of a new installation. A used extraction can contain generated templates, audit data, organization-specific names, or files left by an interrupted run. Keep old extractions privately for troubleshooting, but do not use them as new installation media.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-012-what-release-and-deployment-evidence-should-we-retain" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 12</span>
+          <span>What release and deployment evidence should we retain?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><ul><li>Approved release ZIP, SHA-256 hash, version, and release receipt.</li><li>Organization settings, Content, and Assets as deployed.</li><li>Transcripts from the installation, content-update, and removal scripts, plus checker outputs.</li><li><code>CoE-Revision-Report.json</code>, removal manifest, advisory decisions, and purge receipt where applicable.</li><li>Copies saved before updates, screenshots, recorded confirmation that manual checks were completed, and support-route ownership evidence.</li></ul><p>Store deployment evidence privately. Do not include it in the organization-neutral installation package.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-013-which-microsoft-365-environments-are-supported" data-category="Environment &amp; prerequisites">
+        <summary>
+          <span class="question-number">Question 13</span>
+          <span>Which Microsoft 365 environments are supported?</span>
+          <span class="tag">Environment &amp; prerequisites</span>
+        </summary>
+        <div class="answer"><p>The scripts are designed for commercial and GCC Moderate tenants. This release has not been validated in a GCC Moderate tenant. GCC High and DoD are not supported.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-014-does-the-government-content-pack-configure-gcc-moderat" data-category="Environment &amp; prerequisites">
+        <summary>
+          <span class="question-number">Question 14</span>
+          <span>Does the Government content pack configure GCC Moderate?</span>
+          <span class="tag">Environment &amp; prerequisites</span>
+        </summary>
+        <div class="answer"><p>No. <code>LearningEnvironment: Government</code> and the Government content pack select wording, prompts, links, and learning content. They do not change cloud endpoints, tenant policies, authentication authority, licensing, or compliance boundary.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-015-which-powershell-and-pnp-powershell-versions-are-requi" data-category="Environment &amp; prerequisites">
+        <summary>
+          <span class="question-number">Question 15</span>
+          <span>Which PowerShell and PnP.PowerShell versions are required?</span>
+          <span class="tag">Environment &amp; prerequisites</span>
+        </summary>
+        <div class="answer"><p>Use exactly <code>PnP.PowerShell 3.2.0</code>: the scripts import it with <code>-RequiredVersion 3.2.0</code>, so a newer installed version is not used automatically. Run <code>Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser</code> first if you don't have that version.</p><p>The scripts require PowerShell 7.4 or later (each starts with <code>#Requires -Version 7.4</code>) and will refuse to start in Windows PowerShell 5.1.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-016-why-is-each-delegated-permission-requested" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 16</span>
+          <span>Why is each delegated permission requested?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><ul><li><code>Group.ReadWrite.All</code>: creates and manages the Microsoft 365 group and Team. Microsoft Graph also still accepts this permission for posting channel messages, as a backward-compatible permission alongside <code>ChannelMessage.Send</code>. The kit uses this to send the three welcome posts and does not request <code>ChannelMessage.Send</code> separately.</li><li><code>ChannelMember.ReadWrite.All</code>: creates and validates governance shared-channel membership.</li><li><code>User.Read</code>: signed-in user identity.</li><li><code>User.Read.All</code>: verifies whether governance users are Member or Guest accounts.</li><li><code>AllSites.FullControl</code>: provisions and configures SharePoint sites, pages, lists, files, navigation, permissions, and sharing.</li></ul><p>The kit does not request <code>ChannelMessage.Read.All</code> either. That permission would let the checker read posts directly; instead the kit relies on the manual Teams inspection in Question 54.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-017-how-do-i-confirm-all-permissions-are-granted" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 17</span>
+          <span>How do I confirm all permissions are granted?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><p>In Entra admin center, open App registrations, select <em>Copilot CoE Provisioning (PnP)</em>, and open API permissions. All five requested permissions must show <strong>Granted</strong> before running <code>02_Install-CopilotCoE.ps1</code>. If consent changed, use a fresh interactive sign-in for the next operation.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-018-which-account-should-run-installation-and-whose-name-a" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 18</span>
+          <span>Which account should run installation, and whose name appears on welcome posts?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><p>The signed-in operator is shown as the author of Teams welcome posts. Use an approved CoE owner or dedicated provisioning administrator when attribution matters. The recommended tested configuration uses the operator as the configured <code>SharedChannelOwnerUPN</code>; a Global Administrator installing for another owner was also tested.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-019-what-if-the-owner-differs-from-the-operator" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 19</span>
+          <span>What if the owner differs from the operator?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><p>The installation script asks whether to continue before it creates resources. The governance shared channels contain the configured owner and do not automatically add the person running the script. A Global Administrator installing for a different owner was tested successfully. A non-Global-Administrator installing for a different owner has not been tested and may fail when writing governance files.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-020-what-if-authentication-opens-the-wrong-tenant-or-cache" data-category="Environment &amp; prerequisites">
+        <summary>
+          <span class="question-number">Question 20</span>
+          <span>What if authentication opens the wrong tenant or cached account?</span>
+          <span class="tag">Environment &amp; prerequisites</span>
+        </summary>
+        <div class="answer"><p>Stop and verify <code>Tenant</code>, <code>AdminFQDN</code>, <code>SiteFQDN</code>, and <code>PnPClientID</code>. Add <code>-AuthenticationMode Interactive -ForceAuthentication</code> to the installation, content-update, or removal command when a fresh browser sign-in is needed. Confirm the account and tenant shown by the sign-in flow before continuing.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-021-when-should-i-use-forceauthentication-and-what-cannot-" data-category="Environment &amp; prerequisites">
+        <summary>
+          <span class="question-number">Question 21</span>
+          <span>When should I use ForceAuthentication, and what cannot be combined?</span>
+          <span class="tag">Environment &amp; prerequisites</span>
+        </summary>
+        <div class="answer"><p>Use <code>-ForceAuthentication</code> after consent changes, when switching tenants or accounts, or when a stale cached identity is offered. It requires <code>-AuthenticationMode Interactive</code>; do not combine it with <code>DeviceLogin</code>. Script 01 uses its separate <code>-Interactive</code> switch.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-022-what-must-be-customized-in-deployment-settings-json" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 22</span>
+          <span>What must be customized in Deployment-Settings.json?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Before installation, review these settings:</p><ul><li><strong>Tenant and app:</strong> <code>Tenant</code>, <code>AdminFQDN</code>, <code>SiteFQDN</code>, and <code>PnPClientID</code>.</li><li><strong>Deployment identity:</strong> <code>MailNickname</code>, <code>DisplayName</code>, and <code>SharedChannelOwnerUPN</code>.</li><li><strong>Organization details:</strong> <code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code>, <code>OrganizationEmailDomains</code>, <code>SupportEmail</code>, and <code>TimeZone</code>.</li><li><strong>Access:</strong> <code>TeamVisibility</code>, <code>CoESiteSharingCapability</code>, <code>GovernanceAdditionalAllowedMembers</code>, and <code>CatalogReviewerUPNs</code>.</li><li><strong>Links:</strong> the entries under <code>Links</code>, plus <code>GovernanceLinks</code> and <code>TrainingLinks</code>.</li><li><strong>Content and navigation:</strong> <code>LearningEnvironment</code>, <code>EnvironmentLabel</code>, <code>SampleNotice</code>, <code>PromptLibrary</code>, <code>ChampionDepartments</code>, <code>Agents</code>, <code>NavigationOrder</code>, <code>NavigationPinFirst</code>, and <code>EnableDeveloperTrack</code>.</li></ul><p>Replace all placeholders and check every value that users will see.</p><div class="callout"><strong>If you supply <code>Content\Training-Calendar.csv</code>:</strong> use the current <code>StartOffsetDays</code> schema, not fixed <code>StartDate</code>/<code>EndDate</code> columns. The scripts check this before connecting to the tenant.</div>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-023-which-template-should-higher-education-government-or-c" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 23</span>
+          <span>Which template should higher education, government, or commercial organizations use?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Use <code>Org-Template</code> as the neutral default starting point for higher education. State and local government uses <code>ContentPacks\Government-StateLocal</code>. Commercial organizations can start from <code>Org-Template</code> and replace education-specific content with reviewed organization overrides. There is no separate Commercial content mode.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-024-where-should-the-organization-folder-live" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 24</span>
+          <span>Where should the organization folder live?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Keep it outside the extracted kit, for example <code>C:\CoE-Orgs\Contoso</code> or an approved customer folder. This keeps settings, Content, Assets, transcripts, and identity records across kit upgrades without modifying shared installation media.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-025-can-i-reuse-a-completed-organization-folder-or-copy-on" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 25</span>
+          <span>Can I reuse a completed organization folder or copy one to a new deployment?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Reuse the same folder for updates to the same deployment. For a new site, create a fresh folder and copy only reviewed settings, Content, and approved Assets. Change the alias and any site-specific links. Do not copy files that record the previous deployment and installation status.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-026-which-identity-files-must-never-be-copied-to-another-s" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 26</span>
+          <span>Which identity files must never be copied to another site?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Do not copy <code>CoE-Revision-Report.json</code>, <code>CoE-Removal-Manifest.json</code>, <code>CoE-Purge-Receipt.json</code>, <code>CoE-Advisory-Decisions.json</code>, installation-wrapper state, or <code>RevisionAudit</code>. These files identify the previous deployment and must not be used for a different site.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-027-how-should-i-choose-mailnickname-and-what-if-it-is-act" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 27</span>
+          <span>How should I choose MailNickname, and what if it is active or recycled?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Choose a tenant-unique alias using letters, numbers, hyphen, or underscore, up to 64 characters. <code>02_Install-CopilotCoE.ps1</code> checks active groups, sites, and recycle bins before creating anything. If a naming policy changed the alias during provisioning, inspect Entra before trying again; another new installation could create a duplicate Team.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-028-which-names-domains-mailbox-timezone-and-urls-require-" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 28</span>
+          <span>Which names, domains, mailbox, timezone, and URLs require review?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Verify <code>OrgName</code>, <code>DisplayName</code>, <code>ShortName</code>, <code>OrgNoun</code>, allowed email domains, monitored <code>SupportEmail</code>, Windows timezone ID, and every HTTPS destination. Test the links as a normal intended reader; syntax validation does not prove access, delivery, ownership, or monitoring.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-029-why-must-the-team-remain-private-and-what-should-i-do-" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 29</span>
+          <span>Why must the Team remain private, and what should I do with sharing warnings?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>The kit requires a Private Team and defaults the parent and governance sites to external sharing Disabled. Do not loosen tenant, site, Team, label, or cross-tenant policy just to finish installation. Investigate the actual membership or sharing issue and rerun after it is corrected. <a href="#faq-086-does-the-kit-change-any-tenant-level-settings">Question 86</a> covers what the kit does and does not change at the tenant level.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-030-can-the-incident-route-be-a-monitored-email-address-or" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 30</span>
+          <span>Can the incident route be a monitored email address, or should it be a form?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>The kit accepts an HTTPS page, not a mailto address. That page can present an approved monitored mailbox, but a form or service-management portal is usually preferable when the organization needs required fields, assignment, audit history, escalation, and status tracking. The security or privacy owner must approve the choice.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-031-can-we-use-our-existing-reporting-page" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 31</span>
+          <span>Can we use our existing reporting page?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>Yes. A working organization-approved security or privacy reporting form or instructions page is preferred over creating a Copilot-only system. Use a dedicated Copilot page only if the existing process cannot give users clear, accessible instructions and correct routing.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-032-who-should-own-and-monitor-the-incident-route" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 32</span>
+          <span>Who should own and monitor the incident route?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>The organization must assign this explicitly. Typically Security Operations or an incident-response team handles urgent reports, with Privacy, Legal, Records, and the service desk participating under established procedures. The CoE can explain the route but should not become the official place where incidents are recorded and tracked unless that responsibility is formally assigned.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-033-what-information-should-users-provide-in-an-incident-r" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 33</span>
+          <span>What information should users provide in an incident report?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>Recommended minimum: when it occurred, affected service, brief description, suspected data classification, who may have received access, immediate containment actions, and reporter contact details. Reference the record or conversation rather than copying sensitive content into an unapproved channel.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-034-what-should-users-avoid-including" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 34</span>
+          <span>What should users avoid including?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>Do not paste passwords, secrets, regulated identifiers, case details, complete prompts and responses, screenshots, or files containing sensitive information unless the approved reporting process explicitly protects and requests them. Follow legal-hold and evidence-preservation instructions.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-035-should-the-page-explain-urgent-escalation-after-hours-" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 35</span>
+          <span>Should the page explain urgent escalation, after-hours reporting, and response times?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>Yes, if those commitments are approved. State what qualifies as urgent, the after-hours route, when users should expect confirmation that their report was received, and what they should do while waiting. Do not invent a response time in the CoE page; link to or quote the organization's real process.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-036-how-are-incidents-different-from-support-technology-re" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 36</span>
+          <span>How are incidents different from support, technology requests, and policy questions?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><ul><li><strong>Incident:</strong> suspected exposure, misuse, security or privacy harm, or urgent containment.</li><li><strong>ServiceDesk:</strong> break/fix, access, or ordinary help.</li><li><strong>TechnologyRequest:</strong> new capability, licensing, integration, or change request.</li><li><strong>AIGuidelines:</strong> policy interpretation and approved-use guidance.</li></ul><p>Configure distinct routes even if one portal sends requests to different teams.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-037-how-do-we-verify-the-route-works-for-non-owners" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 37</span>
+          <span>How do we verify the route works for non-owners?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>Sign in as an ordinary intended reader, open the CoE link, and submit a harmless test through the approved process. Confirm that the report is received by the responsible team and that no elevated permission is required. Record the test date and the team's confirmation.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-038-what-happens-if-the-incident-url-is-blank-malformed-in" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 38</span>
+          <span>What happens if the incident URL is blank, malformed, inaccessible, or unmonitored?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>A malformed or non-HTTPS URL stops configuration. A blank route triggers STOP / PROCEED unless explicitly allowed for a reviewed demo; pages show a not-configured warning rather than a working service. An inaccessible or unmonitored route can pass a syntax or link check, so test the reporting process yourself before launch.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-039-does-the-kit-provide-incident-management" data-category="Incident reporting">
+        <summary>
+          <span class="question-number">Question 39</span>
+          <span>Does the kit provide incident management?</span>
+          <span class="tag">Incident reporting</span>
+        </summary>
+        <div class="answer"><p>No. It displays a link to the organization's configured route. It does not create a monitored mailbox, ticket queue, responder schedule, investigation process, notification workflow, or response-time commitment.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-040-what-is-the-difference-between-customer-and-demo-mode" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 40</span>
+          <span>What is the difference between Customer and Demo mode?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p><code>Customer</code> suppresses demo notices and seeded sample calendar and catalog data and checks for demo text or sample content appearing on a customer site. <code>Demo</code> requires a visible sample notice and allows sample rows. The selected mode is not saved on the site, so pass the same mode to the installation script, content-update script, and checker.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-041-why-is-seeddemocontent-required-for-a-production-custo" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 41</span>
+          <span>Why is SeedDemoContent required for a production Customer installation?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>The name is historical and misleading. <code>-SeedDemoContent</code> (alias <code>-PublishContent</code>) means publish the CoE pages, catalogs, calendar structure, prompts, and governance content. <code>-ContentMode Customer</code> is what keeps demo content out.</p><p>The full command for a production Customer installation:</p><div class="command-header"><button type="button" class="copy-command" data-target="install-command">Copy command</button></div><pre><code id="install-command">$orgPath = 'C:\path\to\organization-folder'
+.\02_Install-CopilotCoE.ps1 -OrgPath $orgPath -ContentMode Customer -SeedDemoContent</code></pre><p>The script prints the new site URL at the end. Run the checker against that URL and the same mode:</p><div class="command-header"><button type="button" class="copy-command" data-target="checker-command">Copy command</button></div><pre><code id="checker-command">.\Test-CoEInstall.ps1 -OrgPath $orgPath -SiteUrl '&lt;site URL the install script printed&gt;' -ContentMode Customer</code></pre><p><a href="#faq-085-what-does-installation-create-in-the-tenant">Question 85</a> lists everything this creates in your tenant.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-042-what-is-created-if-i-omit-seeddemocontent" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 42</span>
+          <span>What is created if I omit SeedDemoContent?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p><code>02_Install-CopilotCoE.ps1</code> creates the Team and SharePoint site but skips the CoE pages, catalogs, calendar content, prompts, and governance documents. The result is not a complete deployment.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-043-which-sample-content-is-excluded-in-customer-mode" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 43</span>
+          <span>Which sample content is excluded in Customer mode?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>Customer mode suppresses sample and demo notices and sample list and calendar rows. Organization Asset filenames containing DEMO or SAMPLE as whole words are filtered from hosting offers. Prompt CSVs are not covered by that filename filter; review them separately. Existing rows follow the documented Customer or Demo rules and are not silently rewritten.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-044-when-is-acceptorgassets-safe" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 44</span>
+          <span>When is AcceptOrgAssets safe?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>Only after every eligible file in <code>&lt;OrgPath&gt;\Assets</code> has been reviewed for audience, classification, licensing, freshness, and destination. The switch answers Yes to every hosting prompt; it is not a review mechanism.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-045-what-does-stop-proceed-mean-and-where-is-it-recorded" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 45</span>
+          <span>What does STOP / PROCEED mean, and where is it recorded?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>STOP / PROCEED asks you to decide whether to continue after a specific warning. It does not override an error that blocks installation.</p><p>Your decision is saved in <code>CoE-Advisory-Decisions.json</code> for the specific tenant, site host, alias, warning, and conditions shown. If those conditions change, the script asks again.</p><p>A saved STOP continues to block the run until you deliberately change the configuration or saved decision. Choosing PROCEED is not production approval.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-046-does-proceed-mean-production-approved" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 46</span>
+          <span>Does PROCEED mean production approved?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>No. It means the operator accepted only that warning for this deployment and the conditions shown. It does not prove monitoring, accessibility, security approval, correct rendering, or customer acceptance.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-047-how-long-does-installation-take" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 47</span>
+          <span>How long does installation take?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>Plan for roughly 25&ndash;35 minutes in a typical tenant. Adding 230 prompt rows often accounts for 5&ndash;10 minutes. Tenant propagation, throttling, catalog setup, and shared-channel provisioning can make the installation take longer.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-048-how-do-i-validate-an-organization-provided-launcher" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 48</span>
+          <span>How do I validate an organization-provided installation wrapper?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>An organization-provided installation wrapper is an optional script outside the kit that supplies organization-specific arguments or tracks its own state. Confirm that it calls <code>02_Install-CopilotCoE.ps1</code> with the intended <code>-OrgPath</code>, <code>-ContentMode</code>, <code>-SeedDemoContent</code>, authentication options, and only reviewed asset switches. Treat the wrapper's state and reset logic as separate from the numbered scripts.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-049-does-installation-run-the-checker-automatically" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 49</span>
+          <span>Does installation run the checker automatically?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>No. Run <code>Test-CoEInstall.ps1</code> separately after every install and every update, using the checker from the same release extraction.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-050-which-checker-version-and-contentmode-should-i-use" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 50</span>
+          <span>Which checker version and ContentMode should I use?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>Use the checker shipped in the deployed release and pass the same <code>-ContentMode Customer</code> or <code>Demo</code>. Omitting the mode skips checks that apply specifically to Customer or Demo mode.</p><p>Run it against the site URL the install script printed:</p><div class="command-header"><button type="button" class="copy-command" data-target="checker-command-q50">Copy command</button></div><pre><code id="checker-command-q50">$orgPath = 'C:\path\to\organization-folder'
+.\Test-CoEInstall.ps1 -OrgPath $orgPath -SiteUrl '&lt;site URL&gt;' -ContentMode Customer</code></pre>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-051-what-do-pass-warn-manual-review-required-and-fail-mean" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 51</span>
+          <span>What do PASS, WARN, MANUAL REVIEW REQUIRED, and FAIL mean?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><ul><li><strong>PASS:</strong> that check succeeded.</li><li><strong>WARN:</strong> automation cannot confirm a required condition; complete and record the manual check described in the warning.</li><li><strong>MANUAL REVIEW REQUIRED:</strong> the automated checks may have passed, but one or more WARN items still need review.</li><li><strong>FAIL:</strong> the checker found a problem or could not complete a required check. Do not approve the deployment.</li></ul>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-052-why-can-automation-pass-while-manual-review-is-still-r" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 52</span>
+          <span>Why can automation pass while manual review is still required?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>Automation cannot prove browser layout, human-readable wording, real endpoint ownership and monitoring, how posts look in Teams and which account is shown as the author, non-owner access, or organizational approval. It also deliberately lacks tenant-wide message-read permission.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-053-what-should-be-tested-with-a-non-owner-account" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 53</span>
+          <span>What should be tested with a non-owner account?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>Open parent-site pages, navigation, lists, hosted assets, support and incident links, learning content, and the intended Teams tabs and posts as a normal reader. Confirm governance sites remain inaccessible unless the user is explicitly approved. Validate any lab guest separately.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-054-how-do-i-verify-the-teams-welcome-posts" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 54</span>
+          <span>How do I verify the Teams welcome posts?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>Inspect General, Ask Us Anything, and Share Your Prompt. Confirm exactly one prepared post per channel, correct operator attribution, correct links and content, and no Customer-mode demo notice. On resume, use <code>-PublishWelcomeToChannels</code> only for channels visually confirmed missing.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-055-should-i-grant-channelmessage-read-all-to-remove-a-war" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 55</span>
+          <span>Should I grant ChannelMessage.Read.All to remove a warning?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><p>No. The kit intentionally does not request tenant-wide message-read permission just for checker convenience. Perform and record the manual Teams inspection instead.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-056-what-evidence-should-we-retain-before-launch" data-category="Production acceptance">
+        <summary>
+          <span class="question-number">Question 56</span>
+          <span>What evidence should we retain before launch?</span>
+          <span class="tag">Production acceptance</span>
+        </summary>
+        <div class="answer"><ul><li><strong>Automated checks:</strong> the checker output from the final run.</li><li><strong>Manual checks:</strong> screenshots taken at normal laptop width, the three-post Teams inspection (Question 54), and the non-owner access test (Question 53).</li><li><strong>Approvals:</strong> support and incident-route owner confirmations, the security and sharing review, asset approvals, and the catalog reviewer and approval review.</li><li><strong>Records:</strong> run transcripts, plus the final acceptance decision tied to the release hash and site URL.</li></ul><p><a href="#faq-012-what-release-and-deployment-evidence-should-we-retain">Question 12</a> covers the full deployment record.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-057-what-belongs-in-the-organization-folder-versus-sharepo" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 57</span>
+          <span>What belongs in the organization folder versus SharePoint?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Settings-driven wording, generated page source, starter prompt CSVs, governance draft sources, and hosted Assets belong in the organization folder. After the initial list items are added, maintain live agents, learning paths, champions, calendar entries, success stories, and user prompts in SharePoint unless that feature's instructions say otherwise.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-058-which-direct-sharepoint-edits-are-overwritten" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 58</span>
+          <span>Which direct SharePoint edits are overwritten?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Direct edits to kit-managed generated guide and section page bodies are replaced by the next <code>Guides</code> or <code>All</code> publication. Managed elements on Home and the four prebuilt pages are replaced only by <code>-RepairCapturedPages</code>. Navigation, header settings, and page comments may also be maintained by updates.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-059-what-do-scope-guides-governance-and-all-change" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 59</span>
+          <span>What do Scope Guides, Governance, and All change?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><ul><li><code>Guides</code>: guide, section, FAQ, and feedback pages; settings-driven links; catalogs; and prompt sources.</li><li><code>Governance</code>: the restricted governance shared channels, their SharePoint sites, and managed Word drafts.</li><li><code>All</code>: both, plus resources, champions, training calendar, and Top 10 handling.</li></ul><p>Guides and Governance require a completed deployment report; All can run without it. Always use the documentation from the deployed release for the exact scope.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-060-why-does-editing-settings-or-a-source-file-not-immedia" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 60</span>
+          <span>Why does editing settings or a source file not immediately change the site?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Saving a local settings or source file does not update SharePoint. Run <code>03_Update-CoEContent.ps1</code> with the appropriate scope, then run the checker. Changes to live list items made directly in SharePoint do not require the content-update script.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-061-what-does-repaircapturedpages-reset" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 61</span>
+          <span>What does RepairCapturedPages reset?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>It deliberately rebuilds managed Home elements (title, welcome message and notice, tool links, Explore tiles, champion and calendar areas) and managed title, breadcrumb, and notice elements on the four prebuilt pages: Adoption Best Practices, CoE roles and contacts, Technical Readiness, and Microsoft Mechanics. The Microsoft Mechanics body is also regenerated. Preserve approved direct customizations before using it.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-062-what-is-the-difference-between-replacefiles-and-replac" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 62</span>
+          <span>What is the difference between ReplaceFiles and ReplaceOrgAssets?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p><code>-ReplaceFiles</code> authorizes replacing or removing differing managed governance and kit sample files touched by the update. <code>-ReplaceOrgAssets</code> authorizes replacing an existing hosted organization Asset. Neither is a generic force switch; review the exact files first.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-063-what-if-reviewers-edited-a-governance-word-document" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 63</span>
+          <span>What if reviewers edited a governance Word document?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Copy the approved changes from the published Word document into the matching source file. Without <code>-ReplaceFiles</code>, a <code>Governance</code> or <code>All</code> run stops rather than overwrite a differing managed document. With it, the generated document is rebuilt; custom formatting, comments, and changes not copied to the source file are not carried forward.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-064-can-an-update-stop-after-publishing-some-changes" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 64</span>
+          <span>Can an update stop after publishing some changes?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Yes. All processes do guide, section, and catalog work before governance comparison. A differing governance draft can stop the run after earlier changes are live; there is no rollback. The deployment report is written only at successful completion, so an existing report may describe the prior run.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-065-which-tokens-and-placeholders-must-markdown-preserve" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 65</span>
+          <span>Which tokens and placeholders must customized Markdown preserve?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Some Markdown files contain placeholders that the kit replaces with organization settings.</p><ul><li><code>{{OrgName}}</code>, <code>{{OrgNoun}}</code>, and <code>{{OrgShort}}</code> insert organization names.</li><li><code>{{SupportEmail}}</code> inserts the configured support address.</li><li><code>{{Link:Key|text}}</code> inserts a configured link.</li><li><code>{{MailTo:...}}</code> creates a link to the support email address.</li></ul><p>Keep the placeholders you want the kit to manage. Also keep any fallback message shown when a reporting link is not configured. Do not rename headings used by learning-path links unless you update those links too.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-066-does-changing-displayname-or-mailnickname-rename-an-ex" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 66</span>
+          <span>Does changing DisplayName or MailNickname rename an existing deployment?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>No. Changing these settings does not rename an existing Team or SharePoint site. Use your approved Teams or SharePoint administration process for the type of rename you need. Do not change <code>MailNickname</code> just to make the content-update script target another alias.</p><p>If the administration tools do not support the required alias or URL change, plan a reviewed migration to a new site separately.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-067-what-should-i-preserve-before-an-update" data-category="Safe customization">
+        <summary>
+          <span class="question-number">Question 67</span>
+          <span>What should I preserve before an update?</span>
+          <span class="tag">Safe customization</span>
+        </summary>
+        <div class="answer"><p>Keep the organization folder, live document or version-history backup, current deployment report, run transcripts, copies saved before the update, screenshots and manual-check evidence, and the exact release ZIP and hash.</p><p>Content updates also save a before-copy of every replaced managed page in the kit extraction's own <code>RevisionAudit</code> folder &mdash; separate from the run transcripts saved under <code>&lt;OrgPath&gt;\RevisionAudit</code> (Question 6). Before replacing an extraction, copy its <code>RevisionAudit</code> folder to your deployment records too.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-068-how-do-i-add-organization-specific-prompts" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 68</span>
+          <span>How do I add organization-specific prompts?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>Place UTF-8 CSV files under <code>&lt;OrgPath&gt;\Content\OrgPrompts</code> using the Microsoft 365 admin-center format:</p><p><code>Title,Description,Display Prompt,Prompt Text,Products,Department,Task Type,Locale</code></p><p>Maximum 100 prompts per file; titles must be unique per locale and field limits in the OrgPrompts README apply.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-069-will-changing-a-prompt-csv-update-an-existing-live-pro" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 69</span>
+          <span>Will changing a prompt CSV update an existing live prompt?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>No. The import adds a prompt only if that Title and Locale combination does not already exist. New rows are added; existing live rows and edits are kept. Update existing prompts in the SharePoint list under the review workflow.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-070-how-do-i-remove-a-base-prompt-file-or-all-prompt-funct" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 70</span>
+          <span>How do I remove a base prompt file or all prompt functionality?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>An organization CSV with the same name replaces a base file; an empty same-named file omits that base file during seeding. This does not delete rows already in a live list. Set <code>PromptLibrary: Off</code> before initial publication to leave the list out; retire or delete existing rows through reviewed SharePoint administration.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-071-are-imported-prompts-automatically-approved" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 71</span>
+          <span>Are imported prompts automatically approved?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>Prompts seeded from reviewed CSV files are added approved. Prompts people add on the site wait for catalog review. Approval controls publication; it does not validate underlying data sensitivity or licensing.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-072-how-are-catalog-reviewers-configured-and-why-might-the" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 72</span>
+          <span>How are catalog reviewers configured, and why might the group be absent?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>Add existing in-tenant Member UPNs to <code>CatalogReviewerUPNs</code>. The kit creates <code>CoE Catalog Reviewers</code> and its Contribute + ApproveItems role only when at least one reviewer is configured. Neutral templates use an empty array, so no reviewer group is created by default.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-073-does-removing-a-upn-from-catalogreviewerupns-remove-me" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 73</span>
+          <span>Does removing a UPN from CatalogReviewerUPNs remove membership?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>No. The kit does not silently downgrade or remove former reviewers. Review the live SharePoint group and remove obsolete members explicitly after confirming intended access.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-074-does-approving-an-agent-showcase-entry-grant-access-to" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 74</span>
+          <span>Does approving an Agent Showcase entry grant access to the agent?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>No. Approval controls catalog visibility only. It does not share the agent, grant licenses, authorize data sources or actions, or change source-system permissions. Validate actual launch access separately.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-075-where-should-live-agents-learning-paths-sessions-champ" data-category="Prompts &amp; catalogs">
+        <summary>
+          <span class="question-number">Question 75</span>
+          <span>Where should live agents, learning paths, sessions, champions, and stories be maintained?</span>
+          <span class="tag">Prompts &amp; catalogs</span>
+        </summary>
+        <div class="answer"><p>Maintain live entries in their SharePoint lists with the configured approval workflow. Starter files add the initial list items and remain the source for future deployments. Most existing rows are kept when the scripts run again.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-076-when-is-resumeexisting-appropriate" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 76</span>
+          <span>When is ResumeExisting appropriate?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Use <code>-ResumeExisting</code> only after an interrupted <code>02_Install-CopilotCoE.ps1</code> run created the intended Team or site and you confirmed the tenant, group ID, alias, and exact site URL. Fix the cause, keep the logs, and rerun the same release and settings with <code>-ResumeExisting</code>.</p><p>Never use it for a new installation or to validate that a new release can install successfully from the beginning.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-077-how-do-i-confirm-im-resuming-the-intended-deployment" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 77</span>
+          <span>How do I confirm I am resuming the intended deployment?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Before resuming, confirm that the saved deployment records match the resources in your tenant:</p><ul><li>Tenant</li><li>Microsoft 365 group ID</li><li>Team alias</li><li>Main SharePoint site URL</li><li>Related shared-channel site URLs</li><li>Configured owner</li></ul><p>Also review the sharing settings and who has access. Do not rely on a similar display name. Stop if the saved records and existing resources do not match.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-078-how-do-i-publish-a-missing-welcome-post-without-duplic" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 78</span>
+          <span>How do I publish a missing welcome post without duplicates?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Inspect all three channels visually. On resume, pass <code>-PublishWelcomeToChannels</code> with only the exact names confirmed missing. Ordinary resume skips welcome posts to avoid duplicates.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-079-when-should-i-repair-resume-instead-of-rebuild" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 79</span>
+          <span>When should I repair or resume instead of rebuild?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Resume when the intended Team or site exists and the cause can be corrected. After a completed installation, use <code>03_Update-CoEContent.ps1</code> for content or layout repair.</p><p>Remove and rebuild only after administrators decide the existing deployment should be discarded and the removal script confirms the alias can be reused.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-080-what-does-the-remover-delete-and-what-does-purge-make-" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 80</span>
+          <span>What does the remover delete, and what does Purge make unrecoverable?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p><code>04_Remove-CopilotCoE.ps1</code> removes the Microsoft 365 group and Team, main CoE SharePoint site, governance shared-channel sites, conversations, pages, lists, files, navigation, and site-level reviewer permission. A normal removal leaves the resources restorable for the tenant retention period, documented as about 30 days.</p><p><code>-Purge</code> permanently removes the confirmed recycled group and sites and cannot be undone. The Entra provisioning app is retained.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-081-why-use-purge-whatif-instead-of-deleting-only-the-site" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 81</span>
+          <span>Why use Purge -WhatIf instead of deleting only the site manually?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>The CoE spans a group and Team, the main SharePoint site, and two shared-channel sites. Deleting only the main site leaves related resources and can block reuse of the alias. <code>-WhatIf</code> shows the exact tenant resources that the removal script plans to remove; it does not delete them.</p><p>Nothing is removed from the preview alone. Before any removal, the script displays the alias and asks you to type it to confirm. For <code>-Purge</code>, it then displays each exact site URL from the preview and asks you to retype every one, one at a time, before it purges anything.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-082-what-does-aliasreusable-true-mean" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 82</span>
+          <span>What does AliasReusable: True mean?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>The removal script's summary shows <code>AliasReusable : True</code> when no matching active or recycled group or site remains for that alias. Wait for this result and keep the purge receipt before starting a new installation with the same alias.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-083-is-a-reset-required-before-reinstalling" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 83</span>
+          <span>Is a reset required before reinstalling?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Not for the standard numbered scripts. An organization-provided installation wrapper may keep an <code>InstallAttempted</code> flag and expose <code>-ResetAfterPurge</code>; that reset belongs to the wrapper and only follows verified cleanup. Never fabricate a purge receipt or manually change wrapper state.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-084-what-must-i-retain-if-cleanup-is-incomplete" data-category="Failure &amp; rebuild">
+        <summary>
+          <span class="question-number">Question 84</span>
+          <span>What must I retain if cleanup is incomplete?</span>
+          <span class="tag">Failure &amp; rebuild</span>
+        </summary>
+        <div class="answer"><p>Keep the settings, deployment report, removal manifest, group and site IDs, exact URLs, transcripts, <code>-WhatIf</code> and removal output, recycle-bin status, and any partial purge receipt. Do not replace these records or start another new installation until <code>04_Remove-CopilotCoE.ps1</code> confirms the result.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-085-what-does-installation-create-in-the-tenant" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 85</span>
+          <span>What does installation create in the tenant?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>Across scripts 01 and 02:</p><ul><li>One Entra app registration, <em>Copilot CoE Provisioning (PnP)</em>, created once per tenant with the five permissions in Question 16 and tenant-wide admin consent.</li><li>One private Microsoft 365 group and Team, with its three standard channels (General, Ask Us Anything, Share Your Prompt) and one welcome post in each (Question 54).</li><li>The main CoE SharePoint site, connected to that Team.</li><li>Two governance shared channels (Leadership Governance, Program Governance), each with its own SharePoint site and governance Word drafts.</li><li>SharePoint lists for the prompt library, agent showcase, learning paths, champions, training calendar, and success stories.</li><li>An optional <em>CoE Catalog Reviewers</em> SharePoint group with Contribute and Approve Items permission, created only if <code>CatalogReviewerUPNs</code> is configured (Question 72).</li></ul><p>See <a href="#faq-080-what-does-the-remover-delete-and-what-does-purge-make-">Question 80</a> for what removal deletes and <a href="#faq-086-does-the-kit-change-any-tenant-level-settings">Question 86</a> for what it does not touch at the tenant level.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-086-does-the-kit-change-any-tenant-level-settings" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 86</span>
+          <span>Does the kit change any tenant-level settings?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>The kit does not change tenant-wide policy. The one tenant-level object it creates is the <em>Copilot CoE Provisioning (PnP)</em> app registration and its tenant-wide admin consent (Question 16); removal keeps this app rather than reverting it (Question 87). Otherwise, the scripts change settings only on the CoE's own resources: the Team's visibility (Private) and the sharing capability of its own SharePoint sites (<code>CoESiteSharingCapability</code>, Question 29). They do not change the tenant-wide sharing ceiling, Microsoft 365 Groups or Teams creation and guest policies, Conditional Access, retention, or sensitivity-label policies.</p><p>The kit also does not apply a sensitivity label or retention policy to the Team or site; apply one through your organization's normal process if required. Tenant-wide policy can still block access even when the CoE's own site sharing is On, so review it separately with your security and compliance team.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-087-can-we-disable-or-remove-the-provisioning-app" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 87</span>
+          <span>Can we disable or remove the provisioning app, and how do we delete it when we decommission the CoE?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><p>Keep the app and its consent in place while you intend to run <code>02_Install-CopilotCoE.ps1</code> or <code>03_Update-CoEContent.ps1</code> again &mdash; both sign in through this app with delegated permissions, so disabling it or revoking consent blocks the next install or update. <code>04_Remove-CopilotCoE.ps1</code> also signs in through this app, so keep it in place through removal; the script keeps the app afterward so you can rebuild, whether or not you use <code>-Purge</code>.</p><p>Delete it only after <code>04_Remove-CopilotCoE.ps1</code> reports <code>AliasReusable : True</code> (Question 82) &mdash; removal itself still needs the app. When you're ready: Entra admin center &gt; App registrations &gt; All applications &gt; <em>Copilot CoE Provisioning (PnP)</em> &gt; Delete, then clear <code>PnPClientID</code> in your settings file. The removal script prints these exact steps at the end of every run.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-088-how-do-i-register-the-app-with-script-01" data-category="Roles &amp; permissions">
+        <summary>
+          <span class="question-number">Question 88</span>
+          <span>How do I register the app with script 01, and can we use an existing app registration?</span>
+          <span class="tag">Roles &amp; permissions</span>
+        </summary>
+        <div class="answer"><p>Run <code>.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath</code> once per tenant, as an approved consent approver. It defaults to device-code sign-in; many tenants block that flow through Conditional Access, in which case use <code>-Interactive</code> for a pop-up browser sign-in instead (Question 89 covers this trade-off for all four scripts).</p><p>It always registers a new, single-tenant app named <em>Copilot CoE Provisioning (PnP)</em> and saves its Application (client) ID to <code>PnPClientID</code> in your settings file; the kit does not support pointing it at an existing, separately created app registration. An approved consent approver must then grant tenant-wide admin consent before Question 17's check shows all five permissions as Granted.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-089-what-licenses-do-people-need-and-does-conditional-access" data-category="Environment &amp; prerequisites">
+        <summary>
+          <span class="question-number">Question 89</span>
+          <span>What licenses do people need, and do Conditional Access or device-compliance policies affect sign-in?</span>
+          <span class="tag">Environment &amp; prerequisites</span>
+        </summary>
+        <div class="answer"><p>Viewing the CoE site and Team needs only ordinary Teams and SharePoint access; no Microsoft 365 Copilot license is required just to browse it. Each person's own Copilot license still governs whether they can run Copilot itself, and pages that reference Copilot work prompts note that a license is needed. Whether the configured <code>SharedChannelOwnerUPN</code> or the operator need a specific Teams or SharePoint license has not been tested; Question 3 covers the account type that is verified.</p><p>Script 02 defaults to <code>-AuthenticationMode Interactive</code> (a pop-up browser sign-in). Scripts 01, 03, and 04 default to device-code sign-in instead. Many tenants block the device-code flow through Conditional Access; if yours does, pass <code>-AuthenticationMode Interactive</code> (Question 21), or <code>-Interactive</code> for script 01. Conditional Access and device-compliance policies are evaluated against the device where you complete the browser sign-in, which is not necessarily the machine running the script.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-090-who-supports-the-kit-and-where-do-we-report-a-defect" data-category="Release &amp; integrity">
+        <summary>
+          <span class="question-number">Question 90</span>
+          <span>Who supports the kit, and where do we report a defect?</span>
+          <span class="tag">Release &amp; integrity</span>
+        </summary>
+        <div class="answer"><p>This is a starter kit prepared as deployment materials for your organization, not a Microsoft-supported product with a service-level agreement (see Scope in the footer). Track kit defects and enhancement requests the way your organization already tracks internally adopted tooling, separately from the security-incident route in Question 2, which is for Copilot usage incidents, not kit defects. Confirm with whoever delivered your deployment materials where they want kit issues reported.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-091-what-should-i-do-before-the-first-run" data-category="Install behavior">
+        <summary>
+          <span class="question-number">Question 91</span>
+          <span>What should I do before the first run?</span>
+          <span class="tag">Install behavior</span>
+        </summary>
+        <div class="answer"><p>Right-click the verified ZIP, open Properties, select Unblock if it is shown, then Extract All; keep the folder structure. Do this for a copied or re-downloaded ZIP too, since each copy can be blocked again by Windows.</p><p>Run the numbered scripts from a PowerShell 7.4 or later session opened at <code>&lt;extracted folder&gt;\03_Build\CopilotCoE-Kit</code>. If your execution policy blocks local scripts, use your organization's approved method for running signed or reviewed scripts rather than setting the execution policy to Bypass or Unrestricted.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      </div>
+      <div id="empty" class="empty">No FAQ matches this search and category.</div>
+    </main>
+  </div>
+
+  <footer class="footer">
+    <p><strong>Reference materials:</strong> approved v3.8.21 installation package, Admin Quickstart, START-HERE, numbered scripts, neutral organization template, release receipt, and validation evidence.</p>
+    <p><strong>Scope:</strong> administrator guidance for this starter kit, which is not a Microsoft-supported product with a service-level agreement. Organization policy, incident ownership, service levels, licensing decisions, and tenant security approvals remain the organization's responsibility.</p>
+    <p>Prepared October 20, 2026. This standalone companion does not modify the approved v3.8.21 ZIP or its hash.</p>
+  </footer>
+
+  <script>
+    const categoryOrder = [
+      "All",
+      "Release & integrity",
+      "Incident reporting",
+      "Roles & permissions",
+      "Production acceptance",
+      "Safe customization",
+      "Failure & rebuild",
+      "Environment & prerequisites",
+      "Organization settings",
+      "Install behavior",
+      "Prompts & catalogs"
+    ];
+    const list = document.getElementById("faq-list");
+    const allItems = Array.from(list.querySelectorAll("details"));
+    const search = document.getElementById("search");
+    const count = document.getElementById("count");
+    const title = document.getElementById("results-title");
+    const empty = document.getElementById("empty");
+    const nav = document.getElementById("categories");
+    let activeCategory = "All";
+
+    function visibleItems() {
+      return allItems.filter(item => !item.hidden);
+    }
+
+    function renderCategories() {
+      nav.replaceChildren();
+      categoryOrder.forEach(category => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "category-button" + (category === activeCategory ? " active" : "");
+        button.textContent = category;
+        button.setAttribute("aria-pressed", category === activeCategory ? "true" : "false");
+        button.addEventListener("click", () => {
+          activeCategory = category;
+          renderCategories();
+          applyFilters();
+        });
+        nav.appendChild(button);
+      });
+    }
+
+    function applyFilters() {
+      const term = search.value.trim().toLowerCase();
+      allItems.forEach(item => {
+        const categoryMatch = activeCategory === "All" || item.dataset.category === activeCategory;
+        const textMatch = !term || item.textContent.toLowerCase().includes(term);
+        item.hidden = !(categoryMatch && textMatch);
+        if (item.hidden) item.open = false;
+      });
+      const visible = visibleItems();
+      count.textContent = visible.length + " of " + allItems.length + " questions";
+      title.textContent = activeCategory === "All" ? "Administrator questions" : activeCategory;
+      empty.style.display = visible.length ? "none" : "block";
+    }
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+      const field = document.createElement("textarea");
+      field.value = text;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.opacity = "0";
+      document.body.appendChild(field);
+      field.select();
+      const copied = document.execCommand("copy");
+      field.remove();
+      if (!copied) throw new Error("Copy was not available.");
+    }
+
+    document.querySelectorAll(".copy-link").forEach(button => {
+      button.addEventListener("click", async () => {
+        const item = button.closest("details");
+        const url = new URL(window.location.href);
+        url.search = "";
+        url.hash = item.id;
+        history.replaceState(null, "", url.hash);
+        const original = button.textContent;
+        try {
+          await copyText(url.href);
+          button.textContent = "Reference copied";
+        } catch {
+          button.textContent = "Couldn't copy question reference";
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1800);
+      });
+    });
+
+    document.querySelectorAll(".copy-command").forEach(button => {
+      button.addEventListener("click", async () => {
+        const block = document.getElementById(button.dataset.target);
+        const original = button.textContent;
+        try {
+          await copyText(block.textContent);
+          button.textContent = "Command copied";
+        } catch {
+          button.textContent = "Couldn't copy command";
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1800);
+      });
+    });
+
+    search.addEventListener("input", applyFilters);
+    document.getElementById("expand").addEventListener("click", () => {
+      visibleItems().forEach(item => { item.open = true; });
+    });
+    document.getElementById("collapse").addEventListener("click", () => {
+      allItems.forEach(item => { item.open = false; });
+    });
+
+    function openHashTarget(scrollToTarget = true) {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      const target = id ? document.getElementById(id) : null;
+      if (!target || target.tagName !== "DETAILS") return;
+      activeCategory = "All";
+      search.value = "";
+      renderCategories();
+      applyFilters();
+      target.open = true;
+      if (scrollToTarget) {
+        window.setTimeout(() => target.scrollIntoView({ block: "start" }), 0);
+      }
+    }
+    window.addEventListener("hashchange", () => openHashTarget(true));
+    renderCategories();
+    applyFilters();
+    openHashTarget(false);
+  </script>
+</body>
+</html>
