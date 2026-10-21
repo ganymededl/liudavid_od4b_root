@@ -469,6 +469,13 @@
     grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
     gap: 8px;
   }
+  /* Toolkit tiles carry more text than the library tiles: use wider columns (five
+     across at most; the calc caps the count) and let each tile keep its own height. */
+  #tools {
+    grid-template-columns: repeat(auto-fill, minmax(max(220px, calc((100% - 48px) / 5)), 1fr));
+    gap: 12px;
+    align-items: start;
+  }
   .lib {
     display: block;
     text-decoration: none;
@@ -583,6 +590,7 @@
     color: #05060c;
     outline: none;
   }
+  .lib-download svg { width: 10px; height: 10px; vertical-align: -1px; }
 
   .lib-public-badge {
     display: inline-flex; align-items: center; gap: 4px;
@@ -593,6 +601,7 @@
   .lib-access-badge {
     display: inline-flex; align-items: center; gap: 4px;
     font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    white-space: nowrap;
     padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
   }
   .lib-access-badge.public { color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff); }
@@ -871,14 +880,8 @@
 
     <!-- LIBRARIES -->
     <section class="libraries-wrap">
-      <p class="section-label">Libraries</p>
+      <p class="section-label">Libraries &middot; public, no sign-in</p>
       <div class="libraries" id="libs"></div>
-    </section>
-
-    <!-- CREATIVE EXPERIMENTS -->
-    <section class="tools-wrap" aria-labelledby="creativeTitle">
-      <p class="section-label" id="creativeTitle">Creative experiments &middot; public, no sign-in</p>
-      <div class="libraries" id="creative"></div>
     </section>
 
     <section class="tools-wrap">
@@ -931,6 +934,16 @@ const CONFIG = {
   // Public library cards, kept in alphabetical order by name.
   libraries: [
     {
+      name:  "ARTificial Gallery",
+      desc:  "Four interactive studies and an unofficial Pet Shop Boys / Alan Turing fan film",
+      href:  "artificial-gallery.html?scoutTheme=dark",
+      cta:   "Enter the gallery",
+      newTab: true,
+      icon:  "star",
+      color: ["#00d9ff", "#00ffa3"],
+      public: true
+    },
+    {
       name:  "Copilot Center of Excellence",
       desc:  "Release 3.8.21 video, setup steps, and external-sharing addendum",
       href:  "copilot-center-of-excellence/index.html",
@@ -974,16 +987,6 @@ const CONFIG = {
 
   // ── TOOLS / QUICK ACCESS ──────────────────────────────────
   // Quick-launch tools shown on the main page. Edit href to update a link.
-  creative: [
-    {
-      name: "ARTificial Gallery",
-      desc: "Five original works \u2014 four interactive studies (including the Mini Soundtrack Lab) and The Imitation of Light, an unofficial Pet Shop Boys / Alan Turing fan film.",
-      href: "artificial-gallery.html?scoutTheme=dark",
-      icon: "star",
-      color: ["#00d9ff", "#00ffa3"],
-      public: true
-    }
-  ],
   tools: [
     {
       name:  "Build Ledger",
@@ -1257,6 +1260,7 @@ CONFIG.libraries.forEach(lib => {
   const a = document.createElement("a");
   a.href = lib.href;
   a.className = "lib";
+  if (lib.newTab) { a.target = "_blank"; a.rel = "noopener"; }
   a.innerHTML = `
     ${lib.public ? '<div class="lib-public-badge">Public</div>' : ''}
     <div class="lib-icon" style="background: linear-gradient(135deg, ${lib.color[0]}, ${lib.color[1]});">
@@ -1264,30 +1268,12 @@ CONFIG.libraries.forEach(lib => {
     </div>
     <div class="lib-name">${lib.name}</div>
     <div class="lib-desc">${lib.desc}</div>
-    <div class="lib-cta">Browse ${ICONS.arrow}</div>
+    <div class="lib-cta">${lib.cta || "Browse"} ${ICONS.arrow}</div>
   `;
   libsEl.appendChild(a);
 });
 
 // ── RENDER: tools / quick access ────────────────────────────
-const creativeEl = document.getElementById("creative");
-(CONFIG.creative || []).forEach(item => {
-  const a = document.createElement("a");
-  a.href = item.href;
-  a.className = "lib";
-  a.target = "_blank";
-  a.rel = "noopener";
-  a.innerHTML = `
-    ${item.public ? '<div class="lib-public-badge">Public</div>' : ''}
-    <div class="lib-icon" style="background: linear-gradient(135deg, ${item.color[0]}, ${item.color[1]});">
-      ${ICONS[item.icon] || ICONS.star}
-    </div>
-    <div class="lib-name">${item.name}</div>
-    <div class="lib-desc">${item.desc}</div>
-    <div class="lib-cta">${item.cta || "Enter the gallery"} ${ICONS.arrow}</div>
-  `;
-  creativeEl.appendChild(a);
-});
 const toolsEl = document.getElementById("tools");
 (CONFIG.tools || []).forEach(t => {
   const card = document.createElement(t.groupItems ? "div" : "a");
@@ -1297,8 +1283,10 @@ const toolsEl = document.getElementById("tools");
     card.target = "_blank";
     card.rel = "noopener";
   }
+  const accessLabel = t.public ? "Public" : `${ICONS.lock} ${t.privateOnly ? "Private" : "Internal"}`;
+  const accessTip = t.public ? "" : t.privateOnly ? "Only the owner's Microsoft sign-in works" : "Microsoft sign-in required";
   card.innerHTML = `
-    <div class="lib-access-badge ${t.public ? "public" : "gated"}">${t.public ? "Public" : t.privateOnly ? `${ICONS.lock} Private · my sign-in only` : `${ICONS.lock} Internal · Microsoft sign-in`}</div>
+    <div class="lib-access-badge ${t.public ? "public" : "gated"}"${accessTip ? ` title="${accessTip}"` : ""}>${accessLabel}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
       ${ICONS[t.icon] || ICONS.star}
     </div>

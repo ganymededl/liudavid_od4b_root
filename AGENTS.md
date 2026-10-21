@@ -20,6 +20,11 @@ daily podcast refresh. These rules keep edits from colliding.
 4. On a rebase conflict, keep both sides' changes unless David says otherwise, and tell him what
    was merged.
 
+## Hub page conventions
+- The public cards are `libraries: [...]` in `index.html` (this includes ARTificial Gallery). Keep them
+  in alphabetical order by name and insert new cards in place, not at the end.
+- The hero has no pills (skill or city). Don't add them back.
+
 ## Commits
 - Author email: `17201905+ganymededl@users.noreply.github.com` (GitHub rejects the private
   address, GH007).
