@@ -580,10 +580,13 @@ Illinois Copilot Center Demo https://yourtenant.sharepoint.com/sites/CopilotCoED
 Applying site sharing 'Disabled' (owners only)
 Disabling non-owner sharing</pre>
       <p class="meta">Console output from the recorded lab installation. Before it creates anything, the installer
-        checks the organization's content files locally, signs in, and runs read-only checks. In this run, the account
-        could not read the group naming policy. A naming policy can add a prefix or suffix to the Microsoft 365 group
-        and alias, which can prevent the installer from finding the Team it created. An authorized administrator must
-        confirm that policy separately.</p>
+        checks the organization's content files locally, signs in, and runs read-only checks. The delegated CoE app
+        intentionally omits broad <code>Directory.Read.All</code>, so its optional group-naming-policy read can return
+        <code>Insufficient privileges</code> even for a Global Administrator. This warning is non-blocking and does
+        not indicate that the administrator lacks installation roles. Do not grant broad directory-read consent only
+        to remove it. The warning also does not prove that no policy exists: confirm the policy manually. If the run
+        creates and finds the exact configured alias and proceeds to template application, the alias was not rewritten
+        for that run.</p>
     </section>
 
     <section class="step" id="tour-09" data-tour="9">

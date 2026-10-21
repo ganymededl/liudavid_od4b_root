@@ -433,6 +433,15 @@ $contentMode = 'Customer'
         rows.</p>
       <div class="warning">Before creation, read the signed-in account, tenant, group-naming-policy warning, alias,
         owner, and target URL printed by the script. Stop if any value is wrong.</div>
+      <div class="warning"><strong>Expected optional naming-policy warning:</strong>
+        <code>The group naming policy could not be read (Insufficient privileges...)</code>. The delegated CoE app
+        intentionally does not request broad <code>Directory.Read.All</code>, so this optional
+        <code>groupSettings</code> read can fail even when the signed-in person is Global Administrator. The warning
+        is non-blocking and does not mean the administrator lacks the roles needed for installation. Do not grant
+        <code>Directory.Read.All</code> solely to remove it. It also does not prove that no naming policy exists:
+        confirm <strong>Entra admin center &gt; Groups &gt; Naming policy</strong> manually. If the run creates and
+        finds the exact configured alias and proceeds to template application, the alias was not rewritten for that
+        run.</div>
     </section>
 
     <section id="accept">
