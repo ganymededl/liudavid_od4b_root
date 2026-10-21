@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>External guest sharing addendum - Copilot CoE 3.8.21 Installation Guide</title>
+  <meta name="description" content="Optional approved lab preview: check policies, align the CoE 3.8.21 sharing setting, grant a named guest Visitors Read access, verify access, and close the preview. Production sharing remains disabled by default.">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+      overflow-wrap: anywhere;
+    }
+    .back {
+      display: inline-block;
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 14px;
+    }
+    .back:hover { color: var(--cp-accent); }
+    header, section {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      margin-bottom: 16px;
+      padding: 20px;
+    }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 1.7rem; }
+    h2 { font-size: 1.2rem; color: var(--cp-accent); }
+    h3 { font-size: 1.02rem; }
+    p { margin: 0 0 12px; }
+    a { color: var(--cp-link); }
+    code, pre {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.92rem;
+    }
+    code {
+      background: var(--cp-surface-soft);
+      border-radius: 0.3rem;
+      padding: 0 4px;
+    }
+    .meta {
+      color: var(--cp-text-muted);
+      font-size: 0.95rem;
+    }
+    .warning {
+      background: color-mix(in srgb, var(--cp-warning) 20%, var(--cp-surface));
+      border: 2px solid var(--cp-warning);
+      border-radius: 0.625rem;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .step {
+      border-left: 6px solid var(--cp-accent);
+    }
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .checklist li {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      padding: 10px 12px;
+      background: var(--cp-surface-soft);
+    }
+    .checklist li::before {
+      content: "\2713  ";
+      color: var(--cp-success);
+      font-weight: 700;
+    }
+    .gotchas li::before {
+      content: "\26A0  ";
+      color: var(--cp-warning);
+      font-weight: 700;
+    }
+    .steplist {
+      margin: 10px 0 14px;
+      padding-left: 22px;
+    }
+    .steplist li { margin-bottom: 8px; }
+    .badge {
+      display: inline-block;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 0.625rem;
+      padding: 2px 8px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    .admin-label {
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--cp-text-muted);
+      margin: 4px 0 8px;
+    }
+    figure { margin: 0 0 10px; }
+    .shot {
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      box-shadow: var(--cp-shadow);
+    }
+    figcaption {
+      color: var(--cp-text-soft);
+      font-size: 0.82rem;
+      margin-top: 6px;
+    }
+    table { border-collapse: collapse; margin: 0.5rem 0 1rem; width: 100%; }
+    th, td { border: 1px solid var(--cp-border); padding: 6px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    footer {
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 8px 0 0;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <a class="back" href="index.html#external-sharing">&larr; Back to the installation guide</a>
+
+    <header>
+      <h1>Addendum: sharing a CoE site with one external guest</h1>
+      <p class="meta" role="note"><strong>Public copy:</strong> account, recipient, and site identifiers are covered in these screenshots. The sharing controls and permission labels remain visible.</p>
+      <p class="meta">Companion to the release 3.8.21 installation guide. This optional procedure is for an
+        approved lab preview with a named, authenticated guest, not a prerequisite for installation or a
+        recommendation to open a customer production site.</p>
+      <div class="warning">
+        <p><strong>A public guide is not a public SharePoint site.</strong> The guide and its video can be hosted
+          on a public website without Microsoft sign-in. A deployed CoE remains protected by its tenant and site
+          permissions. An external visitor must authenticate; an Anyone link does not make site pages anonymous.</p>
+        <p style="margin:0;">Keep <code>TeamVisibility</code> set to <code>Private</code> and
+          <code>CoESiteSharingCapability</code> set to <code>Disabled</code> for a normal customer installation.
+          Do not loosen tenant policy merely to complete installation.</p>
+      </div>
+      <p>The four screenshots below are retained from the earlier public tour's GCC demo tenant. They illustrate
+        controls, not the EDU installation in the video or a required policy baseline. Portal labels can vary.
+        For cross-cloud guests, confirm that the cloud combination and B2B configuration are supported;
+        this guide does not establish GCC High or DoD support.</p>
+    </header>
+
+    <section class="step">
+      <h2><span class="badge">1</span>Confirm that policy permits this guest</h2>
+      <p>Before changing the site, obtain the site owner's and the organization's approval for the content,
+        intended person, access level, and preview period. In <strong>Microsoft Entra admin center &rarr; Entra ID
+        &rarr; External Identities &rarr; External collaboration settings</strong>, confirm:</p>
+      <ul class="checklist">
+        <li><strong>Guest invite settings:</strong> the person sending the invitation is authorized.
+          An admin-only or Guest Inviter policy can be appropriate; everyone does not need invitation rights.</li>
+        <li><strong>Collaboration restrictions:</strong> the guest's domain is permitted under the existing
+          allow/block policy. Do not replace a reviewed allow-list with "any domain" for this preview.</li>
+      </ul>
+      <figure>
+        <img class="shot" src="Images/addendum-00c-entra-collab-restrictions.png" alt="Earlier GCC lab example showing permissive guest invitation and domain settings, not a required production baseline">
+        <figcaption>Earlier GCC lab example: permissive invitation and domain settings. These values are not
+          required or recommended for a production tenant.</figcaption>
+      </figure>
+      <p>For a guest from another Entra organization, review <strong>External Identities &rarr; Cross-tenant access
+        settings</strong>, including organization-specific overrides. The resource tenant's inbound and the home
+        tenant's outbound B2B collaboration rules must permit the scenario. B2B direct connect is a different
+        feature. Conditional Access, authentication, sensitivity labels, and other access restrictions still apply.
+        If policy blocks the preview, stop and use the organization's approved review route.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">2</span>Check the SharePoint tenant ceiling</h2>
+      <p>In <strong>SharePoint admin center &rarr; Policies &rarr; Sharing</strong>, confirm that the existing
+        SharePoint policy permits the approved guest-sharing level. A site cannot be more permissive than the
+        tenant. Review domain restrictions and any restriction on which security groups may share externally.</p>
+      <figure>
+        <img class="shot" src="Images/addendum-00-tenant-sharing-open.png" alt="Earlier GCC lab example showing SharePoint and OneDrive Anyone settings, which are not required for a named guest preview">
+        <figcaption>Earlier GCC lab example with Anyone enabled. A named-guest site preview does not require
+          Anyone links or a change to OneDrive policy. Keep approved tenant restrictions in place.</figcaption>
+      </figure>
+      <p>If the tenant permits only existing guests, an authorized administrator must provision the approved
+        guest first. If external sharing is prohibited, keep the site disabled and stop; the site-level setting
+        cannot override that policy.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">3</span>Align the kit setting and the site-level switch</h2>
+      <p>For an approved lab preview only, record the intended mode in that lab organization's
+        <code>Deployment-Settings.json</code>. Do not change the customer production settings.</p>
+      <table>
+        <thead><tr><th scope="col">CoESiteSharingCapability</th><th scope="col">SharePoint option</th></tr></thead>
+        <tbody>
+          <tr><td><code>Disabled</code></td><td>Only people in your organization; the production default.</td></tr>
+          <tr><td><code>ExistingExternalUserSharingOnly</code></td><td>Existing guests; use when the approved
+            guest already exists in the directory.</td></tr>
+          <tr><td><code>ExternalUserSharingOnly</code></td><td>New and existing guests; use only when new
+            guest invitations are approved.</td></tr>
+        </tbody>
+      </table>
+      <p>Saving JSON alone does not change an existing site. Install, resume, and update runs reapply the
+        configured sharing mode; an omitted setting defaults to <code>Disabled</code>. A portal-only change can
+        therefore be reversed on a later authorized run. The kit neither invites the guest nor grants access.</p>
+      <p>A SharePoint Administrator can change the existing parent site as follows:</p>
+      <ol class="steplist">
+        <li>Go to the <strong>SharePoint admin center &rarr; Active sites</strong>.</li>
+        <li>Select the exact CoE parent site and verify its URL.</li>
+        <li>Open the <strong>Settings</strong> tab.</li>
+        <li>Open <strong>More sharing settings</strong> (shown as <strong>External file sharing</strong> in
+          the older screenshot). Select <strong>Existing guests</strong> or <strong>New and existing guests</strong>,
+          matching the approved lab setting above.</li>
+        <li>Select <strong>Save</strong>.</li>
+      </ol>
+      <figure>
+        <img class="shot" src="Images/addendum-01-site-external-sharing-switch.png" alt="Earlier GCC lab site Settings panel with New and existing guests selected in External file sharing">
+        <figcaption>Earlier GCC lab example: Active sites &rarr; selected site &rarr; Settings &rarr;
+          External file sharing. Current portals may label the entry More sharing settings.</figcaption>
+      </figure>
+      <div class="warning">
+        <p style="margin:0;"><strong>No anonymous site access.</strong> Release 3.8.21 supports only the three
+          modes above for the CoE parent site, not Anyone/anonymous sharing. A guest signs in through the
+          configured authentication flow. Leadership Governance and Program Governance remain internal-only;
+          do not change their channel-site sharing or membership to make a preview work.</p>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">4</span>Adding the person as read-only (browse only, no edit)</h2>
+      <p>Review all content visible to site readers before granting site-wide access. For browse-only review,
+        an authorized site owner grants the named guest the site's built-in <strong>Visitors</strong> Read
+        permission. Do not add a preview guest to the Team or Members group: that grants broader membership
+        and edit rights. For a narrower review, share only approved content with Specific people &mdash; Can view.</p>
+      <ol class="steplist">
+        <li>On the site, go to <strong>Settings (gear icon) &rarr; Site permissions &rarr; Advanced permissions settings</strong> (or browse directly to <code>/_layouts/15/user.aspx</code> on the site).</li>
+        <li>On the <strong>Permissions</strong> ribbon, select <strong>Grant Permissions</strong>.</li>
+        <li>Type the person's email address and select it once it resolves &mdash; SharePoint will label it <em>"is outside of your organization"</em> to confirm it recognized a guest.</li>
+        <li>Select <strong>Show options</strong>.</li>
+        <li>Under <strong>Select a permission level</strong>, choose <code>&lt;Site name&gt; Visitors [Read]</code>. This grants browse/view access only.</li>
+        <li>Review the identity and permission before selecting <strong>Share</strong>. If sending an invitation,
+          use only approved wording and recipients.</li>
+      </ol>
+      <figure>
+        <img class="shot" src="Images/addendum-02-grant-permissions-readonly.png" alt="Earlier lab Share dialog selecting the Visitors Read group for an external guest rather than Members Edit">
+        <figcaption>Earlier lab example: Grant Permissions &rarr; Show options &rarr; Visitors [Read].
+          Check the actual permission; do not accept a Members/Edit default.</figcaption>
+      </figure>
+    </section>
+
+    <section>
+      <h2><span class="badge">5</span>Verify the guest experience and close the preview</h2>
+      <p>Have the intended guest redeem the invitation and sign in using a separate browser profile. Owner
+        access is not evidence of guest access. Check the approved pages and links, confirm the guest cannot
+        edit, and confirm governance content remains unavailable. Protected documents and separately secured
+        catalogs may have additional restrictions; Visitors membership does not bypass them.</p>
+      <p><strong>Read is not a no-download guarantee.</strong> A visitor can read or download content as allowed
+        by the site's policies and the content's permissions. Do not expose material that must remain internal.</p>
+      <ol class="steplist">
+        <li>At the agreed end date, remove the guest's Visitors membership, direct grants, and preview-specific
+          sharing links. Review other access paths rather than assuming one removal revokes everything.</li>
+        <li>In the parent site's sharing settings, choose <strong>Only people in your organization</strong> and save.</li>
+        <li>Set <code>"CoESiteSharingCapability": "Disabled"</code> in the organization's settings
+          <strong>before the next install, resume, or update</strong>, so a saved lab ON setting cannot reopen it.</li>
+        <li>Verify that external site access is blocked. Disabling SharePoint sharing does not delete existing
+          grants, remove Team membership, or end Teams chat; clean up any separately approved access as needed.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>Common wrong turns</h2>
+      <ul class="checklist gotchas">
+        <li><strong>Add members is not a read-only visitor invitation.</strong> The modern group-membership
+          flyout can add Microsoft 365 Group/Team members. Use the site permission path when the approved
+          requirement is site-only Read access.</li>
+        <li><strong>A portal loading error is not proof of a sharing-policy block.</strong> Check policy and
+          identity first, then use the supported site-permissions workflow. Do not weaken tenant policy to
+          work around a failed Outlook or membership panel.</li>
+        <li><strong>Changing one switch does not grant access.</strong> Site sharing capability, permission
+          grants, authentication, and content review are separate checks.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>References and scope</h2>
+      <p>Updated for release 3.8.21 from the earlier public site-tour addendum. The frozen kit's
+        <code>Internal/SecurityPosture.ps1</code> defines the supported modes, private defaults,
+        governance-site restrictions, and preview shutdown guidance. No tenant settings or permissions were
+        changed to prepare this guide.</p>
+      <ul>
+        <li><a href="https://learn.microsoft.com/en-us/sharepoint/change-external-sharing-site" target="_blank" rel="noopener">Microsoft Learn: change sharing settings for a site</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/sharepoint/external-sharing-overview" target="_blank" rel="noopener">Microsoft Learn: how tenant and site sharing policies interact</a></li>
+        <li><a href="https://learn.microsoft.com/en-us/entra/external-id/external-collaboration-settings-configure" target="_blank" rel="noopener">Microsoft Learn: external collaboration settings</a></li>
+        <li><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21" target="_blank" rel="noopener">Copilot CoE kit: release 3.8.21 notes and source</a></li>
+      </ul>
+    </section>
+
+    <footer>Addendum by David Shih Chun Liu &middot; Companion to the Copilot CoE 3.8.21 installation guide</footer>
+  </main>
+</body>
+</html>

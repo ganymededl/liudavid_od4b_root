@@ -1,0 +1,385 @@
+WEBVTT
+
+00:00.100 --> 00:08.161
+Follow a sample higher education deployment from gathering the university's public pages to checking the finished site.
+
+00:08.961 --> 00:17.633
+Configure the kit, install it with PowerShell, review SharePoint and Teams, publish a content update, and test the result again.
+
+00:18.433 --> 00:23.513
+This is an unofficial demonstration using a synthetic organization profile.
+
+00:23.513 --> 00:30.288
+It is not affiliated with, endorsed by, or deployed for the University of Illinois Urbana-Champaign.
+
+00:30.288 --> 00:35.368
+Public university information is used only to show how configuration works.
+
+00:36.168 --> 00:40.098
+Everything runs in the Microsoft demonstration lab tenant.
+
+00:40.098 --> 00:48.159
+For a real deployment, use your organization's authorized tenant, accounts, app registration, and SharePoint addresses.
+
+00:49.000 --> 00:53.406
+Before opening PowerShell, find the official pages users will need.
+
+00:54.206 --> 01:01.636
+Collect University of Illinois pages for responsible AI use and data handling, along with Copilot Chat guidance.
+
+01:02.436 --> 01:10.853
+Also find the published support contacts, service requests, security and privacy reporting instructions, and training resources.
+
+01:11.653 --> 01:15.401
+Record the exact links and the published support mailbox.
+
+01:15.401 --> 01:20.333
+For your own deployment, have the organization confirm which routes to use.
+
+01:21.133 --> 01:24.947
+Don't invent an internal address or guess the tenant name.
+
+01:24.947 --> 01:30.996
+And don't assume the organization's public email domain is also its Microsoft tenant domain.
+
+01:31.767 --> 01:35.620
+Keep public information separate from deployment settings.
+
+01:36.420 --> 01:43.994
+Public information includes the organization's name, published guidance, support contacts, and training resources.
+
+01:44.794 --> 01:56.951
+Deployment settings include the Microsoft tenant, SharePoint hosts, and administrator sign-in, plus the app registration's client ID and any service accounts or production mailboxes.
+
+01:56.951 --> 02:01.203
+Have an authorized administrator supply or confirm those values.
+
+02:02.003 --> 02:07.783
+The tenant-specific values in this recording belong to the Microsoft demonstration lab.
+
+02:07.783 --> 02:12.168
+For a real deployment, use the organization's authorized settings.
+
+02:12.967 --> 02:16.326
+Open PowerShell 7 with the No Profile switch.
+
+02:17.126 --> 02:19.662
+Select the approved release zip file.
+
+02:19.662 --> 02:25.832
+The release receipt supplied with the package records its expected SHA256 hash.
+
+02:25.832 --> 02:30.220
+Calculate the file's hash and continue only if the values match.
+
+02:31.020 --> 02:37.053
+For each clean run, extract the release into a new, empty install folder on the C drive.
+
+02:37.853 --> 02:42.720
+Copy the higher education template into a separate organization folder.
+
+02:42.720 --> 02:51.975
+That folder holds settings, content overrides, and approved assets outside the install folder, so a newer release won't overwrite them.
+
+02:52.833 --> 02:57.268
+Open Deployment Settings dot JSON in the organization folder.
+
+02:58.068 --> 03:05.481
+Enter the tenant, SharePoint admin host, SharePoint site host, owner account, organization name, and alias.
+
+03:06.281 --> 03:11.893
+If this is the tenant's first installation, leave PnP client ID blank for now.
+
+03:11.893 --> 03:16.396
+Step six registers the provisioning app and saves its client ID.
+
+03:16.396 --> 03:19.930
+This recording reuses an existing approved lab app.
+
+03:20.730 --> 03:22.601
+Choose the alias carefully.
+
+03:22.601 --> 03:30.638
+It becomes the Team alias and SharePoint site path, and it must meet Microsoft 365 naming requirements.
+
+03:31.438 --> 03:34.555
+Set Learning Environment to Higher Education.
+
+03:34.555 --> 03:45.364
+Keep Team Visibility set to Private and Center of Excellence Site Sharing Capability set to Disabled unless the organization has approved a different setup.
+
+03:46.300 --> 03:50.342
+In the same settings file, configure the links users will see.
+
+03:51.142 --> 03:56.813
+Use Service Desk for general help and Technology Request for approved service requests.
+
+03:57.613 --> 04:08.174
+Point Data Safety Incident to the organization's approved security or privacy reporting instructions, and AI Guidelines to its approved responsible-use guidance.
+
+04:08.974 --> 04:12.038
+Add the reviewed governance and training links.
+
+04:12.038 --> 04:19.339
+Decide whether to enable the prompt library and developer track, and include only approved champion departments.
+
+04:20.139 --> 04:23.529
+Review any sample agent entries before installation.
+
+04:23.529 --> 04:26.593
+This lab includes two clearly labeled examples.
+
+04:27.367 --> 04:35.398
+Check that you're running PowerShell 7.4 or later, and install PnP PowerShell version 3.2.0.
+
+04:36.198 --> 04:44.355
+If the tenant needs a provisioning app, have someone authorized to grant the required app permissions run the registration script.
+
+04:44.355 --> 04:48.998
+Then confirm in Entra that all required delegated permissions are granted.
+
+04:48.998 --> 04:52.574
+The script saves the new client ID to the settings file.
+
+04:53.374 --> 04:59.021
+This lab already has an approved provisioning app, so the recording reuses its client ID.
+
+04:59.821 --> 05:03.335
+Before continuing, review any Entra group naming policy.
+
+05:03.335 --> 05:10.425
+Confirm who will run the installation, who will own the site, and whether the incident-reporting link is correct.
+
+05:11.267 --> 05:14.440
+Run the installer from the extracted kit folder.
+
+05:15.240 --> 05:18.480
+Keep the Seed Demo Content switch in the command.
+
+05:18.480 --> 05:22.909
+It publishes the pages, catalogs, calendar, and governance content.
+
+05:22.909 --> 05:28.000
+Without it, the installer creates only the Team and an empty SharePoint site.
+
+05:28.800 --> 05:33.956
+Use Demo mode in this lab to retain the kit's generated demonstration notices.
+
+05:33.956 --> 05:37.659
+Use Customer mode for an approved production deployment.
+
+05:37.659 --> 05:43.212
+Review the source files and existing site content, and remove sample items yourself.
+
+05:43.212 --> 05:46.319
+Changing the mode does not replace that review.
+
+05:47.119 --> 05:51.218
+Because this is a new installation, don't use Resume Existing.
+
+05:52.018 --> 05:56.448
+If an earlier attempt created a Team or site, stop and investigate.
+
+05:56.448 --> 06:04.645
+Either resume that exact deployment, or run zero-four Remove Copilot Center of Excellence dot P S one before starting again.
+
+06:04.645 --> 06:14.099
+Deleting only the SharePoint site leaves the Team and Microsoft 365 group behind, so the next installation can conflict with them.
+
+06:15.200 --> 06:20.492
+The installer first checks the organization's content files for configuration errors.
+
+06:21.292 --> 06:28.514
+It then checks the tenant, owner, group naming policy, and whether the alias is available before creating resources.
+
+06:28.514 --> 06:32.125
+In this run, the account could not read the naming policy.
+
+06:32.125 --> 06:35.549
+An authorized administrator must confirm it separately.
+
+06:35.549 --> 06:43.767
+A naming policy can add a prefix or suffix to the group and alias, which can prevent the installer from finding the Team it created.
+
+06:44.567 --> 06:47.307
+Read each stop-or-proceed message carefully.
+
+06:47.307 --> 06:52.474
+A decision to proceed here is a recorded lab decision, not approval for production.
+
+06:53.274 --> 07:01.181
+After the checks, the installer creates the private Team, its standard and shared channels, and the connected SharePoint sites.
+
+07:01.981 --> 07:06.215
+The public video uses reference views for longer provisioning steps.
+
+07:06.215 --> 07:09.016
+Keep the full transcript for troubleshooting.
+
+07:09.967 --> 07:13.261
+Watch as the installer publishes the site content.
+
+07:14.061 --> 07:26.117
+It adds navigation, learning guides, and the support and governance pages, followed by the prompt library, agent showcase, success stories, champions directory, and training calendar.
+
+07:26.917 --> 07:35.152
+It also configures catalog approvals, uploads governance drafts, adds resource tabs, and posts the prepared welcome messages.
+
+07:35.952 --> 07:39.708
+Finally, it reports the resulting security configuration.
+
+07:40.508 --> 07:50.126
+In this recording, the higher education prompt library contains about 230 prompts and takes the longest of the catalog steps shown.
+
+07:50.767 --> 07:55.607
+A Team appearing in the tenant doesn't mean the installation is complete.
+
+07:56.407 --> 08:05.490
+At the end of a successful run, the installer prints the SharePoint site address and saves deployment records in the organization folder.
+
+08:06.290 --> 08:09.008
+Save the site address exactly as printed.
+
+08:09.008 --> 08:12.588
+The recorded run finished in about thirty-six minutes.
+
+08:13.388 --> 08:23.532
+Check that no error stopped the installation, and confirm that Center of Excellence Revision Report dot JSON names the intended alias and tenant host.
+
+08:24.332 --> 08:30.829
+The installer saves that report beside Deployment Settings dot JSON in the organization folder.
+
+08:30.829 --> 08:34.874
+It saves the run transcripts in the Revision Audit subfolder.
+
+08:35.667 --> 08:37.444
+The installer has finished.
+
+08:37.444 --> 08:38.891
+Check what it created.
+
+08:39.691 --> 08:47.983
+Run the read-only checker using the same organization folder and content mode, plus the site address printed by the installer.
+
+08:48.783 --> 08:51.876
+The checker reads the site without changing it.
+
+08:51.876 --> 09:00.498
+It checks the pages, navigation, catalogs, approval and permission settings, configured links, learning content, and site security.
+
+09:00.498 --> 09:04.380
+In Demo mode, it also checks for the demonstration notices.
+
+09:05.180 --> 09:07.944
+Look for the final All Checks Passed line.
+
+09:08.744 --> 09:13.022
+Review every warning and complete the manual check it identifies.
+
+09:13.022 --> 09:16.115
+Passing the checker is only part of the review.
+
+09:17.033 --> 09:20.571
+Open the site at the address printed by the installer.
+
+09:21.371 --> 09:25.302
+On Home, check the main task tiles and demonstration notice.
+
+09:26.102 --> 09:28.264
+Open Service Catalog and Support.
+
+09:28.264 --> 09:37.567
+Follow the links for general support, technology requests, and data-safety incidents, and confirm that each leads to the approved destination.
+
+09:38.367 --> 09:42.560
+On Governance, check the university's public AI guidance links.
+
+09:42.560 --> 09:46.360
+Then open the prompt library and review the catalog views.
+
+09:47.160 --> 09:50.501
+This recording shows the administrator review only.
+
+09:50.501 --> 09:57.838
+Before opening the production site to users, repeat it with an account that has reader access, not owner access.
+
+09:57.838 --> 10:02.883
+Also replace every lab-specific value with one the organization has approved.
+
+10:03.800 --> 10:04.518
+Open Teams.
+
+10:05.318 --> 10:14.910
+The provisioning app can publish welcome messages, but reading them back requires an additional message-reading permission, so check them visually.
+
+10:15.710 --> 10:19.168
+Open General, Ask Us Anything, and Share Your Prompt.
+
+10:19.168 --> 10:26.868
+Confirm that each channel has exactly one prepared welcome post, follow its links, and check the demonstration notice.
+
+10:27.668 --> 10:35.628
+If an interrupted run left a post missing, identify the exact channel before republishing it through the recovery process.
+
+10:36.428 --> 10:40.147
+Don't republish all the welcome messages just to be safe.
+
+10:40.147 --> 10:41.909
+That can create duplicates.
+
+10:42.700 --> 10:47.921
+Use the update script to publish reviewed changes without rebuilding the Team.
+
+10:48.721 --> 10:57.558
+This recording also uses Scope All with Repair Captured Pages because it demonstrates the repair process on a fresh validation site.
+
+10:58.358 --> 11:02.173
+Repair Captured Pages rewrites the pages the kit manages.
+
+11:02.173 --> 11:06.257
+Edits made directly to those pages in SharePoint may be lost.
+
+11:06.257 --> 11:14.959
+Before using it on an existing site, review section D, Home and the four captured pages, in zero-one Admin Quickstart dot H T M L.
+
+11:14.959 --> 11:17.770
+That section lists what the switch resets.
+
+11:17.770 --> 11:20.515
+The update script has no What If preview.
+
+11:21.315 --> 11:23.859
+Replace Files needs a separate review.
+
+11:23.859 --> 11:30.820
+It can replace every affected governance draft in the run, not just the document you intended to change.
+
+11:31.620 --> 11:40.189
+If the saved deployment identity doesn't match the configured tenant and alias, stop and resolve the mismatch before continuing.
+
+11:41.167 --> 11:49.409
+After the update, run the checker again and repeat the administrator's SharePoint review and the Teams welcome-post review.
+
+11:50.209 --> 11:57.380
+Confirm that the intended changes appeared and that the links, catalog views, and welcome posts still work.
+
+11:58.180 --> 12:11.515
+Keep Deployment Settings dot JSON, Center of Excellence Revision Report dot JSON, the Revision Audit run transcripts, automated test results, and manual review records together for the handoff.
+
+12:12.167 --> 12:17.081
+The sample installation and update finished, and the automated checks passed.
+
+12:17.881 --> 12:23.433
+The administrator's SharePoint review and the Teams welcome-post review were completed.
+
+12:23.433 --> 12:28.921
+The group naming policy and reader-account review still require separate confirmation.
+
+12:29.721 --> 12:33.039
+Keep the handoff records from step fifteen together.
+
+12:33.039 --> 12:38.719
+For recovery or removal, use the administrator quickstart included with the same release.
+
+12:39.519 --> 12:45.709
+This was an unofficial demonstration in a Microsoft lab, not a University of Illinois deployment.

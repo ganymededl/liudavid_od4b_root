@@ -1,60 +1,817 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Copilot Center of Excellence — David Shih Chun Liu</title>
-<link rel="icon" href="data:,">
-<meta name="description" content="Copilot Center of Excellence guidance and resources. Public, no Microsoft sign-in. Coming soon.">
-<style>
-  :root {
-    --bg:     #060609;
-    --t1:     #f4f4f8;
-    --t2:     rgba(244,244,248,0.55);
-    --tile:   rgba(10,10,16,0.58);
-    --border: rgba(255,255,255,0.09);
-    --c1:     #00d9ff;
-    --accent: #ff6bb5;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; background: var(--bg); color: var(--t1);
-    font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
-  a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 24px 72px; }
-  .back { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600;
-    color: var(--t2); margin-bottom: 28px; }
-  .back:hover { color: var(--c1); }
-  h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 8px; }
-  .sub { font-size: 12.5px; color: var(--t2); margin: 0 0 4px; line-height: 1.5; }
-  .public-badge {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff);
-    padding: 4px 10px; border-radius: 999px; margin: 4px 0 22px;
-  }
-  .soon {
-    max-width: 520px; background: var(--tile); border: 0.5px solid var(--border);
-    border-radius: 14px; padding: 22px; box-shadow: 0 6px 20px rgba(0,0,0,0.30);
-  }
-  .soon-label { font-size: 9.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--accent); margin-bottom: 8px; }
-  .soon p { margin: 0; font-size: 12.5px; color: var(--t2); line-height: 1.55; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Installing a Microsoft 365 Copilot Center of Excellence for Higher Education - Unofficial Demonstration</title>
+  <meta name="description" content="A demonstration of installing a Copilot Center of Excellence for a higher education organization, using public University of Illinois Urbana-Champaign information in a Microsoft lab. Not affiliated with the university.">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 32px 20px 140px;
+    }
+    header, section {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      margin-bottom: 16px;
+      padding: 22px;
+    }
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: 1.8rem; }
+    h2 { font-size: 1.22rem; color: var(--cp-accent); }
+    p { margin: 0 0 12px; }
+    a { color: var(--cp-link); }
+    code, pre {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.88rem;
+    }
+    .meta { color: var(--cp-text-muted); font-size: 0.93rem; }
+    .badge {
+      display: inline-block;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 0.625rem;
+      padding: 2px 9px;
+      font-weight: 700;
+      margin-right: 8px;
+      font-size: 0.85rem;
+    }
+    .disclaimer {
+      background: color-mix(in srgb, var(--cp-danger) 14%, var(--cp-surface));
+      border: 2px solid var(--cp-danger);
+      border-radius: 0.75rem;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+      font-weight: 600;
+      position: sticky;
+      top: 10px;
+      z-index: 40;
+    }
+    .disclaimer strong { color: var(--cp-danger); }
+    figure { margin: 10px 0; }
+    .shot {
+      max-width: 100%;
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      box-shadow: var(--cp-shadow);
+      background: #111;
+    }
+    figcaption {
+      color: var(--cp-text-soft);
+      font-size: 0.8rem;
+      margin-top: 6px;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .boundary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: 14px;
+      margin: 10px 0;
+    }
+    .boundary-card {
+      overflow-wrap: anywhere;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      padding: 14px 16px;
+      background: var(--cp-surface-soft);
+    }
+    .boundary-card h3 { font-size: 1rem; margin-bottom: 8px; }
+    .boundary-card li { margin-bottom: 5px; }
+    .code-panel {
+      background: #1b1b1b;
+      color: #d8d8d8;
+      border-radius: 0.75rem;
+      padding: 14px 16px;
+      overflow-x: auto;
+      border: 1px solid var(--cp-border-strong);
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .code-panel .ok { color: #7ee787; }
+    .code-panel .warn { color: #e3b341; }
+    .code-panel .muted { color: #9aa0a6; }
+    table.source-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0 4px;
+    }
+    table.source-table th, table.source-table td {
+      border: 1px solid var(--cp-border);
+      padding: 7px 10px;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.92rem;
+      overflow-wrap: anywhere;
+    }
+    table.source-table th {
+      background: var(--cp-surface-soft);
+    }
+    .lab-tag {
+      display: inline-block;
+      background: var(--cp-warning);
+      color: #1a1a1a;
+      border-radius: 0.4rem;
+      padding: 1px 7px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+    .step { border-left: 6px solid var(--cp-accent); }
+    .step.current { box-shadow: 0 0 0 3px var(--cp-highlight), var(--cp-shadow); }
+    .tour-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .tour-btn {
+      border: 1px solid var(--cp-accent);
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .tour-btn:hover { background: var(--cp-accent-hover); }
+    .tour-hint { color: var(--cp-text-muted); font-size: 0.85rem; }
+    footer {
+      color: var(--cp-text-muted);
+      font-size: 0.85rem;
+      text-align: center;
+      padding: 8px 0 0;
+    }
+    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+    .pill {
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      color: var(--cp-text-muted);
+    }
+    a.pill { text-decoration: none; }
+    a.pill:hover, a.pill:focus-visible { border-color: var(--cp-accent); color: var(--cp-accent); }
+    summary { cursor: pointer; color: var(--cp-accent); font-weight: 600; }
+    details[open] summary { margin-bottom: 12px; }
+    .disclaimer { font-size: 0.86rem; padding: 10px 14px; }
+    section, header, .step { scroll-margin-top: 150px; }
+    .current { box-shadow: 0 0 0 3px var(--cp-highlight), var(--cp-shadow); }
+    body.wide main { max-width: 1500px; }
+
+    .player-slot {
+      position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 16px 0 8px;
+      background: #000; border-radius: 12px; box-shadow: var(--cp-shadow);
+    }
+    .player-frame {
+      position: relative; width: 100%; height: 100%; border-radius: 12px; overflow: hidden; background: #000;
+    }
+    .player-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
+    .frame-tools {
+      position: absolute; top: 48px; right: 10px; display: flex; gap: 6px; z-index: 3;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .player-frame:hover .frame-tools, .player-frame:focus-within .frame-tools, .player-frame.mini .frame-tools { opacity: 1; }
+    @media (hover: none) { .frame-tools { opacity: 1; } }
+    .frame-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.65); color: #fff;
+      border-radius: 999px; padding: 6px 12px; font: 600 0.78rem "Segoe UI", Aptos, Calibri, sans-serif; cursor: pointer;
+    }
+    .frame-btn:hover, .frame-btn:focus-visible { background: rgba(0, 0, 0, 0.9); border-color: #fff; outline: none; }
+    .player-frame:not(.mini) .btn-top { display: none; }
+    .player-frame.mini {
+      position: fixed; right: 18px; bottom: 18px; width: min(420px, 44vw); height: auto; aspect-ratio: 16 / 9;
+      z-index: 60; box-shadow: var(--cp-shadow); border: 1px solid var(--cp-border-strong);
+    }
+    .player-frame.mini #btnWide { display: none; }
+    .player-frame:fullscreen { border-radius: 0; border: 0; width: 100vw !important; height: 100vh !important; position: static; }
+    .player-frame:-webkit-full-screen { border-radius: 0; border: 0; width: 100vw !important; height: 100vh !important; position: static; }
+    .player-frame:fullscreen .frame-tools { top: 56px; }
+    .player-meta {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 6px 0 2px;
+      font-size: 0.88rem; color: var(--cp-text-muted);
+    }
+    .player-meta #nowPlaying { color: var(--cp-text); font-weight: 600; }
+    .player-meta label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    h2.has-seek { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .seek-btn {
+      margin-left: auto; border: 1px solid var(--cp-accent); background: transparent; color: var(--cp-accent);
+      border-radius: 999px; padding: 5px 14px; font: 600 0.8rem "Segoe UI", Aptos, Calibri, sans-serif; cursor: pointer;
+    }
+    .seek-btn:hover, .seek-btn:focus-visible { background: var(--cp-accent); color: var(--cp-accent-fg); outline: none; }
+    [hidden] { display: none !important; }
+    .video-fallback {
+      margin: 8px 0; padding: 10px 14px; border: 1px solid var(--cp-warning); border-radius: 10px; font-size: 0.9rem;
+      background: color-mix(in srgb, var(--cp-warning) 16%, var(--cp-surface));
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <a class="back" href="../index.html">&larr; Back to hub</a>
-    <h1>Copilot Center of Excellence</h1>
-    <p class="sub">Guidance and resources for building and running a Copilot Center of Excellence.</p>
-    <div class="public-badge">
-      <svg width="10" height="10" viewBox="0 0 16 16" fill="none" stroke="#00160f" stroke-width="1.6"><circle cx="8" cy="8" r="6.2"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg>
-      Public &middot; no Microsoft sign-in
+  <main>
+    <div class="disclaimer">
+      <strong>UNOFFICIAL DEMONSTRATION &mdash; NOT A UNIVERSITY DEPLOYMENT.</strong>
+      This walkthrough uses public University of Illinois Urbana-Champaign information to demonstrate configuration
+      in a Microsoft internal lab. It is not affiliated with, endorsed by, or deployed for the university. No
+      university tenant, systems, accounts, data, or internal resources are used. For your own deployment, replace
+      all lab-specific settings with values approved by your organization.
     </div>
 
-    <div class="soon">
-      <div class="soon-label">Coming soon</div>
-      <p>This section is being built. Check back soon for public Copilot CoE guidance and resources.</p>
-    </div>
-  </div>
+    <header id="tour-00" data-tour="0">
+      <h1>Installing a Microsoft 365 Copilot Center of Excellence for Higher Education</h1>
+      <p class="meta" role="note"><strong>Public demonstration copy.</strong> Identifying lab values have been replaced or covered in the text, images, video, and narration. Displayed tenant addresses and folder names are illustrative placeholders, not deployment targets. Moving terminal captures are shown as sanitized still reference views. Use only values approved by your organization.</p>
+      <p class="meta">Follow a sample higher education deployment from gathering the university's public pages to
+        checking the finished site. See how to configure the kit, install it with PowerShell 7, review SharePoint and
+        Teams, publish a content update, and check the result.</p>
+      <p class="meta">This walkthrough uses
+        <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>
+        release 3.8.21.</p>
+      <nav class="pill-row" aria-label="Written references">
+        <a class="pill" href="#site-tour-reference">What users get</a>
+        <a class="pill" href="#get-kit">Get the kit</a>
+        <a class="pill" href="#external-sharing">External-sharing addendum</a>
+      </nav>
+      <div class="player-slot" id="playerSlot">
+        <div class="player-frame" id="playerFrame">
+          <video id="walkVideo" controls preload="metadata" playsinline poster="Images/video-poster.jpg"
+                 aria-label="Narrated walkthrough: installing a Copilot Center of Excellence for higher education">
+            <source src="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4" type="video/mp4">
+            <track kind="captions" src="walkthrough-captions.vtt" srclang="en" label="English">
+            Your browser can't play this video. <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4">Download the MP4</a>.
+          </video>
+          <div class="frame-tools">
+            <button class="frame-btn btn-top" id="btnTop" type="button">&#8593; Back to video</button>
+            <button class="frame-btn" id="btnWide" type="button" aria-pressed="false">Wide view</button>
+            <button class="frame-btn" id="btnFull" type="button">Full screen</button>
+          </div>
+        </div>
+      </div>
+      <div class="video-fallback" id="videoFallback" hidden>
+        <strong>The video didn't start.</strong> <span class="fb-msg"></span>
+        Try reloading the page, or <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4">download the MP4</a> and play it directly. The step-by-step details below
+        cover the same content.
+      </div>
+      <div class="player-meta">
+        <span id="nowPlaying">17 video sections (introduction plus 16 steps) &middot; about 13 minutes</span>
+        <label><input type="checkbox" id="followAlong" checked> Follow along below</label>
+        <span>Use &ldquo;Play this section&rdquo; on any step to jump the video there. Turn on captions with the CC button.</span>
+      </div>
+    </header>
+
+    <section class="step" id="tour-01" data-tour="1">
+      <h2><span class="badge">01</span>Collect approved public sources first</h2>
+      <p>Before opening PowerShell, find the organization's own published pages: responsible-AI guidance, Copilot
+        guidance, the IT service desk, a technology-request catalog, security-incident reporting, and training
+        resources. The links below are official university pages reviewed for this demonstration on
+        October 20, 2026.</p>
+      <table class="source-table">
+        <tr><th>Purpose</th><th>Official public source</th></tr>
+        <tr><td>Responsible generative AI guidance</td><td><a href="https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/" target="_blank" rel="noopener">https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/</a></td></tr>
+        <tr><td>Data handling &amp; IP best practices</td><td><a href="https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/" target="_blank" rel="noopener">https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/</a></td></tr>
+        <tr><td>Microsoft Copilot Chat guidance</td><td><a href="https://genai.illinois.edu/ai-apps-copilot-chat/" target="_blank" rel="noopener">https://genai.illinois.edu/ai-apps-copilot-chat/</a></td></tr>
+        <tr><td>IT Service Desk</td><td><a href="https://www.techservices.illinois.edu/get-help/it-service-desk/" target="_blank" rel="noopener">https://www.techservices.illinois.edu/get-help/it-service-desk/</a></td></tr>
+        <tr><td>Technology request catalog</td><td><a href="https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog" target="_blank" rel="noopener">https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog</a></td></tr>
+        <tr><td>Cybersecurity incident reporting</td><td><a href="https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/" target="_blank" rel="noopener">https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/</a></td></tr>
+        <tr><td>Teaching &amp; learning best practices</td><td><a href="https://genai.illinois.edu/best-practices-teaching-and-learning/" target="_blank" rel="noopener">https://genai.illinois.edu/best-practices-teaching-and-learning/</a></td></tr>
+      </table>
+      <p class="meta">Public support contact used in this demo: <code>consult@illinois.edu</code>.</p>
+      <p class="meta">Don't infer private reporting routes, internal ticket links, or the Microsoft tenant name from
+        public pages. Ask an authorized administrator to supply or confirm those values.</p>
+    </section>
+
+    <section class="step" id="tour-02" data-tour="2">
+      <h2><span class="badge">02</span>Separate public information from deployment settings</h2>
+      <p>Keep two categories separate. Public information comes from the organization's published pages. Deployment
+        settings must be supplied or confirmed by an authorized administrator. The tenant-specific values shown here
+        belong to the Microsoft lab used for this recording.</p>
+      <div class="boundary-grid">
+        <div class="boundary-card">
+          <h3>Public information</h3>
+          <ul>
+            <li>University of Illinois Urbana-Champaign</li>
+            <li>Public AI guidance pages</li>
+            <li>Published service desk and support mailbox</li>
+            <li>Public security, privacy, and training resources</li>
+          </ul>
+        </div>
+        <div class="boundary-card">
+          <h3>Deployment settings &mdash; Microsoft lab only</h3>
+          <ul>
+            <li>Tenant: <code>yourtenant.onmicrosoft.com</code></li>
+            <li>Admin host: <code>yourtenant-admin.sharepoint.com</code></li>
+            <li>Site host: <code>yourtenant.sharepoint.com</code></li>
+            <li>Administrator account and provisioning-app client ID</li>
+          </ul>
+        </div>
+      </div>
+      <p class="meta">For a real deployment, use the organization's authorized tenant, SharePoint hosts, administrator
+        account, and app registration.</p>
+    </section>
+
+    <section class="step" id="tour-03" data-tour="3">
+      <h2><span class="badge">03</span>Verify and extract the release package</h2>
+      <figure>
+        <img class="shot" src="Images/ps-tenants.png" alt="PowerShell 7 terminal showing the known lab tenants and certificate status before starting work">
+        <figcaption>PowerShell 7 terminal, confirming the correct lab tenant before any kit command runs.</figcaption>
+      </figure>
+      <pre class="code-panel">$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
+$expectedHash = '&lt;SHA256 from the release receipt&gt;'
+$installRoot = 'C:\CoE-Install\DemoOrg'
+$kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'
+
+if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
+  throw 'The chosen release ZIP does not match its receipt.'
+}
+Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
+Copy-Item (Join-Path $kitRoot 'Org-Template') $orgPath -Recurse</pre>
+      <p class="meta">The release receipt supplied with the package records the expected SHA256 for that ZIP. Verify
+        the hash before extracting, and use a new, empty install folder for each clean run.</p>
+      <p class="meta">The separate organization folder holds settings, content overrides, and approved assets outside
+        the install folder, so extracting a newer release does not overwrite them.</p>
+    </section>
+
+    <section class="step" id="tour-04" data-tour="4">
+      <h2><span class="badge">04</span>Configure identity, security, and environment</h2>
+      <figure>
+        <img class="shot" src="Images/ps-settings-json.png" alt="Deployment Settings JSON open in an editor showing tenant, identity, security and environment fields">
+        <figcaption>Deployment settings used in the lab recording.</figcaption>
+      </figure>
+      <p>Open <code>Deployment-Settings.json</code> in the organization folder. Enter the tenant, SharePoint hosts,
+        organization name, and alias.</p>
+      <p>If this is the tenant's first installation, leave <code>PnPClientID</code> blank for now. Step 06 registers
+        the provisioning app and saves its client ID. This recording reuses an existing approved lab app.</p>
+      <p>Set <code>LearningEnvironment</code> to <code>HigherEducation</code>. Keep
+        <code>TeamVisibility</code> set to <code>Private</code> and <code>CoESiteSharingCapability</code> set to
+        <code>Disabled</code>, unless the organization has explicitly approved a different configuration.</p>
+      <p>Choose the alias carefully: it becomes the site path and must meet Microsoft 365 naming requirements.</p>
+    </section>
+
+    <section class="step" id="tour-05" data-tour="5">
+      <h2><span class="badge">05</span>Configure support, governance, and content</h2>
+      <p>In the same <code>Deployment-Settings.json</code> file, set the support and governance links:</p>
+      <pre class="code-panel">"Links": {
+  "ServiceDesk": "https://www.techservices.illinois.edu/get-help/it-service-desk/",
+  "TechnologyRequest": "https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog",
+  "DataSafetyIncident": "https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/",
+  "AIGuidelines": "https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/"
+},
+"GovernanceLinks": [
+  { "label": "Ethical and responsible use of generative AI", "url": "https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/" },
+  { "label": "Data handling and intellectual property best practices", "url": "https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/" },
+  { "label": "Microsoft Copilot Chat guidance", "url": "https://genai.illinois.edu/ai-apps-copilot-chat/" }
+]</pre>
+      <p>Use the complete approved URLs shown here. Also review the training links, champion departments, prompt
+        library setting, and sample agent entries before installation.</p>
+    </section>
+
+    <section class="step" id="tour-06" data-tour="6">
+      <h2><span class="badge">06</span>Install PnP.PowerShell and register the app</h2>
+      <pre class="code-panel">$PSVersionTable.PSVersion
+Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
+.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive</pre>
+      <p class="meta">This recording uses PowerShell 7.6.7. The kit requires PowerShell 7.4 or later and
+        PnP.PowerShell 3.2.0.</p>
+      <p class="meta">Someone authorized to grant the required app permissions runs the registration script once per
+        tenant, then confirms in Entra that every required delegated permission shows Granted. The script saves the
+        new client ID to the organization settings file.</p>
+    </section>
+
+    <section class="step" id="tour-07" data-tour="7">
+      <h2><span class="badge">07</span>Start the clean installation</h2>
+      <pre class="code-panel">Set-Location $kitRoot
+.\02_Install-CopilotCoE.ps1 `
+  -OrgPath $orgPath `
+  -ContentMode Demo `
+  -SeedDemoContent</pre>
+      <p><code>-SeedDemoContent</code> publishes the pages, catalogs, calendar, and governance content. Without it,
+        the installer creates only the Team and an empty SharePoint site.</p>
+      <p>This lab uses <code>-ContentMode Demo</code> to retain the kit's generated demonstration notices. An approved
+        production deployment uses <code>-ContentMode Customer</code>. Review the source files and existing site
+        content, and remove any sample items yourself; changing the mode does not replace that review.</p>
+      <p>This is a clean install, so <code>-ResumeExisting</code> is not used. If an earlier attempt already created a
+        Team or site, investigate first. Then either resume that exact deployment or use
+        <code>04_Remove-CopilotCoE.ps1</code> before starting again. Deleting only the SharePoint site leaves the Team
+        and Microsoft 365 group behind, so the next installation can conflict with them.</p>
+    </section>
+
+    <section class="step" id="tour-08" data-tour="8">
+      <h2><span class="badge">08</span>Review the checks before creation</h2>
+      <pre class="code-panel"><span class="muted">Organization folder: C:\CoE-Orgs\DemoOrg
+Using settings from C:\CoE-Orgs\DemoOrg\Deployment-Settings.json (command-line values override it).
+Connecting to the specified tenant administrator endpoint using Interactive sign-in.</span>
+<span class="warn">WARNING: The group naming policy could not be read (Insufficient privileges to complete the operation.).</span>
+<span class="ok">Read-only preflight passed. Creating the Private Illinois Copilot CoE Team and its SharePoint site.</span>
+
+Title                        Url
+-----                        ---
+Illinois Copilot Center Demo https://yourtenant.sharepoint.com/sites/CopilotCoEDemo
+Applying site sharing 'Disabled' (owners only)
+Disabling non-owner sharing</pre>
+      <p class="meta">Console output from the recorded lab installation. Before it creates anything, the installer
+        checks the organization's content files locally, signs in, and runs read-only checks. In this run, the account
+        could not read the group naming policy. A naming policy can add a prefix or suffix to the Microsoft 365 group
+        and alias, which can prevent the installer from finding the Team it created. An authorized administrator must
+        confirm that policy separately.</p>
+    </section>
+
+    <section class="step" id="tour-09" data-tour="9">
+      <h2><span class="badge">09</span>Watch the content load</h2>
+      <pre class="code-panel">[11:19:04] START Success Stories catalog
+[11:19:31] DONE Success Stories catalog - added 4, preserved 0
+[11:19:31] START Learning Paths catalog
+[11:20:31] DONE Learning Paths catalog - added 18, preserved 0
+[11:20:31] START Agent Showcase catalog
+[11:21:13] DONE Agent Showcase catalog - added 2, preserved 0
+[11:21:13] START Prompt Library catalog
+<span class="muted">[11:21:49] Prompts added - 25 of 230
+[11:22:36] Prompts added - 100 of 230
+[11:23:40] Prompts added - 200 of 230</span>
+[11:24:17] DONE Prompt Library catalog - added 230, preserved 0
+[11:24:18] START Home page and hub repair
+[11:25:49] DONE Home page and hub repair
+[11:26:10] START horizontal mega-menu navigation
+[11:27:37] DONE horizontal mega-menu navigation - 6 top-level link(s)</pre>
+      <p class="meta">Installation log showing progress through the catalogs and navigation. The higher education
+        prompt library contains 230 prompts and took the longest of the catalog steps shown here.</p>
+    </section>
+
+    <section class="step" id="tour-10" data-tour="10">
+      <h2><span class="badge">10</span>Confirm the installation finished</h2>
+      <pre class="code-panel">COE SECURITY POSTURE (live checks; not a substitute for your organization's security approval)
+  Team visibility: Private <span class="ok">[PASS]</span> (required: Private)
+  Parent site external sharing: OFF (Disabled) <span class="ok">[PASS]</span>
+  Leadership Governance external sharing: OFF (Disabled) <span class="ok">[PASS]</span>
+  Program Governance external sharing: OFF (Disabled) <span class="ok">[PASS]</span>
+
+<span class="ok">Submitted the prepared welcome post to 'Share Your Prompt'. Verify it in Teams.
+Submitted the prepared welcome post to 'Ask Us Anything'. Verify it in Teams.
+Submitted the prepared welcome post to 'General'. Verify it in Teams.</span>
+Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization folder&gt; -SiteUrl https://yourtenant.sharepoint.com/sites/CopilotCoEDemo
+<span class="ok">02_Install-CopilotCoE finished in 2143s (about 36 minutes).</span></pre>
+      <p class="meta">Save the site address exactly as printed. The installer saves
+        <code>CoE-Revision-Report.json</code> beside <code>Deployment-Settings.json</code> in the organization folder.
+        It saves the run transcripts in the <code>RevisionAudit</code> subfolder.</p>
+    </section>
+
+    <section class="step" id="tour-11" data-tour="11">
+      <h2><span class="badge">11</span>Run the read-only checker</h2>
+      <pre class="code-panel">.\Test-CoEInstall.ps1 `
+  -OrgPath $orgPath `
+  -SiteUrl 'https://yourtenant.sharepoint.com/sites/CopilotCoEDemo' `
+  -ContentMode Demo
+
+<span class="ok">ALL CHECKS PASSED (292)</span></pre>
+      <figure>
+        <img class="shot" src="Images/ps-checker-pass-rows.png" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
+        <figcaption>Checker result from this lab run: 292 checks passed.</figcaption>
+      </figure>
+      <p class="meta">The checker does not change the site. Passing it is only part of the review: read every
+        <code>WARN</code> message and complete the manual checks it identifies.</p>
+    </section>
+
+    <section class="step" id="tour-12" data-tour="12">
+      <h2><span class="badge">12</span>Review SharePoint as an administrator</h2>
+      <div class="gallery">
+        <figure>
+          <img class="shot" src="Images/site-home.png" alt="Copilot Center Demo Home page with task tiles and the unofficial demo notice">
+          <figcaption>Home &mdash; task tiles and the demonstration notice.</figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="Images/site-help.png" alt="Service Catalog and Support page listing separate routes for help, requests, and incidents">
+          <figcaption>Service Catalog and Support &mdash; support, request, and incident links.</figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="Images/site-governance.png" alt="Governance and Responsible AI page with AI guidance links">
+          <figcaption>Governance &mdash; links to the university's public AI guidance pages.</figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="Images/site-prompts.png" alt="Prompt library page listing prompts organized by role and task">
+          <figcaption>Prompt library &mdash; 230 higher education prompts.</figcaption>
+        </figure>
+      </div>
+      <p class="meta">Before opening the production site to users, repeat this review with an account that has reader
+        access, not owner access. That reader-account review was not performed in this recording. Also replace every
+        lab-specific value with one the organization has approved.</p>
+    </section>
+
+    <section class="step" id="tour-13" data-tour="13">
+      <h2><span class="badge">13</span>Check the welcome messages manually</h2>
+      <div class="gallery">
+        <figure>
+          <img class="shot" src="Images/teams-general.png" alt="Teams General channel showing exactly one welcome post">
+          <figcaption>General &mdash; one welcome post.</figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="Images/teams-aua.png" alt="Teams Ask Us Anything channel showing exactly one welcome post with working links">
+          <figcaption>Ask Us Anything &mdash; one welcome post.</figcaption>
+        </figure>
+        <figure>
+          <img class="shot" src="Images/teams-syp.png" alt="Teams Share Your Prompt channel showing exactly one welcome post">
+          <figcaption>Share Your Prompt &mdash; one welcome post.</figcaption>
+        </figure>
+      </div>
+      <p class="meta">The provisioning app can send these posts but normally can't read them back, so check them
+        visually. Confirm that each channel has exactly one prepared welcome post, follow its links, and check the
+        demonstration notice.</p>
+    </section>
+
+    <section class="step" id="tour-14" data-tour="14">
+      <h2><span class="badge">14</span>Publish a reviewed content update</h2>
+      <figure>
+        <img class="shot" src="Images/ps-update-progress.png" alt="PowerShell terminal showing the content update command publishing catalogs">
+        <figcaption>Recording of the update command republishing catalogs on the lab site.</figcaption>
+      </figure>
+      <p>Use the update script to publish reviewed changes without rebuilding the Team.</p>
+      <p>This recording also includes <code>-RepairCapturedPages</code> because it demonstrates the repair process on a
+        fresh validation site. This switch rewrites the pages the kit manages. Edits you made to those pages in
+        SharePoint may be lost. Before using it on an existing site, review section D, “Home and the four captured
+        pages,” in <code>01_Admin-Quickstart.html</code>. That section lists the page elements the switch resets. The
+        update script does not provide a <code>-WhatIf</code> preview.</p>
+      <pre class="code-panel">.\03_Update-CoEContent.ps1 `
+  -OrgPath $orgPath `
+  -Scope All `
+  -RepairCapturedPages `
+  -AuthenticationMode Interactive `
+  -ContentMode Demo</pre>
+      <p class="meta">In this recorded run, the update preserved existing catalog rows and checked the security
+        configuration again. Review the output for your own deployment rather than assuming every update will have
+        the same result.</p>
+    </section>
+
+    <section class="step" id="tour-15" data-tour="15">
+      <h2><span class="badge">15</span>Check the site again after the update</h2>
+      <figure>
+        <img class="shot" src="Images/ps-checker-command.png" alt="PowerShell terminal running the checker again after the content update">
+        <figcaption>Re-running the same read-only checker after the update.</figcaption>
+      </figure>
+      <pre class="code-panel">.\Test-CoEInstall.ps1 `
+  -OrgPath $orgPath `
+  -SiteUrl 'https://yourtenant.sharepoint.com/sites/CopilotCoEDemo' `
+  -ContentMode Demo
+
+<span class="ok">ALL CHECKS PASSED (292)</span></pre>
+      <p class="meta">Keep <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, the
+        <code>RevisionAudit</code> run transcripts, automated test results, and manual review records together for
+        the handoff.</p>
+    </section>
+
+    <section id="tour-16" data-tour="16">
+      <h2><span class="badge">16</span>Installation complete</h2>
+      <p>The sample installation and update finished, and the automated checks passed. The administrator's SharePoint
+        review and the Teams welcome-post review were completed. The group naming policy and reader-account review
+        still require separate confirmation.</p>
+      <p>Keep the handoff records from step 15 together. For recovery or removal, use the administrator quickstart
+        included with the same release.</p>
+      <p class="meta"><strong>Release 3.8.21 &middot; 292 checks passed &middot; Content mode: Demo &middot;
+        Environment: HigherEducation</strong></p>
+      <p style="margin-top:12px;">
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
+      </p>
+    </section>
+
+    <section id="site-tour-reference">
+      <h2>What users get after installation</h2>
+      <p class="meta">Written reference, not an additional video section. This expands the earlier screenshot-led
+        tour without changing the installation sequence. Review the installed content for your chosen template
+        and configuration; sample guidance is not the organization's official policy.</p>
+      <details>
+        <summary>Explore the site's main areas</summary>
+        <table class="source-table">
+          <thead><tr><th scope="col">Area</th><th scope="col">Purpose and review point</th></tr></thead>
+          <tbody>
+            <tr><td>Home and Start in 10 minutes</td><td>Give users a first task and routes to learning, prompts,
+              agents, and help. Confirm the first-use links work for a reader account.</td></tr>
+            <tr><td>Learning paths by role</td><td>Organize training resources and practice by role.
+              The site does not track course completion; keep that in the organization's learning system.</td></tr>
+            <tr><td>Prompt library by role</td><td>Provide examples users can adapt to their work. Organization
+              prompt CSV files can extend or replace supplied content; review those rows before deployment.</td></tr>
+            <tr><td>Agent Showcase</td><td>Help users find reviewed agents and understand their owner, data
+              sources, and access requirements. Review submissions before approving them for publication.</td></tr>
+            <tr><td>Get help</td><td>Keep general help, service requests, and security or privacy incident
+              reporting distinct. Use the organization's approved contact and submission routes.</td></tr>
+            <tr><td>Governance and Responsible AI</td><td>Provide guidance and example responsibilities.
+              Replace sample classifications, risk models, and roles with approved organizational material.</td></tr>
+            <tr><td>Success Stories</td><td>Collect reviewed examples of useful work. Exclude sensitive or
+              regulated information, obtain consent from people shown, and include captions for video.</td></tr>
+            <tr><td>Feedback and Roadmap</td><td>Connect product updates with local rollout plans and feedback.
+              Clearly distinguish Microsoft's published roadmap from the organization's own commitments.</td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+
+    <section id="get-kit">
+      <h2>Get the kit for this walkthrough</h2>
+      <p>Use the reviewed release 3.8.21 implementation ZIP and its release receipt. The receipt identifies the
+        expected SHA256 hash. GitHub's automatic source-code archives are not the prebuilt implementation ZIP;
+        the source release also documents its template dependency.</p>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.21" target="_blank" rel="noopener">Release 3.8.21 notes and source</a>
+        &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">Kit repository and documentation</a></p>
+      <p class="meta">Keep organization settings and approved overrides outside the extracted kit. This recording
+        uses delegated interactive sign-in through a tenant-owned Entra app. Installation, content updates,
+        removal, and read-only validation are separate operations; use the administrator quickstart supplied
+        with the same release.</p>
+    </section>
+
+    <section id="external-sharing">
+      <h2>Addendum: sharing a CoE site with an external guest</h2>
+      <p>A publicly accessible guide does not make the deployed SharePoint site public. The kit keeps the Team
+        private and external site sharing disabled by default. Customer installations should retain those
+        defaults; an approved lab preview for a named guest is a separate decision.</p>
+      <p><a href="external-sharing-addendum.html">Open the external-sharing addendum &rarr;</a></p>
+      <p class="meta">The addendum covers policy checks, the site-level switch, the corresponding organization
+        setting, Visitors Read access, guest testing, and closing the preview. It does not require making
+        tenant-wide policy more permissive or enabling anonymous links. It is written reference material,
+        not part of the narrated video.</p>
+    </section>
+
+    <footer>Unofficial demonstration in a Microsoft lab. Not affiliated with, endorsed by, or deployed for the University of Illinois Urbana-Champaign.</footer>
+  </main>
+
+  <script>
+    (() => {
+      const STARTS = [0.0, 48.9, 91.667, 132.867, 172.733, 226.2, 267.267, 311.167, 375.1, 429.867, 470.667, 515.567, 556.933, 603.7, 642.6, 701.067, 732.067];
+      const sections = STARTS.map((_, i) => document.getElementById('tour-' + String(i).padStart(2, '0')));
+      const titles = sections.map((el, i) => i === 0 ? 'Introduction'
+        : (el.querySelector('h2') ? el.querySelector('h2').textContent.replace(/^\d+/, '').trim() : ''));
+      const video = document.getElementById('walkVideo');
+      const frame = document.getElementById('playerFrame');
+      const slot = document.getElementById('playerSlot');
+      const nowPlaying = document.getElementById('nowPlaying');
+      const follow = document.getElementById('followAlong');
+      const btnFull = document.getElementById('btnFull');
+      const btnWide = document.getElementById('btnWide');
+      const btnTop = document.getElementById('btnTop');
+      const smooth = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      let lastIndex = -1, slotVisible = true;
+
+      function indexAt(t) {
+        for (let i = STARTS.length - 1; i >= 0; i--) if (t >= STARTS[i] - 0.05) return i;
+        return 0;
+      }
+      function setCurrent(i, scroll) {
+        sections.forEach(el => el.classList.remove('current'));
+        sections[i].classList.add('current');
+        nowPlaying.textContent = 'Now playing: ' + (i + 1) + ' of ' + STARTS.length + ' \u00B7 ' + titles[i];
+        if (scroll && follow.checked && i > 0) sections[i].scrollIntoView({ behavior: smooth, block: 'start' });
+      }
+      function seekTo(i) {
+        lastIndex = i;
+        video.currentTime = STARTS[i] + 0.05;
+        setCurrent(i, false);
+        video.play().catch(() => {});
+      }
+      function updateMini() {
+        const started = video.currentTime > 0.5 && !video.ended;
+        frame.classList.toggle('mini', started && !slotVisible && !document.fullscreenElement);
+      }
+
+      sections.forEach((el, i) => {
+        if (i === 0) return;
+        const h2 = el.querySelector('h2');
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'seek-btn';
+        b.textContent = '\u25B6 Play this section';
+        b.setAttribute('aria-label', 'Play section ' + i + ': ' + titles[i]);
+        b.addEventListener('click', () => seekTo(i));
+        h2.classList.add('has-seek');
+        h2.appendChild(b);
+      });
+
+      video.addEventListener('timeupdate', () => {
+        const i = indexAt(video.currentTime);
+        if (i !== lastIndex) { lastIndex = i; setCurrent(i, !video.paused); }
+        updateMini();
+      });
+      video.addEventListener('seeked', () => {
+        const i = indexAt(video.currentTime);
+        lastIndex = i; setCurrent(i, false); updateMini();
+      });
+      ['play', 'pause', 'ended'].forEach(ev => video.addEventListener(ev, updateMini));
+
+      new IntersectionObserver(entries => {
+        slotVisible = entries[0].isIntersecting;
+        updateMini();
+      }, { threshold: 0.15 }).observe(slot);
+
+      btnFull.addEventListener('click', () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (frame.requestFullscreen) frame.requestFullscreen();
+        else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+      });
+      document.addEventListener('fullscreenchange', () => {
+        btnFull.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+        updateMini();
+      });
+      btnWide.addEventListener('click', () => {
+        const on = document.body.classList.toggle('wide');
+        btnWide.setAttribute('aria-pressed', String(on));
+        btnWide.textContent = on ? 'Standard view' : 'Wide view';
+      });
+      btnTop.addEventListener('click', () => slot.scrollIntoView({ behavior: smooth, block: 'start' }));
+
+      // If the video can't load or stalls after a click, say so instead of leaving a black frame.
+      const fallback = document.getElementById('videoFallback');
+      const fbMsg = fallback.querySelector('.fb-msg');
+      let watchdog;
+      function showFallback(msg) { fbMsg.textContent = msg; fallback.hidden = false; }
+      if (!video.canPlayType('video/mp4')) showFallback('This browser can\u2019t play MP4 video.');
+      // Load failures from <source> children fire on the source element and don't bubble, so listen in the capture phase.
+      video.addEventListener('error', () => showFallback('The browser couldn\u2019t load the video file.'), true);
+      setTimeout(() => {
+        if (video.readyState === 0 && video.networkState === 3) showFallback('The browser couldn\u2019t load the video file.');
+      }, 5000);
+      video.addEventListener('play', () => {
+        clearTimeout(watchdog);
+        const t0 = video.currentTime;
+        watchdog = setTimeout(() => {
+          if (!video.paused && video.currentTime === t0 && video.readyState < 3) showFallback('It is taking too long to start.');
+        }, 12000);
+      });
+      video.addEventListener('playing', () => { clearTimeout(watchdog); fallback.hidden = true; });
+    })();
+  </script>
 </body>
 </html>
