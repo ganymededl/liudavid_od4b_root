@@ -1,33 +1,77 @@
-GCC Copilot CoE Install Walkthrough (8 Steps)
-Aligned to: https://ganymededl.github.io/liudavid_od4b_root/copilot-center-of-excellence/government-install.html
-Style target: commercial walkthrough voice/tone
+GCC Copilot CoE Install Walkthrough - Eight Steps
 
 INTRO
-This walkthrough shows the exact eight-step government install flow for the Copilot Center of Excellence kit, using the validated MNIT GCC run pattern. We focus on repeatable execution, controlled identity, and post-install proof, so admins can deploy with confidence and auditability.
+In this walkthrough, we'll install the Copilot Center of Excellence kit in a GCC Moderate tenant, following the eight-step process used in the MNIT GCC run.
 
-STEP 1 — Verify and extract the implementation package
-Start by validating the frozen implementation ZIP against its release SHA256 receipt, then extract into a clean install folder and create a separate organization folder. Keep org state outside the extracted kit so updates never overwrite deployment identity, transcripts, or acceptance evidence.
+We'll verify the release package, configure the organization settings, check the tenant and signed-in account, and run the installation. Then we'll test the result, complete the manual review, and publish a reviewed update.
 
-STEP 2 — Edit the organization settings file
-Edit only the organization copy of Deployment-Settings.json. Confirm tenant identity fields, SharePoint hosts, alias, visibility, and customer-safe defaults. In a new tenant, leave PnPClientID blank until registration writes it. For government content, keep LearningEnvironment set to Government.
+STEP 1 - Verify and extract the release package
+First, compare the release ZIP's SHA256 hash with the expected value in the release receipt. Continue only if they match.
 
-STEP 3 — Configure support, governance, and reviewed content
-Wire approved support and incident routes, governance links, training links, and organization content overrides. Customer mode removes generated demo markers, but it does not approve your organization text for you. Governance drafts and service routes must be reviewed by the owning teams before release.
+Extract the package into a new, empty install folder. Then create a separate organization folder outside the kit.
 
-STEP 4 — Run local preflight before authentication
-Run the local structured-content preflight from the kit root. This verifies organization content format, including calendar schema and required fields, before any tenant connection is attempted. Fix all preflight issues locally first.
+Keep the deployment settings and records there so replacing the kit won't overwrite them.
 
-STEP 5 — Install PnP.PowerShell and register the tenant app
-Install PnP.PowerShell 3.2.0, run script 01 once per tenant, and confirm a non-empty PnPClientID is written back to Deployment-Settings.json. In Entra, verify required delegated permissions are granted. In Teams admin, verify built-in tab providers are actually available to installer and target users.
+STEP 2 - Edit the organization settings
+Open the organization's copy of Deployment-Settings.json, not the template inside the kit.
 
-STEP 6 — Run the clean customer install
-Derive SiteUrl from SiteFQDN plus MailNickname, then run script 02 with ContentMode Customer and SeedDemoContent. This publishes managed pages, catalogs, calendar, and governance content. Before creation, validate the printed signed-in identity, tenant, alias, owner, and target URL.
+Check the tenant details, SharePoint hosts, site alias, visibility, and security settings.
 
-STEP 7 — Run checker and complete manual acceptance
-Run Test-CoEInstall with OrgPath, SiteUrl, and matching ContentMode. Resolve every FAIL, then complete required manual WARN reviews with evidence. Validate reader experience, support routes, security posture, and customer-mode cleanliness before declaring acceptance.
+If this tenant needs a new provisioning app, leave PnPClientID blank until the registration script fills it in. For government content, set LearningEnvironment to Government.
 
-STEP 8 — Publish reviewed update and check again
-Run script 03 with Scope All and RepairCapturedPages, then rerun Test-CoEInstall. This repairs preserved pages from resume scenarios, republishes managed content, and confirms consistency. Final acceptance requires passing checks plus documented manual WARN review.
+STEP 3 - Configure support links and reviewed content
+Add the organization's approved support and incident-reporting links, along with its governance links, training resources, and custom content.
+
+Customer mode controls the kit's generated demo notices. It does not approve the content or guarantee that every sample item has been removed.
+
+Before publishing, have the responsible teams review the governance drafts, support routes, and organization-specific wording.
+
+STEP 4 - Check the content before signing in
+From the kit folder, run the local content preflight.
+
+This checks the organization's content files, including the calendar format and required fields, before connecting to the tenant.
+
+Fix any reported issues before continuing.
+
+STEP 5 - Install PnP.PowerShell and register the app
+Install PnP.PowerShell version 3.2.0.
+
+If the tenant needs a provisioning app, have someone authorized to grant the required permissions run script 01. Confirm that it writes a client ID to PnPClientID in the organization settings.
+
+In Entra, check that all required delegated permissions show as granted.
+
+In the Teams admin center, also check that the built-in apps used for the kit's tabs are available to the installer and intended users.
+
+STEP 6 - Run the customer installation
+Build the expected site address from SiteFQDN and MailNickname.
+
+Then run script 02 with ContentMode Customer and SeedDemoContent. Despite its name, SeedDemoContent loads the site's pages, catalogs, calendar, and governance content.
+
+Before allowing the installer to create resources, check the signed-in account, tenant, alias, owner, and target site address shown in the output.
+
+This is a new installation, so don't use ResumeExisting. If an earlier attempt already created resources, follow the recovery procedure instead.
+
+STEP 7 - Run the checker and complete the manual review
+Run Test-CoEInstall with the organization folder, site address, and the same content mode used for installation.
+
+Resolve every FAIL. Then read each WARN and complete the manual review it identifies.
+
+Check the site using a reader account, follow the support links, review the security configuration, and look for any remaining demo content.
+
+Save the results. Passing the automated checks is only part of acceptance.
+
+STEP 8 - Publish the reviewed update and test again
+Run script 03 with Scope All to publish the reviewed changes.
+
+For the repair demonstrated here, also include RepairCapturedPages. This option can replace managed parts of Home and the captured pages, including some changes made directly in SharePoint. Review what it will replace before using it on an existing site.
+
+After the update, run Test-CoEInstall again and repeat the relevant manual checks.
+
+Complete the handoff only when the checks pass and the required manual reviews are documented.
 
 OUTRO
-This eight-step flow is the operational baseline for GCC tenant deployments: verify package integrity, enforce tenant-scoped identity, execute controlled install/update paths, and retain full acceptance evidence in the organization folder.
+That completes the eight-step walkthrough.
+
+We've verified the package, checked the tenant and account, installed the site, reviewed the result, and tested a content update.
+
+Keep the organization settings, deployment reports, logs, and review records together. For recovery or removal, follow the administrator guide included with the same release.

@@ -1,0 +1,140 @@
+WEBVTT
+
+00:00:00.100 --> 00:00:10.097
+In this walkthrough, we'll install the Copilot Center of Excellence kit in a GCC Moderate tenant, following the eight-step process used in the MNIT GCC run.
+
+00:00:10.897 --> 00:00:19.613
+We'll verify the release package, configure the organization settings, check the tenant and signed-in account, and run the installation.
+
+00:00:19.613 --> 00:00:25.125
+Then we'll test the result, complete the manual review, and publish a reviewed update.
+
+00:00:25.689 --> 00:00:32.088
+First, compare the release ZIP's SHA256 hash with the expected value in the release receipt.
+
+00:00:32.088 --> 00:00:34.036
+Continue only if they match.
+
+00:00:34.836 --> 00:00:38.522
+Extract the package into a new, empty install folder.
+
+00:00:38.522 --> 00:00:42.626
+Then create a separate organization folder outside the kit.
+
+00:00:43.426 --> 00:00:49.617
+Keep the deployment settings and records there so replacing the kit won't overwrite them.
+
+00:00:50.256 --> 00:00:56.721
+Open the organization's copy of Deployment-Settings.json, not the template inside the kit.
+
+00:00:57.521 --> 00:01:03.711
+Check the tenant details, SharePoint hosts, site alias, visibility, and security settings.
+
+00:01:04.511 --> 00:01:12.489
+If this tenant needs a new provisioning app, leave PnP client ID blank until the registration script fills it in.
+
+00:01:12.489 --> 00:01:16.822
+For government content, set LearningEnvironment to Government.
+
+00:01:17.391 --> 00:01:26.477
+Add the organization's approved support and incident-reporting links, along with its governance links, training resources, and custom content.
+
+00:01:27.277 --> 00:01:30.860
+Customer mode controls the kit's generated demo notices.
+
+00:01:30.860 --> 00:01:36.299
+It does not approve the content or guarantee that every sample item has been removed.
+
+00:01:37.099 --> 00:01:45.161
+Before publishing, have the responsible teams review the governance drafts, support routes, and organization-specific wording.
+
+00:01:45.725 --> 00:01:49.315
+From the kit folder, run the local content preflight.
+
+00:01:50.115 --> 00:01:58.853
+This checks the organization's content files, including the calendar format and required fields, before connecting to the tenant.
+
+00:01:59.653 --> 00:02:02.498
+Fix any reported issues before continuing.
+
+00:02:02.998 --> 00:02:07.010
+Install PnP PowerShell version 3.2.0.
+
+00:02:07.810 --> 00:02:15.700
+If the tenant needs a provisioning app, have someone authorized to grant the required permissions run script 01.
+
+00:02:15.700 --> 00:02:21.383
+Confirm that it writes a client ID to PnP client ID in the organization settings.
+
+00:02:22.183 --> 00:02:26.997
+In Entra, check that all required delegated permissions show as granted.
+
+00:02:27.797 --> 00:02:36.823
+In the Teams admin center, also check that the built-in apps used for the kit's tabs are available to the installer and intended users.
+
+00:02:37.390 --> 00:02:42.150
+Build the expected site address from SiteFQDN and MailNickname.
+
+00:02:42.950 --> 00:02:48.130
+Then run script 02 with ContentMode Customer and SeedDemoContent.
+
+00:02:48.130 --> 00:02:55.339
+Despite its name, SeedDemoContent loads the site's pages, catalogs, calendar, and governance content.
+
+00:02:56.139 --> 00:03:06.359
+Before allowing the installer to create resources, check the signed-in account, tenant, alias, owner, and target site address shown in the output.
+
+00:03:07.159 --> 00:03:11.149
+This is a new installation, so don't use ResumeExisting.
+
+00:03:11.149 --> 00:03:17.239
+If an earlier attempt already created resources, follow the recovery procedure instead.
+
+00:03:17.879 --> 00:03:27.327
+Run Test-CoEInstall with the organization folder, site address, and the same ContentMode used for installation.
+
+00:03:28.127 --> 00:03:29.428
+Resolve every fail.
+
+00:03:29.428 --> 00:03:34.083
+Then read each warning and complete the manual review it identifies.
+
+00:03:34.883 --> 00:03:44.468
+Check the site using a reader account, follow the support links, review the security configuration, and look for any remaining demo content.
+
+00:03:45.268 --> 00:03:46.432
+Save the results.
+
+00:03:46.432 --> 00:03:50.266
+Passing the automated checks is only part of acceptance.
+
+00:03:50.903 --> 00:03:55.413
+Run script 03 with Scope All to publish the reviewed changes.
+
+00:03:56.213 --> 00:04:00.723
+For the repair demonstrated here, also include RepairCapturedPages.
+
+00:04:00.723 --> 00:04:08.631
+This option can replace managed parts of Home and the captured pages, including some changes made directly in SharePoint.
+
+00:04:08.631 --> 00:04:12.814
+Review what it will replace before using it on an existing site.
+
+00:04:13.614 --> 00:04:20.673
+After the update, run Test-CoEInstall again and repeat the relevant manual checks.
+
+00:04:21.473 --> 00:04:27.617
+Complete the handoff only when the checks pass and the required manual reviews are documented.
+
+00:04:28.247 --> 00:04:31.047
+That completes the eight-step walkthrough.
+
+00:04:31.847 --> 00:04:40.445
+We've verified the package, checked the tenant and account, installed the site, reviewed the result, and tested a content update.
+
+00:04:41.245 --> 00:04:46.977
+Keep the organization settings, deployment reports, logs, and review records together.
+
+00:04:46.977 --> 00:04:52.775
+For recovery or removal, follow the administrator guide included with the same release.
+
