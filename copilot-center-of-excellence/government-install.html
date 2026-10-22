@@ -263,94 +263,96 @@
   <main class="shell">
     <section id="walkthrough">
       <h2>GCC Moderate walkthrough video (eight steps)</h2>
-      <p>This narrated recording uses the same voice and pace as the commercial walkthrough and follows the MNIT GCC
-        installation from package verification through the final update check.</p>
-      <video controls preload="metadata" playsinline poster="government-video-poster.jpg"
+      <p>This narrated recording uses the same voice and pace as the commercial walkthrough and follows a generic GCC
+        Moderate installation from package verification through the final update check.</p>
+      <video controls preload="metadata" playsinline poster="government-video-poster.jpg?v=20261022-3"
              aria-label="Narrated eight-step GCC Moderate Copilot Center of Excellence installation walkthrough"
              style="width:100%; border:1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft);">
-        <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-2" type="video/mp4">
-        <track kind="captions" src="government-install-captions.vtt" srclang="en" label="English">
-        Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-2">Download the MP4</a>.
+        <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-3" type="video/mp4">
+        <track kind="captions" src="government-install-captions.vtt?v=20261022-3" srclang="en" label="English">
+        Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-3">Download the MP4</a>.
       </video>
-      <p class="meta">Ten narrated sections (introduction, eight steps, and closing) · about five minutes · English captions included.</p>
-      <p class="meta">Talk track: <a href="government-install-talktrack.txt">Download narration script</a>.</p>
+      <p class="meta">Ten narrated sections (introduction, eight steps, and closing) · 5 minutes 24 seconds · English captions included.</p>
+      <p class="meta">Talk track: <a href="government-install-talktrack.txt?v=20261022-3">Download narration script</a>.</p>
       <details>
         <summary>Read the walkthrough talk track</summary>
         <pre>INTRO
-In this walkthrough, we'll install the Copilot Center of Excellence kit in a GCC Moderate tenant, following the eight-step process used in the MNIT GCC run.
+This video walks through a full install of the Copilot Center of Excellence kit in a GCC Moderate tenant. It is the same eight-step process used in production deployments.
 
-We'll verify the release package, configure the organization settings, check the tenant and signed-in account, and run the installation. Then we'll test the result, complete the manual review, and publish a reviewed update.
+You will verify the package, configure the tenant, install the site, and then confirm that it is ready for users - not just that the scripts finished.
 
 STEP 1 - Verify and extract the release package
-First, compare the release ZIP's SHA256 hash with the expected value in the release receipt. Continue only if they match.
+Start with the release ZIP and the SHA256 receipt downloaded alongside it. Run Get-FileHash with the SHA256 algorithm, and continue only when the calculated value matches the receipt.
 
 Extract the package into a new, empty install folder. Then create a separate organization folder outside the kit.
 
-Keep the deployment settings and records there so replacing the kit won't overwrite them.
+Keep the deployment settings and records there so replacing the kit will not overwrite them.
 
 STEP 2 - Edit the organization settings
-Open the organization's copy of Deployment-Settings.json, not the template inside the kit.
+Open Deployment-Settings.json in the organization folder, not the template inside the kit.
 
-Check the tenant details, SharePoint hosts, site alias, visibility, and security settings.
+Here, you are confirming the tenant name, SharePoint hosts, site alias, visibility, and security settings. For government content, set LearningEnvironment to Government.
 
-If this tenant needs a new provisioning app, leave PnPClientID blank until the registration script fills it in. For government content, set LearningEnvironment to Government.
+If you do not already have an approved provisioning app ID for this tenant, leave PnPClientID blank. Script 01 will fill it in after registration.
 
 STEP 3 - Configure support links and reviewed content
-Add the organization's approved support and incident-reporting links, along with its governance links, training resources, and custom content.
+Next, add the organization's approved support and incident-reporting links, along with its governance links, training resources, and custom content.
 
-Customer mode controls the kit's generated demo notices. It does not approve the content or guarantee that every sample item has been removed.
+As each field appears on screen, confirm that it points to a route the responsible team owns and monitors.
 
-Before publishing, have the responsible teams review the governance drafts, support routes, and organization-specific wording.
+Before publishing, have those teams review the governance drafts, support routes, and organization-specific wording.
 
 STEP 4 - Check the content before signing in
-From the kit folder, run the local content preflight.
+From the kit folder, run the two preflight commands shown on screen.
 
-This checks the organization's content files, including the calendar format and required fields, before connecting to the tenant.
+The first loads Internal\ContentPreflight.ps1. The second checks the organization content, including the calendar format and required fields.
 
-Fix any reported issues before continuing.
+Fix any reported issues before connecting to the tenant.
 
 STEP 5 - Install PnP.PowerShell and register the app
 Install PnP.PowerShell version 3.2.0.
 
-If the tenant needs a provisioning app, have someone authorized to grant the required permissions run script 01. Confirm that it writes a client ID to PnPClientID in the organization settings.
+If PnPClientID is blank because this tenant does not have an approved provisioning app, have someone who can grant tenant-wide admin consent run script 01.
 
-In Entra, check that all required delegated permissions show as granted.
+After registration, check that PnPClientID in the organization settings contains the app's client ID.
 
-In the Teams admin center, also check that the built-in apps used for the kit's tabs are available to the installer and intended users.
+Here in Entra, confirm that every required delegated permission shows as granted.
+
+Then open the Teams admin center. Confirm that Website, PDF, PowerPoint, and SharePoint pages and lists are available to the installer and intended users.
 
 STEP 6 - Run the customer installation
-Build the expected site address from SiteFQDN and MailNickname.
+Before you run anything, work out where the site should land. Combine SiteFQDN and MailNickname from the settings file. The resolved address format is shown on screen.
 
-Then run script 02 with ContentMode Customer and SeedDemoContent. Despite its name, SeedDemoContent loads the site's pages, catalogs, calendar, and governance content.
+Now run script 02 in customer mode with SeedDemoContent. That switch loads the site's pages, catalogs, calendar, and governance content.
 
-Before allowing the installer to create resources, check the signed-in account, tenant, alias, owner, and target site address shown in the output.
+In the installer output, confirm the signed-in account, tenant, alias, owner, and target site address before resources are created.
 
-This is a new installation, so don't use ResumeExisting. If an earlier attempt already created resources, follow the recovery procedure instead.
+For a clean installation, do not use ResumeExisting. If an earlier attempt already created resources, stop and use the Failure and recovery boundary in the administrator guide.
 
 STEP 7 - Run the checker and complete the manual review
-Run Test-CoEInstall with the organization folder, site address, and the same content mode used for installation.
+Now run Test-CoEInstall with the organization folder, site address, and the same content mode used for installation.
 
 Resolve every FAIL. Then read each WARN and complete the manual review it identifies.
 
-Check the site using a reader account, follow the support links, review the security configuration, and look for any remaining demo content.
+Use a reader account to review the site, follow the support links, confirm the security configuration, and look for remaining demo content.
 
-Save the results. Passing the automated checks is only part of acceptance.
+Save the checker output in the organization folder. Passing the automated checks does not replace the manual review.
 
 STEP 8 - Publish the reviewed update and test again
-Run script 03 with Scope All to publish the reviewed changes.
+To publish reviewed content changes, run script 03 with Scope All. Then run Test-CoEInstall again and repeat the relevant manual checks.
 
-For the repair demonstrated here, also include RepairCapturedPages. This option can replace managed parts of Home and the captured pages, including some changes made directly in SharePoint. Review what it will replace before using it on an existing site.
+RepairCapturedPages is not part of a routine update. Use it only when recovery work or checker results show that preserved managed pages need repair.
 
-After the update, run Test-CoEInstall again and repeat the relevant manual checks.
+The option can replace managed parts of Home and the captured pages, including changes made directly in SharePoint. Review what it will replace before using it on an existing site.
 
 Complete the handoff only when the checks pass and the required manual reviews are documented.
 
 OUTRO
-That completes the eight-step walkthrough.
+Before handoff, remember that a clean checker run means the build matches the settings. It does not replace content, security, accessibility, or operational review.
 
-We've verified the package, checked the tenant and account, installed the site, reviewed the result, and tested a content update.
+Keep the organization settings, deployment reports, logs, checker output, and review records together.
 
-Keep the organization settings, deployment reports, logs, and review records together. For recovery or removal, follow the administrator guide included with the same release.</pre>
+For recovery or removal, use the administrator guide included with the same release.</pre>
       </details>
     </section>
 
@@ -372,12 +374,12 @@ Keep the organization settings, deployment reports, logs, and review records tog
         <thead><tr><th scope="col">Cloud</th><th scope="col">Release 3.8.21 status</th></tr></thead>
         <tbody>
           <tr><td>Commercial Microsoft 365</td><td>Validated for this release.</td></tr>
-          <tr><td>GCC Moderate</td><td>MNIT installation and Step 08 validation completed on October 22, 2026: 270 automated checks passed, with two documented manual-review warnings. Repeat acceptance in each customer tenant.</td></tr>
+          <tr><td>GCC Moderate</td><td>A production installation and Step 08 validation completed on October 22, 2026: 270 automated checks passed, with two documented manual-review warnings. Repeat acceptance in each customer tenant.</td></tr>
           <tr><td>GCC High and DoD</td><td>Unsupported.</td></tr>
         </tbody>
       </table>
       <div class="warning"><strong>Environment boundary:</strong> this walkthrough covers GCC Moderate only. It does
-        not apply to GCC High or DoD, and the MNIT result does not replace acceptance in another customer tenant.</div>
+        not apply to GCC High or DoD, and one production result does not replace acceptance in another customer tenant.</div>
     </section>
 
     <section id="package">
@@ -634,7 +636,7 @@ if (-not $?) {
   <footer>
     <div class="shell">
       <p>Release 3.8.21 · GCC Moderate · Government-StateLocal content · Customer mode</p>
-      <p>The MNIT acceptance result does not replace acceptance in another tenant. GCC High and DoD are unsupported.</p>
+      <p>A prior acceptance result does not replace acceptance in another tenant. GCC High and DoD are unsupported.</p>
     </div>
   </footer>
 
