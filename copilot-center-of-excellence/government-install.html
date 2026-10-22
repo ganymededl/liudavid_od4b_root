@@ -247,9 +247,8 @@
     <span class="eyebrow">Release 3.8.21 · Government-StateLocal · Customer mode</span>
     <h1>Government installation runbook</h1>
     <p class="lede">Use this page for state and local government content. It follows the same package verification,
-      extraction, registration, installation, validation, update, and final-validation sequence as the higher
-      education walkthrough and the <a href="admin-quickstart.html">canonical Admin Quickstart</a>, without mixing in
-      education defaults or Demo mode.</p>
+      extraction, registration, installation, validation, update, and final-validation sequence as the
+      <a href="admin-quickstart.html">canonical Admin Quickstart</a>, without mixing in education defaults or Demo mode.</p>
     <nav class="toc" aria-label="Runbook sections">
       <a href="#walkthrough">Video walkthrough</a>
       <a href="#cloud">Cloud boundary</a>
@@ -264,12 +263,45 @@
   <main class="shell">
     <section id="walkthrough">
       <h2>GCC walkthrough video (8-step run)</h2>
-      <p>This recording mirrors the commercial walkthrough style and follows the exact eight-step government install sequence on this page.</p>
+      <p>This recording follows the exact eight-step government install sequence on this page.</p>
       <video controls preload="metadata" playsinline poster="Images/video-poster.jpg" style="width:100%; border:1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft);">
         <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4" type="video/mp4">
         Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4">Download the MP4</a>.
       </video>
       <p class="meta">Video file: <code>Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4</code> (about 24 minutes).</p>
+      <p class="meta">Talk track: <a href="government-install-talktrack.txt">Download narration script</a>.</p>
+      <details>
+        <summary>Read the walkthrough talk track</summary>
+        <pre>INTRO
+This walkthrough shows the exact eight-step government install flow for the Copilot Center of Excellence kit, using the validated MNIT GCC run pattern. We focus on repeatable execution, controlled identity, and post-install proof, so admins can deploy with confidence and auditability.
+
+STEP 1 — Verify and extract the implementation package
+Start by validating the frozen implementation ZIP against its release SHA256 receipt, then extract into a clean install folder and create a separate organization folder. Keep org state outside the extracted kit so updates never overwrite deployment identity, transcripts, or acceptance evidence.
+
+STEP 2 — Edit the organization settings file
+Edit only the organization copy of Deployment-Settings.json. Confirm tenant identity fields, SharePoint hosts, alias, visibility, and customer-safe defaults. In a new tenant, leave PnPClientID blank until registration writes it. For government content, keep LearningEnvironment set to Government.
+
+STEP 3 — Configure support, governance, and reviewed content
+Wire approved support and incident routes, governance links, training links, and organization content overrides. Customer mode removes generated demo markers, but it does not approve your organization text for you. Governance drafts and service routes must be reviewed by the owning teams before release.
+
+STEP 4 — Run local preflight before authentication
+Run the local structured-content preflight from the kit root. This verifies organization content format, including calendar schema and required fields, before any tenant connection is attempted. Fix all preflight issues locally first.
+
+STEP 5 — Install PnP.PowerShell and register the tenant app
+Install PnP.PowerShell 3.2.0, run script 01 once per tenant, and confirm a non-empty PnPClientID is written back to Deployment-Settings.json. In Entra, verify required delegated permissions are granted. In Teams admin, verify built-in tab providers are actually available to installer and target users.
+
+STEP 6 — Run the clean customer install
+Derive SiteUrl from SiteFQDN plus MailNickname, then run script 02 with ContentMode Customer and SeedDemoContent. This publishes managed pages, catalogs, calendar, and governance content. Before creation, validate the printed signed-in identity, tenant, alias, owner, and target URL.
+
+STEP 7 — Run checker and complete manual acceptance
+Run Test-CoEInstall with OrgPath, SiteUrl, and matching ContentMode. Resolve every FAIL, then complete required manual WARN reviews with evidence. Validate reader experience, support routes, security posture, and customer-mode cleanliness before declaring acceptance.
+
+STEP 8 — Publish reviewed update and check again
+Run script 03 with Scope All and RepairCapturedPages, then rerun Test-CoEInstall. This repairs preserved pages from resume scenarios, republishes managed content, and confirms consistency. Final acceptance requires passing checks plus documented manual WARN review.
+
+OUTRO
+This eight-step flow is the operational baseline for GCC tenant deployments: verify package integrity, enforce tenant-scoped identity, execute controlled install/update paths, and retain full acceptance evidence in the organization folder.</pre>
+      </details>
     </section>
 
     <section id="cloud">
