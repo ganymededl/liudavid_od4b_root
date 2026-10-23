@@ -1350,6 +1350,36 @@ if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>
+      <details id="faq-092-what-happens-if-i-leave-the-training-calendar-csv-blank-or-omit-it" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 92</span>
+          <span>What happens if I leave the training calendar CSV blank or omit it?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Nothing breaks, and the Training Calendar list is still created. The difference is where sessions come from.</p><ul><li><strong>No <code>Content\Training-Calendar.csv</code>, or a header-only file (header row, no data rows):</strong> preflight passes. In <strong>Customer</strong> mode the installer does not load any CSV rows. It only removes leftover titles that start with <code>SAMPLE - </code>. The Home page shows &ldquo;Upcoming sessions &ndash; No sessions scheduled yet&rdquo; with a link to the full training calendar.</li><li><strong>Add real sessions later:</strong> add them directly to the <code>CopilotTrainingCalendar</code> list in SharePoint. Only items whose <code>SampleStatus</code> is <code>Approved</code> appear in the upcoming view. Later updates keep existing calendar rows (Question 57).</li><li><strong>Demo mode:</strong> the CSV rows are seeded as <code>DRAFT - DEMONSTRATION</code> samples. With a header-only file, any remaining untouched demo samples are removed.</li><li><strong>A completely empty (0-byte) file is the one case to avoid.</strong> In 3.8.22 the preflight stops with &ldquo;You cannot call a method on a null-valued expression&rdquo; before any tenant change. Delete the file or keep the header row instead.</li></ul><p>If you do supply rows, use the <code>StartOffsetDays</code> schema (Question 22 and the step 04 worksheet), not fixed <code>StartDate</code> / <code>EndDate</code> columns.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-093-what-happens-if-service-desk-or-other-support-links-are-blank" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 93</span>
+          <span>What happens if the service desk, technology request, or other support links are blank?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Each of these <code>Links</code> entries is optional: <code>ServiceDesk</code>, <code>TechnologyRequest</code>, <code>DataSafetyIncident</code>, and <code>AIGuidelines</code>. A blank value does not create a broken link.</p><ul><li><strong>At install:</strong> the installer warns and raises an <em>unconfigured support routes</em> advisory with a <strong>STOP / PROCEED</strong> prompt. STOP is the default. PROCEED is a documented decision for a pilot or a route you will add later. <code>-AllowMissingDataSafetyIncidentRoute</code> skips the prompt for the incident route only (Question 38).</li><li><strong>On the site:</strong> the page text shows &ldquo;<em>label</em> &ndash; route not configured. The organization has not supplied this destination.&rdquo; together with guidance to stop and ask for the correct route. A <code>{{Link:Key|label}}</code> placeholder renders the same way and links to the Give Feedback page.</li><li><strong>At the checker:</strong> <code>Test-CoEInstall.ps1</code> accepts a clear &ldquo;not configured&rdquo; notice. It fails if a route is empty and the page does not say so, unless you pass <code>-AllowUnconfiguredRoutes</code>.</li><li><strong>Other support settings:</strong> <code>SupportEmail</code> must be a valid address. A lab-looking mailbox such as <code>admin@&hellip;onmicrosoft.com</code> raises a separate advisory.</li></ul><p>To fix a route later, add the HTTPS URL to <code>Deployment-Settings.json</code> and run <code>03_Update-CoEContent.ps1 -Scope Guides</code> with the same <code>-ContentMode</code>. Test the route as an ordinary user before launch (Question 37).</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
+      <details id="faq-094-what-files-and-formats-go-in-the-organization-folder-rai-policies" data-category="Organization settings">
+        <summary>
+          <span class="question-number">Question 94</span>
+          <span>Which file types and folders do I use for RAI policies, training materials, and other organization content?</span>
+          <span class="tag">Organization settings</span>
+        </summary>
+        <div class="answer"><p>Use the folder that matches how the content is delivered. The two main locations are different.</p><ul><li><strong><code>Assets\</code> holds hosted files.</strong> The installer lists what it finds in each subfolder and asks &ldquo;Host these files?&rdquo; (<code>-AcceptOrgAssets</code> answers yes to all; see Question 44). Files are uploaded as files, not as links. Add <code>-ReplaceOrgAssets</code> only to replace an existing hosted copy (Question 62).<ul><li><code>RAI-Policies\</code>: AI and Responsible AI policies, normally <strong>PDF</strong>. They appear under Governance and Responsible AI &gt; Official Documents.</li><li><code>Roadmap\</code>: roadmap decks. <code>Training\</code>: decks, handouts, recordings. <code>Service-Catalog\</code>: forms and service descriptions. <code>Agents\</code>: agent guides and demo recordings.</li><li><code>Top10\</code>: exactly one <code>.pptx</code>. <code>Success-Stories\</code>: <code>.mp4</code> videos.</li><li><code>README*</code> files are ignored. File names containing DEMO or SAMPLE as whole words are not offered for hosting in Customer mode.</li></ul></li><li><strong>URLs go in <code>Deployment-Settings.json</code>:</strong> <code>Links</code> (a blank value means text only), plus the <code>GovernanceLinks</code> and <code>TrainingLinks</code> lists of label and URL. Use a URL when the RAI policy already lives in an approved SharePoint library or on your public site and you do not want a second copy.</li><li><strong><code>Content\</code> accepts text only:</strong> <code>.md</code> guide pages, <code>.txt</code> governance drafts that the kit turns into Word documents, <code>.csv</code> files, and <code>.json</code>. Do not put PDFs or Word files here. <code>Content\OrgPrompts\</code> takes CSV files in the Microsoft 365 admin center prompt import format.</li></ul><p>After adding files, run <code>03_Update-CoEContent.ps1 -Scope Guides</code> (or <code>-Scope All</code> for the Top 10 deck). Each hosted file is then listed with a link on its section page.</p>
+          <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
+        </div>
+      </details>
       </div>
       <div id="empty" class="empty">No FAQ matches this search and category.</div>
     </main>

@@ -172,6 +172,17 @@
     .code-panel .ok { color: #7ee787; }
     .code-panel .warn { color: #e3b341; }
     .code-panel .muted { color: #9aa0a6; }
+    .command-head { display: flex; justify-content: flex-end; margin: 6px 0 -4px; }
+    .command-head button {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      color: var(--cp-text);
+      font: 600 0.8rem "Segoe UI", Aptos, Calibri, sans-serif;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .command-head button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
     table.source-table {
       width: 100%;
       border-collapse: collapse;
@@ -309,9 +320,11 @@
         Teams, publish a content update, and check the result.</p>
       <p class="meta">This walkthrough uses
         <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>
-        release 3.8.21. The current release is 3.8.22; its steps are the same, and it also checks that the
-        provisioning app has <strong>Allow public client flows</strong> set to Yes before sign-in.</p>
+        release 3.8.21. Use the current 3.8.22 kit for a new install. The 16 chapters below document the
+        recorded lab tour, while the <a href="#eight-phase-runbook">eight-phase installation path</a> matches
+        the GCC Moderate guide and calls out 3.8.22 safeguards the earlier recording does not show.</p>
       <nav class="pill-row" aria-label="Written references">
+        <a class="pill" href="#eight-phase-runbook">Eight-phase install path</a>
         <a class="pill" href="admin-quickstart.html">Admin quickstart</a>
         <a class="pill" href="government-install.html">Government install runbook</a>
         <a class="pill" href="#site-tour-reference">What users get</a>
@@ -355,11 +368,40 @@
         cover the same content.
       </div>
       <div class="player-meta">
-        <span id="nowPlaying">17 video sections (introduction plus 16 steps) &middot; about 13 minutes</span>
+        <span id="nowPlaying">17 video scenes (introduction plus 16 chapters) &middot; about 13 minutes</span>
         <label><input type="checkbox" id="followAlong" checked> Follow along below</label>
-        <span>Use &ldquo;Play this section&rdquo; on any step to jump the video there. Turn on captions with the CC button.</span>
+        <span>The video scenes expand the shared eight-phase path. Use &ldquo;Play this section&rdquo; to jump to a scene; turn on captions with CC.</span>
       </div>
     </header>
+
+    <section id="eight-phase-runbook">
+      <h2>The same eight installation phases in both guides</h2>
+      <p>Use the current 3.8.22 implementation ZIP and these eight phases for either profile. The 16 numbered
+        panels below are <strong>video scenes from an earlier higher-ed lab run</strong>, not extra installation
+        commands. The GCC guide uses the same phase order with government examples and a newly narrated video.</p>
+      <table class="source-table">
+        <thead><tr><th scope="col">Phase</th><th scope="col">Customer action</th><th scope="col">Detailed scene</th></tr></thead>
+        <tbody>
+          <tr><td>01</td><td>Verify the named release ZIP and receipt; extract to an empty kit folder and create a separate organization folder.</td><td><a href="#tour-03">Package</a></td></tr>
+          <tr><td>02</td><td>Edit the organization copy of <code>Deployment-Settings.json</code>; confirm tenant, owner, alias, profile, and sharing.</td><td><a href="#tour-04">Settings</a></td></tr>
+          <tr><td>03</td><td>Review approved support and incident links, governance drafts, <code>Content</code>, and <code>Assets</code>.</td><td><a href="#tour-05">Content</a></td></tr>
+          <tr><td>04</td><td>Run <code>Assert-CoEStructuredOrganizationContent</code> locally before tenant sign-in.</td><td><a href="#tour-05">Preflight</a></td></tr>
+          <tr><td>05</td><td>Register or reuse the approved tenant app; confirm consent, public-client flow, naming policy, and Teams tabs.</td><td><a href="#tour-06">App</a></td></tr>
+          <tr><td>06</td><td>Run one clean Customer install with <code>-SeedDemoContent</code>; use the actual site URL in the deployment report.</td><td><a href="#tour-07">Install</a> through <a href="#tour-10">completion</a></td></tr>
+          <tr><td>07</td><td>Run the read-only checker, resolve FAILs, and document every WARN and reader/manual check.</td><td><a href="#tour-11">Checker</a> through <a href="#tour-13">welcome posts</a></td></tr>
+          <tr><td>08</td><td>Publish reviewed changes with script 03, check again, and retain both results and manual acceptance.</td><td><a href="#tour-14">Update</a> and <a href="#tour-15">recheck</a></td></tr>
+        </tbody>
+      </table>
+      <div class="boundary-grid">
+        <div class="boundary-card"><h3>Higher education</h3><p>Copy <code>Org-Template</code> and retain
+          <code>LearningEnvironment: HigherEducation</code>. The illustrated video uses a clearly labeled
+          synthetic Demo run; the copy-ready commands below use Customer mode.</p></div>
+        <div class="boundary-card"><h3>GCC Moderate government</h3><p>Copy
+          <code>ContentPacks\Government-StateLocal</code> and retain
+          <code>LearningEnvironment: Government</code>. The pack selects content, not a cloud.
+          <a href="government-install.html">Open the matching government phases</a>; GCC High and DoD are unsupported.</p></div>
+      </div>
+    </section>
 
     <section class="step" id="tour-01" data-tour="1">
       <h2><span class="badge">01</span>Collect approved public sources first</h2>
@@ -417,8 +459,12 @@
         <img class="shot" src="Images/ps-tenants.png" alt="PowerShell 7 terminal showing the known lab tenants and certificate status before starting work">
         <figcaption>PowerShell 7 terminal, confirming the correct lab tenant before any kit command runs.</figcaption>
       </figure>
-      <pre class="code-panel">$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
-$expectedHash = '&lt;SHA256 from the release receipt&gt;'
+      <div class="command-head"><button type="button" data-copy="cmd-highered-package">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-package">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+  throw 'Open PowerShell 7.4 or later (pwsh).'
+}
+$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
+$expectedHash = 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F'
 $installRoot = 'C:\CoE-Install\DemoOrg'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
@@ -428,6 +474,13 @@ $profileSource = Join-Path $kitRoot 'Org-Template' # Higher education
 if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
   throw 'The chosen release ZIP does not match its receipt.'
 }
+if ((Get-Content -LiteralPath "$zip.sha256" -Raw).Trim() -cne
+    "$expectedHash  Copilot-CoE-Implementation-Kit.zip") {
+  throw 'The release receipt does not match the chosen ZIP.'
+}
+if (Test-Path -LiteralPath $installRoot) { throw "Use a new install folder: $installRoot" }
+if (Test-Path -LiteralPath $orgPath) { throw "Use a new organization folder: $orgPath" }
+Unblock-File -LiteralPath $zip
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
 Copy-Item $profileSource $orgPath -Recurse</pre>
       <p class="meta">The release receipt supplied with the package records the expected SHA256 for that ZIP. Verify
@@ -464,9 +517,9 @@ Copy-Item $profileSource $orgPath -Recurse</pre>
           <tr><td><code>SiteFQDN</code></td><td><code>yourtenant.sharepoint.com</code></td><td>The SharePoint content host, without <code>https://</code> or a path.</td></tr>
           <tr><td><code>PnPClientID</code></td><td>Blank for the tenant's first kit registration</td><td>Step 06 writes the new tenant-owned app ID. Never carry a client ID into another tenant.</td></tr>
           <tr><td><code>SharedChannelOwnerUPN</code></td><td><code>coe-owner@your-domain</code></td><td>An existing in-tenant Member account approved to own the restricted governance channels.</td></tr>
-          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>The approved full name, reader-facing noun, and abbreviation</td><td>Examples: <code>Contoso County</code>, <code>county</code>, <code>CC</code>.</td></tr>
+          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>The approved full name, reader-facing noun, and abbreviation</td><td>For a higher-ed profile: <code>Contoso University</code>, <code>university</code>, <code>CU</code>.</td></tr>
           <tr><td><code>MailNickname</code></td><td>A unique Microsoft 365 group alias</td><td>This value chooses the Team alias and SharePoint site path. Changing only <code>$siteUrl</code> does not change the installation target.</td></tr>
-          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title</td><td>Reader-facing; do not put lab wording in a customer profile.</td></tr>
+          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title, ideally 30 characters or fewer</td><td>A longer title triggers a STOP / PROCEED advisory and requires a 1366px navigation review. Do not put lab wording in a customer profile.</td></tr>
           <tr><td><code>TeamVisibility</code></td><td><code>Private</code></td><td>Required by the installer.</td></tr>
           <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code></td><td>Customer default. External preview is a separate, approved lab decision.</td></tr>
           <tr><td><code>OrganizationEmailDomains</code></td><td>Approved UPN domains for this tenant</td><td>Used to flag out-of-domain Team members; do not copy domains from another deployment.</td></tr>
@@ -480,6 +533,10 @@ Copy-Item $profileSource $orgPath -Recurse</pre>
           <tr><td><code>TimeZone</code></td><td>A Windows time-zone ID</td><td>For example, <code>Eastern Standard Time</code> or <code>Central Standard Time</code>.</td></tr>
         </tbody>
       </table>
+      <p>Every row above is edited in <code>$orgPath\Deployment-Settings.json</code>; the table says
+        <em>where to obtain its value</em>, not where to edit it. Do not modify the kit copy. Never copy
+        another tenant's <code>PnPClientID</code>, deployment report, advisory decisions, or
+        <code>RevisionAudit</code> into a fresh organization folder.</p>
       <p>If this is the tenant's first installation, leave <code>PnPClientID</code> blank for now. Step 06 registers
         the provisioning app and saves its client ID. An additional organization profile in the same tenant may use
         the client ID of a kit-created app that is already approved there. Do not reuse that ID across tenants.</p>
@@ -489,11 +546,14 @@ Copy-Item $profileSource $orgPath -Recurse</pre>
         <code>LearningEnvironment: Government</code> setting. Keep
         <code>TeamVisibility</code> set to <code>Private</code> and <code>CoESiteSharingCapability</code> set to
         <code>Disabled</code>, unless the organization has explicitly approved a different configuration.</p>
-      <p>Choose the alias carefully: it becomes the site path and must meet Microsoft 365 naming requirements. After
-        saving the JSON, define the checker URL and content mode from the same values:</p>
-      <pre class="code-panel">$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
-$siteUrl = "https://$($settings.SiteFQDN)/sites/$($settings.MailNickname)"
-$contentMode = 'Customer' # Use Demo only for a clearly labeled synthetic demonstration.</pre>
+      <p>Choose the alias carefully: it becomes the Team and site path and must meet Microsoft 365 naming
+        requirements. Keep the content mode the same for install, update, and both checker runs. Do not assume
+        that a new site will use <code>/sites/</code>; after a completed install, read its URL from the report:</p>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-settings">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-settings">$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+$contentMode = 'Customer' # Demo requires a clearly labeled synthetic demonstration.
+# After script 02 completes:
+$siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site</pre>
     </section>
 
     <section class="step" id="tour-05" data-tour="5">
@@ -528,14 +588,27 @@ $contentMode = 'Customer' # Use Demo only for a clearly labeled synthetic demons
       <p>Put organization text overrides under <code>$orgPath\Content</code> and approved hosted files under
         <code>$orgPath\Assets</code>. Do not edit <code>$kitRoot\SeedContent</code>. Run the local structured-content
         check before authentication:</p>
-      <pre class="code-panel">Set-Location $kitRoot
+      <table class="source-table">
+        <thead><tr><th scope="col">Change</th><th scope="col">Edit here</th><th scope="col">What happens on script 03</th></tr></thead>
+        <tbody>
+          <tr><td>Tenant, identity, approved routes, profile and title</td><td><code>$orgPath\Deployment-Settings.json</code></td><td>Most content settings republish; tenant, alias and governance owner are fixed at installation.</td></tr>
+          <tr><td>Guides, sections, policies, calendar and catalog seeds</td><td><code>$orgPath\Content</code></td><td>Kit-managed pages can be replaced. Changed governance drafts require deliberate <code>-ReplaceFiles</code>.</td></tr>
+          <tr><td>Reviewed documents, images and videos</td><td><code>$orgPath\Assets</code></td><td>Script 03 asks before hosting new files; review each asset first.</td></tr>
+          <tr><td>Observed site, Team ID and run evidence</td><td><code>$orgPath\CoE-Revision-Report.json</code> and <code>RevisionAudit</code></td><td>Generated records. Preserve them; never edit them to force a different deployment.</td></tr>
+        </tbody>
+      </table>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-preflight">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-preflight">Set-Location $kitRoot
 . .\Internal\ContentPreflight.ps1
 Assert-CoEStructuredOrganizationContent -OrgPath $orgPath</pre>
+      <p class="meta">Local preflight catches malformed structured overrides before sign-in; it does not prove that
+        the tenant, mailbox, public policy links, or reader-facing material is approved.</p>
     </section>
 
     <section class="step" id="tour-06" data-tour="6">
       <h2><span class="badge">06</span>Install PnP.PowerShell and register the app</h2>
-      <pre class="code-panel">Set-Location $kitRoot
+      <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-register">Set-Location $kitRoot
 $PSVersionTable.PSVersion
 Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
 .\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
@@ -547,15 +620,41 @@ Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
       <p class="meta">Someone authorized to grant the required app permissions runs the registration script once per
         tenant, then confirms in Entra that every required delegated permission shows Granted. The script saves the
         new client ID to the organization settings file.</p>
+      <div class="boundary-card">
+        <h3>Same approval gate as the GCC runbook</h3>
+        <p>Confirm the four Microsoft Graph delegated permissions <code>Group.ReadWrite.All</code>,
+          <code>ChannelMember.ReadWrite.All</code>, <code>User.Read</code>, and <code>User.Read.All</code>,
+          plus SharePoint <code>AllSites.FullControl</code>, show <strong>Granted</strong>. On that app,
+          <strong>Authentication &gt; Settings &gt; Allow public client flows</strong> must be <strong>Yes</strong>.
+          Script 01 saves the client ID before this check, so if it stops, fix the same registration instead of
+          creating a duplicate.</p>
+        <p>Before script 02, review <strong>Entra &gt; Groups &gt; Naming policy</strong>. If a prefix or suffix
+          would rewrite the Team alias, use an exempt Global or User Administrator or resolve the policy.
+          Sign in as the shared-channel owner or a Global Administrator. In Teams admin center, make the
+          Website, PDF, PowerPoint, and SharePoint page/list tab apps available to the installer and readers;
+          <em>Unblocked</em> with <em>Available to: No one</em> is not available.</p>
+      </div>
     </section>
 
     <section class="step" id="tour-07" data-tour="7">
       <h2><span class="badge">07</span>Start the clean installation</h2>
-      <pre class="code-panel">Set-Location $kitRoot
-.\02_Install-CopilotCoE.ps1 `
-  -OrgPath $orgPath `
-  -ContentMode $contentMode `
-  -SeedDemoContent</pre>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-install">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-install">Set-Location $kitRoot
+$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
+  throw 'Run script 01 and confirm admin consent before installation.'
+}
+try {
+  &amp; .\02_Install-CopilotCoE.ps1 `
+    -OrgPath $orgPath `
+    -ContentMode $contentMode `
+    -SeedDemoContent
+} catch {
+  throw 'Installation stopped. Inspect the saved transcript and existing Team/site; do not start clean or purge.'
+}
+if (-not $?) { throw 'Installer did not complete; stop before reading the deployment report.' }
+# Read the actual site path after completion; it may be under /teams/ rather than /sites/.
+$siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site</pre>
       <p><code>-SeedDemoContent</code> publishes the pages, catalogs, calendar, and governance content. Without it,
         the installer creates only the Team and an empty SharePoint site.</p>
       <p>The command above uses the <code>$contentMode</code> selected in step 04. Set it to <code>Customer</code> for
@@ -565,6 +664,11 @@ Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
         Team or site, investigate first. Then either resume that exact deployment or use
         <code>04_Remove-CopilotCoE.ps1</code> before starting again. Deleting only the SharePoint site leaves the Team
         and Microsoft 365 group behind, so the next installation can conflict with them.</p>
+      <p>Script 02 prompts <strong>STOP</strong> or <strong>PROCEED</strong> for a long title, lab support
+        mailbox, missing support routes, naming policy, a different owner/operator, or a fallback header.
+        STOP is the default. PROCEED acknowledges that one fact for a reviewed pilot; it does not verify a
+        mailbox, make an incident route work, or waive manual acceptance. Prompts that arise after the
+        Team/site exists require investigation and <code>-ResumeExisting</code>, not another clean run.</p>
     </section>
 
     <section class="step" id="tour-08" data-tour="8">
@@ -592,6 +696,9 @@ Disabling non-owner sharing</pre>
         (<code>com.microsoft.teamspace.tab.web</code>), PDF, PowerPoint and SharePoint page/list tab providers for the
         installer and intended CoE users. If Teams blocks one after the Team/site is created, correct the app policy
         and use <code>-ResumeExisting</code>; do not start clean or purge.</p>
+      <p class="meta">A warning that the optional naming-policy read lacked
+        <code>Directory.Read.All</code> is not proof the policy is absent. Confirm the policy directly in Entra;
+        do not grant broad directory-read permission just to silence that warning.</p>
     </section>
 
     <section class="step" id="tour-09" data-tour="9">
@@ -635,18 +742,23 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
 
     <section class="step" id="tour-11" data-tour="11">
       <h2><span class="badge">11</span>Run the read-only checker</h2>
-      <pre class="code-panel">.\Test-CoEInstall.ps1 `
+      <div class="command-head"><button type="button" data-copy="cmd-highered-check">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-check">.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
+      if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }
 
-<span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
+      <span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
       <figure>
         <img class="shot" src="Images/ps-checker-pass-rows.png" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
-        <figcaption>Checker result from this lab run: 292 checks passed.</figcaption>
+        <figcaption>Historical 3.8.21 Demo recording: 292 checks passed. Counts depend on release,
+          content mode, and applicable checks; do not require that count for another tenant.</figcaption>
       </figure>
       <p class="meta">The checker does not change the site. Passing it is only part of the review: read every
-        <code>WARN</code> message and complete the manual checks it identifies.</p>
+        <code>WARN</code> message and complete the manual checks it identifies. A warning that welcome
+        posts could not be read without <code>ChannelMessage.Read.All</code> calls for visual inspection of
+        General, Share Your Prompt, and Ask Us Anything; do not add that permission just to silence a WARN.</p>
     </section>
 
     <section class="step" id="tour-12" data-tour="12">
@@ -670,8 +782,9 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
         </figure>
       </div>
       <p class="meta">Before opening the production site to users, repeat this review with an account that has reader
-        access, not owner access. That reader-account review was not performed in this recording. Also replace every
-        lab-specific value with one the organization has approved.</p>
+        access, not owner access. Follow every support and incident link; check Private Team visibility and
+        Disabled external sharing on all three SharePoint sites. That reader-account review was not performed
+        in this historical recording. Replace every lab-specific value with one the organization has approved.</p>
     </section>
 
     <section class="step" id="tour-13" data-tour="13">
@@ -702,17 +815,20 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
         <figcaption>Recording of the update command republishing catalogs on the lab site.</figcaption>
       </figure>
       <p>Use the update script to publish reviewed changes without rebuilding the Team.</p>
-      <p>This recording also includes <code>-RepairCapturedPages</code> because it demonstrates the repair process on a
-        fresh validation site. This switch rewrites the pages the kit manages. Edits you made to those pages in
-        SharePoint may be lost. Before using it on an existing site, review section D, “Home and the four captured
-        pages,” in <code>01_Admin-Quickstart.html</code>. That section lists the page elements the switch resets. The
-        update script does not provide a <code>-WhatIf</code> preview.</p>
-      <pre class="code-panel">.\03_Update-CoEContent.ps1 `
+      <p>The historical recording used <code>-RepairCapturedPages</code> on a fresh validation site.
+        <strong>Do not add it for a routine update.</strong> It can overwrite kit-managed parts of Home and
+        captured pages, including direct SharePoint edits. Use it only for a reviewed recovery or internal
+        test where replacement is intended; it has no <code>-WhatIf</code> preview.</p>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-update">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-update">.\03_Update-CoEContent.ps1 `
   -OrgPath $orgPath `
   -Scope All `
-  -RepairCapturedPages `
   -AuthenticationMode Interactive `
-        -ContentMode $contentMode</pre>
+  -ContentMode $contentMode</pre>
+            <p class="meta">Stop if script 03 fails; do not treat the following checker as update acceptance until
+              the update actually completes.</p>
+      <p class="meta">If reviewed governance drafts changed, add <code>-ReplaceFiles</code> deliberately.
+        Keep lasting edits in <code>$orgPath\Content</code>; script 03 republishes managed pages.</p>
       <p class="meta">In this recorded run, the update preserved existing catalog rows and checked the security
         configuration again. Review the output for your own deployment rather than assuming every update will have
         the same result.</p>
@@ -724,15 +840,17 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
         <img class="shot" src="Images/ps-checker-command.png" alt="PowerShell terminal running the checker again after the content update">
         <figcaption>Re-running the same read-only checker after the update.</figcaption>
       </figure>
-      <pre class="code-panel">.\Test-CoEInstall.ps1 `
+      <div class="command-head"><button type="button" data-copy="cmd-highered-recheck">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-recheck">.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
+      if ($LASTEXITCODE -ne 0) { throw 'Second checker failed; stop and investigate.' }
 
-<span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
+      <span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
       <p class="meta">Keep <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, the
-        <code>RevisionAudit</code> run transcripts, automated test results, and manual review records together for
-        the handoff.</p>
+        <code>RevisionAudit</code> run transcripts, both checker outputs, and manual review records together
+        for the handoff. Repeat reader, support-route, security, and welcome-post checks after the update.</p>
     </section>
 
     <section id="tour-16" data-tour="16">
@@ -742,11 +860,30 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
         still require separate confirmation.</p>
       <p>Keep the handoff records from step 15 together. For recovery or removal, use the administrator quickstart
         included with the same release.</p>
-      <p class="meta"><strong>Release 3.8.21 &middot; 292 checks passed &middot; Content mode: Demo &middot;
+      <p class="meta"><strong>Historical video: release 3.8.21 &middot; 292 checks passed &middot; Content mode: Demo &middot;
         Environment: HigherEducation</strong></p>
       <p style="margin-top:12px;">
         <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
       </p>
+    </section>
+
+    <section id="recovery">
+      <h2>Failure and recovery boundary</h2>
+      <p>The eight-phase workflow is the same for HigherEducation and Government content. Do not mistake an
+        interrupted install for a blank tenant: inspect the run transcript and intended Team/site before retrying.</p>
+      <ul>
+        <li>If the intended Team/site already exists, correct the blocker and resume that same deployment with
+          <code>-ResumeExisting</code>; never run a second clean install against the same alias.</li>
+        <li>Do not delete only the SharePoint site; the Team and Microsoft 365 group remain.</li>
+        <li>If a Teams tab says <em>App is blocked</em>, verify both <em>App status</em> and <em>Available
+          to</em>. Repair the approved policy, allow it to propagate, and resume; only republish welcome
+          posts whose channels are visually confirmed empty.</li>
+        <li>For a separately approved permanent removal, preview
+          <code>04_Remove-CopilotCoE.ps1 -Purge -WhatIf</code> first. Keep the provisioning app until
+          removal reports <code>AliasReusable : True</code>.</li>
+      </ul>
+      <p><a href="government-install.html#recovery">Compare the GCC Moderate recovery notes</a> and the
+        <a href="admin-faq.html">administrator FAQ</a>.</p>
     </section>
 
     <section id="site-tour-reference">
@@ -926,6 +1063,22 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
       });
       video.addEventListener('playing', () => { clearTimeout(watchdog); fallback.hidden = true; });
     })();
+  </script>
+  <script>
+    document.querySelectorAll("[data-copy]").forEach((button) => {
+      button.addEventListener("click", async () => {
+        const target = document.getElementById(button.dataset.copy);
+        if (!target) return;
+        const original = button.textContent;
+        try {
+          await navigator.clipboard.writeText(target.textContent);
+          button.textContent = "Copied";
+        } catch {
+          button.textContent = "Select and copy";
+        }
+        window.setTimeout(() => { button.textContent = original; }, 1800);
+      });
+    });
   </script>
 </body>
 </html>

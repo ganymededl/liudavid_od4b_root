@@ -152,6 +152,15 @@
       padding: 14px 16px;
       margin: 14px 0;
     }
+    .site-shot {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface-soft);
+    }
+    figcaption { color: var(--cp-text-muted); font-size: 0.9rem; margin-top: 6px; }
     .step-title { display: flex; gap: 10px; align-items: center; }
     .step-number {
       display: inline-grid;
@@ -247,117 +256,157 @@
     <span class="eyebrow">Release 3.8.22 · GCC Moderate · Government-StateLocal · Customer mode</span>
     <h1>GCC Moderate installation runbook</h1>
     <p class="lede">Use this page to install the Government-StateLocal content pack in a GCC Moderate tenant. Follow
-      the eight-step walkthrough and the <a href="admin-quickstart.html">canonical Admin Quickstart</a>. GCC High and
-      DoD are not supported by this release.</p>
+      the same eight installation phases as the <a href="index.html#eight-phase-runbook">higher-ed guide</a> and the
+      <a href="admin-quickstart.html">canonical Admin Quickstart</a>. The profiles supply different content;
+      the installation and acceptance boundaries are the same. GCC High and DoD are unsupported.</p>
     <nav class="toc" aria-label="Runbook sections">
-      <a href="#walkthrough">Video walkthrough</a>
+      <a href="#walkthrough">Video and chapters</a>
+      <a href="#sources">Public vs tenant data</a>
       <a href="#cloud">Cloud boundary</a>
-      <a href="#package">Package</a>
-      <a href="#settings">Settings</a>
-      <a href="#register">Register</a>
-      <a href="#install">Install</a>
-      <a href="#accept">Accept</a>
+      <a href="#package">01 Package</a>
+      <a href="#settings">02 Settings</a>
+      <a href="#content">03 Content</a>
+      <a href="#preflight">04 Preflight</a>
+      <a href="#register">05 App</a>
+      <a href="#install">06 Install</a>
+      <a href="#accept">07 Review</a>
+      <a href="#update">08 Update</a>
+      <a href="#site-tour-reference">What users get</a>
     </nav>
   </header>
 
   <main class="shell">
     <section id="walkthrough">
-      <h2>GCC Moderate walkthrough video (eight steps)</h2>
-      <p>This narrated recording uses the same voice and pace as the commercial walkthrough and follows a generic GCC
-        Moderate installation from package verification through the final update check.</p>
-      <video controls preload="metadata" playsinline poster="government-video-poster.jpg?v=20261022-3"
-             aria-label="Narrated eight-step GCC Moderate Copilot Center of Excellence installation walkthrough"
+      <h2>GCC Moderate walkthrough video (eight phases)</h2>
+      <p>This narrated 3.8.22 walkthrough follows the same eight phases as the
+        <a href="index.html#eight-phase-runbook">higher-ed guide</a>. The footage comes from an internal lab
+        installation, so the tenant, agency and account names on screen are lab values, not values to copy.</p>
+      <video controls preload="metadata" playsinline poster="government-video-poster.jpg?v=20261023-3"
+             aria-label="Narrated eight-phase GCC Moderate Copilot Center of Excellence installation walkthrough"
              style="width:100%; border:1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft);">
-        <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-3" type="video/mp4">
-        <track kind="captions" src="government-install-captions.vtt?v=20261022-3" srclang="en" label="English">
-        Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-3">Download the MP4</a>.
+        <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3" type="video/mp4">
+        <track kind="captions" src="government-install-captions.vtt?v=20261023-3" srclang="en" label="English">
+        Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3">Download the MP4</a>.
       </video>
-      <p class="meta">Ten narrated sections (introduction, eight steps, and closing) · 5 minutes 24 seconds · English captions included.</p>
-      <div class="warning"><strong>Recorded with release 3.8.21.</strong> The eight steps are unchanged in 3.8.22. Where the
-        video and this page differ, follow this page: Step 05 adds the <strong>Allow public client flows</strong> check and the
-        naming-policy gate, Step 06 explains the STOP / PROCEED prompts, and Step 08 no longer uses
-        <code>-RepairCapturedPages</code>.</div>
-      <p class="meta">Talk track: <a href="government-install-talktrack.txt?v=20261022-3">Download narration script</a>.</p>
+      <p class="meta">Ten narrated sections (introduction, eight phases, and closing) · about 7 minutes · English captions included.</p>
+      <div class="warning"><strong>Recorded with release 3.8.22.</strong> The video is a summary, not a substitute for this page:
+        use the commands and cautions below, including the Allow public client flows check, the naming-policy gate, the
+        STOP / PROCEED prompts, and no routine <code>-RepairCapturedPages</code>. The footage is from a lab installation and is not a customer acceptance run.</div>
+      <p class="meta">Talk track: <a href="government-install-talktrack.txt?v=20261023-3">Download narration script</a>.</p>
       <details>
         <summary>Read the walkthrough talk track</summary>
         <pre>INTRO
-This video walks through a full install of the Copilot Center of Excellence kit in a GCC Moderate tenant. It is the same eight-step process used in production deployments.
+In this walkthrough, we&#39;ll install release 3.8.22 using the Government State and Local content pack in GCC Moderate. We&#39;ll follow the same eight phases as the higher education guide.
 
-You will verify the package, configure the tenant, install the site, and then confirm that it is ready for users - not just that the scripts finished.
+The footage comes from an internal lab installation, so the tenant, agency, and account names you see on screen are lab values, not values to copy.
 
-STEP 1 - Verify and extract the release package
-Start with the release ZIP and the SHA256 receipt downloaded alongside it. Run Get-FileHash with the SHA256 algorithm, and continue only when the calculated value matches the receipt.
+We&#39;ll verify the package, configure the settings, install the site, and review the result. Passing the automated checks is only part of deciding whether a deployment is ready for production.
 
-Extract the package into a new, empty install folder. Then create a separate organization folder outside the kit.
+PHASE 1 - Verify and extract the release package
+Download the release 3.8.22 implementation ZIP and its SHA256 receipt, not GitHub&#39;s automatically generated source archive.
 
-Keep the deployment settings and records there so replacing the kit will not overwrite them.
+Run Get-FileHash on the ZIP and compare the result with the expected hash in the receipt. Continue only if they match.
 
-STEP 2 - Edit the organization settings
-Open Deployment-Settings.json in the organization folder, not the template inside the kit.
+Use a new empty install folder. Copy the Government State and Local content pack to a separate organization folder. Keep settings and records outside the extracted kit so a future release cannot overwrite them.
 
-Here, you are confirming the tenant name, SharePoint hosts, site alias, visibility, and security settings. For government content, set LearningEnvironment to Government.
+PHASE 2 - Edit the organization settings
+Open Deployment-Settings.json in the organization folder, not the template inside the kit. Use the guide&#39;s comparison table to separate public agency information from tenant-specific settings.
 
-If you do not already have an approved provisioning app ID for this tenant, leave PnPClientID blank. Script 01 will fill it in after registration.
+Confirm the tenant, SharePoint hosts, unused group alias, and approved owner and reviewer accounts.
 
-STEP 3 - Configure support links and reviewed content
-Next, add the organization's approved support and incident-reporting links, along with its governance links, training resources, and custom content.
+Keep the Team private and external sharing disabled. Set the LearningEnvironment to Government.
 
-As each field appears on screen, confirm that it points to a route the responsible team owns and monitors.
+If you&#39;re creating a new provisioning app, leave the PnP client ID blank. Don&#39;t copy another tenant&#39;s client ID or deployment report into this folder.
 
-Before publishing, have those teams review the governance drafts, support routes, and organization-specific wording.
+PHASE 3 - Configure support links and reviewed content
+Compare each setting with its source. Public policy links can be researched, but private mailboxes, ticket queues, incident routes, and tenant identities must come from the people who own them.
 
-STEP 4 - Check the content before signing in
-From the kit folder, run the two preflight commands shown on screen.
+Configure a monitored support mailbox. Then set the links for general support, technology requests, incident reporting, and AI guidance.
 
-The first loads Internal\ContentPreflight.ps1. The second checks the organization content, including the calendar format and required fields.
+Review the governance and training links as well.
 
-Fix any reported issues before connecting to the tenant.
+Keep lasting changes to generated page text in the organization&#39;s Content folder, and approved reference files in Assets.
 
-STEP 5 - Install PnP.PowerShell and register the app
-Install PnP.PowerShell version 3.2.0.
+The government governance drafts are examples for review, not adopted policy.
 
-If PnPClientID is blank because this tenant does not have an approved provisioning app, have someone who can grant tenant-wide admin consent run script 01.
+PHASE 4 - Check the content before signing in
+From the extracted kit folder, run the local content preflight against the organization folder. The commands are shown on screen.
 
-After registration, check that PnPClientID in the organization settings contains the app's client ID.
+This checks the structured content before sign-in, including the calendar columns and required fields. It does not approve the links, tenant settings, policy wording, or reader experience.
 
-Here in Entra, confirm that every required delegated permission shows as granted.
+Fix every reported issue before continuing.
 
-Then open the Teams admin center. Confirm that Website, PDF, PowerPoint, and SharePoint pages and lists are available to the installer and intended users.
+PHASE 5 - Install PnP.PowerShell and register the app
+Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
 
-STEP 6 - Run the customer installation
-Before you run anything, work out where the site should land. Combine SiteFQDN and MailNickname from the settings file. The resolved address format is shown on screen.
+If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
 
-Now run script 02 in customer mode with SeedDemoContent. That switch loads the site's pages, catalogs, calendar, and governance content.
+The script saves the client ID before checking the public client setting. If it stops at that check, correct the existing app rather than creating another one.
 
-In the installer output, confirm the signed-in account, tenant, alias, owner, and target site address before resources are created.
+In Entra, confirm that all required delegated permissions are granted and that Allow public client flows is set to Yes.
 
-For a clean installation, do not use ResumeExisting. If an earlier attempt already created resources, stop and use the Failure and recovery boundary in the administrator guide.
+Review the group naming policy. If it would change the alias, follow the organization&#39;s approved process for using an exempt administrator.
 
-STEP 7 - Run the checker and complete the manual review
-Now run Test-CoEInstall with the organization folder, site address, and the same content mode used for installation.
+Finally, check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users. On each app&#39;s Users and groups tab, Availability should not say No one, as it does for Website here. Choose Edit availability, then make the app available to Everyone, or to specific users or groups. SharePoint, shown here, is already available to everyone.
 
-Resolve every FAIL. Then read each WARN and complete the manual review it identifies.
+PHASE 6 - Run the customer installation
+Run script 02 in Customer mode with SeedDemoContent. Despite its name, that switch loads the site&#39;s pages, catalogs, calendar, and governance content.
 
-Use a reader account to review the site, follow the support links, confirm the security configuration, and look for remaining demo content.
+Customer mode controls the kit&#39;s generated demo notices and sample content behavior. It does not replace a review of the source files or published content.
 
-Save the checker output in the organization folder. Passing the automated checks does not replace the manual review.
+Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
 
-STEP 8 - Publish the reviewed update and test again
-To publish reviewed content changes, run script 03 with Scope All. Then run Test-CoEInstall again and repeat the relevant manual checks.
+If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it. Choosing Proceed is a documented pilot decision, not production approval. The Admin Quickstart describes the same decision for a missing incident-reporting route.
 
-RepairCapturedPages is not part of a routine update. Use it only when recovery work or checker results show that preserved managed pages need repair.
+After installation, use the actual site address recorded in the deployment report. Don&#39;t assume the path starts with sites. It may start with teams.
 
-The option can replace managed parts of Home and the captured pages, including changes made directly in SharePoint. Review what it will replace before using it on an existing site.
+If an earlier attempt already created resources for the alias, follow the recovery procedure. Don&#39;t start another clean installation against it.
 
-Complete the handoff only when the checks pass and the required manual reviews are documented.
+PHASE 7 - Run the checker and complete the manual review
+Run the read-only checker with the organization folder, the actual site address, and the same ContentMode. Resolve every failure. Read each warning and complete the review or corrective action it identifies.
+
+Review Home, the tool pages, navigation, and catalog views as a regular reader. Follow the support and governance links.
+
+Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post.
+
+The app does not normally have permission to read those posts back. Check them visually rather than granting extra access just to clear the warning.
+
+Keep the checker output and the manual review record.
+
+PHASE 8 - Publish the reviewed update and test again
+Publish reviewed changes from the organization folder with script 03, Scope All, and interactive sign-in. Then run the same read-only checker and repeat the relevant manual review.
+
+Do not add RepairCapturedPages for a routine update. It can replace managed parts of Home and the captured pages. Use it only for a reviewed recovery, or an internal test where replacement is intended.
+
+Complete the handoff only when both checker runs have passed and the required manual reviews and approvals are documented for this tenant.
 
 OUTRO
-Before handoff, remember that a clean checker run means the build matches the settings. It does not replace content, security, accessibility, or operational review.
+Passing the checker is not the same as production approval. The organization still needs to approve the content, security, accessibility, and operating arrangements.
 
-Keep the organization settings, deployment reports, logs, checker output, and review records together.
+Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
 
-For recovery or removal, use the administrator guide included with the same release.</pre>
+For recovery or removal, use the administrator guide included with release 3.8.22.</pre>
       </details>
+    </section>
+
+    <section id="sources">
+      <h2>Separate public information from tenant settings</h2>
+      <p>Use only publicly published agency material as research. An authorized tenant administrator and the teams
+        responsible for support and security must supply or confirm private settings. The internal lab footage
+        used to prepare the walkthrough is not an agency deployment or an approval of agency policy.</p>
+      <div class="cards">
+        <div class="card"><h3>Public research</h3><p>Published agency name, AI guidance, public training and
+          records guidance may inform the starter content. For illustration, Minnesota IT Services publishes
+          an <a href="https://mn.gov/mnit/government/policies/security/ai-standard/">AI services security standard</a>
+          and <a href="https://mn.gov/mnit/about-mnit/security/cir/">cybersecurity reporting information</a>.
+          These links are not proof of this kit's adoption or approved tenant support routes.</p></div>
+        <div class="card"><h3>Tenant and operational values</h3><p>Do not infer
+          <code>Tenant</code>, SharePoint hosts, the installer/owner identity,
+          <code>PnPClientID</code>, support mailbox, incident route, or reader permissions from a public site.
+          Get those from an authorized administrator or route owner.</p></div>
+      </div>
+      <p class="meta">For higher-ed public-source examples and the same source-versus-settings boundary, see the
+        <a href="index.html#tour-01">commercial illustrated tour</a>. Use the government profile below for GCC Moderate.</p>
     </section>
 
     <section id="cloud">
@@ -423,6 +472,10 @@ $orgPath = 'C:\CoE-Orgs\GovernmentOrg'
 if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
   throw 'The chosen release ZIP does not match its receipt.'
 }
+if ((Get-Content -LiteralPath "$zip.sha256" -Raw).Trim() -cne
+    "$expectedHash  Copilot-CoE-Implementation-Kit.zip") {
+  throw 'The release receipt does not match the chosen ZIP.'
+}
 if (Test-Path -LiteralPath $installRoot) {
   throw "Use a new, empty install folder: $installRoot"
 }
@@ -443,38 +496,39 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
       <p>Edit <code>$orgPath\Deployment-Settings.json</code>. Do not edit the copies under
         <code>$kitRoot</code>.</p>
       <table>
-        <thead><tr><th scope="col">Field</th><th scope="col">Government customer value</th></tr></thead>
+        <thead><tr><th scope="col">JSON field</th><th scope="col">Government value</th><th scope="col">Where the value comes from</th></tr></thead>
         <tbody>
-          <tr><td><code>Tenant</code></td><td>The tenant's primary <code>.onmicrosoft.com</code> domain.</td></tr>
-          <tr><td><code>AdminFQDN</code></td><td>The SharePoint admin host, without protocol or path.</td></tr>
-          <tr><td><code>SiteFQDN</code></td><td>The SharePoint content host, without protocol or path.</td></tr>
-          <tr><td><code>PnPClientID</code></td><td>Blank for the first kit registration in a new tenant. Script 01 writes it.</td></tr>
-          <tr><td><code>SharedChannelOwnerUPN</code></td><td>An approved, existing in-tenant Member account.</td></tr>
-          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved organization name, <code>agency</code>, and abbreviation.</td></tr>
-          <tr><td><code>MailNickname</code></td><td>A unique, agency-specific group alias. It controls the Team alias and SharePoint site path. The pack's <code>CopilotCoE</code> is only an example; the installer stops if the alias is already used, including by a deleted group or site.</td></tr>
-          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title, <strong>30 characters or fewer</strong>. If blank, the kit uses <code>&lt;OrgName&gt; Copilot CoE</code>, which is usually longer for an agency name and triggers a STOP / PROCEED prompt and a checker WARN.</td></tr>
-          <tr><td><code>TeamVisibility</code></td><td><code>Private</code>.</td></tr>
-          <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code> for Customer deployments.</td></tr>
-          <tr><td><code>OrganizationEmailDomains</code></td><td>Approved UPN domains from this tenant only.</td></tr>
-          <tr><td><code>GovernanceAdditionalAllowedMembers</code></td><td>Approved in-tenant UPNs, or <code>[]</code>.</td></tr>
-          <tr><td><code>CatalogReviewerUPNs</code></td><td>Approved in-tenant reviewers, or <code>[]</code>.</td></tr>
-          <tr><td><code>EnvironmentLabel</code></td><td><code>Production</code>, <code>Pilot</code>, or another approved reader-facing label.</td></tr>
-          <tr><td><code>SampleNotice</code></td><td><code>none</code> only after Customer content is approved.</td></tr>
-          <tr><td><code>SupportEmail</code></td><td>An approved, monitored mailbox.</td></tr>
-          <tr><td><code>TimeZone</code></td><td>A Windows time-zone ID, such as <code>Central Standard Time</code>.</td></tr>
-          <tr><td><code>LearningEnvironment</code></td><td><code>Government</code>.</td></tr>
-          <tr><td><code>GuidesIntro</code></td><td>Government-pack wording for staff, supervisors, and IT; review before use.</td></tr>
-          <tr><td><code>StoryAudiences</code></td><td><code>Staff</code>, <code>Supervisors</code>, and <code>IT</code>, or approved replacements.</td></tr>
-          <tr><td><code>ScenarioLibraryUrl</code></td><td><code>https://adoption.microsoft.com/en-us/scenario-library/government/</code></td></tr>
+          <tr><td><code>Tenant</code></td><td>The primary <code>.onmicrosoft.com</code> domain</td><td>Confirm with the tenant administrator; never infer it from an agency web page.</td></tr>
+          <tr><td><code>AdminFQDN</code></td><td>SharePoint admin host, no protocol/path</td><td>Copy the actual admin-center host from this tenant.</td></tr>
+          <tr><td><code>SiteFQDN</code></td><td>SharePoint content host, no protocol/path</td><td>Copy the actual content host; the team site may use <code>/teams/</code>, not <code>/sites/</code>.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Blank for the first approved app</td><td>Script 01 saves this tenant's client ID. Never reuse an app ID from another tenant.</td></tr>
+          <tr><td><code>SharedChannelOwnerUPN</code></td><td>Approved in-tenant Member</td><td>Obtain from the governance owner; a public agency mailbox is not sufficient.</td></tr>
+          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved agency name, <code>agency</code>, and abbreviation</td><td>Use the organization's actual name and reader-facing language; public branding needs owner review.</td></tr>
+          <tr><td><code>MailNickname</code></td><td>Unique agency Team alias</td><td>Confirm it is unused, including deleted groups/sites. This field sets the Team alias and site path.</td></tr>
+          <tr><td><code>DisplayName</code></td><td>Approved Team/hub title, ideally 30 characters or fewer</td><td>Longer names trigger an advisory and require a 1366px navigation review.</td></tr>
+          <tr><td><code>TeamVisibility</code></td><td><code>Private</code></td><td>Required by the installer.</td></tr>
+          <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code></td><td>Customer default; external preview needs separate approval.</td></tr>
+          <tr><td><code>OrganizationEmailDomains</code></td><td>Approved in-tenant UPN domains</td><td>Get from the identity/security owner, not another deployment.</td></tr>
+          <tr><td><code>GovernanceAdditionalAllowedMembers</code></td><td>Approved UPNs or <code>[]</code></td><td>Only in-tenant Members approved for restricted channels.</td></tr>
+          <tr><td><code>CatalogReviewerUPNs</code></td><td>Approved UPNs or <code>[]</code></td><td>Catalog approval reviewers; do not copy a lab account.</td></tr>
+          <tr><td><code>EnvironmentLabel</code></td><td><code>Production</code>, <code>Pilot</code>, or approved label</td><td>Reader-facing operational owner decision.</td></tr>
+          <tr><td><code>SampleNotice</code></td><td><code>none</code> after Customer content approval</td><td>Demo mode requires a visible disclaimer. Blank does not mean no notice.</td></tr>
+          <tr><td><code>SupportEmail</code></td><td>Approved, monitored support mailbox</td><td>Confirm owner and monitoring; an admin lab address triggers a WARN, not production approval.</td></tr>
+          <tr><td><code>TimeZone</code></td><td>Windows time-zone ID</td><td>Confirm regional schedule, for example <code>Central Standard Time</code>.</td></tr>
+          <tr><td><code>LearningEnvironment</code></td><td><code>Government</code></td><td>Retain this setting from the Government-StateLocal pack.</td></tr>
+          <tr><td><code>GuidesIntro</code>, <code>StoryAudiences</code></td><td>Reviewed government wording, staff/supervisors/IT</td><td>Start with the pack's values; replace only with approved agency language.</td></tr>
+          <tr><td><code>ScenarioLibraryUrl</code></td><td>Government scenario library URL</td><td>Retain the pack's public Microsoft adoption link or use an approved alternative.</td></tr>
         </tbody>
       </table>
+      <p>All fields in this comparison are edited in <code>$orgPath\Deployment-Settings.json</code>. The
+        third column describes where to <em>obtain</em> each value, not another file to modify.</p>
       <div class="danger"><strong>New tenant:</strong> do not copy <code>PnPClientID</code>,
         <code>CoE-Revision-Report.json</code>, <code>CoE-Removal-Manifest.json</code>,
         <code>CoE-Purge-Receipt.json</code>, advisory decisions, wrapper state, or
         <code>RevisionAudit</code> from another deployment.</div>
     </section>
 
-    <section>
+    <section id="content">
       <h2 class="step-title"><span class="step-number">03</span>Configure support, governance, and reviewed content</h2>
       <p>Use routes supplied or approved by their owners. Do not infer private mailboxes, ticket queues, incident
         endpoints, or tenant values from a public website.</p>
@@ -486,7 +540,10 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
           <tr><td><code>Links.TechnologyRequest</code></td><td>Approved software, service, or AI request process.</td></tr>
           <tr><td><code>Links.DataSafetyIncident</code></td><td>Approved security/data incident route, separate from ordinary feedback.</td></tr>
           <tr><td><code>Links.AIGuidelines</code></td><td>Current responsible-AI or acceptable-use guidance.</td></tr>
+          <tr><td><code>Links.AboutOrg</code></td><td>Official public organization page, if applicable.</td></tr>
+          <tr><td><code>Links.PromptLibrary</code>, <code>Links.LearningSystem</code></td><td>Optional approved destinations; blank is allowed.</td></tr>
           <tr><td><code>GovernanceLinks</code>, <code>TrainingLinks</code></td><td>Reviewed labels and URLs shown on generated pages.</td></tr>
+          <tr><td><code>ChampionDepartments</code>, <code>Agents</code></td><td>Real reviewed units and agent records; remove sample proposals.</td></tr>
           <tr><td><code>$orgPath\Content</code></td><td>Agency text overrides. Review Low/Moderate/High classifications and all illustrative governance drafts.</td></tr>
           <tr><td><code>$orgPath\Assets</code></td><td>Approved files only. Review before using <code>-AcceptOrgAssets</code>.</td></tr>
         </tbody>
@@ -496,9 +553,18 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
       <p>Customer mode removes generated demo notices and sample catalog rows. It does not approve or rewrite your
         organization files. The Government pack contains illustrative governance drafts that must be reviewed,
         replaced, or intentionally omitted before customer use.</p>
+      <table>
+        <thead><tr><th scope="col">Change</th><th scope="col">Edit here</th><th scope="col">What happens on script 03</th></tr></thead>
+        <tbody>
+          <tr><td>Tenant, identity, profile, approved routes and title</td><td><code>$orgPath\Deployment-Settings.json</code></td><td>Most content values republish; tenant, alias and governance owner are fixed at install.</td></tr>
+          <tr><td>Guides, policies, catalog seeds and training calendar</td><td><code>$orgPath\Content</code></td><td>Managed pages can be replaced. Changed governance drafts require deliberate <code>-ReplaceFiles</code>.</td></tr>
+          <tr><td>Reviewed documents, images and videos</td><td><code>$orgPath\Assets</code></td><td>New files require an explicit hosting decision; review every asset.</td></tr>
+          <tr><td>Observed site, Team ID and run evidence</td><td><code>$orgPath\CoE-Revision-Report.json</code> and <code>RevisionAudit</code></td><td>Generated records. Preserve them; never edit them to force another deployment.</td></tr>
+        </tbody>
+      </table>
     </section>
 
-    <section>
+    <section id="preflight">
       <h2 class="step-title"><span class="step-number">04</span>Run local preflight before authentication</h2>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-preflight">Copy command</button></div>
       <pre id="cmd-preflight">Set-Location $kitRoot
@@ -575,6 +641,7 @@ try {
   Write-Host 'Installer did not complete. Stop here: keep the transcript in RevisionAudit, do not start clean or purge, and see Failure and recovery below.' -ForegroundColor Red
   throw
 }
+if (-not $?) { throw 'Installer did not complete; stop before reading the deployment report.' }
 
 # Use the exact site address the installer recorded (it may be under /teams/ rather than /sites/).
 $siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site
@@ -627,8 +694,15 @@ $siteUrl</pre>
       <pre id="cmd-check">.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
-  -ContentMode $contentMode</pre>
+  -ContentMode $contentMode
+if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
       <p>Fix every FAIL. Read every WARN and retain evidence for each manual check. At minimum:</p>
+      <figure>
+        <img class="site-shot" src="government-3822-site-layout.jpg" loading="lazy"
+             alt="CoE Home page from the lab installation, showing the Governance menu, the Start in 10 minutes hero and the Copilot tools section">
+        <figcaption>Home page from the internal 3.8.22 lab installation. This illustrates what to inspect;
+          it is not an agency site, a tenant identity, a reader-permission test, or proof of acceptance.</figcaption>
+      </figure>
       <ol>
         <li>Confirm the Home page, navigation, tools, learning paths, support, governance, and catalog views.</li>
         <li>Confirm exactly one welcome post in General, Share Your Prompt, and Ask Us Anything.</li>
@@ -643,7 +717,7 @@ $siteUrl</pre>
         add the permission solely to eliminate the WARN.</div>
     </section>
 
-    <section>
+    <section id="update">
       <h2 class="step-title"><span class="step-number">08</span>Publish the reviewed update and check again</h2>
       <p>Publish the content approved during Step 07 from the organization folder, then run the checker again.
         Script 03 replaces the pages it manages, so make lasting changes in <code>$orgPath\Content</code>, not
@@ -658,10 +732,12 @@ $siteUrl</pre>
   -AuthenticationMode Interactive `
   -ContentMode $contentMode
 
+if (-not $?) { throw 'Update did not complete; stop before the second checker.' }
 .\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
-  -ContentMode $contentMode</pre>
+  -ContentMode $contentMode
+if ($LASTEXITCODE -ne 0) { throw 'Second checker failed; stop and investigate.' }</pre>
       <div class="warning"><strong>Do not add <code>-RepairCapturedPages</code> here.</strong> It rebuilds Home and
         the captured pages and replaces edits made directly in SharePoint after Step 07. Use it only on an internal
         test site, or when recovery work or checker results show that those pages need repair, after reviewing what it
@@ -671,7 +747,28 @@ $siteUrl</pre>
         <code>RevisionAudit</code> transcripts, checker output, and manual acceptance evidence together.</div>
     </section>
 
-    <section>
+    <section id="site-tour-reference">
+      <h2>What users get after installation</h2>
+      <p>A written reference for the same areas shown in the higher-ed illustrated tour. Government pack wording
+        starts from generic examples; replace classifications, approvals, links and commitments with agency-owned
+        content before production use.</p>
+      <table>
+        <thead><tr><th scope="col">Area</th><th scope="col">Reader and administrator review</th></tr></thead>
+        <tbody>
+          <tr><td>Home and Start in 10 minutes</td><td>Confirm Hero links, tool cards and training-calendar fallback with an ordinary reader account.</td></tr>
+          <tr><td>Learning paths</td><td>Check role-based staff, supervisor and IT routes; do not mistake site links for course-completion tracking.</td></tr>
+          <tr><td>Government prompt library</td><td>Review generic prompts and organization CSV overrides for records, privacy and approved use before publishing.</td></tr>
+          <tr><td>Agent Showcase</td><td>Approve owner, access, data sources, and GCC feature availability before making a proposed agent discoverable.</td></tr>
+          <tr><td>Support and incident reporting</td><td>Keep general help, technology requests and security/data incident routes distinct and actually monitored.</td></tr>
+          <tr><td>Governance and Responsible AI</td><td>Replace illustrative Low/Moderate/High levels, governance drafts and policy links with agency-approved standards.</td></tr>
+          <tr><td>Success Stories</td><td>Review consent, accessibility, captioned media and exclusion of sensitive or regulated details.</td></tr>
+          <tr><td>Feedback and Roadmap</td><td>Separate Microsoft's public feature availability from the agency's own rollout commitments.</td></tr>
+        </tbody>
+      </table>
+      <p><a href="index.html#site-tour-reference">Compare the same eight site areas in the higher-ed guide</a>.</p>
+    </section>
+
+    <section id="recovery">
       <h2>Failure and recovery boundary</h2>
       <ul>
         <li>If the intended Team/site exists after an interrupted run, investigate and resume that exact deployment

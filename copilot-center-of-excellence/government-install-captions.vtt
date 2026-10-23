@@ -1,155 +1,221 @@
 WEBVTT
 
-00:00:00.100 --> 00:00:06.773
-This video walks through a full install of the Copilot Center of Excellence kit in a GCC Moderate tenant.
+00:00:00.100 --> 00:00:09.230
+In this walkthrough, we'll install release 3.8.22 using the Government State and Local content pack in GCC Moderate.
 
-00:00:06.773 --> 00:00:10.904
-It is the same eight-step process used in production deployments.
+00:00:09.230 --> 00:00:13.351
+We'll follow the same eight phases as the higher education guide.
 
-00:00:11.704 --> 00:00:21.237
-You will verify the package, configure the tenant, install the site, and then confirm that it is ready for users - not just that the scripts finished.
+00:00:14.151 --> 00:00:23.472
+The footage comes from an internal lab installation, so the tenant, agency, and account names you see on screen are lab values, not values to copy.
 
-00:00:22.001 --> 00:00:27.647
-Start with the release ZIP and the SHA256 receipt downloaded alongside it.
+00:00:24.272 --> 00:00:29.978
+We'll verify the package, configure the settings, install the site, and review the result.
 
-00:00:27.647 --> 00:00:35.564
-Run Get-FileHash with the SHA256 algorithm, and continue only when the calculated value matches the receipt.
+00:00:29.978 --> 00:00:36.255
+Passing the automated checks is only part of deciding whether a deployment is ready for production.
 
-00:00:36.364 --> 00:00:39.803
-Extract the package into a new, empty install folder.
+00:00:37.082 --> 00:00:47.475
+Download the release 3.8.22 implementation ZIP and its SHA256 receipt, not GitHub's automatically generated source archive.
 
-00:00:39.803 --> 00:00:43.632
-Then create a separate organization folder outside the kit.
+00:00:48.275 --> 00:00:54.014
+Run Get-FileHash on the ZIP and compare the result with the expected hash in the receipt.
 
-00:00:44.432 --> 00:00:50.402
-Keep the deployment settings and records there so replacing the kit will not overwrite them.
+00:00:54.014 --> 00:00:55.799
+Continue only if they match.
 
-00:00:52.532 --> 00:00:58.867
+00:00:56.599 --> 00:00:58.576
+Use a new empty install folder.
+
+00:00:58.576 --> 00:01:03.868
+Copy the Government State and Local content pack to a separate organization folder.
+
+00:01:03.868 --> 00:01:09.862
+Keep settings and records outside the extracted kit so a future release cannot overwrite them.
+
+00:01:12.053 --> 00:01:18.317
 Open Deployment-Settings.json in the organization folder, not the template inside the kit.
 
-00:00:59.667 --> 00:01:06.812
-Here, you are confirming the tenant name, SharePoint hosts, site alias, visibility, and security settings.
+00:01:18.317 --> 00:01:25.047
+Use the guide's comparison table to separate public agency information from tenant-specific settings.
 
-00:01:06.812 --> 00:01:11.058
-For government content, set LearningEnvironment to Government.
+00:01:25.847 --> 00:01:32.444
+Confirm the tenant, SharePoint hosts, unused group alias, and approved owner and reviewer accounts.
 
-00:01:11.858 --> 00:01:19.002
-If you do not already have an approved provisioning app ID for this tenant, leave PnPClientID blank.
+00:01:33.244 --> 00:01:36.709
+Keep the Team private and external sharing disabled.
 
-00:01:19.002 --> 00:01:22.440
-script 01 will fill it in after registration.
+00:01:36.709 --> 00:01:39.574
+Set the LearningEnvironment to Government.
 
-00:01:23.275 --> 00:01:32.818
-Next, add the organization's approved support and incident-reporting links, along with its governance links, training resources, and custom content.
+00:01:40.374 --> 00:01:45.438
+If you're creating a new provisioning app, leave the PnP client ID blank.
 
-00:01:33.618 --> 00:01:40.453
-As each field appears on screen, confirm that it points to a route the responsible team owns and monitors.
+00:01:45.438 --> 00:01:50.569
+Don't copy another tenant's client ID or deployment report into this folder.
 
-00:01:41.253 --> 00:01:48.733
-Before publishing, have those teams review the governance drafts, support routes, and organization-specific wording.
+00:01:51.469 --> 00:01:53.893
+Compare each setting with its source.
 
-00:01:49.433 --> 00:01:53.997
-From the kit folder, run the two preflight commands shown on screen.
+00:01:53.893 --> 00:02:04.049
+Public policy links can be researched, but private mailboxes, ticket queues, incident routes, and tenant identities must come from the people who own them.
 
-00:01:54.797 --> 00:01:58.487
-The first loads Internal\ContentPreflight.ps1.
+00:02:04.849 --> 00:02:07.339
+Configure a monitored support mailbox.
 
-00:01:58.487 --> 00:02:04.795
-The second checks the organization content, including the calendar format and required fields.
+00:02:07.339 --> 00:02:13.760
+Then set the links for general support, technology requests, incident reporting, and AI guidance.
 
-00:02:05.595 --> 00:02:09.353
-Fix any reported issues before connecting to the tenant.
+00:02:14.560 --> 00:02:17.771
+Review the governance and training links as well.
 
-00:02:10.120 --> 00:02:14.267
-Install PnP PowerShell version 3.2.0.
+00:02:18.571 --> 00:02:26.499
+Keep lasting changes to generated page text in the organization's Content folder, and approved reference files in Assets.
 
-00:02:15.067 --> 00:02:26.538
-If PnPClientID is blank because this tenant does not have an approved provisioning app, have someone who can grant tenant-wide admin consent run script 01.
+00:02:27.299 --> 00:02:32.344
+The government governance drafts are examples for review, not adopted policy.
 
-00:02:27.338 --> 00:02:34.732
-After registration, check that PnPClientID in the organization settings contains the app's client ID.
+00:02:33.175 --> 00:02:39.522
+From the extracted kit folder, run the local content preflight against the organization folder.
 
-00:02:35.532 --> 00:02:41.130
-Here in Entra, confirm that every required delegated permission shows as granted.
+00:02:39.522 --> 00:02:41.726
+The commands are shown on screen.
 
-00:02:41.930 --> 00:02:44.210
-Then open the Teams admin center.
+00:02:42.526 --> 00:02:49.341
+This checks the structured content before sign-in, including the calendar columns and required fields.
 
-00:02:44.210 --> 00:02:52.641
-Confirm that Website, PDF, PowerPoint, and SharePoint pages and lists are available to the installer and intended users.
+00:02:49.341 --> 00:02:55.019
+It does not approve the links, tenant settings, policy wording, or reader experience.
 
-00:02:54.710 --> 00:02:58.835
-Before you run anything, work out where the site should land.
+00:02:55.819 --> 00:02:58.692
+Fix every reported issue before continuing.
 
-00:02:58.835 --> 00:03:03.027
-Combine SiteFQDN and MailNickname from the settings file.
+00:02:59.526 --> 00:03:05.549
+Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
 
-00:03:03.027 --> 00:03:06.206
-The resolved address format is shown on screen.
+00:03:06.349 --> 00:03:13.978
+If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
 
-00:03:07.006 --> 00:03:11.333
-Now run script 02 in customer mode with SeedDemoContent.
+00:03:14.778 --> 00:03:19.730
+The script saves the client ID before checking the public client setting.
 
-00:03:11.333 --> 00:03:16.676
-That switch loads the site's pages, catalogs, calendar, and governance content.
+00:03:19.730 --> 00:03:25.419
+If it stops at that check, correct the existing app rather than creating another one.
 
-00:03:17.476 --> 00:03:26.334
-In the installer output, confirm the signed-in account, tenant, alias, owner, and target site address before resources are created.
+00:03:26.219 --> 00:03:34.182
+In Entra, confirm that all required delegated permissions are granted and that Allow public client flows is set to Yes.
 
-00:03:27.134 --> 00:03:30.718
-For a clean installation, do not use ResumeExisting.
+00:03:34.982 --> 00:03:37.057
+Review the group naming policy.
 
-00:03:30.718 --> 00:03:39.036
-If an earlier attempt already created resources, stop and use the Failure and recovery boundary in the administrator guide.
+00:03:37.057 --> 00:03:44.218
+If it would change the alias, follow the organization's approved process for using an exempt administrator.
 
-00:03:41.306 --> 00:03:49.393
-Now run Test-CoEInstall with the organization folder, site address, and the same ContentMode used for installation.
+00:03:45.018 --> 00:03:56.261
+Finally, check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users.
 
-00:03:50.193 --> 00:03:51.484
-Resolve every fail.
+00:03:56.261 --> 00:04:02.953
+On each app's Users and groups tab, Availability should not say No one, as it does for Website here.
 
-00:03:51.484 --> 00:03:56.105
-Then read each warning and complete the manual review it identifies.
+00:04:02.953 --> 00:04:09.512
+Choose Edit availability, then make the app available to Everyone, or to specific users or groups.
 
-00:03:56.905 --> 00:04:06.351
-Use a reader account to review the site, follow the support links, confirm the security configuration, and look for remaining demo content.
+00:04:09.512 --> 00:04:13.326
+SharePoint, shown here, is already available to everyone.
 
-00:04:07.151 --> 00:04:10.617
-Save the checker output in the organization folder.
+00:04:15.661 --> 00:04:19.659
+Run script 02 in Customer mode with SeedDemoContent.
 
-00:04:10.617 --> 00:04:14.966
-Passing the automated checks does not replace the manual review.
+00:04:19.659 --> 00:04:26.124
+Despite its name, that switch loads the site's pages, catalogs, calendar, and governance content.
 
-00:04:15.802 --> 00:04:20.768
-To publish reviewed content changes, run script 03 with Scope All.
+00:04:26.924 --> 00:04:32.522
+Customer mode controls the kit's generated demo notices and sample content behavior.
 
-00:04:20.768 --> 00:04:25.599
-Then run Test-CoEInstall again and repeat the relevant manual checks.
+00:04:32.522 --> 00:04:37.187
+It does not replace a review of the source files or published content.
 
-00:04:26.399 --> 00:04:30.022
-RepairCapturedPages is not part of a routine update.
+00:04:37.987 --> 00:04:44.451
+Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
 
-00:04:30.022 --> 00:04:36.463
-Use it only when recovery work or checker results show that preserved managed pages need repair.
+00:04:45.251 --> 00:04:52.316
+If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it.
 
-00:04:37.263 --> 00:04:44.980
-The option can replace managed parts of Home and the captured pages, including changes made directly in SharePoint.
+00:04:52.316 --> 00:04:57.181
+Choosing Proceed is a documented pilot decision, not production approval.
 
-00:04:44.980 --> 00:04:49.274
-Review what it will replace before using it on an existing site.
+00:04:57.181 --> 00:05:03.045
+The Admin Quickstart describes the same decision for a missing incident-reporting route.
 
-00:04:50.074 --> 00:04:56.381
-Complete the handoff only when the checks pass and the required manual reviews are documented.
+00:05:03.845 --> 00:05:09.310
+After installation, use the actual site address recorded in the deployment report.
 
-00:04:57.283 --> 00:05:03.446
-Before handoff, remember that a clean checker run means the build matches the settings.
+00:05:09.310 --> 00:05:11.976
+Don't assume the path starts with sites.
 
-00:05:03.446 --> 00:05:08.830
-It does not replace content, security, accessibility, or operational review.
+00:05:11.976 --> 00:05:13.575
+It may start with teams.
 
-00:05:09.630 --> 00:05:16.856
-Keep the organization settings, deployment reports, logs, checker output, and review records together.
+00:05:14.375 --> 00:05:20.573
+If an earlier attempt already created resources for the alias, follow the recovery procedure.
 
-00:05:17.656 --> 00:05:23.606
-For recovery or removal, use the administrator guide included with the same release.
+00:05:20.573 --> 00:05:23.905
+Don't start another clean installation against it.
+
+00:05:26.372 --> 00:05:33.404
+Run the read-only checker with the organization folder, the actual site address, and the same ContentMode.
+
+00:05:33.404 --> 00:05:34.850
+Resolve every failure.
+
+00:05:34.850 --> 00:05:39.911
+Read each warning and complete the review or corrective action it identifies.
+
+00:05:40.711 --> 00:05:45.903
+Review Home, the tool pages, navigation, and catalog views as a regular reader.
+
+00:05:45.903 --> 00:05:48.532
+Follow the support and governance links.
+
+00:05:49.332 --> 00:05:58.994
+Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post.
+
+00:05:59.794 --> 00:06:04.197
+The app does not normally have permission to read those posts back.
+
+00:06:04.197 --> 00:06:09.455
+Check them visually rather than granting extra access just to clear the warning.
+
+00:06:10.255 --> 00:06:13.738
+Keep the checker output and the manual review record.
+
+00:06:14.701 --> 00:06:22.084
+Publish reviewed changes from the organization folder with script 03, Scope All, and interactive sign-in.
+
+00:06:22.084 --> 00:06:26.919
+Then run the same read-only checker and repeat the relevant manual review.
+
+00:06:27.719 --> 00:06:31.247
+Do not add RepairCapturedPages for a routine update.
+
+00:06:31.247 --> 00:06:35.167
+It can replace managed parts of Home and the captured pages.
+
+00:06:35.167 --> 00:06:40.852
+Use it only for a reviewed recovery, or an internal test where replacement is intended.
+
+00:06:41.652 --> 00:06:50.668
+Complete the handoff only when both checker runs have passed and the required manual reviews and approvals are documented for this tenant.
+
+00:06:51.564 --> 00:06:55.521
+Passing the checker is not the same as production approval.
+
+00:06:55.521 --> 00:07:02.564
+The organization still needs to approve the content, security, accessibility, and operating arrangements.
+
+00:07:03.364 --> 00:07:11.346
+Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
+
+00:07:12.146 --> 00:07:19.524
+For recovery or removal, use the administrator guide included with release 3.8.22.
 
