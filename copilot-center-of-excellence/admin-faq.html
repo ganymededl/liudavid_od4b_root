@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="data:,">
-  <title>Copilot CoE Administrator FAQ - v3.8.21</title>
+  <title>Copilot CoE Administrator FAQ - v3.8.22</title>
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -387,11 +387,11 @@
       <p class="lede">Find answers about installing, checking, customizing, and maintaining the Copilot CoE kit. Start with the <a href="admin-quickstart.html">canonical Admin Quickstart</a>, then use the six key questions below or search by topic. State and local government administrators can also follow the <a href="government-install.html">separate Government Customer-mode runbook</a>.</p>
       <section class="release-card" aria-label="Current approved release">
         <div class="release-grid">
-          <div><span class="release-label">Approved release</span><span class="release-value">v3.8.21</span></div>
-          <div><span class="release-label">Approved ZIP SHA-256</span><span class="release-value"><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></span></div>
-          <div><span class="release-label">Implementation release asset</span><span class="release-value"><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip">Copilot-CoE-Implementation-Kit.zip</a></span></div>
+          <div><span class="release-label">Approved release</span><span class="release-value">v3.8.22</span></div>
+          <div><span class="release-label">Approved ZIP SHA-256</span><span class="release-value"><code>D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F</code></span></div>
+          <div><span class="release-label">Implementation release asset</span><span class="release-value"><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip">Copilot-CoE-Implementation-Kit.zip</a></span></div>
         </div>
-        <p class="integrity-note">Download the named implementation ZIP asset and its <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip.sha256">SHA256 receipt</a>. GitHub-generated source archives are not substitutes. Keep the receipt with the package.</p>
+        <p class="integrity-note">Download the named implementation ZIP asset and its <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip.sha256">SHA256 receipt</a>. GitHub-generated source archives are not substitutes. Keep the receipt with the package.</p>
         <p class="integrity-note"><strong>Cloud support:</strong> validated in commercial tenants only for this release. GCC Moderate is a design target but has not yet been validated; GCC High and DoD are not supported. See <a href="#faq-013-which-microsoft-365-environments-are-supported">Question 13</a>.</p>
       </section>
     </div>
@@ -438,7 +438,7 @@
           <span>Which release should I deploy, where is the approved ZIP, and what is its hash?</span>
           <span class="tag">Release &amp; integrity</span>
         </summary>
-        <div class="answer"><p>Download the approved <strong>v3.8.21</strong> <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a> release asset.</p><p>Before extracting it, verify this SHA-256 hash:</p><p><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></p><p>Keep the matching <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a> with your deployment records. See <a href="#faq-007-how-do-i-verify-the-zip-before-extracting-it">Question 7</a> for the PowerShell command and <a href="#faq-008-how-do-i-check-whether-my-copy-is-the-correct-release">Question 8</a> for checking a copied package.</p><div class="callout">Do not substitute GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository <em>Download ZIP</em>. Those are source snapshots, not installation packages.</div>
+        <div class="answer"><p>Download the approved <strong>v3.8.22</strong> <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a> release asset.</p><p>Before extracting it, verify this SHA-256 hash:</p><p><code>D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F</code></p><p>Keep the matching <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a> with your deployment records. See <a href="#faq-007-how-do-i-verify-the-zip-before-extracting-it">Question 7</a> for the PowerShell command and <a href="#faq-008-how-do-i-check-whether-my-copy-is-the-correct-release">Question 8</a> for checking a copied package.</p><div class="callout">Do not substitute GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository <em>Download ZIP</em>. Those are source snapshots, not installation packages.</div>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>
@@ -501,7 +501,7 @@
           <span class="tag">Release &amp; integrity</span>
         </summary>
         <div class="answer"><p>Run this before extracting the package:</p><div class="command-header"><button type="button" class="copy-command" data-target="hash-command">Copy command</button></div><pre><code id="hash-command">$zip = 'full path to Copilot-CoE-Implementation-Kit.zip'
-$expected = 'B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F'
+$expected = 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F'
 if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
     throw 'The ZIP does not match the approved release.'
 }</code></pre><p>Stop if the hash differs. Verify it again after copying the ZIP to another location.</p>
@@ -524,7 +524,7 @@ if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
           <span>Why can VERSION.txt differ from CoE-Revision-Content.json?</span>
           <span class="tag">Release &amp; integrity</span>
         </summary>
-        <div class="answer"><p><code>VERSION.txt</code> identifies the packaged kit release, such as 3.8.21. The <code>version</code> inside <code>CoE-Revision-Content.json</code> in the base or Government content pack identifies a content revision. They serve different purposes and can legitimately differ. Do not relabel content revisions just to match the package version.</p>
+        <div class="answer"><p><code>VERSION.txt</code> identifies the packaged kit release, such as 3.8.22. From 3.8.22, <code>CoE-Revision-Report.json</code> also records it as <code>KitRelease</code>. The <code>version</code> inside <code>CoE-Revision-Content.json</code> in the base or Government content pack identifies a content revision. They serve different purposes and can legitimately differ. Do not relabel content revisions just to match the package version.</p>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>
@@ -604,7 +604,7 @@ if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
           <span>How do I confirm all permissions are granted?</span>
           <span class="tag">Roles &amp; permissions</span>
         </summary>
-        <div class="answer"><p>In Entra admin center, open App registrations, select <em>Copilot CoE Provisioning (PnP)</em>, and open API permissions. All five requested permissions must show <strong>Granted</strong> before running <code>02_Install-CopilotCoE.ps1</code>. If consent changed, use a fresh interactive sign-in for the next operation.</p>
+        <div class="answer"><p>In Entra admin center, open App registrations, select <em>Copilot CoE Provisioning (PnP)</em>, and open API permissions. All five requested permissions must show <strong>Granted</strong> before running <code>02_Install-CopilotCoE.ps1</code>. Also open Authentication &gt; Settings and confirm <strong>Allow public client flows</strong> is <strong>Yes</strong>; from release 3.8.22 the scripts check this before sign-in and stop with the exact Entra path when it is off. If consent changed, use a fresh interactive sign-in for the next operation.</p>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>
@@ -1356,9 +1356,9 @@ if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
   </div>
 
   <footer class="footer">
-    <p><strong>Reference materials:</strong> approved v3.8.21 installation package, Admin Quickstart, START-HERE, numbered scripts, neutral organization template, release receipt, and validation evidence.</p>
+    <p><strong>Reference materials:</strong> approved v3.8.22 installation package, Admin Quickstart, START-HERE, numbered scripts, neutral organization template, release receipt, and validation evidence.</p>
     <p><strong>Scope:</strong> administrator guidance for this starter kit, which is not a Microsoft-supported product with a service-level agreement. Organization policy, incident ownership, service levels, licensing decisions, and tenant security approvals remain the organization's responsibility.</p>
-    <p>Prepared October 20, 2026. This standalone companion does not modify the approved v3.8.21 ZIP or its hash.</p>
+    <p>Prepared October 20, 2026; release references updated for v3.8.22. This standalone companion does not modify the approved v3.8.22 ZIP or its hash.</p>
   </footer>
 
   <script>

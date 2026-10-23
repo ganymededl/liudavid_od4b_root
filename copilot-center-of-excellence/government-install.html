@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GCC Moderate Copilot CoE installation runbook - Release 3.8.21</title>
-  <meta name="description" content="GCC Moderate Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.21.">
+  <title>GCC Moderate Copilot CoE installation runbook - Release 3.8.22</title>
+  <meta name="description" content="GCC Moderate Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.22.">
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -244,7 +244,7 @@
   </div>
 
   <header class="shell">
-    <span class="eyebrow">Release 3.8.21 · GCC Moderate · Government-StateLocal · Customer mode</span>
+    <span class="eyebrow">Release 3.8.22 · GCC Moderate · Government-StateLocal · Customer mode</span>
     <h1>GCC Moderate installation runbook</h1>
     <p class="lede">Use this page to install the Government-StateLocal content pack in a GCC Moderate tenant. Follow
       the eight-step walkthrough and the <a href="admin-quickstart.html">canonical Admin Quickstart</a>. GCC High and
@@ -273,6 +273,10 @@
         Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261022-3">Download the MP4</a>.
       </video>
       <p class="meta">Ten narrated sections (introduction, eight steps, and closing) · 5 minutes 24 seconds · English captions included.</p>
+      <div class="warning"><strong>Recorded with release 3.8.21.</strong> The eight steps are unchanged in 3.8.22. Where the
+        video and this page differ, follow this page: Step 05 adds the <strong>Allow public client flows</strong> check and the
+        naming-policy gate, Step 06 explains the STOP / PROCEED prompts, and Step 08 no longer uses
+        <code>-RepairCapturedPages</code>.</div>
       <p class="meta">Talk track: <a href="government-install-talktrack.txt?v=20261022-3">Download narration script</a>.</p>
       <details>
         <summary>Read the walkthrough talk track</summary>
@@ -371,30 +375,47 @@ For recovery or removal, use the administrator guide included with the same rele
         </div>
       </div>
       <table>
-        <thead><tr><th scope="col">Cloud</th><th scope="col">Release 3.8.21 status</th></tr></thead>
+        <thead><tr><th scope="col">Cloud</th><th scope="col">Status</th></tr></thead>
         <tbody>
-          <tr><td>Commercial Microsoft 365</td><td>Validated for this release.</td></tr>
-          <tr><td>GCC Moderate</td><td>A production installation and Step 08 validation completed on October 22, 2026: 270 automated checks passed, with two documented manual-review warnings. Repeat acceptance in each customer tenant.</td></tr>
+          <tr><td>Commercial Microsoft 365</td><td>End-to-end validated with release 3.8.21. The 3.8.22 changes (listed below) have not been re-run end to end; run your own acceptance before relying on them.</td></tr>
+          <tr><td>GCC Moderate</td><td>Release 3.8.21: a production installation and Step 08 validation completed on October 22, 2026, with 270 automated checks passed and two documented manual-review warnings. Release 3.8.22: an internal fresh install and first checker passed 268 checks with two WARNs; the operator reports completing Step 08 elsewhere, but the update, second checker and manual WARN review are not independently evidenced. Repeat acceptance in each customer tenant.</td></tr>
           <tr><td>GCC High and DoD</td><td>Unsupported.</td></tr>
         </tbody>
       </table>
       <div class="warning"><strong>Environment boundary:</strong> this walkthrough covers GCC Moderate only. It does
         not apply to GCC High or DoD, and one production result does not replace acceptance in another customer tenant.</div>
+      <h3>What changed in release 3.8.22</h3>
+      <ul>
+        <li>Scripts 01, 02, 03, 04 and <code>Test-CoEInstall.ps1</code> check that the provisioning app has
+          <strong>Allow public client flows</strong> set to Yes before sign-in, and stop with the exact Entra path when it
+          is off. If the check itself cannot reach Entra or a tenant policy refuses it, the scripts warn and continue to
+          sign-in, which still happens before anything is created.</li>
+        <li>Script 03 checks the target before it changes anything: the alias must resolve to the recorded site and the
+          Team must match the <code>TeamId</code> saved in <code>CoE-Revision-Report.json</code>. If the alias or site was
+          reused, the update stops with nothing changed.</li>
+        <li><code>CoE-Revision-Report.json</code> now records <code>KitRelease</code> (the packaged release that ran).
+          The Government pack's content-schema version now matches the main kit.</li>
+        <li>GCC notes for Researcher, Analyst and SharePoint agents now tell readers to confirm current GCC availability
+          before announcing them.</li>
+      </ul>
     </section>
 
     <section id="package">
       <h2 class="step-title"><span class="step-number">01</span>Verify and extract the implementation package</h2>
-      <p>Use the frozen implementation ZIP and its matching release receipt. Release 3.8.21 SHA256:</p>
-      <p><code>B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F</code></p>
+      <p>Run these steps in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen implementation ZIP and its matching release receipt. Release 3.8.22 SHA256:</p>
+      <p><code>D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F</code></p>
       <div class="warning"><strong>GitHub ZIP distinction:</strong> download the named
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
         release asset and verify it against the attached
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.21/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.
         GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository
         <em>Download ZIP</em> are source snapshots, not installation packages.</div>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-package">Copy command</button></div>
-      <pre id="cmd-package">$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
-$expectedHash = 'B31F641642BD2199C36C3F840F5A4878CEE8332E89B5C3AB4EC09FF72B264D6F'
+      <pre id="cmd-package">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+  throw 'Open PowerShell 7.4 or later (pwsh). The kit scripts require it.'
+}
+$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
+$expectedHash = 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F'
 $installRoot = 'C:\CoE-Install\GovernmentOrg'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\GovernmentOrg'
@@ -409,6 +430,7 @@ if (Test-Path -LiteralPath $orgPath) {
   throw "Use a new organization folder: $orgPath"
 }
 
+Unblock-File -LiteralPath $zip
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
 Copy-Item (Join-Path $kitRoot 'ContentPacks\Government-StateLocal') $orgPath -Recurse
 Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
@@ -429,8 +451,8 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
           <tr><td><code>PnPClientID</code></td><td>Blank for the first kit registration in a new tenant. Script 01 writes it.</td></tr>
           <tr><td><code>SharedChannelOwnerUPN</code></td><td>An approved, existing in-tenant Member account.</td></tr>
           <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved organization name, <code>agency</code>, and abbreviation.</td></tr>
-          <tr><td><code>MailNickname</code></td><td>A unique group alias. It controls the Team alias and SharePoint site path.</td></tr>
-          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title.</td></tr>
+          <tr><td><code>MailNickname</code></td><td>A unique, agency-specific group alias. It controls the Team alias and SharePoint site path. The pack's <code>CopilotCoE</code> is only an example; the installer stops if the alias is already used, including by a deleted group or site.</td></tr>
+          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title, <strong>30 characters or fewer</strong>. If blank, the kit uses <code>&lt;OrgName&gt; Copilot CoE</code>, which is usually longer for an agency name and triggers a STOP / PROCEED prompt and a checker WARN.</td></tr>
           <tr><td><code>TeamVisibility</code></td><td><code>Private</code>.</td></tr>
           <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code> for Customer deployments.</td></tr>
           <tr><td><code>OrganizationEmailDomains</code></td><td>Approved UPN domains from this tenant only.</td></tr>
@@ -469,6 +491,8 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
           <tr><td><code>$orgPath\Assets</code></td><td>Approved files only. Review before using <code>-AcceptOrgAssets</code>.</td></tr>
         </tbody>
       </table>
+      <p>If any of the four <code>Links</code> routes is empty, script 02 asks STOP / PROCEED before it creates anything
+        (see Step 06). PROCEED publishes a visible “route not configured” notice, not a working endpoint.</p>
       <p>Customer mode removes generated demo notices and sample catalog rows. It does not approve or rewrite your
         organization files. The Government pack contains illustrative governance drafts that must be reviewed,
         replaced, or intentionally omitted before customer use.</p>
@@ -504,6 +528,18 @@ Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
           <code>User.Read</code>, and <code>User.Read.All</code></li>
         <li>SharePoint: <code>AllSites.FullControl</code></li>
       </ul>
+      <p>On the same app, open <strong>Authentication &gt; Settings</strong> and confirm <strong>Allow public client
+        flows</strong> is <strong>Yes</strong>. Script 01 does not change this setting; it checks it and, if it is off,
+        stops after saving <code>PnPClientID</code> with the exact Entra path. Turn it on, save, and continue. Scripts
+        02, 03, 04 and the checker run the same check before sign-in.</p>
+      <div class="danger"><strong>Gate before Step 06: group naming policy and installer identity.</strong> Open
+        <strong>Entra admin center &gt; Groups &gt; Naming policy</strong>. If a prefix or suffix is configured, it is
+        applied to the CoE alias too; script 02 would then create the Team and site but fail to find them, and a second
+        run would create another. Run Step 06 as a Global Administrator or User Administrator (activate the role
+        first if it is eligible through Privileged Identity Management), which are exempt, or have the policy changed for
+        the install. Script 02 tries to read the policy, but this app's least-privilege permissions often cannot, so do
+        not rely on its warning. Also run Step 06 as the <code>SharedChannelOwnerUPN</code> account or as a Global
+        Administrator; other operators are untested for writing the governance documents.</div>
       <p>Before installation, confirm in Teams admin center that the installer and intended CoE users can use these
         built-in tab providers:</p>
       <ul>
@@ -528,31 +564,59 @@ $settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | C
 if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
   throw 'Run script 01 and grant admin consent before installation.'
 }
-$siteUrl = "https://$($settings.SiteFQDN)/sites/$($settings.MailNickname)"
 $contentMode = 'Customer'
 
-& .\02_Install-CopilotCoE.ps1 `
-  -OrgPath $orgPath `
-  -ContentMode $contentMode `
-  -SeedDemoContent
+try {
+  & .\02_Install-CopilotCoE.ps1 `
+    -OrgPath $orgPath `
+    -ContentMode $contentMode `
+    -SeedDemoContent
+} catch {
+  Write-Host 'Installer did not complete. Stop here: keep the transcript in RevisionAudit, do not start clean or purge, and see Failure and recovery below.' -ForegroundColor Red
+  throw
+}
 
-if (-not $?) {
-  throw 'Installer did not complete. Stop here; do not read the report, start clean, or purge.'
-}</pre>
-      <p><code>MailNickname</code> chooses the Team alias and SharePoint site path. <code>$siteUrl</code> is derived
-        for validation; changing that variable alone does not change the install target.</p>
+# Use the exact site address the installer recorded (it may be under /teams/ rather than /sites/).
+$siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site
+$siteUrl</pre>
+      <p><code>MailNickname</code> chooses the Team alias and SharePoint site path. <code>$siteUrl</code> is read from
+        the deployment report after a completed install and is used only by the checker; changing it does not change the
+        install target.</p>
       <p><code>-SeedDemoContent</code> is still required in Customer mode because it publishes the managed pages,
         catalogs, calendar, and governance content. Customer mode filters generated demonstration notices and sample
         rows.</p>
       <div class="warning">Before creation, read the signed-in account, tenant, group-naming-policy warning, alias,
         owner, and target URL printed by the script. Stop if any value is wrong.</div>
+      <h3>STOP / PROCEED prompts</h3>
+      <p>Script 02 pauses for some conditions and asks you to type <code>STOP</code> or <code>PROCEED</code>. Pressing
+        Enter means <strong>STOP</strong>, which ends the run. Prompts that appear before anything is created are safe to
+        stop at; correct the setting and run Step 06 again. <code>HeaderLayout</code> and
+        <code>ParentTeamExternalMembers</code> appear after the Team and site exist: if you stop there, fix the cause and
+        resume that deployment with <code>-ResumeExisting</code> (see Failure and recovery); do not start a clean
+        install.</p>
+      <table>
+        <thead><tr><th scope="col">Prompt</th><th scope="col">When it appears</th><th scope="col">What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code>LongDisplayName</code></td><td>Title longer than 30 characters.</td><td>Shorten <code>DisplayName</code>, or PROCEED and capture a 1366px screenshot of the navigation.</td></tr>
+          <tr><td><code>UnconfiguredSupportRoutes</code></td><td>One or more of the four <code>Links</code> routes is empty.</td><td>Add the approved routes, or PROCEED for a reviewed pilot only.</td></tr>
+          <tr><td><code>LabSupportMailbox</code></td><td><code>SupportEmail</code> looks like a lab mailbox.</td><td>Replace it with the agency's monitored mailbox.</td></tr>
+          <tr><td><code>GroupNamingPolicy</code></td><td>A naming policy was read and the operator is not exempt.</td><td>STOP and rerun as Global Administrator or User Administrator.</td></tr>
+          <tr><td><code>OwnerDiffersFromOperator</code></td><td>The signed-in account is not <code>SharedChannelOwnerUPN</code>.</td><td>STOP and sign in as the owner or a Global Administrator, unless tested.</td></tr>
+          <tr><td><code>HeaderLayout</code></td><td>The Extended site header is unavailable (after the site exists).</td><td>PROCEED and capture a 1366px screenshot.</td></tr>
+          <tr><td><code>ParentTeamExternalMembers</code></td><td>Guests or out-of-domain members are on the parent Team (after the site exists).</td><td>Review membership with the security owner.</td></tr>
+        </tbody>
+      </table>
+      <p class="meta">Decisions are saved in <code>$orgPath\CoE-Advisory-Decisions.json</code>, tied to this tenant, host
+        and alias, and reused on the next run. A saved STOP stays a stop until you fix the setting or remove that entry.
+        PROCEED does not approve content or replace manual acceptance.</p>
       <div class="warning"><strong>Expected optional naming-policy warning:</strong>
         <code>The group naming policy could not be read (Insufficient privileges...)</code>. The delegated CoE app
         intentionally does not request broad <code>Directory.Read.All</code>, so this optional
         <code>groupSettings</code> read can fail even when the signed-in person is Global Administrator. The warning
         is non-blocking and does not mean the administrator lacks the roles needed for installation. Do not grant
-        <code>Directory.Read.All</code> solely to remove it. It also does not prove that no naming policy exists:
-        confirm <strong>Entra admin center &gt; Groups &gt; Naming policy</strong> manually. If the run creates and
+        <code>Directory.Read.All</code> solely to remove it. It also does not prove that no naming policy exists, which
+        is why the Step 05 gate checks <strong>Entra admin center &gt; Groups &gt; Naming policy</strong> before this
+        step. If the run creates and
         finds the exact configured alias and proceeds to template application, the alias was not rewritten for that
         run.</div>
     </section>
@@ -581,14 +645,16 @@ if (-not $?) {
 
     <section>
       <h2 class="step-title"><span class="step-number">08</span>Publish the reviewed update and check again</h2>
-      <p>For this fresh acceptance run, use the same repair/update sequence documented by the implementation guide.
-        <code>-RepairCapturedPages</code> rewrites managed captured-page elements; review direct SharePoint edits
-        before using it on an established site.</p>
+      <p>Publish the content approved during Step 07 from the organization folder, then run the checker again.
+        Script 03 replaces the pages it manages, so make lasting changes in <code>$orgPath\Content</code>, not
+        directly in SharePoint.</p>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-update">Copy command</button></div>
-      <pre id="cmd-update">.\03_Update-CoEContent.ps1 `
+      <pre id="cmd-update"># Add -ReplaceFiles only if governance drafts under $orgPath\Content\Governance changed during review,
+# or if reviewers edited the governance Word documents on the site. Without it, 03 stops at the first
+# governance document that differs from the organization's draft, after earlier content has been published.
+.\03_Update-CoEContent.ps1 `
   -OrgPath $orgPath `
   -Scope All `
-  -RepairCapturedPages `
   -AuthenticationMode Interactive `
   -ContentMode $contentMode
 
@@ -596,6 +662,10 @@ if (-not $?) {
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
   -ContentMode $contentMode</pre>
+      <div class="warning"><strong>Do not add <code>-RepairCapturedPages</code> here.</strong> It rebuilds Home and
+        the captured pages and replaces edits made directly in SharePoint after Step 07. Use it only on an internal
+        test site, or when recovery work or checker results show that those pages need repair, after reviewing what it
+        will replace.</div>
       <div class="success"><strong>Complete only after both checker runs and manual review.</strong> Keep
         <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, all
         <code>RevisionAudit</code> transcripts, checker output, and manual acceptance evidence together.</div>
@@ -618,7 +688,10 @@ if (-not $?) {
         intended CoE audience. Do not use <strong>Add to team</strong>. Wait for policy propagation, then resume the existing deployment. Do not start clean
         or purge. Inspect General, Share Your Prompt, and Ask Us Anything first; pass only confirmed missing welcome
         posts:</div>
-      <pre>$missingWelcomeChannels = @('General', 'Share Your Prompt', 'Ask Us Anything 📢')
+      <pre># List ONLY the channels you confirmed have no welcome post. Names must match exactly, for example:
+# 'General', 'Share Your Prompt', 'Ask Us Anything 📢'
+# Leave out -PublishWelcomeToChannels entirely if every channel already has its post.
+$missingWelcomeChannels = @()
 .\02_Install-CopilotCoE.ps1 `
   -OrgPath $orgPath `
   -ContentMode $contentMode `
@@ -635,7 +708,7 @@ if (-not $?) {
 
   <footer>
     <div class="shell">
-      <p>Release 3.8.21 · GCC Moderate · Government-StateLocal content · Customer mode</p>
+      <p>Release 3.8.22 · GCC Moderate · Government-StateLocal content · Customer mode</p>
       <p>A prior acceptance result does not replace acceptance in another tenant. GCC High and DoD are unsupported.</p>
     </div>
   </footer>
