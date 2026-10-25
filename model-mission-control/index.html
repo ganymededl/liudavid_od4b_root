@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>
   (() => {
+    const hasAuthResponse = /(?:^|[#&])(code|error|error_description)=/.test(window.location.hash);
+    if (window.opener && hasAuthResponse) {
+      const callback = new URL("auth-popup.html", window.location.href);
+      callback.hash = window.location.hash;
+      window.location.replace(callback.href);
+    }
+  })();
+</script>
+<script>
+  (() => {
     const param = new URLSearchParams(window.location.search).get("scoutTheme");
     const theme =
       param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
@@ -13,7 +23,7 @@
 </script>
 <script src="catalog-state.js"></script>
 <script src="vendor/msal-browser.min.js"></script>
-<script src="ai-config.js"></script>
+<script src="ai-config.js?v=20261024-2"></script>
 <title>Model Mission Control | Scout Model Advisor</title>
 <meta name="description" content="Paste a task, compare the available Microsoft Scout models, and get a task-specific recommendation with tradeoffs.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
@@ -238,10 +248,10 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   </header>
 
   <nav class="platform-nav" aria-label="Choose AI platform">
-    <a class="platform-link" data-platform="copilot" href="?platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
-    <a class="platform-link" data-platform="cowork" href="?platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
-    <a class="platform-link" data-platform="scout" href="?platform=scout">Microsoft Scout<small>Desktop agent</small></a>
-    <a class="platform-link" data-platform="github-cli" href="?platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
+    <a class="platform-link" data-platform="copilot" href="?v=20261024-2&amp;platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
+    <a class="platform-link" data-platform="cowork" href="?v=20261024-2&amp;platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
+    <a class="platform-link" data-platform="scout" href="?v=20261024-2&amp;platform=scout">Microsoft Scout<small>Desktop agent</small></a>
+    <a class="platform-link" data-platform="github-cli" href="?v=20261024-2&amp;platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
   </nav>
 
   <section class="hero">
