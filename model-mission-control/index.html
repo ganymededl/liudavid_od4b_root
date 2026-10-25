@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="catalog-state.js"></script>
 <script>
   (() => {
     const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -89,6 +90,18 @@ a { color: var(--cp-link); }
   background: var(--cp-accent); color: var(--cp-accent-fg);
 }
 .catalog-stamp { color: var(--cp-text-muted); font-size: 13px; text-align: right; }
+.platform-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
+.platform-link {
+  display: block; padding: 14px; border: 1px solid var(--cp-border); border-radius: 0.625rem;
+  background: var(--cp-surface); color: var(--cp-text); text-decoration: none; font-weight: 750;
+}
+.platform-link small { display: block; margin-top: 4px; color: var(--cp-text-muted); font-weight: 500; }
+.platform-link.active { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+.platform-link.active small { color: var(--cp-accent-fg); }
+.platform-notice {
+  margin: 0 0 20px; padding: 12px 14px; border-left: 4px solid var(--cp-accent);
+  background: var(--cp-accent-soft); color: var(--cp-text-muted); line-height: 1.45;
+}
 .hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; align-items: end; margin-bottom: 24px; }
 .eyebrow { color: var(--cp-accent); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
 h1 { margin: 8px 0 12px; font-size: clamp(36px, 6vw, 72px); line-height: .98; letter-spacing: -.045em; }
@@ -197,6 +210,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
 @media (max-width: 620px) {
   .shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
   .topbar { align-items: start; }
+  .platform-nav { grid-template-columns: 1fr 1fr; }
   .model-grid, .recipe-grid, .alternatives { grid-template-columns: 1fr; }
   .model-toolbar { grid-template-columns: 1fr; }
   .duel-grid { grid-template-columns: 1fr; }
@@ -211,20 +225,28 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
       <span class="brand-mark">MC</span>
       <span>Model Mission Control</span>
     </a>
-    <div class="catalog-stamp">Scout catalog snapshot<br><strong>October 24, 2026</strong></div>
+    <div class="catalog-stamp"><span id="catalogLabel">Catalog snapshot</span><br><strong>October 24, 2026</strong></div>
   </header>
+
+  <nav class="platform-nav" aria-label="Choose AI platform">
+    <a class="platform-link" data-platform="copilot" href="?platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
+    <a class="platform-link" data-platform="cowork" href="?platform=cowork">Claude Cowork<small>Anthropic desktop agent</small></a>
+    <a class="platform-link" data-platform="scout" href="?platform=scout">Microsoft Scout<small>Desktop agent</small></a>
+    <a class="platform-link" data-platform="github-cli" href="?platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
+  </nav>
 
   <section class="hero">
     <div>
-      <div class="eyebrow">Prompt-to-model decision support</div>
+      <div class="eyebrow" id="platformEyebrow">Prompt-to-model decision support</div>
       <h1>Use the right mind for the mission.</h1>
-      <p class="lede">Paste the task, set what matters, and get a model recommendation with a faster fallback, a power upgrade, and a clear reason to switch.</p>
+      <p class="lede" id="platformLede">Paste the task, set what matters, and get a model recommendation with a faster fallback, a power upgrade, and a clear reason to switch.</p>
     </div>
     <aside class="principle">
       <strong>The routing principle</strong>
       <span>Choose the least expensive, fastest model likely to complete the task reliably. Escalate for ambiguity, consequence, scale, or specialized coding depth.</span>
     </aside>
   </section>
+  <div class="platform-notice" id="platformNotice"></div>
 
   <nav class="tabs" aria-label="Model Mission Control views">
     <button class="tab" data-panel="advisor" aria-selected="true">Choose for my prompt</button>
@@ -236,7 +258,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   <section class="panel active" id="advisor">
     <div class="advisor-grid">
       <div class="card">
-        <label for="prompt">What are you asking Scout to do?</label>
+        <label for="prompt" id="promptLabel">What are you asking this product to do?</label>
         <textarea id="prompt" placeholder="Example: Review a large TypeScript change for subtle auth and concurrency bugs, propose the smallest safe fix, then run targeted tests."></textarea>
         <div class="controls">
           <div>
@@ -314,14 +336,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   <section class="panel" id="catalog">
     <div class="model-toolbar">
       <input type="search" id="modelSearch" placeholder="Search model, strength, or task">
-      <div class="filters" aria-label="Filter models">
-        <button class="filter active" data-family="all">All</button>
-        <button class="filter" data-family="OpenAI">GPT</button>
-        <button class="filter" data-family="Anthropic">Claude</button>
-        <button class="filter" data-family="Google">Gemini</button>
-        <button class="filter" data-family="xAI">Grok</button>
-        <button class="filter" data-family="Microsoft">MAI</button>
-      </div>
+      <div class="filters" id="familyFilters" aria-label="Filter models"></div>
     </div>
     <div class="model-grid" id="modelGrid"></div>
   </section>
@@ -353,11 +368,11 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
     <div class="recipe-grid" id="recipeGrid"></div>
   </section>
 
-  <p class="footer-note"><strong>Important:</strong> Scout currently exposes the available model names but not authoritative pricing, benchmark results, or context-window limits. The ratings here are qualitative routing guidance, designed to make the tradeoff explicit. Use Auto when the task is mixed or you do not want to manage the choice.</p>
+  <p class="footer-note" id="sourceNote"></p>
 </main>
 
 <script>
-const MODELS = [
+const SCOUT_MODELS = [
   {
     id: "auto", name: "Auto", family: "Scout", tier: "adaptive",
     known: "Mixed or underspecified tasks.",
@@ -512,6 +527,188 @@ const MODELS = [
   }
 ];
 
+const cloneScout = (id, changes = {}) => ({...SCOUT_MODELS.find(model => model.id === id), ...changes});
+
+const GITHUB_CLI_MODELS = [
+  cloneScout("auto", {
+    family: "GitHub",
+    known: "Automatic routing within your plan and administrator policy.",
+    caveat: "The chosen model can vary by plan, policy, evaluation access, and repository settings."
+  }),
+  cloneScout("claude-sonnet-5.5", {
+    caveat: "Documented CLI default, but an administrator-managed default or repository pin can override it."
+  }),
+  {
+    id: "claude-opus-5.5", name: "Claude Opus 5.5", family: "Anthropic", tier: "frontier",
+    known: "Deep, sustained coding and careful review when quality matters more than speed.",
+    excels: "Complex software engineering and long-running technical reasoning.",
+    best: ["Difficult repository work", "Architecture review", "High-consequence changes"],
+    caveat: "Availability depends on plan and administrator policy.",
+    scores: {reasoning: 10, speed: 4, coding: 10, writing: 9, tools: 9, context: 9}
+  },
+  cloneScout("claude-haiku-5.5"),
+  cloneScout("claude-haiku-4.5"),
+  cloneScout("gpt-5.3-codex"),
+  cloneScout("gpt-6.1-sol"),
+  {
+    id: "gpt-6-astra", name: "GPT-6 Astra", family: "OpenAI", tier: "frontier",
+    known: "Frontier problem-solving for broad, difficult coding missions.",
+    excels: "Advanced coding and multi-stage agent work.",
+    best: ["Complex implementation", "Broad technical investigation", "Agentic coding"],
+    caveat: "Documented as recommended opt-in, not the automatic default.",
+    scores: {reasoning: 10, speed: 5, coding: 10, writing: 8, tools: 10, context: 9}
+  },
+  cloneScout("gpt-6-luna"),
+  cloneScout("gemini-3.8-flash")
+];
+
+const COWORK_MODELS = [
+  {
+    id: "claude-fable-5.1", name: "Claude Fable 5.1", family: "Anthropic", tier: "power",
+    known: "Cowork's documented balanced agent model, defaulting to Medium effort.",
+    excels: "Agentic knowledge work that balances quality, speed, and sustained execution.",
+    best: ["Multi-step knowledge work", "Document creation", "Everyday Cowork tasks"],
+    caveat: "Anthropic has not published a complete Cowork picker matrix by plan.",
+    scores: {reasoning: 9, speed: 8, coding: 8, writing: 9, tools: 9, context: 10}
+  },
+  {
+    id: "claude-opus-5.5", name: "Claude Opus 5.5", family: "Anthropic", tier: "frontier",
+    known: "Maximum-depth reasoning and sustained work in Anthropic's current lineup.",
+    excels: "Difficult research, strategy, and complex agent work.",
+    best: ["High-consequence analysis", "Deep research", "Complex multi-step work"],
+    caveat: "Current Anthropic model; Cowork picker availability is plan and account dependent.",
+    scores: {reasoning: 10, speed: 4, coding: 10, writing: 10, tools: 9, context: 9}
+  },
+  cloneScout("claude-sonnet-5.5", {
+    caveat: "Current Anthropic model; Cowork picker availability is plan and account dependent."
+  }),
+  cloneScout("claude-haiku-5.5", {
+    caveat: "Current Anthropic model; Cowork picker availability is plan and account dependent."
+  }),
+  {
+    id: "claude-mythos-5.1", name: "Claude Mythos 5.1", family: "Anthropic", tier: "restricted",
+    known: "Specialized high-capability work for organizations verified by Anthropic.",
+    excels: "Restricted advanced use cases under Anthropic verification programs.",
+    best: ["Verified specialist programs", "Controlled advanced research", "Approved security work"],
+    caveat: "Restricted to verified organizations and not a general Cowork choice.",
+    scores: {reasoning: 10, speed: 4, coding: 9, writing: 9, tools: 8, context: 10}
+  }
+];
+
+const COPILOT_MODELS = [
+  {
+    id: "microsoft-default", name: "Microsoft default model", family: "Microsoft", tier: "default",
+    known: "Everyday Microsoft 365 work with Microsoft-managed routing and grounding.",
+    excels: "General Copilot Chat and Microsoft 365 app tasks.",
+    best: ["Workplace Q&A", "Drafting in Microsoft 365", "Grounded everyday work"],
+    caveat: "Microsoft does not publicly enumerate the exact default model version for every surface.",
+    scores: {reasoning: 8, speed: 8, coding: 6, writing: 8, tools: 9, context: 8}
+  },
+  {
+    id: "claude-family", name: "Claude (family)", family: "Anthropic", tier: "provider",
+    known: "Nuanced research and editing where Microsoft exposes Claude selection.",
+    excels: "Researcher, Edit with Copilot, and supported Copilot picker experiences.",
+    best: ["Research synthesis", "Nuanced editing", "Alternative model response"],
+    caveat: "Exact versions and availability vary by surface, region, license, and administrator settings.",
+    scores: {reasoning: 9, speed: 6, coding: 7, writing: 10, tools: 8, context: 9}
+  },
+  {
+    id: "claude-fable-5", name: "Claude Fable 5", family: "Anthropic", tier: "opt-in",
+    known: "Opt-in Claude processing for organizations that accept provider data retention.",
+    excels: "Advanced Claude-backed Microsoft 365 scenarios.",
+    best: ["Approved Claude workflows", "Research and editing", "Tenant-enabled scenarios"],
+    caveat: "Off by default, may retain data, and requires tenant administrator approval.",
+    scores: {reasoning: 9, speed: 7, coding: 7, writing: 9, tools: 8, context: 9}
+  },
+  {
+    id: "claude-mythos-5", name: "Claude Mythos 5", family: "Anthropic", tier: "opt-in",
+    known: "Restricted Claude capability under explicit tenant opt-in and retention terms.",
+    excels: "Controlled advanced scenarios for approved organizations.",
+    best: ["Approved specialist use", "Controlled research", "Tenant-governed workflows"],
+    caveat: "Off by default, includes provider data retention, and is not broadly available.",
+    scores: {reasoning: 10, speed: 5, coding: 8, writing: 9, tools: 8, context: 10}
+  },
+  {
+    id: "spacexai-provider", name: "SpaceXAI provider", family: "xAI", tier: "independent",
+    known: "An independent-provider option for Copilot Studio and Copilot Cowork.",
+    excels: "Alternative-provider agent scenarios enabled by an administrator.",
+    best: ["Copilot Studio agents", "Copilot Cowork", "Independent-provider evaluation"],
+    caveat: "Microsoft does not publish individual model names; Microsoft DPA, residency, SLA, and copyright commitments do not apply.",
+    scores: {reasoning: 8, speed: 7, coding: 7, writing: 7, tools: 8, context: 8}
+  }
+];
+
+const PLATFORMS = {
+  copilot: {
+    name: "Microsoft 365 Copilot",
+    shortName: "Copilot",
+    models: COPILOT_MODELS,
+    notice: "Microsoft publishes provider and family availability, not a complete model-picker list. What you can select varies by app, tenant, region, license, and administrator policy.",
+    source: "Microsoft Learn: AI models in Microsoft 365 Copilot",
+    sourceUrl: "https://learn.microsoft.com/en-us/microsoft-365/copilot/ai-models-overview",
+    catalogLabel: "Provider-level catalog"
+  },
+  cowork: {
+    name: "Claude Cowork",
+    shortName: "Cowork",
+    models: COWORK_MODELS,
+    notice: "Cowork requires a paid Claude plan. Anthropic documents its current lineup and Fable 5.1's Cowork effort default, but not a complete per-plan Cowork picker matrix.",
+    source: "Anthropic: Models overview",
+    sourceUrl: "https://platform.claude.com/docs/en/models/overview",
+    catalogLabel: "Plan-dependent catalog"
+  },
+  scout: {
+    name: "Microsoft Scout",
+    shortName: "Scout",
+    models: SCOUT_MODELS,
+    notice: "This is the exact live catalog returned by Scout for this installation. Availability can still change as the service catalog changes.",
+    source: "Microsoft Scout live m_list_models catalog",
+    sourceUrl: "",
+    catalogLabel: "Live exact catalog"
+  },
+  "github-cli": {
+    name: "GitHub Copilot CLI",
+    shortName: "GitHub CLI",
+    models: GITHUB_CLI_MODELS,
+    notice: "These are the model IDs documented for GitHub Copilot CLI. Your live picker can be narrower because plan, organization policy, evaluation access, repository pins, and managed defaults all apply.",
+    source: "GitHub Docs: Copilot CLI command reference",
+    sourceUrl: "https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference",
+    catalogLabel: "Documented CLI catalog"
+  }
+};
+
+function profileForDetectedModel(id) {
+  const profile = [...SCOUT_MODELS, ...GITHUB_CLI_MODELS, ...COWORK_MODELS, ...COPILOT_MODELS]
+    .find(model => model.id === id);
+  if (profile) return {...profile};
+  const family = id.startsWith("claude") ? "Anthropic" :
+    id.startsWith("gpt") ? "OpenAI" :
+    id.startsWith("gemini") ? "Google" :
+    id.startsWith("grok") ? "xAI" :
+    id.startsWith("mai") ? "Microsoft" : "New";
+  return {
+    id, name: id, family, tier: "new",
+    known: "Newly detected in this platform's catalog; differentiation review pending.",
+    excels: "Newly detected model.",
+    best: ["Evaluate before production use"],
+    caveat: "Mission Control detected this model but has not assigned a reviewed capability profile yet.",
+    scores: {reasoning: 7, speed: 7, coding: 7, writing: 7, tools: 7, context: 7}
+  };
+}
+
+if (window.MODEL_MISSION_CATALOGS) {
+  Object.entries(window.MODEL_MISSION_CATALOGS.platforms || {}).forEach(([key, state]) => {
+    if (PLATFORMS[key] && Array.isArray(state.models) && state.models.length) {
+      PLATFORMS[key].models = state.models.map(profileForDetectedModel);
+    }
+  });
+}
+
+const requestedPlatform = new URLSearchParams(window.location.search).get("platform") || "scout";
+const platformKey = PLATFORMS[requestedPlatform] ? requestedPlatform : "scout";
+const PLATFORM = PLATFORMS[platformKey] || PLATFORMS.scout;
+const MODELS = PLATFORM.models;
+
 const RECIPES = [
   {title: "Ship a production code change", text: "Implement, test, and inspect a cross-file change with minimal regression risk.", prompt: "Implement a production-ready change across several files. First trace the existing architecture and prior art, then make the smallest complete change, add targeted tests, and validate behavior. Explain any remaining risk."},
   {title: "Write an executive narrative", text: "Turn mixed evidence into concise, nuanced leadership-ready writing.", prompt: "Synthesize the attached evidence into a concise executive narrative. Preserve uncertainty, separate facts from interpretation, surface the two decisions that matter, and avoid generic AI phrasing."},
@@ -565,6 +762,9 @@ function scoreModel(model, signals, priority, stakes, context) {
   if (context === "small") score += model.scores.speed;
   if (context === "large") score += model.scores.context * 1.7;
   if (model.id === "auto") score -= promptSpecificity(signals) > 2 ? 8 : -6;
+  if (model.tier === "restricted") score -= 22;
+  if (model.tier === "opt-in") score -= 9;
+  if (model.tier === "independent") score -= 7;
   return score;
 }
 
@@ -577,8 +777,10 @@ function routePrompt(prompt, priority, stakes, context) {
   const ranked = MODELS.map(model => ({model, score: scoreModel(model, signals, priority, stakes, context)}))
     .sort((a, b) => b.score - a.score);
   const primary = ranked[0].model;
-  const lighter = ranked.find(item => item.model.scores.speed >= 9 && item.model.id !== primary.id)?.model || byId("auto");
-  const upgrade = ranked.find(item => item.model.tier === "frontier" && item.model.id !== primary.id)?.model || byId("gpt-6.1-sol");
+  const lighter = ranked.find(item => item.model.scores.speed >= 8 && item.model.id !== primary.id)?.model ||
+    ranked.find(item => item.model.id !== primary.id)?.model || primary;
+  const upgrade = ranked.find(item => ["frontier", "power"].includes(item.model.tier) && item.model.id !== primary.id)?.model ||
+    ranked.find(item => item.model.id !== primary.id)?.model || primary;
   return {primary, lighter, upgrade, signals, ranked};
 }
 
@@ -646,6 +848,30 @@ function renderCatalog() {
   `).join("") || `<div class="empty">No models match that filter.</div>`;
 }
 
+function renderPlatformChrome() {
+  document.title = `${PLATFORM.name} Model Mission Control`;
+  document.getElementById("catalogLabel").textContent = PLATFORM.catalogLabel;
+  document.getElementById("platformEyebrow").textContent = `${PLATFORM.name} model advisor`;
+  document.getElementById("platformLede").textContent =
+    `Paste a ${PLATFORM.shortName} task and get a platform-specific recommendation, a quicker fallback, and a clear reason to switch.`;
+  document.getElementById("platformNotice").textContent = PLATFORM.notice;
+  document.getElementById("promptLabel").textContent = `What are you asking ${PLATFORM.shortName} to do?`;
+  document.querySelectorAll(".platform-link").forEach(link => {
+    link.classList.toggle("active", link.dataset.platform === platformKey);
+    if (link.dataset.platform === platformKey) link.setAttribute("aria-current", "page");
+  });
+  const families = [...new Set(MODELS.map(model => model.family))];
+  document.getElementById("familyFilters").innerHTML =
+    `<button class="filter active" data-family="all">All</button>` +
+    families.map(family => `<button class="filter" data-family="${family}">${family}</button>`).join("");
+  const source = PLATFORM.sourceUrl ?
+    `<a href="${PLATFORM.sourceUrl}" target="_blank" rel="noopener noreferrer">${PLATFORM.source}</a>` :
+    PLATFORM.source;
+  document.getElementById("sourceNote").innerHTML =
+    `<strong>Availability source:</strong> ${source}. Last checked October 24, 2026. ` +
+    `Capability ratings are qualitative guidance, not benchmark scores or pricing claims.`;
+}
+
 function modelSummary(model) {
   return `<div class="family">${model.family} / ${model.tier}</div><h2>${model.name}</h2><div class="known-for"><span>Known for:</span> ${model.known}</div><div class="caveat"><strong>Use it for:</strong> ${model.best.join(", ")}</div>`;
 }
@@ -671,8 +897,8 @@ function setupDuel() {
   const options = MODELS.map(model => `<option value="${model.id}">${model.name} - ${model.known}</option>`).join("");
   document.getElementById("duelA").innerHTML = options;
   document.getElementById("duelB").innerHTML = options;
-  document.getElementById("duelA").value = "claude-sonnet-5.5";
-  document.getElementById("duelB").value = "gpt-6.1-sol";
+  document.getElementById("duelA").value = MODELS[0].id;
+  document.getElementById("duelB").value = MODELS[Math.min(1, MODELS.length - 1)].id;
   renderDuel();
 }
 
@@ -683,6 +909,8 @@ function renderRecipes() {
     </article>
   `).join("");
 }
+
+renderPlatformChrome();
 
 document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
   document.querySelectorAll(".tab").forEach(item => item.setAttribute("aria-selected", "false"));
