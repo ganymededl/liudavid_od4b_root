@@ -151,6 +151,8 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
   <p>The reference deployment uses a DIAx tenant for sign-in. In another environment, use that organization's Entra tenant and authorized user.</p>
   <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer. This does not mean the API accepts unauthenticated requests: the function code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI resource.</div>
 
+  <p>At each checkpoint, record the result and capture screenshots if required by your deployment process. Redact identifiers before sharing evidence, and never include tokens or credentials.</p>
+
   <nav class="toc">
     <strong>Build sequence</strong>
     <ol>
@@ -237,7 +239,7 @@ az cognitiveservices account deployment create `
           <div class="portal-field"><span>Deployment type</span><span>Global Standard</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 1 - Confirm the model deployment.</strong> Verify that deployment status is Succeeded. Record the deployment name; you will use it in the Function settings. Capture a screenshot if required for the deployment record.</figcaption>
+      <figcaption><strong>Checkpoint 1 - Confirm the model deployment.</strong> Verify that deployment status is Succeeded. Record the deployment name; you will use it in the Function settings.</figcaption>
     </figure>
   </section>
 
@@ -265,7 +267,7 @@ az cognitiveservices account deployment create `
           <div class="portal-field"><span>Status</span><span>Enabled</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 2 - Confirm the API scope.</strong> Verify that <code>access_as_user</code> is enabled before configuring the SPA. Capture a screenshot if required for the deployment record.</figcaption>
+      <figcaption><strong>Checkpoint 2 - Confirm the API scope.</strong> Verify that <code>access_as_user</code> is enabled before configuring the SPA.</figcaption>
     </figure>
   </section>
 
@@ -293,7 +295,7 @@ az cognitiveservices account deployment create `
           <div class="portal-field"><span>Supported account type</span><span>Single tenant</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 3 - Confirm SPA authentication.</strong> Verify that both redirects are under SPA, not Web. A mismatched path or missing trailing slash causes AADSTS50011. Capture a screenshot if required for the deployment record.</figcaption>
+      <figcaption><strong>Checkpoint 3 - Confirm SPA authentication.</strong> Verify that both redirects are under SPA, not Web. A mismatched path or missing trailing slash causes AADSTS50011.</figcaption>
     </figure>
   </section>
 
@@ -326,7 +328,7 @@ az functionapp create `
           <div class="portal-field"><span>HTTPS only</span><span>Enabled</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 4 - Confirm the Function runtime.</strong> Verify Linux, Flex Consumption, Node.js 22, Running status, and HTTPS only before deployment. Capture a screenshot if required for the deployment record.</figcaption>
+      <figcaption><strong>Checkpoint 4 - Confirm the Function runtime.</strong> Verify Linux, Flex Consumption, Node.js 22, Running status, and HTTPS only before deployment.</figcaption>
     </figure>
   </section>
 
@@ -360,7 +362,7 @@ az role assignment create `
           <div class="portal-field"><span>Role</span><strong>Cognitive Services OpenAI User</strong></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 5 - Confirm managed identity access.</strong> Verify the role at the Azure OpenAI account scope, not the entire subscription. Capture a screenshot if required for the deployment record.</figcaption>
+      <figcaption><strong>Checkpoint 5 - Confirm managed identity access.</strong> Verify the role at the Azure OpenAI account scope, not the entire subscription.</figcaption>
     </figure>
   </section>
 
@@ -378,7 +380,7 @@ az role assignment create `
         <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td>Your deployment name</td><td>Model deployment used by the router.</td></tr>
       </tbody>
     </table>
-    <p>The next command selects the account currently signed in to Azure CLI. Use it only if that account should be authorized to run assessments. Otherwise, set <code>$USER_OBJECT_ID</code> to the intended user's object ID.</p>
+    <p>The user lookup below retrieves the object ID of the account currently signed in to Azure CLI. Use that ID only if this account should be authorized to run assessments. Otherwise, replace it with the intended user's object ID before applying the settings.</p>
 <pre><code>$TENANT_ID = az account show --query tenantId -o tsv
 $USER_OBJECT_ID = az ad signed-in-user show --query id -o tsv
 $AI_ENDPOINT = az cognitiveservices account show `
@@ -404,10 +406,10 @@ az functionapp config appsettings set `
           <div class="portal-field"><span>Authentication</span><span>ENTRA_TENANT_ID, ENTRA_API_CLIENT_ID, ALLOWED_USER_OBJECT_ID</span></div>
           <div class="portal-field"><span>Browser origins</span><span>ALLOWED_ORIGINS</span></div>
           <div class="portal-field"><span>Azure OpenAI</span><span>AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT</span></div>
-          <div class="portal-field"><span>Secrets</span><strong>None</strong></div>
+          <div class="portal-field"><span>Azure OpenAI API key or application client secret</span><strong>Not configured</strong></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 6 - Confirm Function settings.</strong> Verify all six setting names and save the configuration. Redact tenant and user identifiers before sharing a screenshot.</figcaption>
+      <figcaption><strong>Checkpoint 6 - Confirm Function settings.</strong> Verify all six setting names and save the configuration.</figcaption>
     </figure>
     <div class="callout"><strong>Do not use a wildcard (<code>*</code>) in the allowed origins.</strong> The function code returns CORS headers only when the request Origin exactly matches <code>ALLOWED_ORIGINS</code>. Keep the platform CORS list empty or equally restrictive; do not weaken the code-level check.</div>
   </section>
@@ -443,10 +445,10 @@ func azure functionapp publish $FUNCTION_APP --javascript --build remote</code><
       <li><strong>Deployment:</strong> Function App state is Running and <code>/api/recommend</code> exists.</li>
       <li><strong>Anonymous denial:</strong> POST without a bearer token returns HTTP 401.</li>
       <li><strong>CORS:</strong> OPTIONS from the production origin returns 204 and that exact <code>Access-Control-Allow-Origin</code>.</li>
-      <li><strong>Authentication:</strong> <code>Assess with Azure AI</code> redirects the current tab to Microsoft Entra ID, returns to Model Mission Control with the selected platform restored, restores the prompt, and continues automatically.</li>
+      <li><strong>Authentication:</strong> selecting <code>Assess with Azure AI</code> redirects the current tab to Microsoft Entra ID. After sign-in, Model Mission Control restores the selected platform and prompt, then continues the assessment automatically.</li>
       <li><strong>Authorization:</strong> a different tenant/user is rejected even if it can authenticate.</li>
       <li><strong>Managed identity:</strong> in a dedicated test environment, temporarily remove the managed identity's Azure OpenAI role assignment. Confirm the expected authentication failure, then restore the assignment.</li>
-      <li><strong>Model bounding:</strong> verify the response references only candidate IDs submitted by the current platform catalog.</li>
+      <li><strong>Eligible models:</strong> verify that the response references only model IDs included in the assessment request from the selected platform's catalog.</li>
     </ol>
 <pre><code># Expected: HTTP 401
 Invoke-WebRequest `
@@ -476,7 +478,7 @@ Invoke-WebRequest `
           <div class="portal-field"><span>Recommendation</span><span>Only an eligible platform model ID</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 7 - Confirm the browser flow.</strong> Verify the completed recommendation and success status with a synthetic prompt that contains no customer data. Capture a screenshot if required for production approval.</figcaption>
+      <figcaption><strong>Checkpoint 7 - Confirm the browser flow.</strong> Verify the completed recommendation and success status with a synthetic prompt that contains no customer data.</figcaption>
     </figure>
   </section>
 
