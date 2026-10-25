@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<title>Azure AI Assessment Deployment Runbook</title>
+<meta name="description" content="Recreate the Model Mission Control Azure Function, Entra authentication, managed identity, and Azure AI deployment.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--cp-bg); color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+a { color: var(--cp-link); }
+code, pre { font-family: Consolas, "Courier New", Courier, monospace; }
+.shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 72px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 32px; }
+.back { color: var(--cp-text); text-decoration: none; font-weight: 700; }
+.verified { color: var(--cp-text-muted); font-size: 13px; text-align: right; }
+.hero { max-width: 900px; margin-bottom: 28px; }
+.eyebrow { color: var(--cp-accent); font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+h1 { margin: 8px 0 12px; font-size: clamp(36px, 6vw, 68px); line-height: 1; letter-spacing: -.04em; }
+.lede { color: var(--cp-text-muted); font-size: 19px; line-height: 1.55; }
+.callout {
+  border-left: 4px solid var(--cp-accent); background: var(--cp-accent-soft);
+  padding: 14px 16px; margin: 20px 0; line-height: 1.5;
+}
+.toc, .step, .architecture {
+  background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+  padding: 22px; margin: 18px 0; box-shadow: 0 0 2px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.14);
+}
+.toc ol { columns: 2; margin: 12px 0 0; padding-left: 22px; }
+.toc li { margin: 7px 0; }
+h2 { margin: 42px 0 12px; font-size: 28px; letter-spacing: -.02em; }
+h3 { margin: 0 0 10px; font-size: 20px; }
+p, li { line-height: 1.55; }
+.step-number {
+  display: inline-grid; place-items: center; width: 30px; height: 30px; margin-right: 8px;
+  border-radius: 50%; background: var(--cp-accent); color: var(--cp-accent-fg); font-weight: 800;
+}
+.checklist { list-style: none; padding: 0; }
+.checklist li { margin: 8px 0; padding-left: 26px; position: relative; }
+.checklist li::before { content: "OK"; position: absolute; left: 0; color: var(--cp-success); font-size: 11px; font-weight: 900; }
+pre {
+  overflow-x: auto; padding: 16px; border: 1px solid var(--cp-border);
+  border-radius: 0.625rem; background: var(--cp-bg-elevated); line-height: 1.45; font-size: 13px;
+}
+.vars { width: 100%; border-collapse: collapse; }
+.vars th, .vars td { padding: 10px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
+.vars th { color: var(--cp-text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+.portal-shot {
+  margin: 18px 0 8px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem;
+  overflow: hidden; background: var(--cp-bg-elevated);
+}
+.portal-bar { padding: 10px 14px; background: var(--cp-surface-soft); border-bottom: 1px solid var(--cp-border); font-size: 12px; color: var(--cp-text-muted); }
+.portal-body { display: grid; grid-template-columns: 190px 1fr; min-height: 190px; }
+.portal-nav { padding: 14px; border-right: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 13px; }
+.portal-nav strong { display: block; color: var(--cp-accent); margin: 8px 0; }
+.portal-panel { padding: 18px; }
+.portal-panel h4 { margin: 0 0 12px; }
+.portal-field { border-bottom: 1px solid var(--cp-border); padding: 8px 0; display: grid; grid-template-columns: 190px 1fr; gap: 12px; }
+.portal-field span:first-child { color: var(--cp-text-muted); }
+figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; border-top: 1px solid var(--cp-border); }
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; align-items: stretch; }
+.flow-box { padding: 14px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+.flow-box strong { color: var(--cp-accent); display: block; margin-bottom: 5px; }
+.arrow { color: var(--cp-text-muted); text-align: center; display: none; }
+.danger { color: var(--cp-danger); font-weight: 700; }
+.small { color: var(--cp-text-muted); font-size: 13px; }
+@media (max-width: 760px) {
+  .toc ol { columns: 1; }
+  .flow { grid-template-columns: 1fr; }
+  .portal-body { grid-template-columns: 1fr; }
+  .portal-nav { border-right: 0; border-bottom: 1px solid var(--cp-border); }
+  .portal-field { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="back" href="index.html?v=20261024-3">&larr; Model Mission Control</a>
+    <div class="verified">Reference deployment verified<br><strong>October 25, 2026</strong></div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">Administrator deployment guide</div>
+    <h1>Azure AI assessment runbook</h1>
+    <p class="lede">Recreate the secretless Azure Function behind <strong>Assess with Azure AI</strong>: Entra delegated authentication at the browser, strict token validation in the API, and managed identity from the Function App to Azure AI Foundry.</p>
+  </section>
+
+  <div class="callout"><strong>Security model:</strong> no API key or client secret is stored in the website or Function App. The HTTP trigger is anonymous at the Functions host layer because the code validates tenant, audience, delegated scope, and an allowed user object ID before calling Azure AI. The Function uses its system-assigned identity for Azure AI.</div>
+
+  <nav class="toc">
+    <strong>Build sequence</strong>
+    <ol>
+      <li><a href="#prerequisites">Prerequisites and variables</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#azure-ai">Azure AI resource and deployment</a></li>
+      <li><a href="#entra-api">Entra API registration</a></li>
+      <li><a href="#entra-web">Entra SPA registration</a></li>
+      <li><a href="#function">Function App</a></li>
+      <li><a href="#identity">Managed identity and role</a></li>
+      <li><a href="#settings">Application settings and origins</a></li>
+      <li><a href="#deploy">Deploy code and configure website</a></li>
+      <li><a href="#validate">End-to-end validation</a></li>
+      <li><a href="#troubleshoot">Troubleshooting and rollback</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="prerequisites">1. Prerequisites and variables</h2>
+  <section class="step">
+    <h3><span class="step-number">1</span>Prepare an administrator workstation</h3>
+    <ul class="checklist">
+      <li>Azure subscription Contributor or Owner for the target resource group.</li>
+      <li>Permission to create Entra app registrations and grant delegated consent.</li>
+      <li>Azure CLI, Node.js 22, npm, and Azure Functions Core Tools 4.</li>
+      <li>A globally unique suffix for public Azure resource names.</li>
+      <li>A GitHub Pages or other HTTPS origin for the static frontend.</li>
+    </ul>
+<pre><code>$SUFFIX = "&lt;unique-suffix&gt;"
+$LOCATION = "eastus2"
+$RG = "rg-model-mission-control-$LOCATION"
+$STORAGE = "stmmc$SUFFIX"
+$FUNCTION_APP = "func-model-mission-control-$SUFFIX"
+$AI_ACCOUNT = "mmc-openai-$SUFFIX"
+$AI_DEPLOYMENT = "mmc-gpt-5-mini"
+$WEB_ORIGIN = "https://&lt;github-user&gt;.github.io"
+$WEB_REDIRECT = "$WEB_ORIGIN/&lt;repository&gt;/model-mission-control/"
+$LOCAL_ORIGIN = "http://localhost:8765"
+$LOCAL_REDIRECT = "$LOCAL_ORIGIN/model-mission-control/"</code></pre>
+    <p class="small">Use your own tenant, subscription, object IDs, names, and origins. Do not copy IDs from the reference deployment.</p>
+  </section>
+
+  <h2 id="architecture">2. Architecture</h2>
+  <section class="architecture">
+    <div class="flow">
+      <div class="flow-box"><strong>Static website</strong>MSAL redirect sign-in and bounded model catalog.</div>
+      <div class="flow-box"><strong>Entra ID</strong>Single-tenant SPA token with <code>access_as_user</code>.</div>
+      <div class="flow-box"><strong>Azure Function</strong>Validates origin, tenant, audience, user, and scope.</div>
+      <div class="flow-box"><strong>Azure AI</strong>Function managed identity invokes the deployed model.</div>
+    </div>
+    <p class="small">Trust boundaries: browser token to Function; managed identity token from Function to Azure AI. No browser-to-Azure-AI credential exists.</p>
+  </section>
+
+  <h2 id="azure-ai">3. Create Azure AI and deploy the model</h2>
+  <section class="step">
+    <h3><span class="step-number">2</span>Create the resource group, Azure OpenAI account, and deployment</h3>
+<pre><code>az group create --name $RG --location $LOCATION
+
+az cognitiveservices account create `
+  --name $AI_ACCOUNT `
+  --resource-group $RG `
+  --location $LOCATION `
+  --kind OpenAI `
+  --sku S0 `
+  --custom-domain $AI_ACCOUNT
+
+az cognitiveservices account deployment create `
+  --resource-group $RG `
+  --name $AI_ACCOUNT `
+  --deployment-name $AI_DEPLOYMENT `
+  --model-format OpenAI `
+  --model-name gpt-5-mini `
+  --model-version 2025-08-07 `
+  --sku-name GlobalStandard `
+  --sku-capacity 10</code></pre>
+    <figure class="portal-shot">
+      <div class="portal-bar">Azure portal &gt; Azure AI resource &gt; Model deployments</div>
+      <div class="portal-body">
+        <div class="portal-nav">Resource Management<strong>Model deployments</strong>Keys and Endpoint<br>Identity<br>Networking</div>
+        <div class="portal-panel">
+          <h4>Expected deployment checkpoint</h4>
+          <div class="portal-field"><span>Deployment name</span><strong>mmc-gpt-5-mini</strong></div>
+          <div class="portal-field"><span>Model</span><span>gpt-5-mini</span></div>
+          <div class="portal-field"><span>Version</span><span>2025-08-07</span></div>
+          <div class="portal-field"><span>Deployment type</span><span>Global Standard</span></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 1: confirm the deployment is succeeded and copy its deployment name, not the underlying model name.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="entra-api">4. Register the protected API</h2>
+  <section class="step">
+    <h3><span class="step-number">3</span>Create the API registration and delegated scope</h3>
+    <ol>
+      <li>Open <strong>Microsoft Entra admin center &gt; Identity &gt; Applications &gt; App registrations &gt; New registration</strong>.</li>
+      <li>Name it <strong>Model Mission Control API</strong>; choose <strong>Accounts in this organizational directory only</strong>.</li>
+      <li>Open <strong>Expose an API</strong> and set the Application ID URI to <code>api://&lt;API-CLIENT-ID&gt;</code>.</li>
+      <li>Add scope <code>access_as_user</code>. Set both admin and user consent display names and descriptions. Enable the scope.</li>
+      <li>Open <strong>Manifest</strong> and confirm <code>requestedAccessTokenVersion</code> is <code>2</code>.</li>
+    </ol>
+    <figure class="portal-shot">
+      <div class="portal-bar">Entra admin center &gt; App registrations &gt; Model Mission Control API &gt; Expose an API</div>
+      <div class="portal-body">
+        <div class="portal-nav">Overview<br>Authentication<br>Certificates &amp; secrets<strong>Expose an API</strong>API permissions<br>Manifest</div>
+        <div class="portal-panel">
+          <h4>Expected API checkpoint</h4>
+          <div class="portal-field"><span>Application ID URI</span><span>api://&lt;API-CLIENT-ID&gt;</span></div>
+          <div class="portal-field"><span>Scope</span><strong>access_as_user</strong></div>
+          <div class="portal-field"><span>Who can consent</span><span>Admins and users</span></div>
+          <div class="portal-field"><span>Status</span><span>Enabled</span></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 2: the exposed delegated scope must be enabled before configuring the SPA.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="entra-web">5. Register the single-page application</h2>
+  <section class="step">
+    <h3><span class="step-number">4</span>Create the web registration, redirects, permission, and preauthorization</h3>
+    <ol>
+      <li>Create a second single-tenant app registration named <strong>Model Mission Control Web</strong>.</li>
+      <li>Under <strong>Authentication</strong>, add platform <strong>Single-page application</strong>.</li>
+      <li>Add production and local redirect URIs. Use the main Mission Control directory URL with a trailing slash.</li>
+      <li>Under <strong>API permissions &gt; Add a permission &gt; My APIs</strong>, choose the API registration and delegated permission <code>access_as_user</code>.</li>
+      <li>Return to the API registration &gt; <strong>Expose an API &gt; Authorized client applications</strong>. Add the web app client ID and select <code>access_as_user</code>.</li>
+    </ol>
+    <figure class="portal-shot">
+      <div class="portal-bar">Entra admin center &gt; Model Mission Control Web &gt; Authentication</div>
+      <div class="portal-body">
+        <div class="portal-nav">Overview<strong>Authentication</strong>Certificates &amp; secrets<br>API permissions<br>Token configuration</div>
+        <div class="portal-panel">
+          <h4>Expected SPA checkpoint</h4>
+          <div class="portal-field"><span>Platform</span><strong>Single-page application</strong></div>
+          <div class="portal-field"><span>Production redirect</span><span>https://.../model-mission-control/</span></div>
+          <div class="portal-field"><span>Local redirect</span><span>http://localhost:8765/model-mission-control/</span></div>
+          <div class="portal-field"><span>Supported account type</span><span>Single tenant</span></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 3: redirects belong under SPA, not Web. A mismatched path or missing trailing slash causes AADSTS50011.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="function">6. Create the Function App</h2>
+  <section class="step">
+    <h3><span class="step-number">5</span>Create Node.js 22 on Linux Flex Consumption</h3>
+<pre><code>az storage account create `
+  --name $STORAGE `
+  --resource-group $RG `
+  --location $LOCATION `
+  --sku Standard_LRS
+
+az functionapp create `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --storage-account $STORAGE `
+  --flexconsumption-location $LOCATION `
+  --runtime node `
+  --runtime-version 22</code></pre>
+    <figure class="portal-shot">
+      <div class="portal-bar">Azure portal &gt; Function App &gt; Overview</div>
+      <div class="portal-body">
+        <div class="portal-nav"><strong>Overview</strong>Activity log<br>Access control (IAM)<br>Deployment Center<br>Settings<br>Identity</div>
+        <div class="portal-panel">
+          <h4>Expected Function checkpoint</h4>
+          <div class="portal-field"><span>Status</span><span>Running</span></div>
+          <div class="portal-field"><span>Operating system</span><span>Linux</span></div>
+          <div class="portal-field"><span>Hosting plan</span><span>Flex Consumption</span></div>
+          <div class="portal-field"><span>Runtime</span><span>Node.js 22</span></div>
+          <div class="portal-field"><span>HTTPS only</span><span>Enabled</span></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 4: confirm runtime and plan before deployment; the package declares Node.js 22-24 support.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="identity">7. Enable managed identity and grant Azure AI access</h2>
+  <section class="step">
+    <h3><span class="step-number">6</span>Assign the system identity and least-privilege role</h3>
+<pre><code>$PRINCIPAL_ID = az functionapp identity assign `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --query principalId -o tsv
+
+$AI_SCOPE = az cognitiveservices account show `
+  --resource-group $RG `
+  --name $AI_ACCOUNT `
+  --query id -o tsv
+
+az role assignment create `
+  --assignee-object-id $PRINCIPAL_ID `
+  --assignee-principal-type ServicePrincipal `
+  --role "Cognitive Services OpenAI User" `
+  --scope $AI_SCOPE</code></pre>
+    <figure class="portal-shot">
+      <div class="portal-bar">Function App &gt; Identity and Azure AI resource &gt; Access control (IAM)</div>
+      <div class="portal-body">
+        <div class="portal-nav">Function App<strong>Identity: On</strong><br>Azure AI resource<strong>Role assignments</strong></div>
+        <div class="portal-panel">
+          <h4>Expected identity checkpoint</h4>
+          <div class="portal-field"><span>Identity type</span><span>System assigned</span></div>
+          <div class="portal-field"><span>Identity status</span><span>On</span></div>
+          <div class="portal-field"><span>Scope</span><span>Azure AI account</span></div>
+          <div class="portal-field"><span>Role</span><strong>Cognitive Services OpenAI User</strong></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 5: assign the role at the Azure AI account scope, not the entire subscription.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="settings">8. Configure the Function App</h2>
+  <section class="step">
+    <h3><span class="step-number">7</span>Add six application settings</h3>
+    <table class="vars">
+      <thead><tr><th>Setting</th><th>Value</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td><code>ENTRA_TENANT_ID</code></td><td>Your tenant GUID</td><td>Restricts issuer and tenant.</td></tr>
+        <tr><td><code>ENTRA_API_CLIENT_ID</code></td><td>API app client ID</td><td>Valid token audience.</td></tr>
+        <tr><td><code>ALLOWED_USER_OBJECT_ID</code></td><td>Authorized user's object ID</td><td>Restricts the endpoint to the intended DIAx user.</td></tr>
+        <tr><td><code>ALLOWED_ORIGINS</code></td><td>Comma-separated exact origins</td><td>Application-level CORS allow-list.</td></tr>
+        <tr><td><code>AZURE_OPENAI_ENDPOINT</code></td><td><code>https://&lt;account&gt;.openai.azure.com/</code></td><td>Azure AI account endpoint.</td></tr>
+        <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td>Your deployment name</td><td>Model deployment used by the router.</td></tr>
+      </tbody>
+    </table>
+<pre><code>$TENANT_ID = az account show --query tenantId -o tsv
+$USER_OBJECT_ID = az ad signed-in-user show --query id -o tsv
+$AI_ENDPOINT = az cognitiveservices account show `
+  --resource-group $RG --name $AI_ACCOUNT `
+  --query properties.endpoint -o tsv
+
+az functionapp config appsettings set `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --settings `
+    "ENTRA_TENANT_ID=$TENANT_ID" `
+    "ENTRA_API_CLIENT_ID=$API_CLIENT_ID" `
+    "ALLOWED_USER_OBJECT_ID=$USER_OBJECT_ID" `
+    "ALLOWED_ORIGINS=$WEB_ORIGIN,$LOCAL_ORIGIN" `
+    "AZURE_OPENAI_ENDPOINT=$AI_ENDPOINT" `
+    "AZURE_OPENAI_DEPLOYMENT=$AI_DEPLOYMENT"</code></pre>
+    <figure class="portal-shot">
+      <div class="portal-bar">Function App &gt; Settings &gt; Environment variables &gt; App settings</div>
+      <div class="portal-body">
+        <div class="portal-nav">Configuration<strong>Environment variables</strong>Authentication<br>Identity<br>CORS</div>
+        <div class="portal-panel">
+          <h4>Expected settings checkpoint</h4>
+          <div class="portal-field"><span>Authentication</span><span>ENTRA_TENANT_ID, ENTRA_API_CLIENT_ID, ALLOWED_USER_OBJECT_ID</span></div>
+          <div class="portal-field"><span>Browser origins</span><span>ALLOWED_ORIGINS</span></div>
+          <div class="portal-field"><span>Azure AI</span><span>AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT</span></div>
+          <div class="portal-field"><span>Secrets</span><strong>None</strong></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 6: setting names are visible; values containing tenant/user identifiers should be redacted before sharing screenshots.</figcaption>
+    </figure>
+    <div class="callout"><strong>Do not add <code>*</code> CORS.</strong> The function code returns CORS headers only when the request Origin exactly matches <code>ALLOWED_ORIGINS</code>. Keep the platform CORS list empty or equally restrictive; do not weaken the code-level check.</div>
+  </section>
+
+  <h2 id="deploy">9. Deploy the Function and connect the website</h2>
+  <section class="step">
+    <h3><span class="step-number">8</span>Validate and publish the Node.js project</h3>
+<pre><code>cd model-mission-control-api
+npm ci
+npm test
+func azure functionapp publish $FUNCTION_APP --javascript --build remote</code></pre>
+    <p>Then update <code>model-mission-control/ai-config.js</code>:</p>
+<pre><code>window.MODEL_MISSION_AI = Object.freeze({
+  tenantId: "&lt;TENANT-ID&gt;",
+  clientId: "&lt;WEB-APP-CLIENT-ID&gt;",
+  scope: "api://&lt;API-APP-CLIENT-ID&gt;/access_as_user",
+  apiUrl: "https://&lt;FUNCTION-APP&gt;.azurewebsites.net/api/recommend",
+  redirectUri: window.location.hostname === "localhost"
+    ? "http://localhost:8765/model-mission-control/"
+    : "https://&lt;github-user&gt;.github.io/&lt;repository&gt;/model-mission-control/"
+});</code></pre>
+    <ul>
+      <li>Commit the frontend and API source, but never publish local settings, storage connection strings, tokens, or deployment credentials.</li>
+      <li>Because GitHub Pages can cache JavaScript for 10 minutes, version the <code>ai-config.js</code> script URL whenever authentication settings change.</li>
+      <li>The frontend uses full-page MSAL redirect authentication and resumes the assessment from session storage after sign-in.</li>
+    </ul>
+  </section>
+
+  <h2 id="validate">10. Validate end to end</h2>
+  <section class="step">
+    <h3><span class="step-number">9</span>Run the acceptance checks in order</h3>
+    <ol>
+      <li><strong>Deployment:</strong> Function App state is Running and <code>/api/recommend</code> exists.</li>
+      <li><strong>Anonymous denial:</strong> POST without a bearer token returns HTTP 401.</li>
+      <li><strong>CORS:</strong> OPTIONS from the production origin returns 204 and that exact <code>Access-Control-Allow-Origin</code>.</li>
+      <li><strong>Authentication:</strong> Assess with Azure AI redirects the current tab to DIAx, returns to the same platform, restores the prompt, and continues automatically.</li>
+      <li><strong>Authorization:</strong> a different tenant/user is rejected even if it can authenticate.</li>
+      <li><strong>Managed identity:</strong> remove the Azure AI role temporarily in a test environment and verify the API returns a Foundry authentication error; restore the role.</li>
+      <li><strong>Model bounding:</strong> verify the response references only candidate IDs submitted by the current platform catalog.</li>
+    </ol>
+<pre><code># Expected: HTTP 401
+Invoke-WebRequest `
+  -Uri "https://$FUNCTION_APP.azurewebsites.net/api/recommend" `
+  -Method Post `
+  -ContentType "application/json" `
+  -Body '{}'
+
+# Expected: HTTP 204 plus exact production origin
+Invoke-WebRequest `
+  -Uri "https://$FUNCTION_APP.azurewebsites.net/api/recommend" `
+  -Method Options `
+  -Headers @{
+    Origin = $WEB_ORIGIN
+    "Access-Control-Request-Method" = "POST"
+    "Access-Control-Request-Headers" = "authorization,content-type"
+  }</code></pre>
+    <figure class="portal-shot">
+      <div class="portal-bar">Browser acceptance test &gt; Model Mission Control</div>
+      <div class="portal-body">
+        <div class="portal-nav">1. Enter prompt<br>2. Select platform<strong>3. Assess with Azure AI</strong>4. DIAx sign-in<br>5. Return and resume</div>
+        <div class="portal-panel">
+          <h4>Expected browser checkpoint</h4>
+          <div class="portal-field"><span>Authentication</span><span>Same-tab redirect; no popup</span></div>
+          <div class="portal-field"><span>Prompt after return</span><span>Restored</span></div>
+          <div class="portal-field"><span>Status</span><span>Azure AI assessment completed through managed identity</span></div>
+          <div class="portal-field"><span>Recommendation</span><span>Only an eligible platform model ID</span></div>
+        </div>
+      </div>
+      <figcaption>Screenshot checkpoint 7: capture the completed recommendation and status, but use a synthetic prompt with no customer data.</figcaption>
+    </figure>
+  </section>
+
+  <h2 id="troubleshoot">11. Troubleshooting and rollback</h2>
+  <section class="step">
+    <table class="vars">
+      <thead><tr><th>Symptom</th><th>Likely cause</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>AADSTS50011</td><td>Redirect URI mismatch</td><td>Match scheme, host, path, and trailing slash under the SPA platform.</td></tr>
+        <tr><td>Login succeeds but assessment does not resume</td><td>Cached frontend or stale MSAL state</td><td>Version the config script, close stale tabs, and clear site session storage.</td></tr>
+        <tr><td>HTTP 401</td><td>Missing, expired, wrong-audience, or wrong-issuer token</td><td>Check tenant, API client ID, scope URI, and MSAL configuration.</td></tr>
+        <tr><td>HTTP 403</td><td>Origin, user object ID, or delegated scope rejected</td><td>Check <code>ALLOWED_ORIGINS</code>, <code>ALLOWED_USER_OBJECT_ID</code>, and <code>scp</code>.</td></tr>
+        <tr><td>Foundry authentication failed</td><td>Managed identity role missing or not propagated</td><td>Verify system identity and Cognitive Services OpenAI User at the AI account scope; wait for propagation.</td></tr>
+        <tr><td>Foundry HTTP 404</td><td>Wrong endpoint or deployment name</td><td>Use the Azure AI endpoint and deployment name exactly as shown in Model deployments.</td></tr>
+        <tr><td>Browser CORS error</td><td>Origin not exact or preflight rejected</td><td>Do not include paths in <code>ALLOWED_ORIGINS</code>; include only scheme and host/port.</td></tr>
+      </tbody>
+    </table>
+    <h3>Rollback</h3>
+    <ol>
+      <li>Disable the Azure assessment button or remove its frontend configuration.</li>
+      <li>Disable the API delegated scope or remove SPA preauthorization.</li>
+      <li>Remove the Function managed identity role assignment from the Azure AI account.</li>
+      <li>Stop or delete the Function App. The local advisor continues working independently.</li>
+    </ol>
+    <p class="danger">Never troubleshoot by adding a browser-visible Azure AI key, wildcard CORS, a client secret to the static site, or subscription-wide Owner permissions.</p>
+  </section>
+</main>
+</body>
+</html>

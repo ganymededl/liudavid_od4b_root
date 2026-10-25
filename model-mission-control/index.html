@@ -102,6 +102,7 @@ a { color: var(--cp-link); }
   background: var(--cp-accent); color: var(--cp-accent-fg);
 }
 .catalog-stamp { color: var(--cp-text-muted); font-size: 13px; text-align: right; }
+.runbook-link { display: inline-block; margin-top: 5px; font-weight: 700; }
 .platform-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
 .platform-link {
   display: block; padding: 14px; border: 1px solid var(--cp-border); border-radius: 0.625rem;
@@ -244,7 +245,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
       <span class="brand-mark">MC</span>
       <span>Model Mission Control</span>
     </a>
-    <div class="catalog-stamp"><span id="catalogLabel">Catalog snapshot</span><br><strong>October 24, 2026</strong></div>
+    <div class="catalog-stamp"><span id="catalogLabel">Catalog snapshot</span><br><strong>October 24, 2026</strong><br><a class="runbook-link" href="azure-deployment-runbook.html">Azure setup runbook</a></div>
   </header>
 
   <nav class="platform-nav" aria-label="Choose AI platform">
