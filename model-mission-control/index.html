@@ -928,6 +928,7 @@ async function acquireAiToken() {
       prompt: "select_account"
     });
     account = login.account;
+    if (login.accessToken) return login.accessToken;
   }
   try {
     const token = await aiAuthClient.acquireTokenSilent({
@@ -942,6 +943,16 @@ async function acquireAiToken() {
       account
     });
     return token.accessToken;
+  }
+
+  function aiErrorMessage(error) {
+    if (error?.errorCode === "timed_out") {
+      return "DIAx sign-in timed out. Close any leftover sign-in window and try again.";
+    }
+    if (error?.errorCode === "block_nested_popups") {
+      return "Sign-in was opened inside another sign-in window. Close the extra window and retry from the original Mission Control tab.";
+    }
+    return error?.message || "The Azure AI assessment could not be completed.";
   }
 }
 
@@ -1036,7 +1047,7 @@ async function renderAiAssessment() {
     setAiStatus("Azure AI assessment completed through managed identity.", "success");
   } catch (error) {
     if (assessmentVersion !== aiAssessmentVersion || error?.name === "AbortError") return;
-    setAiStatus(error?.message || "The Azure AI assessment could not be completed.", "error");
+    setAiStatus(aiErrorMessage(error), "error");
   } finally {
     if (assessmentVersion === aiAssessmentVersion) {
       aiAssessmentController = undefined;
