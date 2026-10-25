@@ -23,7 +23,7 @@
 </script>
 <script src="catalog-state.js"></script>
 <script src="vendor/msal-browser.min.js"></script>
-<script src="ai-config.js?v=20261024-2"></script>
+<script src="ai-config.js?v=20261024-3"></script>
 <title>Model Mission Control | Scout Model Advisor</title>
 <meta name="description" content="Paste a task, compare the available Microsoft Scout models, and get a task-specific recommendation with tradeoffs.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
@@ -248,10 +248,10 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   </header>
 
   <nav class="platform-nav" aria-label="Choose AI platform">
-    <a class="platform-link" data-platform="copilot" href="?v=20261024-2&amp;platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
-    <a class="platform-link" data-platform="cowork" href="?v=20261024-2&amp;platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
-    <a class="platform-link" data-platform="scout" href="?v=20261024-2&amp;platform=scout">Microsoft Scout<small>Desktop agent</small></a>
-    <a class="platform-link" data-platform="github-cli" href="?v=20261024-2&amp;platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
+    <a class="platform-link" data-platform="copilot" href="?v=20261024-3&amp;platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
+    <a class="platform-link" data-platform="cowork" href="?v=20261024-3&amp;platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
+    <a class="platform-link" data-platform="scout" href="?v=20261024-3&amp;platform=scout">Microsoft Scout<small>Desktop agent</small></a>
+    <a class="platform-link" data-platform="github-cli" href="?v=20261024-3&amp;platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
   </nav>
 
   <section class="hero">
@@ -887,6 +887,7 @@ function renderRecommendation() {
 }
 
 const AI_CONFIG = window.MODEL_MISSION_AI;
+const AI_PENDING_KEY = "model-mission-control.pending-ai-assessment";
 let aiAuthClient;
 let aiAuthReady;
 let aiAssessmentVersion = 0;
@@ -917,28 +918,46 @@ function initializeAiAuth() {
       clientId: AI_CONFIG.clientId,
       authority: `https://login.microsoftonline.com/${AI_CONFIG.tenantId}`,
       redirectUri: AI_CONFIG.redirectUri,
-      navigateToLoginRequestUrl: false
+      navigateToLoginRequestUrl: true
     },
     cache: {
       cacheLocation: "sessionStorage",
       storeAuthStateInCookie: false
     }
   });
-  aiAuthReady = aiAuthClient.initialize();
+  aiAuthReady = (async () => {
+    await aiAuthClient.initialize();
+    const response = await aiAuthClient.handleRedirectPromise();
+    if (response?.account) aiAuthClient.setActiveAccount(response.account);
+    return response;
+  })();
   return aiAuthReady;
 }
 
+function savePendingAiAssessment() {
+  sessionStorage.setItem(AI_PENDING_KEY, JSON.stringify({
+    prompt: document.getElementById("prompt").value,
+    priority: document.getElementById("priority").value,
+    stakes: document.getElementById("stakes").value,
+    context: document.getElementById("context").value,
+    platform: platformKey,
+    returnUrl: window.location.href
+  }));
+}
+
 async function acquireAiToken() {
-  await initializeAiAuth();
-  let account = aiAuthClient.getAllAccounts()[0];
+  const redirectResponse = await initializeAiAuth();
+  if (redirectResponse?.accessToken) return redirectResponse.accessToken;
+  let account = aiAuthClient.getActiveAccount() || aiAuthClient.getAllAccounts()[0];
   if (!account) {
-    setAiStatus("Signing in to DIAx...");
-    const login = await aiAuthClient.loginPopup({
+    savePendingAiAssessment();
+    setAiStatus("Redirecting to DIAx sign-in...");
+    await aiAuthClient.loginRedirect({
       scopes: [AI_CONFIG.scope],
-      prompt: "select_account"
+      prompt: "select_account",
+      redirectStartPage: window.location.href
     });
-    account = login.account;
-    if (login.accessToken) return login.accessToken;
+    throw new Error("DIAx sign-in could not redirect this page.");
   }
   try {
     const token = await aiAuthClient.acquireTokenSilent({
@@ -948,11 +967,42 @@ async function acquireAiToken() {
     return token.accessToken;
   } catch (error) {
     if (!(error instanceof msal.InteractionRequiredAuthError)) throw error;
-    const token = await aiAuthClient.acquireTokenPopup({
+    savePendingAiAssessment();
+    setAiStatus("Redirecting to DIAx to refresh access...");
+    await aiAuthClient.acquireTokenRedirect({
       scopes: [AI_CONFIG.scope],
-      account
+      account,
+      redirectStartPage: window.location.href
     });
-    return token.accessToken;
+    throw new Error("DIAx token refresh could not redirect this page.");
+  }
+}
+
+async function resumeAiAssessmentAfterRedirect() {
+  const saved = sessionStorage.getItem(AI_PENDING_KEY);
+  if (!saved) return;
+  try {
+    await initializeAiAuth();
+    const account = aiAuthClient.getActiveAccount() || aiAuthClient.getAllAccounts()[0];
+    if (!account) {
+      setAiStatus("DIAx sign-in did not complete. Run the Azure AI assessment again.", "error");
+      return;
+    }
+    const pending = JSON.parse(saved);
+    if (pending.platform !== platformKey) {
+      window.location.replace(pending.returnUrl);
+      return;
+    }
+    document.getElementById("prompt").value = pending.prompt;
+    document.getElementById("priority").value = pending.priority;
+    document.getElementById("stakes").value = pending.stakes;
+    document.getElementById("context").value = pending.context;
+    sessionStorage.removeItem(AI_PENDING_KEY);
+    setAiStatus("DIAx sign-in complete. Continuing the Azure AI assessment...");
+    await renderAiAssessment();
+  } catch (error) {
+    sessionStorage.removeItem(AI_PENDING_KEY);
+    setAiStatus(aiErrorMessage(error), "error");
   }
 
   function aiErrorMessage(error) {
@@ -1198,6 +1248,7 @@ document.getElementById("recipeGrid").addEventListener("keydown", event => {
 renderCatalog();
 renderRecipes();
 setupDuel();
+resumeAiAssessmentAfterRedirect();
 </script>
 </body>
 </html>

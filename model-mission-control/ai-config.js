@@ -4,6 +4,6 @@ window.MODEL_MISSION_AI = Object.freeze({
   scope: "api://2d2b1294-b9d7-4cd0-aa96-2b615cc0a7fb/access_as_user",
   apiUrl: "https://func-model-mission-control-eecd0085.azurewebsites.net/api/recommend",
   redirectUri: window.location.hostname === "localhost"
-    ? "http://localhost:8765/model-mission-control/auth-popup.html"
-    : "https://ganymededl.github.io/liudavid_od4b_root/model-mission-control/auth-popup.html"
+    ? "http://localhost:8765/model-mission-control/"
+    : "https://ganymededl.github.io/liudavid_od4b_root/model-mission-control/"
 });
