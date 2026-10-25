@@ -112,8 +112,6 @@ pre {
 }
 .portal-bar { padding: 10px 14px; background: var(--cp-surface-soft); border-bottom: 1px solid var(--cp-border); font-size: 12px; color: var(--cp-text-muted); }
 .portal-body { display: block; min-height: 190px; }
-.portal-nav { display: none; }
-.portal-nav strong { display: block; color: var(--cp-accent); margin: 8px 0; }
 .portal-panel { padding: 18px; }
 .portal-panel h4 { margin: 0 0 12px; }
 .portal-field { border-bottom: 1px solid var(--cp-border); padding: 8px 0; display: grid; grid-template-columns: 190px 1fr; gap: 12px; }
@@ -129,7 +127,6 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
   .toc ol { columns: 1; }
   .flow { grid-template-columns: 1fr; }
   .portal-body { grid-template-columns: 1fr; }
-  .portal-nav { border-right: 0; border-bottom: 1px solid var(--cp-border); }
   .portal-field { grid-template-columns: 1fr; }
 }
 </style>
@@ -231,11 +228,10 @@ az cognitiveservices account deployment create `
   --model-version 2025-08-07 `
   --sku-name GlobalStandard `
   --sku-capacity 10</code></pre>
-    <div class="callout"><strong>Data processing:</strong> <code>GlobalStandard</code> can process prompts and responses in any Azure region. If policy requires US-only processing, use <code>DataZoneStandard</code> only where <code>gpt-5-mini</code> supports that deployment type and region. Verify current availability before deployment. See <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types" target="_blank" rel="noopener noreferrer">Microsoft Foundry deployment types</a>.</div>
+    <div class="callout"><strong>Data processing:</strong> data stored at rest remains in the designated Azure geography. With <code>GlobalStandard</code>, prompts and responses can be processed in any Azure region. If policy requires US-only processing, use <code>DataZoneStandard</code> only where <code>gpt-5-mini</code> supports that deployment type and region. Verify current availability before deployment. See <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types" target="_blank" rel="noopener noreferrer">Microsoft Foundry deployment types</a>.</div>
     <figure class="portal-shot">
       <div class="portal-bar">Azure portal &gt; Azure OpenAI resource &gt; Model deployments</div>
       <div class="portal-body">
-        <div class="portal-nav">Resource Management<strong>Model deployments</strong>Keys and Endpoint<br>Identity<br>Networking</div>
         <div class="portal-panel">
           <h4>Expected deployment checkpoint</h4>
           <div class="portal-field"><span>Deployment name</span><strong>mmc-gpt-5-mini</strong></div>
@@ -263,7 +259,6 @@ az cognitiveservices account deployment create `
     <figure class="portal-shot">
       <div class="portal-bar">Entra admin center &gt; App registrations &gt; Model Mission Control API &gt; Expose an API</div>
       <div class="portal-body">
-        <div class="portal-nav">Overview<br>Authentication<br>Certificates &amp; secrets<strong>Expose an API</strong>API permissions<br>Manifest</div>
         <div class="portal-panel">
           <h4>Expected API checkpoint</h4>
           <div class="portal-field"><span>Application ID URI</span><span>api://&lt;API-CLIENT-ID&gt;</span></div>
@@ -291,7 +286,6 @@ az cognitiveservices account deployment create `
     <figure class="portal-shot">
       <div class="portal-bar">Entra admin center &gt; Model Mission Control Web &gt; Authentication</div>
       <div class="portal-body">
-        <div class="portal-nav">Overview<strong>Authentication</strong>Certificates &amp; secrets<br>API permissions<br>Token configuration</div>
         <div class="portal-panel">
           <h4>Expected SPA checkpoint</h4>
           <div class="portal-field"><span>Platform</span><strong>Single-page application</strong></div>
@@ -328,7 +322,6 @@ az functionapp update `
     <figure class="portal-shot">
       <div class="portal-bar">Azure portal &gt; Function App &gt; Overview</div>
       <div class="portal-body">
-        <div class="portal-nav"><strong>Overview</strong>Activity log<br>Access control (IAM)<br>Deployment Center<br>Settings<br>Identity</div>
         <div class="portal-panel">
           <h4>Expected Function checkpoint</h4>
           <div class="portal-field"><span>Status</span><span>Running</span></div>
@@ -363,7 +356,6 @@ az role assignment create `
     <figure class="portal-shot">
       <div class="portal-bar">Function App &gt; Identity and Azure OpenAI resource &gt; Access control (IAM)</div>
       <div class="portal-body">
-        <div class="portal-nav">Function App<strong>Identity: On</strong><br>Azure OpenAI resource<strong>Role assignments</strong></div>
         <div class="portal-panel">
           <h4>Expected identity checkpoint</h4>
           <div class="portal-field"><span>Identity type</span><span>System assigned</span></div>
@@ -412,7 +404,6 @@ az functionapp config appsettings set `
     <figure class="portal-shot">
       <div class="portal-bar">Function App &gt; Settings &gt; Environment variables &gt; App settings</div>
       <div class="portal-body">
-        <div class="portal-nav">Configuration<strong>Environment variables</strong>Authentication<br>Identity<br>CORS</div>
         <div class="portal-panel">
           <h4>Expected settings checkpoint</h4>
           <div class="portal-field"><span>Authentication</span><span>ENTRA_TENANT_ID, ENTRA_API_CLIENT_ID, ALLOWED_USER_OBJECT_ID</span></div>
@@ -509,7 +500,6 @@ Invoke-WebRequest `
     <figure class="portal-shot">
       <div class="portal-bar">Browser acceptance test &gt; Model Mission Control</div>
       <div class="portal-body">
-        <div class="portal-nav">1. Enter prompt<br>2. Select platform<strong>3. Assess with Azure AI</strong>4. Entra sign-in<br>5. Return and resume</div>
         <div class="portal-panel">
           <h4>Expected browser checkpoint</h4>
           <div class="portal-field"><span>Authentication</span><span>Same-tab redirect; no popup</span></div>
