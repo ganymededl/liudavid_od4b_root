@@ -148,6 +148,7 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
   </section>
 
   <p>Users sign in through Microsoft Entra ID. The API validates their access tokens and checks whether they are allowed to use the service. The Function then calls the deployed model in an Azure OpenAI resource using its managed identity.</p>
+  <div class="callout"><strong>Cloud scope:</strong> this runbook targets an Azure commercial subscription and commercial Microsoft Entra ID tenant. Azure Government has not been tested; commands, endpoint suffixes, and model availability can differ.</div>
   <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer. This does not mean the API accepts unauthenticated requests: the function code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI resource.</div>
 
   <p>At each checkpoint, record the result and capture screenshots if required by your deployment process. Redact identifiers before sharing evidence, and never include tokens or credentials.</p>
@@ -180,8 +181,9 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
       <li>A globally unique suffix for public Azure resource names.</li>
       <li>A GitHub Pages or other HTTPS origin for the static frontend.</li>
     </ul>
-<pre><code>git clone https://github.com/ganymededl/liudavid_od4b_root.git
-cd liudavid_od4b_root</code></pre>
+<pre><code>git clone &lt;source-repository-URL&gt;
+cd &lt;source-repository-directory&gt;</code></pre>
+    <p>The repository root must contain <code>model-mission-control-api/</code>. Section 9 starts from that repository root before changing into the API folder.</p>
 <pre><code>$SUFFIX = "&lt;unique-suffix&gt;"
 $LOCATION = "eastus2"
 $RG = "rg-model-mission-control-$LOCATION"
@@ -229,6 +231,7 @@ az cognitiveservices account deployment create `
   --model-version 2025-08-07 `
   --sku-name GlobalStandard `
   --sku-capacity 10</code></pre>
+    <div class="callout"><strong>Data processing:</strong> <code>GlobalStandard</code> can process prompts and responses in any Azure region. If policy requires US-only processing, use <code>DataZoneStandard</code> only where <code>gpt-5-mini</code> supports that deployment type and region. Verify current availability before deployment. See <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types" target="_blank" rel="noopener noreferrer">Microsoft Foundry deployment types</a>.</div>
     <figure class="portal-shot">
       <div class="portal-bar">Azure portal &gt; Azure OpenAI resource &gt; Model deployments</div>
       <div class="portal-body">
@@ -279,7 +282,7 @@ az cognitiveservices account deployment create `
     <ol>
       <li>Create a second single-tenant app registration named <strong>Model Mission Control Web</strong>.</li>
       <li>Under <strong>Authentication</strong>, add platform <strong>Single-page application</strong>.</li>
-      <li>Add production and local redirect URIs. Use the main Mission Control directory URL with a trailing slash.</li>
+      <li>Add <code>$WEB_REDIRECT</code> and <code>$LOCAL_REDIRECT</code> as SPA redirect URIs. Use the main Mission Control directory URL with a trailing slash.</li>
       <li>Under <strong>API permissions &gt; Add a permission &gt; My APIs</strong>, choose the API registration and delegated permission <code>access_as_user</code>.</li>
       <li>Return to the API registration &gt; <strong>Expose an API &gt; Authorized client applications</strong>. Add the web app client ID and select <code>access_as_user</code>.</li>
     </ol>
@@ -388,7 +391,7 @@ az role assignment create `
       </tbody>
     </table>
     <p><code>ALLOWED_USER_OBJECT_ID</code> accepts one user object ID. Supporting multiple users or a group requires a code change and a corresponding authorization design review.</p>
-    <p>The Function App also contains platform-managed storage settings such as <code>AzureWebJobsStorage</code> and <code>DEPLOYMENT_STORAGE_CONNECTION_STRING</code>. With the creation command above, these values are storage connection strings and must be treated as secrets. The statement above applies only to Azure OpenAI API keys and application client secrets.</p>
+    <p>The Function App also contains platform-managed storage settings such as <code>AzureWebJobsStorage</code> and <code>DEPLOYMENT_STORAGE_CONNECTION_STRING</code>. With the creation command above, these values are storage connection strings and must be treated as secrets. The security model statement at the top of this runbook applies only to Azure OpenAI API keys and application client secrets.</p>
     <p>The user lookup below retrieves the object ID of the account currently signed in to Azure CLI. Use that ID only if this account should be authorized to run assessments. Otherwise, replace it with the intended user's object ID before applying the settings.</p>
 <pre><code>$TENANT_ID = az account show --query tenantId -o tsv
 $USER_OBJECT_ID = az ad signed-in-user show --query id -o tsv
@@ -501,7 +504,8 @@ Invoke-WebRequest `
     "Access-Control-Request-Method" = "POST"
     "Access-Control-Request-Headers" = "authorization,content-type"
   } `
-  -UseBasicParsing</code></pre>
+  -UseBasicParsing |
+  Select-Object StatusCode, @{n="ACAO";e={$_.Headers["Access-Control-Allow-Origin"]}}</code></pre>
     <figure class="portal-shot">
       <div class="portal-bar">Browser acceptance test &gt; Model Mission Control</div>
       <div class="portal-body">
