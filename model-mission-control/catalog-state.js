@@ -55,6 +55,9 @@ window.MODEL_MISSION_CATALOGS = {
       source: "GitHub Copilot CLI CAPI catalog: picker enabled and policy enabled",
       models: [
         "auto",
+        "observed-hydrafusion-max",
+        "observed-hydrafusion",
+        "observed-flint-nvfp4",
         "claude-sonnet-5.5",
         "claude-sonnet-5",
         "claude-haiku-5.5",

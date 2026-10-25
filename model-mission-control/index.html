@@ -535,6 +535,30 @@ const GITHUB_CLI_MODELS = [
     known: "Automatic routing within your plan and administrator policy.",
     caveat: "The chosen model can vary by plan, policy, evaluation access, and repository settings."
   }),
+  {
+    id: "observed-hydrafusion-max", name: "HydraFusion Max (Research Preview)", family: "Research preview", tier: "preview",
+    known: "Experimental maximum-capability routing shown in the CLI's recent models.",
+    excels: "Early-access research behavior for exploratory work.",
+    best: ["Preview evaluation", "Exploratory reasoning", "Non-production trials"],
+    caveat: "Observed as a display label, not a published API ID; preview availability can disappear without notice.",
+    scores: {reasoning: 9, speed: 5, coding: 8, writing: 8, tools: 8, context: 8}
+  },
+  {
+    id: "observed-hydrafusion", name: "HydraFusion (Research Preview)", family: "Research preview", tier: "preview",
+    known: "Experimental adaptive model routing available in the CLI's recent models.",
+    excels: "Preview testing across mixed coding tasks.",
+    best: ["Preview evaluation", "Mixed coding work", "Comparative testing"],
+    caveat: "Observed as a display label, not a published API ID; preview availability can disappear without notice.",
+    scores: {reasoning: 8, speed: 7, coding: 8, writing: 7, tools: 8, context: 8}
+  },
+  {
+    id: "observed-flint-nvfp4", name: "Flint NVFP4", family: "Local", tier: "download",
+    known: "A local, self-hosted option that requires a model download.",
+    excels: "Local execution where cloud model use is not desired.",
+    best: ["Local experimentation", "Offline-oriented work", "Self-hosted evaluation"],
+    caveat: "Download required; local hardware and provider configuration determine performance.",
+    scores: {reasoning: 6, speed: 6, coding: 7, writing: 6, tools: 5, context: 5}
+  },
   cloneScout("claude-sonnet-5.5"),
   cloneScout("claude-sonnet-5"),
   cloneScout("claude-haiku-5.5"),
@@ -671,7 +695,7 @@ const PLATFORMS = {
     name: "GitHub Copilot CLI",
     shortName: "GitHub CLI",
     models: GITHUB_CLI_MODELS,
-    notice: "Exact built-in picker models enabled for this GitHub Copilot CLI account and policy. Auto, research-preview, recent, and local models may appear as additional picker rows.",
+    notice: "Built-in choices come from the live account/policy CAPI feed. Research-preview, recent, and local downloadable rows are preserved separately from the observed CLI picker.",
     source: "GitHub Copilot CLI live CAPI catalog",
     sourceUrl: "",
     catalogLabel: "Account-live catalog"
