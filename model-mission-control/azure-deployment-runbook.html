@@ -87,6 +87,11 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 6vw, 68px); line-height: 1; lett
   border-left: 4px solid var(--cp-accent); background: var(--cp-accent-soft);
   padding: 14px 16px; margin: 20px 0; line-height: 1.5;
 }
+.download-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 12px; }
+.download-button {
+  display: inline-block; padding: 10px 14px; border-radius: 0.625rem;
+  background: var(--cp-accent); color: var(--cp-accent-fg); text-decoration: none; font-weight: 700;
+}
 .toc, .step, .architecture {
   background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
   padding: 22px; margin: 18px 0; box-shadow: 0 0 2px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.14);
@@ -147,6 +152,13 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
   <p>Users sign in through Microsoft Entra ID. The API validates their access tokens and checks whether they are allowed to use the service. The Function then calls the deployed model in an Azure OpenAI resource using its managed identity.</p>
   <div class="callout"><strong>Cloud scope:</strong> this runbook targets an Azure commercial subscription and commercial Microsoft Entra ID tenant. Azure Government has not been tested; commands, endpoint suffixes, and model availability can differ.</div>
   <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer. This does not mean the API accepts unauthenticated requests: the function code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI resource.</div>
+  <div class="callout">
+    <strong>Function source package:</strong> includes <code>host.json</code>, package manifests, locked dependencies, Function source, authorization and routing libraries, tests, and the source runbook. It excludes <code>node_modules</code>, local settings, credentials, and deployment artifacts.
+    <div class="download-row">
+      <a class="download-button" href="downloads/model-mission-control-api-source.zip" download>Download Function source ZIP</a>
+      <a href="downloads/model-mission-control-api-source.sha256.txt">SHA-256 checksum</a>
+    </div>
+  </div>
 
   <p>At each checkpoint, record the result and capture screenshots if required by your deployment process. Redact identifiers before sharing evidence, and never include tokens or credentials.</p>
 
