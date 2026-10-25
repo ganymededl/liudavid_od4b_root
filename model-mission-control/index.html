@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="catalog-state.js"></script>
 <script>
   (() => {
     const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -12,6 +11,9 @@
     document.documentElement.setAttribute("data-theme", theme);
   })();
 </script>
+<script src="catalog-state.js"></script>
+<script src="vendor/msal-browser.min.js"></script>
+<script src="ai-config.js"></script>
 <title>Model Mission Control | Scout Model Advisor</title>
 <meta name="description" content="Paste a task, compare the available Microsoft Scout models, and get a task-specific recommendation with tradeoffs.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
@@ -139,6 +141,13 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
 .controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
 .hint { color: var(--cp-text-muted); font-size: 13px; line-height: 1.45; margin: 10px 0 0; }
 .action-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.button:disabled { cursor: wait; opacity: .65; }
+.ai-status {
+  min-height: 20px; margin: 10px 0 0; color: var(--cp-text-muted);
+  font-size: 13px; line-height: 1.45;
+}
+.ai-status.error { color: var(--cp-danger); }
+.ai-status.success { color: var(--cp-success); }
 .empty {
   min-height: 374px; display: grid; place-items: center; text-align: center;
   border: 1px dashed var(--cp-border-strong); border-radius: 16px; color: var(--cp-text-muted); padding: 32px;
@@ -259,7 +268,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
     <div class="advisor-grid">
       <div class="card">
         <label for="prompt" id="promptLabel">What are you asking this product to do?</label>
-        <textarea id="prompt" placeholder="Example: Review a large TypeScript change for subtle auth and concurrency bugs, propose the smallest safe fix, then run targeted tests."></textarea>
+        <textarea id="prompt" maxlength="12000" placeholder="Example: Review a large TypeScript change for subtle auth and concurrency bugs, propose the smallest safe fix, then run targeted tests."></textarea>
         <div class="controls">
           <div>
             <label for="priority">How should Scout trade speed for quality?</label>
@@ -290,11 +299,13 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
             <small class="control-help">Count everything the model must read, not just your prompt.</small>
           </div>
         </div>
-        <p class="hint">Your prompt stays in this browser. The advisor is a transparent local heuristic, not a benchmark or a hidden model call.</p>
+        <p class="hint"><strong>Local advisor:</strong> your prompt stays in this browser. <strong>Azure AI assessment:</strong> after DIAx sign-in, the prompt and eligible catalog are sent to the dedicated Model Mission Control API. Prompt text is not intentionally logged.</p>
         <div class="action-row">
-          <button class="button primary" id="route">Find the best model</button>
+          <button class="button primary" id="route">Find locally</button>
+          <button class="button" id="routeAi">Assess with Azure AI</button>
           <button class="button" id="clear">Clear</button>
         </div>
+        <p class="ai-status" id="aiStatus" role="status" aria-live="polite"></p>
       </div>
       <div class="card">
         <div class="empty" id="emptyResult">
@@ -316,12 +327,12 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
           <div class="signal-row" id="signals"></div>
           <div class="alternatives">
             <div class="alt">
-              <small>Quicker option - accepts less depth</small>
+              <small id="fallbackLabel">Quicker option - accepts less depth</small>
               <strong id="fallbackModel"></strong>
               <p id="fallbackWhy"></p>
             </div>
             <div class="alt">
-              <small>Stronger option - only if the task grows</small>
+              <small id="upgradeLabel">Stronger option - only if the task grows</small>
               <strong id="upgradeModel"></strong>
               <p id="upgradeWhy"></p>
             </div>
@@ -825,7 +836,18 @@ function reasonFor(model, signals) {
   return `${model.name} fits this task's ${signalText}.`;
 }
 
+function setAlternativeLabels(primary, lighter, upgrade) {
+  document.querySelector(".alternatives").hidden = MODELS.length < 2;
+  document.getElementById("fallbackLabel").textContent = lighter.id === primary.id
+    ? "Current speed floor - no lighter eligible model"
+    : "Quicker option - accepts less depth";
+  document.getElementById("upgradeLabel").textContent = upgrade.id === primary.id
+    ? "Current capability ceiling - no stronger eligible model"
+    : "Stronger option - only if the task grows";
+}
+
 function renderRecommendation() {
+  cancelAiAssessment();
   const prompt = document.getElementById("prompt").value.trim();
   if (!prompt) {
     document.getElementById("prompt").focus();
@@ -840,17 +862,187 @@ function renderRecommendation() {
   document.getElementById("result").classList.add("visible");
   document.getElementById("resultModel").textContent = routed.primary.name;
   document.getElementById("resultKnown").innerHTML = `<span>Known for:</span> ${routed.primary.known}`;
-  document.getElementById("confidence").textContent = `${activeSignals.length >= 3 ? "High" : activeSignals.length >= 1 ? "Medium" : "Low"} confidence`;
+  document.getElementById("confidence").textContent = `${activeSignals.length >= 3 ? "High" : activeSignals.length >= 1 ? "Medium" : "Low"} confidence / Local`;
   document.getElementById("resultWhy").textContent = reasonFor(routed.primary, routed.signals);
   document.getElementById("signals").innerHTML = (activeSignals.length ? activeSignals : ["general task"]).map(signal => `<span class="signal">${signal}</span>`).join("");
   document.getElementById("fallbackModel").textContent = routed.lighter.name;
   document.getElementById("fallbackWhy").textContent = `Use it if speed matters more than ${routed.primary.scores.reasoning > 8 ? "maximum depth" : "some nuance"}. ${routed.lighter.caveat}`;
   document.getElementById("upgradeModel").textContent = routed.upgrade.name;
   document.getElementById("upgradeWhy").textContent = "Use it if the task becomes more consequential, cross-system, ambiguous, or resistant to the first attempt.";
-  document.querySelector(".alternatives").hidden = MODELS.length < 2;
+  setAlternativeLabels(routed.primary, routed.lighter, routed.upgrade);
   document.getElementById("switchRule").textContent = `Switch away from ${routed.primary.name} if: ${routed.primary.caveat}`;
   const effort = routed.signals.highStakes || routed.signals.large ? "High" : routed.signals.speed ? "Low" : "Medium";
   document.getElementById("effort").textContent = `Suggested reasoning effort, when the picker supports it: ${effort}.`;
+  setAiStatus("Local heuristic completed. Nothing was sent over the network.", "success");
+}
+
+const AI_CONFIG = window.MODEL_MISSION_AI;
+let aiAuthClient;
+let aiAuthReady;
+let aiAssessmentVersion = 0;
+let aiAssessmentController;
+
+function setAiStatus(message, state = "") {
+  const status = document.getElementById("aiStatus");
+  status.textContent = message;
+  status.className = `ai-status${state ? ` ${state}` : ""}`;
+}
+
+function cancelAiAssessment(message = "") {
+  if (!aiAssessmentController) return;
+  aiAssessmentVersion += 1;
+  aiAssessmentController.abort();
+  aiAssessmentController = undefined;
+  document.getElementById("routeAi").disabled = false;
+  if (message) setAiStatus(message);
+}
+
+function initializeAiAuth() {
+  if (aiAuthReady) return aiAuthReady;
+  if (!window.msal || !AI_CONFIG) {
+    return Promise.reject(new Error("The DIAx sign-in component is unavailable."));
+  }
+  aiAuthClient = new msal.PublicClientApplication({
+    auth: {
+      clientId: AI_CONFIG.clientId,
+      authority: `https://login.microsoftonline.com/${AI_CONFIG.tenantId}`,
+      redirectUri: AI_CONFIG.redirectUri,
+      navigateToLoginRequestUrl: false
+    },
+    cache: {
+      cacheLocation: "sessionStorage",
+      storeAuthStateInCookie: false
+    }
+  });
+  aiAuthReady = aiAuthClient.initialize();
+  return aiAuthReady;
+}
+
+async function acquireAiToken() {
+  await initializeAiAuth();
+  let account = aiAuthClient.getAllAccounts()[0];
+  if (!account) {
+    setAiStatus("Signing in to DIAx...");
+    const login = await aiAuthClient.loginPopup({
+      scopes: [AI_CONFIG.scope],
+      prompt: "select_account"
+    });
+    account = login.account;
+  }
+  try {
+    const token = await aiAuthClient.acquireTokenSilent({
+      scopes: [AI_CONFIG.scope],
+      account
+    });
+    return token.accessToken;
+  } catch (error) {
+    if (!(error instanceof msal.InteractionRequiredAuthError)) throw error;
+    const token = await aiAuthClient.acquireTokenPopup({
+      scopes: [AI_CONFIG.scope],
+      account
+    });
+    return token.accessToken;
+  }
+}
+
+function aiCandidates() {
+  return MODELS.map(model => ({
+    id: model.id,
+    name: model.name,
+    family: model.family,
+    tier: model.tier,
+    known: model.known,
+    best: model.best,
+    caveat: model.caveat,
+    scores: model.scores
+  }));
+}
+
+function renderSignals(signals) {
+  const container = document.getElementById("signals");
+  container.replaceChildren();
+  signals.forEach(signal => {
+    const chip = document.createElement("span");
+    chip.className = "signal";
+    chip.textContent = signal;
+    container.appendChild(chip);
+  });
+}
+
+function renderAiRecommendation(recommendation) {
+  const primary = byId(recommendation.primaryId);
+  const lighter = byId(recommendation.lighterId);
+  const upgrade = byId(recommendation.upgradeId);
+  if (!primary || !lighter || !upgrade) {
+    throw new Error("The assessment referenced a model outside the current catalog.");
+  }
+  document.getElementById("emptyResult").hidden = true;
+  document.getElementById("result").classList.add("visible");
+  document.getElementById("resultModel").textContent = primary.name;
+  document.getElementById("resultKnown").innerHTML = `<span>Known for:</span> ${primary.known}`;
+  document.getElementById("confidence").textContent =
+    `${recommendation.confidence[0].toUpperCase()}${recommendation.confidence.slice(1)} confidence / Azure AI`;
+  document.getElementById("resultWhy").textContent = recommendation.rationale;
+  renderSignals(recommendation.matchedSignals);
+  document.getElementById("fallbackModel").textContent = lighter.name;
+  document.getElementById("fallbackWhy").textContent = recommendation.lighterReason;
+  document.getElementById("upgradeModel").textContent = upgrade.name;
+  document.getElementById("upgradeWhy").textContent = recommendation.upgradeReason;
+  setAlternativeLabels(primary, lighter, upgrade);
+  document.getElementById("switchRule").textContent = recommendation.switchRule;
+  document.getElementById("effort").textContent =
+    `Suggested reasoning effort, when the picker supports it: ${recommendation.reasoningEffort}.`;
+}
+
+async function renderAiAssessment() {
+  const prompt = document.getElementById("prompt").value.trim();
+  if (!prompt) {
+    document.getElementById("prompt").focus();
+    return;
+  }
+  const button = document.getElementById("routeAi");
+  cancelAiAssessment();
+  const assessmentVersion = ++aiAssessmentVersion;
+  const controller = new AbortController();
+  aiAssessmentController = controller;
+  button.disabled = true;
+  setAiStatus("Preparing the DIAx-authenticated assessment...");
+  try {
+    const accessToken = await acquireAiToken();
+    if (assessmentVersion !== aiAssessmentVersion) return;
+    setAiStatus("Azure AI is assessing the task against the eligible catalog...");
+    const response = await fetch(AI_CONFIG.apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt,
+        platform: platformKey,
+        priority: document.getElementById("priority").value,
+        stakes: document.getElementById("stakes").value,
+        context: document.getElementById("context").value,
+        candidates: aiCandidates()
+      }),
+      signal: controller.signal
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (assessmentVersion !== aiAssessmentVersion) return;
+    if (!response.ok) {
+      throw new Error(payload.message || `The assessment failed with HTTP ${response.status}.`);
+    }
+    renderAiRecommendation(payload);
+    setAiStatus("Azure AI assessment completed through managed identity.", "success");
+  } catch (error) {
+    if (assessmentVersion !== aiAssessmentVersion || error?.name === "AbortError") return;
+    setAiStatus(error?.message || "The Azure AI assessment could not be completed.", "error");
+  } finally {
+    if (assessmentVersion === aiAssessmentVersion) {
+      aiAssessmentController = undefined;
+      button.disabled = false;
+    }
+  }
 }
 
 function renderCatalog() {
@@ -896,7 +1088,8 @@ function renderPlatformChrome() {
     PLATFORM.source;
   document.getElementById("sourceNote").innerHTML =
     `<strong>Availability source:</strong> ${source}. Last checked October 24, 2026. ` +
-    `Capability ratings are qualitative guidance, not benchmark scores or pricing claims.`;
+    `Capability ratings are qualitative guidance, not benchmark scores or pricing claims. ` +
+    `AI-assisted routing, when selected, uses DIAx sign-in and a managed-identity Azure backend.`;
 }
 
 function modelSummary(model) {
@@ -952,11 +1145,20 @@ document.querySelectorAll(".filter").forEach(filter => filter.addEventListener("
 }));
 document.getElementById("modelSearch").addEventListener("input", renderCatalog);
 document.getElementById("route").addEventListener("click", renderRecommendation);
+document.getElementById("routeAi").addEventListener("click", renderAiAssessment);
 document.getElementById("clear").addEventListener("click", () => {
+  cancelAiAssessment();
   document.getElementById("prompt").value = "";
   document.getElementById("emptyResult").hidden = false;
   document.getElementById("result").classList.remove("visible");
+  setAiStatus("");
   document.getElementById("prompt").focus();
+});
+["prompt", "priority", "stakes", "context"].forEach(id => {
+  const eventName = id === "prompt" ? "input" : "change";
+  document.getElementById(id).addEventListener(eventName, () => {
+    cancelAiAssessment("Inputs changed. Run the Azure AI assessment again.");
+  });
 });
 document.getElementById("duelA").addEventListener("change", renderDuel);
 document.getElementById("duelB").addEventListener("change", renderDuel);

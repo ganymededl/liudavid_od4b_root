@@ -1,0 +1,19 @@
+{
+  "name": "model-mission-control-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Secretless Azure Function for AI-assisted Model Mission Control routing.",
+  "type": "module",
+  "main": "src/functions/*.js",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@azure/functions": "4.17.0",
+    "@azure/identity": "4.14.0",
+    "jose": "6.2.12"
+  }
+}
