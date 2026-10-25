@@ -160,6 +160,12 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   padding: 18px; display: flex; flex-direction: column; min-height: 250px;
 }
 .model-card h3 { margin: 3px 0 8px; font-size: 19px; }
+.known-for {
+  color: var(--cp-danger); font-weight: 800; font-size: 14px; line-height: 1.4;
+  letter-spacing: .01em; margin: 0 0 10px;
+}
+.known-for span { text-transform: uppercase; letter-spacing: .08em; font-size: 11px; }
+.control-help { display: block; color: var(--cp-text-muted); font-size: 12px; line-height: 1.35; margin-top: 6px; }
 .family { color: var(--cp-accent); text-transform: uppercase; font-size: 11px; letter-spacing: .08em; font-weight: 750; }
 .model-card p { color: var(--cp-text-muted); line-height: 1.45; margin: 0 0 12px; }
 .best-list { margin: 0 0 14px; padding-left: 19px; color: var(--cp-text-soft); font-size: 13px; line-height: 1.55; }
@@ -221,10 +227,10 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   </section>
 
   <nav class="tabs" aria-label="Model Mission Control views">
-    <button class="tab" data-panel="advisor" aria-selected="true">Prompt advisor</button>
-    <button class="tab" data-panel="catalog" aria-selected="false">Model field guide</button>
-    <button class="tab" data-panel="duel" aria-selected="false">Model duel</button>
-    <button class="tab" data-panel="recipes" aria-selected="false">Mission recipes</button>
+    <button class="tab" data-panel="advisor" aria-selected="true">Choose for my prompt</button>
+    <button class="tab" data-panel="catalog" aria-selected="false">Browse every model</button>
+    <button class="tab" data-panel="duel" aria-selected="false">Compare two models</button>
+    <button class="tab" data-panel="recipes" aria-selected="false">Try example tasks</button>
   </nav>
 
   <section class="panel active" id="advisor">
@@ -234,34 +240,37 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
         <textarea id="prompt" placeholder="Example: Review a large TypeScript change for subtle auth and concurrency bugs, propose the smallest safe fix, then run targeted tests."></textarea>
         <div class="controls">
           <div>
-            <label for="priority">Priority</label>
+            <label for="priority">How should Scout trade speed for quality?</label>
             <select id="priority">
-              <option value="balanced">Balanced</option>
-              <option value="quality">Maximum quality</option>
-              <option value="speed">Fast response</option>
-              <option value="economy">Use the lightest capable model</option>
+              <option value="balanced">Best overall balance (Recommended)</option>
+              <option value="quality">Best answer, even if it takes longer</option>
+              <option value="speed">Fastest useful answer</option>
+              <option value="economy">Lightest model likely to succeed</option>
             </select>
+            <small class="control-help">Choose Recommended unless waiting time is unusually important.</small>
           </div>
           <div>
-            <label for="stakes">Consequence of error</label>
+            <label for="stakes">How costly would a wrong answer be?</label>
             <select id="stakes">
-              <option value="low">Low</option>
-              <option value="medium" selected>Medium</option>
-              <option value="high">High</option>
+              <option value="low">Low - easy to check or undo</option>
+              <option value="medium" selected>Medium - affects real work (Recommended)</option>
+              <option value="high">High - security, production, legal, or customer impact</option>
             </select>
+            <small class="control-help">Higher stakes favor slower models that check more carefully.</small>
           </div>
           <div>
-            <label for="context">Input size</label>
+            <label for="context">How much material must it consider?</label>
             <select id="context">
-              <option value="small">Short prompt / few files</option>
-              <option value="medium" selected>Several files / documents</option>
-              <option value="large">Large codebase / many documents</option>
+              <option value="small">Short prompt or 1-2 files</option>
+              <option value="medium" selected>Several files or documents (Recommended)</option>
+              <option value="large">Large codebase or many long documents</option>
             </select>
+            <small class="control-help">Count everything the model must read, not just your prompt.</small>
           </div>
         </div>
         <p class="hint">Your prompt stays in this browser. The advisor is a transparent local heuristic, not a benchmark or a hidden model call.</p>
         <div class="action-row">
-          <button class="button primary" id="route">Route this mission</button>
+          <button class="button primary" id="route">Find the best model</button>
           <button class="button" id="clear">Clear</button>
         </div>
       </div>
@@ -277,6 +286,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
             <div>
               <div class="eyebrow">Recommended model</div>
               <div class="result-model" id="resultModel"></div>
+              <div class="known-for" id="resultKnown"></div>
             </div>
             <span class="badge" id="confidence"></span>
           </div>
@@ -284,12 +294,12 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
           <div class="signal-row" id="signals"></div>
           <div class="alternatives">
             <div class="alt">
-              <small>Faster / lighter fallback</small>
+              <small>Quicker option - accepts less depth</small>
               <strong id="fallbackModel"></strong>
               <p id="fallbackWhy"></p>
             </div>
             <div class="alt">
-              <small>Power upgrade</small>
+              <small>Stronger option - only if the task grows</small>
               <strong id="upgradeModel"></strong>
               <p id="upgradeWhy"></p>
             </div>
@@ -319,13 +329,13 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   <section class="panel" id="duel">
     <div class="duel-grid">
       <div class="card">
-        <label for="duelA">Model A</label>
+        <label for="duelA">First model to compare</label>
         <select class="duel-select" id="duelA"></select>
         <div id="duelACard"></div>
       </div>
       <div class="versus">VS</div>
       <div class="card">
-        <label for="duelB">Model B</label>
+        <label for="duelB">Second model to compare</label>
         <select class="duel-select" id="duelB"></select>
         <div id="duelBCard"></div>
       </div>
@@ -350,6 +360,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
 const MODELS = [
   {
     id: "auto", name: "Auto", family: "Scout", tier: "adaptive",
+    known: "Mixed or underspecified tasks.",
     excels: "Mixed or underspecified work where Scout should choose without manual model management.",
     best: ["Everyday mixed tasks", "Unclear task shape", "Convenience-first routing"],
     caveat: "Less control and less predictable model-specific behavior.",
@@ -357,6 +368,7 @@ const MODELS = [
   },
   {
     id: "claude-sonnet-5", name: "Claude Sonnet 5", family: "Anthropic", tier: "power",
+    known: "Nuanced writing and document synthesis.",
     excels: "Nuanced writing, careful synthesis, structured reasoning, and sustained work across many constraints.",
     best: ["Executive narratives", "Document synthesis", "Ambiguous planning"],
     caveat: "Use a Haiku model when turnaround matters more than nuance.",
@@ -364,6 +376,7 @@ const MODELS = [
   },
   {
     id: "claude-haiku-4.5", name: "Claude Haiku 4.5", family: "Anthropic", tier: "fast",
+    known: "Extraction, classification, concise rewrites.",
     excels: "Fast extraction, classification, concise rewriting, and routine tool-assisted tasks.",
     best: ["Inbox triage", "Short summaries", "Formatting and cleanup"],
     caveat: "Not the first choice for difficult debugging or high-stakes ambiguity.",
@@ -371,6 +384,7 @@ const MODELS = [
   },
   {
     id: "gpt-5.6-sol", name: "GPT-5.6 Sol", family: "OpenAI", tier: "power",
+    known: "Architecture and deliberate technical reasoning.",
     excels: "Deliberate reasoning, architecture, complex debugging, and tasks with interlocking constraints.",
     best: ["Systems design", "Root-cause analysis", "Complex implementation"],
     caveat: "More capability than routine drafting or extraction usually needs.",
@@ -378,6 +392,7 @@ const MODELS = [
   },
   {
     id: "gpt-5.6-terra", name: "GPT-5.6 Terra", family: "OpenAI", tier: "power",
+    known: "Large-context and multi-document synthesis.",
     excels: "Broad synthesis across substantial context, research organization, and grounded planning.",
     best: ["Multi-document analysis", "Portfolio synthesis", "Evidence mapping"],
     caveat: "Choose Sol for harder logic or Codex for code-first work.",
@@ -385,6 +400,7 @@ const MODELS = [
   },
   {
     id: "gpt-5.6-luna", name: "GPT-5.6 Luna", family: "OpenAI", tier: "balanced",
+    known: "Balanced analysis and business writing.",
     excels: "Polished general-purpose work, clear communication, and balanced analysis without maximum deliberation.",
     best: ["Business writing", "Meeting outputs", "General analysis"],
     caveat: "Escalate to Sol for difficult logic and Terra for very broad inputs.",
@@ -392,6 +408,7 @@ const MODELS = [
   },
   {
     id: "gpt-5.3-codex", name: "GPT-5.3-Codex", family: "OpenAI", tier: "specialist",
+    known: "Repository coding, refactoring, debugging, tests.",
     excels: "Repository-scale coding, implementation, refactoring, debugging, and test-driven engineering.",
     best: ["Feature implementation", "Code review", "Refactors and migrations"],
     caveat: "A generalist is usually better for prose-first or relationship-heavy work.",
@@ -399,6 +416,7 @@ const MODELS = [
   },
   {
     id: "claude-haiku-5.5", name: "Claude Haiku 5.5", family: "Anthropic", tier: "fast",
+    known: "Fast drafting, briefings, triage.",
     excels: "Quick, high-quality drafting and triage with stronger judgment than a purely lightweight extractor.",
     best: ["Daily briefings", "First drafts", "Rapid task routing"],
     caveat: "Escalate when the task spans many dependencies or carries material risk.",
@@ -406,6 +424,7 @@ const MODELS = [
   },
   {
     id: "claude-sonnet-5.5", name: "Claude Sonnet 5.5", family: "Anthropic", tier: "power",
+    known: "Complex synthesis, strategy, careful critique.",
     excels: "High-quality reasoning and writing, long-form coherence, careful tool plans, and nuanced review.",
     best: ["Strategy documents", "Complex synthesis", "High-quality critique"],
     caveat: "A Haiku model is more efficient for repetitive or tightly scoped work.",
@@ -413,6 +432,7 @@ const MODELS = [
   },
   {
     id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", family: "Google", tier: "fast",
+    known: "Rapid multimodal scans and bulk summaries.",
     excels: "Low-latency summarization, multimodal triage, extraction, and broad first-pass analysis.",
     best: ["Fast multimodal scans", "Bulk summarization", "Rapid ideation"],
     caveat: "Use Argon or a power model when subtle reasoning determines the outcome.",
@@ -420,6 +440,7 @@ const MODELS = [
   },
   {
     id: "gemini-4-argon", name: "Gemini 4 Argon", family: "Google", tier: "power",
+    known: "Large-context and multimodal analysis.",
     excels: "Multimodal understanding, large-context synthesis, technical analysis, and cross-format work.",
     best: ["Image plus document analysis", "Large input synthesis", "Technical research"],
     caveat: "Flash is the better choice for simple, latency-sensitive work.",
@@ -427,6 +448,7 @@ const MODELS = [
   },
   {
     id: "gpt-5.6-sol-fast", name: "GPT-5.6 Sol Fast (Internal only)", family: "OpenAI", tier: "fast",
+    known: "Interactive reasoning and fast debugging.",
     excels: "Strong reasoning and coding when interactive speed matters, with less waiting than full Sol.",
     best: ["Interactive debugging", "Fast architecture review", "Iterative coding"],
     caveat: "Use full Sol or GPT-6 Sol when maximum depth matters more than latency.",
@@ -434,6 +456,7 @@ const MODELS = [
   },
   {
     id: "gpt-6.1-sol", name: "GPT-6.1 Sol", family: "OpenAI", tier: "frontier",
+    known: "Highest-consequence reasoning and complex orchestration.",
     excels: "The hardest multi-step reasoning, high-consequence analysis, complex engineering, and rigorous orchestration.",
     best: ["High-stakes decisions", "Deep technical investigations", "Complex agent workflows"],
     caveat: "Reserve it for tasks where added depth changes the outcome.",
@@ -441,6 +464,7 @@ const MODELS = [
   },
   {
     id: "gpt-6-luna", name: "GPT-6 Luna", family: "OpenAI", tier: "balanced",
+    known: "Frontier general-purpose work.",
     excels: "A strong frontier generalist for polished output, analysis, and tool use with balanced responsiveness.",
     best: ["Important business work", "Complex drafting", "General agent tasks"],
     caveat: "Sol is stronger for maximum reasoning; lighter models are better for routine volume.",
@@ -448,6 +472,7 @@ const MODELS = [
   },
   {
     id: "gpt-6-sol", name: "GPT-6 Sol", family: "OpenAI", tier: "frontier",
+    known: "Deep engineering and difficult planning.",
     excels: "Deep reasoning, advanced coding, difficult planning, and robust execution across many constraints.",
     best: ["Production architecture", "Difficult debugging", "Critical planning"],
     caveat: "GPT-6.1 Sol is the escalation path for the most consequential or stubborn tasks.",
@@ -455,6 +480,7 @@ const MODELS = [
   },
   {
     id: "grok-4.6", name: "Grok 4.6", family: "xAI", tier: "balanced",
+    known: "Direct critique and alternative framing.",
     excels: "Direct analysis, adversarial critique, alternative framing, and concise synthesis.",
     best: ["Red-team critique", "Second opinions", "Fast research framing"],
     caveat: "Use a newer or specialist model for maximum rigor or repository coding.",
@@ -462,6 +488,7 @@ const MODELS = [
   },
   {
     id: "grok-4.7", name: "Grok 4.7", family: "xAI", tier: "power",
+    known: "Stress-testing, assumptions, independent review.",
     excels: "Strong critical reasoning, candid synthesis, scenario stress-testing, and independent second opinions.",
     best: ["Assumption testing", "Competitive analysis", "Adversarial review"],
     caveat: "Prefer Codex for implementation and Sonnet for nuanced long-form prose.",
@@ -469,6 +496,7 @@ const MODELS = [
   },
   {
     id: "mai-code-1.1-flash", name: "MAI-Code-1.1-Flash", family: "Microsoft", tier: "fast",
+    known: "Small code fixes and scripts.",
     excels: "Fast code assistance, small fixes, scripting, and low-latency developer iteration.",
     best: ["Small code changes", "Script generation", "Code explanation"],
     caveat: "Escalate for architectural changes, subtle defects, or broad repository context.",
@@ -476,6 +504,7 @@ const MODELS = [
   },
   {
     id: "mai-code-2-flash", name: "MAI-Code-2-Flash", family: "Microsoft", tier: "fast",
+    known: "Fast implementation and targeted debugging.",
     excels: "Quick implementation and debugging with stronger code judgment while preserving fast iteration.",
     best: ["Targeted bug fixes", "Prototype implementation", "Developer Q&A"],
     caveat: "Use Codex or a Sol model when changes cross systems or require deeper proof.",
@@ -566,7 +595,7 @@ function signalLabels(signals) {
 function reasonFor(model, signals) {
   const active = signalLabels(signals);
   const signalText = active.length ? active.slice(0, 3).join(", ") : "general-purpose work";
-  return `${model.name} is the best fit for this combination of ${signalText}. ${model.excels}`;
+  return `${model.name} fits this task's ${signalText}.`;
 }
 
 function renderRecommendation() {
@@ -583,6 +612,7 @@ function renderRecommendation() {
   document.getElementById("emptyResult").hidden = true;
   document.getElementById("result").classList.add("visible");
   document.getElementById("resultModel").textContent = routed.primary.name;
+  document.getElementById("resultKnown").innerHTML = `<span>Known for:</span> ${routed.primary.known}`;
   document.getElementById("confidence").textContent = `${activeSignals.length >= 3 ? "High" : activeSignals.length >= 1 ? "Medium" : "Low"} confidence`;
   document.getElementById("resultWhy").textContent = reasonFor(routed.primary, routed.signals);
   document.getElementById("signals").innerHTML = (activeSignals.length ? activeSignals : ["general task"]).map(signal => `<span class="signal">${signal}</span>`).join("");
@@ -599,14 +629,14 @@ function renderCatalog() {
   const query = document.getElementById("modelSearch").value.toLowerCase();
   const family = document.querySelector(".filter.active").dataset.family;
   const models = MODELS.filter(model => {
-    const haystack = `${model.name} ${model.family} ${model.excels} ${model.best.join(" ")}`.toLowerCase();
+    const haystack = `${model.name} ${model.family} ${model.known} ${model.excels} ${model.best.join(" ")}`.toLowerCase();
     return (family === "all" || model.family === family) && haystack.includes(query);
   });
   document.getElementById("modelGrid").innerHTML = models.map(model => `
     <article class="model-card">
       <div class="family">${model.family} / ${model.tier}</div>
       <h3>${model.name}</h3>
-      <p>${model.excels}</p>
+      <div class="known-for"><span>Known for:</span> ${model.known}</div>
       <ul class="best-list">${model.best.map(item => `<li>${item}</li>`).join("")}</ul>
       <div class="meter-row">
         ${["reasoning", "speed", "coding"].map(key => `<div class="meter"><span>${labels[key]}</span><div class="track"><div class="fill" style="width:${model.scores[key] * 10}%"></div></div></div>`).join("")}
@@ -617,7 +647,7 @@ function renderCatalog() {
 }
 
 function modelSummary(model) {
-  return `<div class="family">${model.family} / ${model.tier}</div><h2>${model.name}</h2><p class="why">${model.excels}</p><div class="caveat"><strong>Best for:</strong> ${model.best.join(", ")}</div>`;
+  return `<div class="family">${model.family} / ${model.tier}</div><h2>${model.name}</h2><div class="known-for"><span>Known for:</span> ${model.known}</div><div class="caveat"><strong>Use it for:</strong> ${model.best.join(", ")}</div>`;
 }
 
 function renderDuel() {
@@ -638,7 +668,7 @@ function renderDuel() {
 }
 
 function setupDuel() {
-  const options = MODELS.map(model => `<option value="${model.id}">${model.name}</option>`).join("");
+  const options = MODELS.map(model => `<option value="${model.id}">${model.name} - ${model.known}</option>`).join("");
   document.getElementById("duelA").innerHTML = options;
   document.getElementById("duelB").innerHTML = options;
   document.getElementById("duelA").value = "claude-sonnet-5.5";
