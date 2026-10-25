@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<title>Model Mission Control | Scout Model Advisor</title>
+<meta name="description" content="Paste a task, compare the available Microsoft Scout models, and get a task-specific recommendation with tradeoffs.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--cp-bg);
+  color: var(--cp-text);
+  font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+button, textarea, select, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+a { color: var(--cp-link); }
+.shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 64px; }
+.topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 32px; }
+.brand { display: flex; align-items: center; gap: 10px; color: var(--cp-text); text-decoration: none; font-weight: 700; }
+.brand-mark {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border: 1px solid var(--cp-border); border-radius: 0.625rem;
+  background: var(--cp-accent); color: var(--cp-accent-fg);
+}
+.catalog-stamp { color: var(--cp-text-muted); font-size: 13px; text-align: right; }
+.hero { display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px; align-items: end; margin-bottom: 24px; }
+.eyebrow { color: var(--cp-accent); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; font-size: 12px; }
+h1 { margin: 8px 0 12px; font-size: clamp(36px, 6vw, 72px); line-height: .98; letter-spacing: -.045em; }
+.lede { margin: 0; max-width: 720px; color: var(--cp-text-muted); font-size: clamp(17px, 2vw, 21px); line-height: 1.5; }
+.principle {
+  background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+  padding: 20px; box-shadow: var(--cp-shadow);
+}
+.principle strong { display: block; margin-bottom: 6px; }
+.principle span { color: var(--cp-text-muted); line-height: 1.45; }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; margin: 28px 0 18px; }
+.tab, .button {
+  border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface);
+  color: var(--cp-text); padding: 10px 14px; cursor: pointer; font-weight: 650;
+}
+.tab[aria-selected="true"], .button.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+.tab:hover, .button:hover { border-color: var(--cp-border-strong); }
+.button.primary:hover { background: var(--cp-accent-hover); }
+.panel { display: none; }
+.panel.active { display: block; }
+.card {
+  background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+  padding: 22px; box-shadow: var(--cp-shadow);
+}
+.advisor-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+label { display: block; font-weight: 700; margin-bottom: 8px; }
+textarea, select, input[type="search"] {
+  width: 100%; color: var(--cp-text); background: var(--cp-bg-elevated);
+  border: 1px solid var(--cp-border); border-radius: 0.625rem; padding: 12px;
+}
+textarea { min-height: 220px; resize: vertical; line-height: 1.5; }
+textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--cp-highlight); outline-offset: 2px; border-color: var(--cp-accent);
+}
+.controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+.hint { color: var(--cp-text-muted); font-size: 13px; line-height: 1.45; margin: 10px 0 0; }
+.action-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.empty {
+  min-height: 374px; display: grid; place-items: center; text-align: center;
+  border: 1px dashed var(--cp-border-strong); border-radius: 16px; color: var(--cp-text-muted); padding: 32px;
+}
+.result { display: none; }
+.result.visible { display: block; }
+.result-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.result-model { font-size: 29px; font-weight: 760; letter-spacing: -.025em; margin: 4px 0; }
+.badge {
+  display: inline-flex; align-items: center; border: 1px solid var(--cp-border);
+  border-radius: 999px; padding: 5px 9px; color: var(--cp-text-muted); font-size: 12px; white-space: nowrap;
+}
+.why { color: var(--cp-text-muted); line-height: 1.55; margin: 16px 0; }
+.signal-row { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0 18px; }
+.signal { background: var(--cp-accent-soft); color: var(--cp-accent); border-radius: 999px; padding: 5px 9px; font-size: 12px; font-weight: 650; }
+.alternatives { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.alt { border: 1px solid var(--cp-border); border-radius: 0.625rem; padding: 12px; }
+.alt small { color: var(--cp-text-muted); display: block; margin-bottom: 4px; }
+.alt strong { display: block; }
+.alt p { color: var(--cp-text-muted); margin: 6px 0 0; font-size: 13px; line-height: 1.4; }
+.switch-rule { border-left: 4px solid var(--cp-warning); padding: 8px 12px; margin-top: 14px; color: var(--cp-text-muted); }
+.model-toolbar { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-bottom: 16px; }
+.filters { display: flex; gap: 8px; flex-wrap: wrap; }
+.filter {
+  border: 1px solid var(--cp-border); border-radius: 999px; background: var(--cp-surface);
+  color: var(--cp-text-muted); padding: 8px 12px; cursor: pointer;
+}
+.filter.active { color: var(--cp-accent-fg); background: var(--cp-accent); border-color: var(--cp-accent); }
+.model-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.model-card {
+  background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
+  padding: 18px; display: flex; flex-direction: column; min-height: 250px;
+}
+.model-card h3 { margin: 3px 0 8px; font-size: 19px; }
+.family { color: var(--cp-accent); text-transform: uppercase; font-size: 11px; letter-spacing: .08em; font-weight: 750; }
+.model-card p { color: var(--cp-text-muted); line-height: 1.45; margin: 0 0 12px; }
+.best-list { margin: 0 0 14px; padding-left: 19px; color: var(--cp-text-soft); font-size: 13px; line-height: 1.55; }
+.meter-row { margin-top: auto; }
+.meter { display: grid; grid-template-columns: 64px 1fr; gap: 8px; align-items: center; margin-top: 7px; font-size: 11px; color: var(--cp-text-muted); }
+.track { height: 6px; background: var(--cp-surface-soft); border-radius: 999px; overflow: hidden; }
+.fill { height: 100%; background: var(--cp-accent); border-radius: 999px; }
+.caveat { border-top: 1px solid var(--cp-border); padding-top: 10px; margin-top: 12px; font-size: 12px; color: var(--cp-text-muted); }
+.duel-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; }
+.versus { align-self: center; color: var(--cp-text-muted); font-weight: 800; }
+.duel-select { margin-bottom: 14px; }
+.score-table { width: 100%; border-collapse: collapse; }
+.score-table th, .score-table td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--cp-border); }
+.score-table td:last-child, .score-table th:last-child { text-align: right; }
+.winner { color: var(--cp-success); font-weight: 750; }
+.recipe-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.recipe { cursor: pointer; }
+.recipe:hover { border-color: var(--cp-accent); }
+.recipe h3 { margin: 0 0 6px; }
+.recipe p { color: var(--cp-text-muted); margin: 0; line-height: 1.45; }
+.footer-note { color: var(--cp-text-muted); font-size: 13px; line-height: 1.5; margin-top: 28px; }
+[hidden] { display: none !important; }
+
+@media (max-width: 900px) {
+  .hero, .advisor-grid { grid-template-columns: 1fr; }
+  .model-grid { grid-template-columns: repeat(2, 1fr); }
+  .controls { grid-template-columns: 1fr; }
+}
+@media (max-width: 620px) {
+  .shell { width: min(100% - 20px, 1180px); padding-top: 14px; }
+  .topbar { align-items: start; }
+  .model-grid, .recipe-grid, .alternatives { grid-template-columns: 1fr; }
+  .model-toolbar { grid-template-columns: 1fr; }
+  .duel-grid { grid-template-columns: 1fr; }
+  .versus { text-align: center; }
+}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="brand" href="../index.html">
+      <span class="brand-mark">MC</span>
+      <span>Model Mission Control</span>
+    </a>
+    <div class="catalog-stamp">Scout catalog snapshot<br><strong>October 24, 2026</strong></div>
+  </header>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Prompt-to-model decision support</div>
+      <h1>Use the right mind for the mission.</h1>
+      <p class="lede">Paste the task, set what matters, and get a model recommendation with a faster fallback, a power upgrade, and a clear reason to switch.</p>
+    </div>
+    <aside class="principle">
+      <strong>The routing principle</strong>
+      <span>Choose the least expensive, fastest model likely to complete the task reliably. Escalate for ambiguity, consequence, scale, or specialized coding depth.</span>
+    </aside>
+  </section>
+
+  <nav class="tabs" aria-label="Model Mission Control views">
+    <button class="tab" data-panel="advisor" aria-selected="true">Prompt advisor</button>
+    <button class="tab" data-panel="catalog" aria-selected="false">Model field guide</button>
+    <button class="tab" data-panel="duel" aria-selected="false">Model duel</button>
+    <button class="tab" data-panel="recipes" aria-selected="false">Mission recipes</button>
+  </nav>
+
+  <section class="panel active" id="advisor">
+    <div class="advisor-grid">
+      <div class="card">
+        <label for="prompt">What are you asking Scout to do?</label>
+        <textarea id="prompt" placeholder="Example: Review a large TypeScript change for subtle auth and concurrency bugs, propose the smallest safe fix, then run targeted tests."></textarea>
+        <div class="controls">
+          <div>
+            <label for="priority">Priority</label>
+            <select id="priority">
+              <option value="balanced">Balanced</option>
+              <option value="quality">Maximum quality</option>
+              <option value="speed">Fast response</option>
+              <option value="economy">Use the lightest capable model</option>
+            </select>
+          </div>
+          <div>
+            <label for="stakes">Consequence of error</label>
+            <select id="stakes">
+              <option value="low">Low</option>
+              <option value="medium" selected>Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+          <div>
+            <label for="context">Input size</label>
+            <select id="context">
+              <option value="small">Short prompt / few files</option>
+              <option value="medium" selected>Several files / documents</option>
+              <option value="large">Large codebase / many documents</option>
+            </select>
+          </div>
+        </div>
+        <p class="hint">Your prompt stays in this browser. The advisor is a transparent local heuristic, not a benchmark or a hidden model call.</p>
+        <div class="action-row">
+          <button class="button primary" id="route">Route this mission</button>
+          <button class="button" id="clear">Clear</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="empty" id="emptyResult">
+          <div>
+            <strong>Awaiting mission brief</strong>
+            <p>Recommendations will include what the model is buying you, what it is not, and when to switch.</p>
+          </div>
+        </div>
+        <div class="result" id="result" aria-live="polite">
+          <div class="result-head">
+            <div>
+              <div class="eyebrow">Recommended model</div>
+              <div class="result-model" id="resultModel"></div>
+            </div>
+            <span class="badge" id="confidence"></span>
+          </div>
+          <p class="why" id="resultWhy"></p>
+          <div class="signal-row" id="signals"></div>
+          <div class="alternatives">
+            <div class="alt">
+              <small>Faster / lighter fallback</small>
+              <strong id="fallbackModel"></strong>
+              <p id="fallbackWhy"></p>
+            </div>
+            <div class="alt">
+              <small>Power upgrade</small>
+              <strong id="upgradeModel"></strong>
+              <p id="upgradeWhy"></p>
+            </div>
+          </div>
+          <div class="switch-rule" id="switchRule"></div>
+          <p class="hint" id="effort"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="catalog">
+    <div class="model-toolbar">
+      <input type="search" id="modelSearch" placeholder="Search model, strength, or task">
+      <div class="filters" aria-label="Filter models">
+        <button class="filter active" data-family="all">All</button>
+        <button class="filter" data-family="OpenAI">GPT</button>
+        <button class="filter" data-family="Anthropic">Claude</button>
+        <button class="filter" data-family="Google">Gemini</button>
+        <button class="filter" data-family="xAI">Grok</button>
+        <button class="filter" data-family="Microsoft">MAI</button>
+      </div>
+    </div>
+    <div class="model-grid" id="modelGrid"></div>
+  </section>
+
+  <section class="panel" id="duel">
+    <div class="duel-grid">
+      <div class="card">
+        <label for="duelA">Model A</label>
+        <select class="duel-select" id="duelA"></select>
+        <div id="duelACard"></div>
+      </div>
+      <div class="versus">VS</div>
+      <div class="card">
+        <label for="duelB">Model B</label>
+        <select class="duel-select" id="duelB"></select>
+        <div id="duelBCard"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <table class="score-table">
+        <thead><tr><th>Dimension</th><th id="duelAName"></th><th id="duelBName"></th></tr></thead>
+        <tbody id="duelScores"></tbody>
+      </table>
+      <p class="footer-note" id="duelVerdict"></p>
+    </div>
+  </section>
+
+  <section class="panel" id="recipes">
+    <div class="recipe-grid" id="recipeGrid"></div>
+  </section>
+
+  <p class="footer-note"><strong>Important:</strong> Scout currently exposes the available model names but not authoritative pricing, benchmark results, or context-window limits. The ratings here are qualitative routing guidance, designed to make the tradeoff explicit. Use Auto when the task is mixed or you do not want to manage the choice.</p>
+</main>
+
+<script>
+const MODELS = [
+  {
+    id: "auto", name: "Auto", family: "Scout", tier: "adaptive",
+    excels: "Mixed or underspecified work where Scout should choose without manual model management.",
+    best: ["Everyday mixed tasks", "Unclear task shape", "Convenience-first routing"],
+    caveat: "Less control and less predictable model-specific behavior.",
+    scores: {reasoning: 7, speed: 7, coding: 7, writing: 7, tools: 8, context: 7}
+  },
+  {
+    id: "claude-sonnet-5", name: "Claude Sonnet 5", family: "Anthropic", tier: "power",
+    excels: "Nuanced writing, careful synthesis, structured reasoning, and sustained work across many constraints.",
+    best: ["Executive narratives", "Document synthesis", "Ambiguous planning"],
+    caveat: "Use a Haiku model when turnaround matters more than nuance.",
+    scores: {reasoning: 9, speed: 6, coding: 8, writing: 10, tools: 8, context: 9}
+  },
+  {
+    id: "claude-haiku-4.5", name: "Claude Haiku 4.5", family: "Anthropic", tier: "fast",
+    excels: "Fast extraction, classification, concise rewriting, and routine tool-assisted tasks.",
+    best: ["Inbox triage", "Short summaries", "Formatting and cleanup"],
+    caveat: "Not the first choice for difficult debugging or high-stakes ambiguity.",
+    scores: {reasoning: 6, speed: 10, coding: 6, writing: 7, tools: 7, context: 6}
+  },
+  {
+    id: "gpt-5.6-sol", name: "GPT-5.6 Sol", family: "OpenAI", tier: "power",
+    excels: "Deliberate reasoning, architecture, complex debugging, and tasks with interlocking constraints.",
+    best: ["Systems design", "Root-cause analysis", "Complex implementation"],
+    caveat: "More capability than routine drafting or extraction usually needs.",
+    scores: {reasoning: 9, speed: 6, coding: 9, writing: 8, tools: 9, context: 8}
+  },
+  {
+    id: "gpt-5.6-terra", name: "GPT-5.6 Terra", family: "OpenAI", tier: "power",
+    excels: "Broad synthesis across substantial context, research organization, and grounded planning.",
+    best: ["Multi-document analysis", "Portfolio synthesis", "Evidence mapping"],
+    caveat: "Choose Sol for harder logic or Codex for code-first work.",
+    scores: {reasoning: 8, speed: 6, coding: 7, writing: 8, tools: 8, context: 10}
+  },
+  {
+    id: "gpt-5.6-luna", name: "GPT-5.6 Luna", family: "OpenAI", tier: "balanced",
+    excels: "Polished general-purpose work, clear communication, and balanced analysis without maximum deliberation.",
+    best: ["Business writing", "Meeting outputs", "General analysis"],
+    caveat: "Escalate to Sol for difficult logic and Terra for very broad inputs.",
+    scores: {reasoning: 8, speed: 8, coding: 7, writing: 9, tools: 8, context: 8}
+  },
+  {
+    id: "gpt-5.3-codex", name: "GPT-5.3-Codex", family: "OpenAI", tier: "specialist",
+    excels: "Repository-scale coding, implementation, refactoring, debugging, and test-driven engineering.",
+    best: ["Feature implementation", "Code review", "Refactors and migrations"],
+    caveat: "A generalist is usually better for prose-first or relationship-heavy work.",
+    scores: {reasoning: 9, speed: 6, coding: 10, writing: 6, tools: 9, context: 8}
+  },
+  {
+    id: "claude-haiku-5.5", name: "Claude Haiku 5.5", family: "Anthropic", tier: "fast",
+    excels: "Quick, high-quality drafting and triage with stronger judgment than a purely lightweight extractor.",
+    best: ["Daily briefings", "First drafts", "Rapid task routing"],
+    caveat: "Escalate when the task spans many dependencies or carries material risk.",
+    scores: {reasoning: 7, speed: 10, coding: 7, writing: 8, tools: 8, context: 7}
+  },
+  {
+    id: "claude-sonnet-5.5", name: "Claude Sonnet 5.5", family: "Anthropic", tier: "power",
+    excels: "High-quality reasoning and writing, long-form coherence, careful tool plans, and nuanced review.",
+    best: ["Strategy documents", "Complex synthesis", "High-quality critique"],
+    caveat: "A Haiku model is more efficient for repetitive or tightly scoped work.",
+    scores: {reasoning: 10, speed: 6, coding: 9, writing: 10, tools: 9, context: 9}
+  },
+  {
+    id: "gemini-3.8-flash", name: "Gemini 3.8 Flash", family: "Google", tier: "fast",
+    excels: "Low-latency summarization, multimodal triage, extraction, and broad first-pass analysis.",
+    best: ["Fast multimodal scans", "Bulk summarization", "Rapid ideation"],
+    caveat: "Use Argon or a power model when subtle reasoning determines the outcome.",
+    scores: {reasoning: 6, speed: 10, coding: 6, writing: 7, tools: 7, context: 8}
+  },
+  {
+    id: "gemini-4-argon", name: "Gemini 4 Argon", family: "Google", tier: "power",
+    excels: "Multimodal understanding, large-context synthesis, technical analysis, and cross-format work.",
+    best: ["Image plus document analysis", "Large input synthesis", "Technical research"],
+    caveat: "Flash is the better choice for simple, latency-sensitive work.",
+    scores: {reasoning: 9, speed: 6, coding: 8, writing: 8, tools: 8, context: 10}
+  },
+  {
+    id: "gpt-5.6-sol-fast", name: "GPT-5.6 Sol Fast (Internal only)", family: "OpenAI", tier: "fast",
+    excels: "Strong reasoning and coding when interactive speed matters, with less waiting than full Sol.",
+    best: ["Interactive debugging", "Fast architecture review", "Iterative coding"],
+    caveat: "Use full Sol or GPT-6 Sol when maximum depth matters more than latency.",
+    scores: {reasoning: 8, speed: 9, coding: 9, writing: 7, tools: 9, context: 8}
+  },
+  {
+    id: "gpt-6.1-sol", name: "GPT-6.1 Sol", family: "OpenAI", tier: "frontier",
+    excels: "The hardest multi-step reasoning, high-consequence analysis, complex engineering, and rigorous orchestration.",
+    best: ["High-stakes decisions", "Deep technical investigations", "Complex agent workflows"],
+    caveat: "Reserve it for tasks where added depth changes the outcome.",
+    scores: {reasoning: 10, speed: 5, coding: 10, writing: 9, tools: 10, context: 9}
+  },
+  {
+    id: "gpt-6-luna", name: "GPT-6 Luna", family: "OpenAI", tier: "balanced",
+    excels: "A strong frontier generalist for polished output, analysis, and tool use with balanced responsiveness.",
+    best: ["Important business work", "Complex drafting", "General agent tasks"],
+    caveat: "Sol is stronger for maximum reasoning; lighter models are better for routine volume.",
+    scores: {reasoning: 9, speed: 7, coding: 8, writing: 9, tools: 9, context: 9}
+  },
+  {
+    id: "gpt-6-sol", name: "GPT-6 Sol", family: "OpenAI", tier: "frontier",
+    excels: "Deep reasoning, advanced coding, difficult planning, and robust execution across many constraints.",
+    best: ["Production architecture", "Difficult debugging", "Critical planning"],
+    caveat: "GPT-6.1 Sol is the escalation path for the most consequential or stubborn tasks.",
+    scores: {reasoning: 10, speed: 5, coding: 10, writing: 9, tools: 10, context: 9}
+  },
+  {
+    id: "grok-4.6", name: "Grok 4.6", family: "xAI", tier: "balanced",
+    excels: "Direct analysis, adversarial critique, alternative framing, and concise synthesis.",
+    best: ["Red-team critique", "Second opinions", "Fast research framing"],
+    caveat: "Use a newer or specialist model for maximum rigor or repository coding.",
+    scores: {reasoning: 8, speed: 8, coding: 7, writing: 7, tools: 7, context: 8}
+  },
+  {
+    id: "grok-4.7", name: "Grok 4.7", family: "xAI", tier: "power",
+    excels: "Strong critical reasoning, candid synthesis, scenario stress-testing, and independent second opinions.",
+    best: ["Assumption testing", "Competitive analysis", "Adversarial review"],
+    caveat: "Prefer Codex for implementation and Sonnet for nuanced long-form prose.",
+    scores: {reasoning: 9, speed: 7, coding: 8, writing: 8, tools: 8, context: 8}
+  },
+  {
+    id: "mai-code-1.1-flash", name: "MAI-Code-1.1-Flash", family: "Microsoft", tier: "fast",
+    excels: "Fast code assistance, small fixes, scripting, and low-latency developer iteration.",
+    best: ["Small code changes", "Script generation", "Code explanation"],
+    caveat: "Escalate for architectural changes, subtle defects, or broad repository context.",
+    scores: {reasoning: 6, speed: 10, coding: 8, writing: 5, tools: 7, context: 6}
+  },
+  {
+    id: "mai-code-2-flash", name: "MAI-Code-2-Flash", family: "Microsoft", tier: "fast",
+    excels: "Quick implementation and debugging with stronger code judgment while preserving fast iteration.",
+    best: ["Targeted bug fixes", "Prototype implementation", "Developer Q&A"],
+    caveat: "Use Codex or a Sol model when changes cross systems or require deeper proof.",
+    scores: {reasoning: 7, speed: 10, coding: 9, writing: 5, tools: 8, context: 7}
+  }
+];
+
+const RECIPES = [
+  {title: "Ship a production code change", text: "Implement, test, and inspect a cross-file change with minimal regression risk.", prompt: "Implement a production-ready change across several files. First trace the existing architecture and prior art, then make the smallest complete change, add targeted tests, and validate behavior. Explain any remaining risk."},
+  {title: "Write an executive narrative", text: "Turn mixed evidence into concise, nuanced leadership-ready writing.", prompt: "Synthesize the attached evidence into a concise executive narrative. Preserve uncertainty, separate facts from interpretation, surface the two decisions that matter, and avoid generic AI phrasing."},
+  {title: "Triage a busy inbox", text: "Classify a high volume of messages quickly and identify what needs action.", prompt: "Review today's inbox, identify only messages that require my action, summarize the ask and deadline, and group the rest into informational themes. Do not draft or send replies."},
+  {title: "Stress-test a strategy", text: "Find hidden assumptions, failure modes, and stronger alternatives.", prompt: "Red-team this strategy. Identify hidden assumptions, incentives, second-order effects, likely failure modes, and disconfirming evidence. Then propose the smallest experiments that would change the decision."},
+  {title: "Synthesize many documents", text: "Build an evidence map across a large body of mixed material.", prompt: "Analyze these documents as one evidence set. Build a claim-to-source map, reconcile contradictions, identify missing evidence, and produce a decision brief with confidence levels."},
+  {title: "Fix one small script", text: "Make a narrow code correction without paying the latency tax of a frontier model.", prompt: "Find and fix the specific defect in this small script. Preserve existing behavior, avoid unrelated refactoring, and run the smallest existing validation that proves the fix."}
+];
+
+const byId = id => MODELS.find(model => model.id === id);
+const dimensions = ["reasoning", "speed", "coding", "writing", "tools", "context"];
+const labels = {reasoning: "Reasoning", speed: "Speed", coding: "Coding", writing: "Writing", tools: "Tool use", context: "Large context"};
+
+function detectSignals(prompt, stakes, context) {
+  const text = prompt.toLowerCase();
+  const has = pattern => pattern.test(text);
+  const signals = {
+    coding: has(/\b(code|coding|repository|repo|typescript|javascript|python|powershell|debug|bug|refactor|implement|test|api|sql|dax|kql|git|security review)\b/),
+    writing: has(/\b(write|rewrite|draft|narrative|memo|email|executive|story|proposal|brief|tone|customer-ready)\b/),
+    tools: has(/\b(email|calendar|teams|sharepoint|onedrive|browser|automation|agent|workflow|publish|deploy|msx|power bi|dataverse)\b/),
+    multimodal: has(/\b(image|screenshot|photo|video|audio|diagram|slide|pptx|visual)\b/),
+    research: has(/\b(research|compare|investigate|evidence|sources|current|latest|market|competitive)\b/),
+    critique: has(/\b(red.team|stress.test|critique|challenge|assumption|second opinion|failure mode)\b/),
+    math: has(/\b(math|calculate|statistics|forecast|optimization|quantitative|algorithm)\b/),
+    speed: has(/\b(quick|fast|rapid|immediately|triage|classify|extract|short summary)\b/),
+    highStakes: stakes === "high" || has(/\b(production|security|legal|compliance|financial|medical|high.stakes|customer-facing|executive decision)\b/),
+    large: context === "large" || has(/\b(many documents|large codebase|entire repo|long transcript|portfolio|across all|hundreds|thousands)\b/),
+    ambiguous: has(/\b(strategy|plan|ambiguous|complex|tradeoff|architecture|root cause|why|design)\b/)
+  };
+  return signals;
+}
+
+function scoreModel(model, signals, priority, stakes, context) {
+  let score = model.scores.reasoning * 1.4 + model.scores.speed + model.scores.tools * .7;
+  if (signals.coding) score += model.scores.coding * 2.2;
+  if (signals.writing) score += model.scores.writing * 2;
+  if (signals.tools) score += model.scores.tools * 1.7;
+  if (signals.multimodal) score += (model.family === "Google" ? 14 : model.scores.context);
+  if (signals.research) score += model.scores.context + model.scores.reasoning;
+  if (signals.critique) score += model.family === "xAI" ? 14 : model.scores.reasoning;
+  if (signals.math) score += model.scores.reasoning * 1.5;
+  if (signals.speed) score += model.scores.speed * 1.8;
+  if (signals.highStakes) score += model.scores.reasoning * 2.2 + model.scores.tools;
+  if (signals.large) score += model.scores.context * 2;
+  if (signals.ambiguous) score += model.scores.reasoning * 1.5 + model.scores.writing * .5;
+  if (priority === "speed") score += model.scores.speed * 3;
+  if (priority === "economy") score += model.scores.speed * 2.2 - (model.tier === "frontier" ? 10 : 0);
+  if (priority === "quality") score += model.scores.reasoning * 2 + model.scores.writing + model.scores.coding;
+  if (stakes === "low" && ["frontier", "power"].includes(model.tier)) score -= 6;
+  if (stakes === "high" && ["fast", "adaptive"].includes(model.tier)) score -= 12;
+  if (context === "small") score += model.scores.speed;
+  if (context === "large") score += model.scores.context * 1.7;
+  if (model.id === "auto") score -= promptSpecificity(signals) > 2 ? 8 : -6;
+  return score;
+}
+
+function promptSpecificity(signals) {
+  return Object.values(signals).filter(Boolean).length;
+}
+
+function routePrompt(prompt, priority, stakes, context) {
+  const signals = detectSignals(prompt, stakes, context);
+  const ranked = MODELS.map(model => ({model, score: scoreModel(model, signals, priority, stakes, context)}))
+    .sort((a, b) => b.score - a.score);
+  const primary = ranked[0].model;
+  const lighter = ranked.find(item => item.model.scores.speed >= 9 && item.model.id !== primary.id)?.model || byId("auto");
+  const upgrade = ranked.find(item => item.model.tier === "frontier" && item.model.id !== primary.id)?.model || byId("gpt-6.1-sol");
+  return {primary, lighter, upgrade, signals, ranked};
+}
+
+function signalLabels(signals) {
+  const map = {
+    coding: "code-intensive", writing: "writing-sensitive", tools: "tool orchestration",
+    multimodal: "multimodal", research: "research", critique: "adversarial review",
+    math: "quantitative", speed: "latency-sensitive", highStakes: "high consequence",
+    large: "large context", ambiguous: "ambiguity"
+  };
+  return Object.entries(signals).filter(([, value]) => value).map(([key]) => map[key]);
+}
+
+function reasonFor(model, signals) {
+  const active = signalLabels(signals);
+  const signalText = active.length ? active.slice(0, 3).join(", ") : "general-purpose work";
+  return `${model.name} is the best fit for this combination of ${signalText}. ${model.excels}`;
+}
+
+function renderRecommendation() {
+  const prompt = document.getElementById("prompt").value.trim();
+  if (!prompt) {
+    document.getElementById("prompt").focus();
+    return;
+  }
+  const priority = document.getElementById("priority").value;
+  const stakes = document.getElementById("stakes").value;
+  const context = document.getElementById("context").value;
+  const routed = routePrompt(prompt, priority, stakes, context);
+  const activeSignals = signalLabels(routed.signals);
+  document.getElementById("emptyResult").hidden = true;
+  document.getElementById("result").classList.add("visible");
+  document.getElementById("resultModel").textContent = routed.primary.name;
+  document.getElementById("confidence").textContent = `${activeSignals.length >= 3 ? "High" : activeSignals.length >= 1 ? "Medium" : "Low"} confidence`;
+  document.getElementById("resultWhy").textContent = reasonFor(routed.primary, routed.signals);
+  document.getElementById("signals").innerHTML = (activeSignals.length ? activeSignals : ["general task"]).map(signal => `<span class="signal">${signal}</span>`).join("");
+  document.getElementById("fallbackModel").textContent = routed.lighter.name;
+  document.getElementById("fallbackWhy").textContent = `Use it if speed matters more than ${routed.primary.scores.reasoning > 8 ? "maximum depth" : "some nuance"}. ${routed.lighter.caveat}`;
+  document.getElementById("upgradeModel").textContent = routed.upgrade.name;
+  document.getElementById("upgradeWhy").textContent = "Use it if the task becomes more consequential, cross-system, ambiguous, or resistant to the first attempt.";
+  document.getElementById("switchRule").textContent = `Switch away from ${routed.primary.name} if: ${routed.primary.caveat}`;
+  const effort = routed.signals.highStakes || routed.signals.large ? "High" : routed.signals.speed ? "Low" : "Medium";
+  document.getElementById("effort").textContent = `Suggested reasoning effort, when the picker supports it: ${effort}.`;
+}
+
+function renderCatalog() {
+  const query = document.getElementById("modelSearch").value.toLowerCase();
+  const family = document.querySelector(".filter.active").dataset.family;
+  const models = MODELS.filter(model => {
+    const haystack = `${model.name} ${model.family} ${model.excels} ${model.best.join(" ")}`.toLowerCase();
+    return (family === "all" || model.family === family) && haystack.includes(query);
+  });
+  document.getElementById("modelGrid").innerHTML = models.map(model => `
+    <article class="model-card">
+      <div class="family">${model.family} / ${model.tier}</div>
+      <h3>${model.name}</h3>
+      <p>${model.excels}</p>
+      <ul class="best-list">${model.best.map(item => `<li>${item}</li>`).join("")}</ul>
+      <div class="meter-row">
+        ${["reasoning", "speed", "coding"].map(key => `<div class="meter"><span>${labels[key]}</span><div class="track"><div class="fill" style="width:${model.scores[key] * 10}%"></div></div></div>`).join("")}
+      </div>
+      <div class="caveat"><strong>Watch-out:</strong> ${model.caveat}</div>
+    </article>
+  `).join("") || `<div class="empty">No models match that filter.</div>`;
+}
+
+function modelSummary(model) {
+  return `<div class="family">${model.family} / ${model.tier}</div><h2>${model.name}</h2><p class="why">${model.excels}</p><div class="caveat"><strong>Best for:</strong> ${model.best.join(", ")}</div>`;
+}
+
+function renderDuel() {
+  const a = byId(document.getElementById("duelA").value);
+  const b = byId(document.getElementById("duelB").value);
+  document.getElementById("duelACard").innerHTML = modelSummary(a);
+  document.getElementById("duelBCard").innerHTML = modelSummary(b);
+  document.getElementById("duelAName").textContent = a.name;
+  document.getElementById("duelBName").textContent = b.name;
+  document.getElementById("duelScores").innerHTML = dimensions.map(key => {
+    const aClass = a.scores[key] > b.scores[key] ? "winner" : "";
+    const bClass = b.scores[key] > a.scores[key] ? "winner" : "";
+    return `<tr><td>${labels[key]}</td><td class="${aClass}">${a.scores[key]}/10</td><td class="${bClass}">${b.scores[key]}/10</td></tr>`;
+  }).join("");
+  const aWins = dimensions.filter(key => a.scores[key] > b.scores[key]).map(key => labels[key]);
+  const bWins = dimensions.filter(key => b.scores[key] > a.scores[key]).map(key => labels[key]);
+  document.getElementById("duelVerdict").innerHTML = `<strong>${a.name}</strong> leads on ${aWins.join(", ") || "no unique dimensions"}; <strong>${b.name}</strong> leads on ${bWins.join(", ") || "no unique dimensions"}. Choose based on the task, not the total score.`;
+}
+
+function setupDuel() {
+  const options = MODELS.map(model => `<option value="${model.id}">${model.name}</option>`).join("");
+  document.getElementById("duelA").innerHTML = options;
+  document.getElementById("duelB").innerHTML = options;
+  document.getElementById("duelA").value = "claude-sonnet-5.5";
+  document.getElementById("duelB").value = "gpt-6.1-sol";
+  renderDuel();
+}
+
+function renderRecipes() {
+  document.getElementById("recipeGrid").innerHTML = RECIPES.map((recipe, index) => `
+    <article class="card recipe" tabindex="0" role="button" data-recipe="${index}" aria-label="Load ${recipe.title}">
+      <h3>${recipe.title}</h3><p>${recipe.text}</p>
+    </article>
+  `).join("");
+}
+
+document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(item => item.setAttribute("aria-selected", "false"));
+  document.querySelectorAll(".panel").forEach(panel => panel.classList.remove("active"));
+  tab.setAttribute("aria-selected", "true");
+  document.getElementById(tab.dataset.panel).classList.add("active");
+}));
+document.querySelectorAll(".filter").forEach(filter => filter.addEventListener("click", () => {
+  document.querySelectorAll(".filter").forEach(item => item.classList.remove("active"));
+  filter.classList.add("active");
+  renderCatalog();
+}));
+document.getElementById("modelSearch").addEventListener("input", renderCatalog);
+document.getElementById("route").addEventListener("click", renderRecommendation);
+document.getElementById("clear").addEventListener("click", () => {
+  document.getElementById("prompt").value = "";
+  document.getElementById("emptyResult").hidden = false;
+  document.getElementById("result").classList.remove("visible");
+  document.getElementById("prompt").focus();
+});
+document.getElementById("duelA").addEventListener("change", renderDuel);
+document.getElementById("duelB").addEventListener("change", renderDuel);
+document.getElementById("recipeGrid").addEventListener("click", event => {
+  const recipe = event.target.closest("[data-recipe]");
+  if (!recipe) return;
+  document.getElementById("prompt").value = RECIPES[Number(recipe.dataset.recipe)].prompt;
+  document.querySelector('[data-panel="advisor"]').click();
+  renderRecommendation();
+  window.scrollTo({top: 0, behavior: "smooth"});
+});
+document.getElementById("recipeGrid").addEventListener("keydown", event => {
+  if (event.key === "Enter" || event.key === " ") event.target.click();
+});
+
+renderCatalog();
+renderRecipes();
+setupDuel();
+</script>
+</body>
+</html>
