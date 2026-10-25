@@ -1,26 +1,28 @@
 window.MODEL_MISSION_CATALOGS = {
-  updatedAt: "2026-10-24T20:44:46-04:00",
+  updatedAt: "2026-10-24T21:18:17-04:00",
   platforms: {
     copilot: {
-      confidence: "provider-level",
-      source: "Microsoft Learn",
+      confidence: "account-observed",
+      source: "Authenticated Microsoft 365 Copilot model picker screenshots",
       models: [
-        "microsoft-default",
-        "claude-family",
-        "claude-fable-5",
-        "claude-mythos-5",
-        "spacexai-provider"
+        "copilot-auto",
+        "copilot-quick-response",
+        "copilot-think-deeper",
+        "copilot-advanced-reasoning",
+        "claude-sonnet-5",
+        "claude-sonnet-5.5",
+        "claude-opus-5.5",
+        "gpt-5.6-sol-quick",
+        "gpt-6",
+        "gpt-5.6-sol-think",
+        "gpt-6.1-sol"
       ]
     },
     cowork: {
-      confidence: "plan-dependent",
-      source: "Anthropic model catalog and Cowork documentation",
+      confidence: "live-capture-pending",
+      source: "Microsoft Copilot Cowork authenticated picker pending",
       models: [
-        "claude-fable-5.1",
-        "claude-opus-5.5",
-        "claude-sonnet-5.5",
-        "claude-haiku-5.5",
-        "claude-mythos-5.1"
+        "cowork-managed"
       ]
     },
     scout: {
@@ -49,19 +51,25 @@ window.MODEL_MISSION_CATALOGS = {
       ]
     },
     "github-cli": {
-      confidence: "documented-filtered",
-      source: "GitHub Copilot CLI command reference",
+      confidence: "account-live",
+      source: "GitHub Copilot CLI CAPI catalog: picker enabled and policy enabled",
       models: [
         "auto",
         "claude-sonnet-5.5",
-        "claude-opus-5.5",
+        "claude-sonnet-5",
         "claude-haiku-5.5",
         "claude-haiku-4.5",
-        "gpt-5.3-codex",
         "gpt-6.1-sol",
-        "gpt-6-astra",
         "gpt-6-luna",
-        "gemini-3.8-flash"
+        "gpt-6-sol",
+        "gpt-5.6-luna",
+        "gpt-5.6-sol",
+        "gpt-5.6-sol-fast",
+        "gpt-5.6-terra",
+        "gemini-3.8-flash",
+        "gemini-4-argon",
+        "mai-code-1.1-flash",
+        "mai-code-2-flash"
       ]
     }
   }

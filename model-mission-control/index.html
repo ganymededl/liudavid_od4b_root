@@ -230,7 +230,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
 
   <nav class="platform-nav" aria-label="Choose AI platform">
     <a class="platform-link" data-platform="copilot" href="?platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
-    <a class="platform-link" data-platform="cowork" href="?platform=cowork">Claude Cowork<small>Anthropic desktop agent</small></a>
+    <a class="platform-link" data-platform="cowork" href="?platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
     <a class="platform-link" data-platform="scout" href="?platform=scout">Microsoft Scout<small>Desktop agent</small></a>
     <a class="platform-link" data-platform="github-cli" href="?platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
   </nav>
@@ -535,107 +535,108 @@ const GITHUB_CLI_MODELS = [
     known: "Automatic routing within your plan and administrator policy.",
     caveat: "The chosen model can vary by plan, policy, evaluation access, and repository settings."
   }),
-  cloneScout("claude-sonnet-5.5", {
-    caveat: "Documented CLI default, but an administrator-managed default or repository pin can override it."
-  }),
-  {
-    id: "claude-opus-5.5", name: "Claude Opus 5.5", family: "Anthropic", tier: "frontier",
-    known: "Deep, sustained coding and careful review when quality matters more than speed.",
-    excels: "Complex software engineering and long-running technical reasoning.",
-    best: ["Difficult repository work", "Architecture review", "High-consequence changes"],
-    caveat: "Availability depends on plan and administrator policy.",
-    scores: {reasoning: 10, speed: 4, coding: 10, writing: 9, tools: 9, context: 9}
-  },
+  cloneScout("claude-sonnet-5.5"),
+  cloneScout("claude-sonnet-5"),
   cloneScout("claude-haiku-5.5"),
   cloneScout("claude-haiku-4.5"),
-  cloneScout("gpt-5.3-codex"),
   cloneScout("gpt-6.1-sol"),
-  {
-    id: "gpt-6-astra", name: "GPT-6 Astra", family: "OpenAI", tier: "frontier",
-    known: "Frontier problem-solving for broad, difficult coding missions.",
-    excels: "Advanced coding and multi-stage agent work.",
-    best: ["Complex implementation", "Broad technical investigation", "Agentic coding"],
-    caveat: "Documented as recommended opt-in, not the automatic default.",
-    scores: {reasoning: 10, speed: 5, coding: 10, writing: 8, tools: 10, context: 9}
-  },
   cloneScout("gpt-6-luna"),
-  cloneScout("gemini-3.8-flash")
+  cloneScout("gpt-6-sol"),
+  cloneScout("gpt-5.6-luna"),
+  cloneScout("gpt-5.6-sol"),
+  cloneScout("gpt-5.6-sol-fast"),
+  cloneScout("gpt-5.6-terra"),
+  cloneScout("gemini-3.8-flash"),
+  cloneScout("gemini-4-argon"),
+  cloneScout("mai-code-1.1-flash"),
+  cloneScout("mai-code-2-flash")
 ];
 
 const COWORK_MODELS = [
   {
-    id: "claude-fable-5.1", name: "Claude Fable 5.1", family: "Anthropic", tier: "power",
-    known: "Cowork's documented balanced agent model, defaulting to Medium effort.",
-    excels: "Agentic knowledge work that balances quality, speed, and sustained execution.",
-    best: ["Multi-step knowledge work", "Document creation", "Everyday Cowork tasks"],
-    caveat: "Anthropic has not published a complete Cowork picker matrix by plan.",
-    scores: {reasoning: 9, speed: 8, coding: 8, writing: 9, tools: 9, context: 10}
-  },
-  {
-    id: "claude-opus-5.5", name: "Claude Opus 5.5", family: "Anthropic", tier: "frontier",
-    known: "Maximum-depth reasoning and sustained work in Anthropic's current lineup.",
-    excels: "Difficult research, strategy, and complex agent work.",
-    best: ["High-consequence analysis", "Deep research", "Complex multi-step work"],
-    caveat: "Current Anthropic model; Cowork picker availability is plan and account dependent.",
-    scores: {reasoning: 10, speed: 4, coding: 10, writing: 10, tools: 9, context: 9}
-  },
-  cloneScout("claude-sonnet-5.5", {
-    caveat: "Current Anthropic model; Cowork picker availability is plan and account dependent."
-  }),
-  cloneScout("claude-haiku-5.5", {
-    caveat: "Current Anthropic model; Cowork picker availability is plan and account dependent."
-  }),
-  {
-    id: "claude-mythos-5.1", name: "Claude Mythos 5.1", family: "Anthropic", tier: "restricted",
-    known: "Specialized high-capability work for organizations verified by Anthropic.",
-    excels: "Restricted advanced use cases under Anthropic verification programs.",
-    best: ["Verified specialist programs", "Controlled advanced research", "Approved security work"],
-    caveat: "Restricted to verified organizations and not a general Cowork choice.",
-    scores: {reasoning: 10, speed: 4, coding: 9, writing: 9, tools: 8, context: 10}
+    id: "cowork-managed", name: "Microsoft-managed Cowork model", family: "Microsoft", tier: "managed",
+    known: "Agentic workplace tasks that plan and act across Microsoft 365.",
+    excels: "Multi-step knowledge work in the Microsoft Copilot Cowork surface.",
+    best: ["Workplace projects", "Multi-step execution", "Microsoft 365 agent work"],
+    caveat: "The exact account picker has not yet been captured; this is a product capability placeholder, not a claimed model name.",
+    scores: {reasoning: 8, speed: 7, coding: 6, writing: 8, tools: 10, context: 8}
   }
 ];
 
 const COPILOT_MODELS = [
   {
-    id: "microsoft-default", name: "Microsoft default model", family: "Microsoft", tier: "default",
-    known: "Everyday Microsoft 365 work with Microsoft-managed routing and grounding.",
-    excels: "General Copilot Chat and Microsoft 365 app tasks.",
-    best: ["Workplace Q&A", "Drafting in Microsoft 365", "Grounded everyday work"],
-    caveat: "Microsoft does not publicly enumerate the exact default model version for every surface.",
+    id: "copilot-auto", name: "Auto", family: "Copilot mode", tier: "adaptive",
+    known: "Lets Copilot decide how long to think.",
+    excels: "General Microsoft 365 work without manually choosing depth or provider.",
+    best: ["Everyday work", "Mixed tasks", "Convenience-first routing"],
+    caveat: "The underlying model is selected by Copilot and can change.",
     scores: {reasoning: 8, speed: 8, coding: 6, writing: 8, tools: 9, context: 8}
   },
   {
-    id: "claude-family", name: "Claude (family)", family: "Anthropic", tier: "provider",
-    known: "Nuanced research and editing where Microsoft exposes Claude selection.",
-    excels: "Researcher, Edit with Copilot, and supported Copilot picker experiences.",
-    best: ["Research synthesis", "Nuanced editing", "Alternative model response"],
-    caveat: "Exact versions and availability vary by surface, region, license, and administrator settings.",
-    scores: {reasoning: 9, speed: 6, coding: 7, writing: 10, tools: 8, context: 9}
+    id: "copilot-quick-response", name: "Quick response", family: "Copilot mode", tier: "fast",
+    known: "Answers immediately with minimal deliberation.",
+    excels: "Short, low-risk questions where response time matters.",
+    best: ["Quick facts", "Simple rewrites", "Low-risk questions"],
+    caveat: "Avoid it for subtle analysis or consequential decisions.",
+    scores: {reasoning: 5, speed: 10, coding: 5, writing: 7, tools: 7, context: 6}
   },
   {
-    id: "claude-fable-5", name: "Claude Fable 5", family: "Anthropic", tier: "opt-in",
-    known: "Opt-in Claude processing for organizations that accept provider data retention.",
-    excels: "Advanced Claude-backed Microsoft 365 scenarios.",
-    best: ["Approved Claude workflows", "Research and editing", "Tenant-enabled scenarios"],
-    caveat: "Off by default, may retain data, and requires tenant administrator approval.",
-    scores: {reasoning: 9, speed: 7, coding: 7, writing: 9, tools: 8, context: 9}
+    id: "copilot-think-deeper", name: "Think deeper", family: "Copilot mode", tier: "power",
+    known: "Spends longer producing a more considered answer.",
+    excels: "Important analysis that benefits from more deliberation.",
+    best: ["Planning", "Tradeoffs", "Detailed analysis"],
+    caveat: "A named frontier model may be better when you need a specific specialty.",
+    scores: {reasoning: 9, speed: 5, coding: 7, writing: 9, tools: 8, context: 8}
   },
   {
-    id: "claude-mythos-5", name: "Claude Mythos 5", family: "Anthropic", tier: "opt-in",
-    known: "Restricted Claude capability under explicit tenant opt-in and retention terms.",
-    excels: "Controlled advanced scenarios for approved organizations.",
-    best: ["Approved specialist use", "Controlled research", "Tenant-governed workflows"],
-    caveat: "Off by default, includes provider data retention, and is not broadly available.",
-    scores: {reasoning: 10, speed: 5, coding: 8, writing: 9, tools: 8, context: 10}
+    id: "copilot-advanced-reasoning", name: "Advanced reasoning (Experimental)", family: "Copilot mode", tier: "experimental",
+    known: "Copilot's experimental mode for complex tasks.",
+    excels: "Difficult exploratory reasoning where experimental behavior is acceptable.",
+    best: ["Complex analysis", "Exploration", "Hard planning"],
+    caveat: "Experimental behavior can change and may be less predictable.",
+    scores: {reasoning: 10, speed: 3, coding: 8, writing: 8, tools: 8, context: 9}
+  },
+  cloneScout("claude-sonnet-5", {
+    caveat: "Observed in this Microsoft 365 Copilot account; tenant and surface availability can change."
+  }),
+  cloneScout("claude-sonnet-5.5", {
+    caveat: "Observed in this Microsoft 365 Copilot account; tenant and surface availability can change."
+  }),
+  {
+    id: "claude-opus-5.5", name: "Claude Opus 5.5", family: "Anthropic", tier: "frontier",
+    known: "Maximum-depth Claude reasoning and long-form quality.",
+    excels: "Difficult strategy, synthesis, and careful review.",
+    best: ["High-consequence writing", "Deep synthesis", "Complex critique"],
+    caveat: "Observed in this Microsoft 365 Copilot account; use when added depth justifies the latency.",
+    scores: {reasoning: 10, speed: 4, coding: 9, writing: 10, tools: 8, context: 9}
   },
   {
-    id: "spacexai-provider", name: "SpaceXAI provider", family: "xAI", tier: "independent",
-    known: "An independent-provider option for Copilot Studio and Copilot Cowork.",
-    excels: "Alternative-provider agent scenarios enabled by an administrator.",
-    best: ["Copilot Studio agents", "Copilot Cowork", "Independent-provider evaluation"],
-    caveat: "Microsoft does not publish individual model names; Microsoft DPA, residency, SLA, and copyright commitments do not apply.",
-    scores: {reasoning: 8, speed: 7, coding: 7, writing: 7, tools: 8, context: 8}
-  }
+    id: "gpt-5.6-sol-quick", name: "GPT-5.6 Sol Quick response", family: "OpenAI", tier: "fast",
+    known: "Sol technical ability tuned for quick turnaround.",
+    excels: "Fast technical answers and interactive problem solving.",
+    best: ["Quick debugging", "Technical Q&A", "Iterative analysis"],
+    caveat: "Use the Think deeper variant when mistakes would be costly.",
+    scores: {reasoning: 8, speed: 9, coding: 9, writing: 7, tools: 8, context: 8}
+  },
+  {
+    id: "gpt-6", name: "GPT-6", family: "OpenAI", tier: "frontier",
+    known: "Broad frontier general-purpose reasoning.",
+    excels: "Important work that spans analysis, writing, and technical tasks.",
+    best: ["Complex general work", "Cross-domain analysis", "Important drafting"],
+    caveat: "Choose a named Sol mode when deep technical deliberation is the primary need.",
+    scores: {reasoning: 9, speed: 6, coding: 9, writing: 9, tools: 9, context: 9}
+  },
+  {
+    id: "gpt-5.6-sol-think", name: "GPT-5.6 Sol Think deeper", family: "OpenAI", tier: "power",
+    known: "Deliberate technical reasoning with extra thinking time.",
+    excels: "Architecture, root-cause analysis, and consequential technical decisions.",
+    best: ["Architecture", "Hard debugging", "Technical planning"],
+    caveat: "Use Quick response for straightforward iterations.",
+    scores: {reasoning: 9, speed: 5, coding: 9, writing: 8, tools: 9, context: 8}
+  },
+  cloneScout("gpt-6.1-sol", {
+    caveat: "Observed in this Microsoft 365 Copilot account; reserve it for work where maximum depth changes the outcome."
+  })
 ];
 
 const PLATFORMS = {
@@ -643,19 +644,19 @@ const PLATFORMS = {
     name: "Microsoft 365 Copilot",
     shortName: "Copilot",
     models: COPILOT_MODELS,
-    notice: "Microsoft publishes provider and family availability, not a complete model-picker list. What you can select varies by app, tenant, region, license, and administrator policy.",
-    source: "Microsoft Learn: AI models in Microsoft 365 Copilot",
-    sourceUrl: "https://learn.microsoft.com/en-us/microsoft-365/copilot/ai-models-overview",
-    catalogLabel: "Provider-level catalog"
+    notice: "Exact options observed in this Microsoft 365 Copilot account on October 24, 2026. The picker can change by tenant, surface, license, region, policy, or Microsoft release.",
+    source: "Authenticated Microsoft 365 Copilot model picker",
+    sourceUrl: "",
+    catalogLabel: "Account-observed catalog"
   },
   cowork: {
-    name: "Claude Cowork",
+    name: "Microsoft Copilot Cowork",
     shortName: "Cowork",
     models: COWORK_MODELS,
-    notice: "Cowork requires a paid Claude plan. Anthropic documents its current lineup and Fable 5.1's Cowork effort default, but not a complete per-plan Cowork picker matrix.",
-    source: "Anthropic: Models overview",
-    sourceUrl: "https://platform.claude.com/docs/en/models/overview",
-    catalogLabel: "Plan-dependent catalog"
+    notice: "This is Microsoft Copilot Cowork. Its exact account-level picker has not yet been captured, so Mission Control is retaining a clearly labeled placeholder instead of copying Anthropic's unrelated Claude app catalog.",
+    source: "Microsoft Copilot Cowork product surface; authenticated picker capture pending",
+    sourceUrl: "https://learn.microsoft.com/en-us/microsoft-365/copilot/cowork/",
+    catalogLabel: "Live catalog pending"
   },
   scout: {
     name: "Microsoft Scout",
@@ -670,10 +671,10 @@ const PLATFORMS = {
     name: "GitHub Copilot CLI",
     shortName: "GitHub CLI",
     models: GITHUB_CLI_MODELS,
-    notice: "These are the model IDs documented for GitHub Copilot CLI. Your live picker can be narrower because plan, organization policy, evaluation access, repository pins, and managed defaults all apply.",
-    source: "GitHub Docs: Copilot CLI command reference",
-    sourceUrl: "https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-command-reference",
-    catalogLabel: "Documented CLI catalog"
+    notice: "Exact built-in picker models enabled for this GitHub Copilot CLI account and policy. Auto, research-preview, recent, and local models may appear as additional picker rows.",
+    source: "GitHub Copilot CLI live CAPI catalog",
+    sourceUrl: "",
+    catalogLabel: "Account-live catalog"
   }
 };
 
@@ -822,6 +823,7 @@ function renderRecommendation() {
   document.getElementById("fallbackWhy").textContent = `Use it if speed matters more than ${routed.primary.scores.reasoning > 8 ? "maximum depth" : "some nuance"}. ${routed.lighter.caveat}`;
   document.getElementById("upgradeModel").textContent = routed.upgrade.name;
   document.getElementById("upgradeWhy").textContent = "Use it if the task becomes more consequential, cross-system, ambiguous, or resistant to the first attempt.";
+  document.querySelector(".alternatives").hidden = MODELS.length < 2;
   document.getElementById("switchRule").textContent = `Switch away from ${routed.primary.name} if: ${routed.primary.caveat}`;
   const effort = routed.signals.highStakes || routed.signals.large ? "High" : routed.signals.speed ? "Low" : "Medium";
   document.getElementById("effort").textContent = `Suggested reasoning effort, when the picker supports it: ${effort}.`;
@@ -856,6 +858,7 @@ function renderPlatformChrome() {
     `Paste a ${PLATFORM.shortName} task and get a platform-specific recommendation, a quicker fallback, and a clear reason to switch.`;
   document.getElementById("platformNotice").textContent = PLATFORM.notice;
   document.getElementById("promptLabel").textContent = `What are you asking ${PLATFORM.shortName} to do?`;
+  document.querySelector('[data-panel="duel"]').hidden = MODELS.length < 2;
   document.querySelectorAll(".platform-link").forEach(link => {
     link.classList.toggle("active", link.dataset.platform === platformKey);
     if (link.dataset.platform === platformKey) link.setAttribute("aria-current", "page");
