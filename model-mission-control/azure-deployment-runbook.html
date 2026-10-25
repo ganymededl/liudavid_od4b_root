@@ -11,7 +11,7 @@
     document.documentElement.setAttribute("data-theme", theme);
   })();
 </script>
-<title>Azure AI Assessment Deployment Runbook</title>
+<title>Azure AI assessment deployment runbook</title>
 <meta name="description" content="Recreate the Model Mission Control Azure Function, Entra authentication, managed identity, and Azure AI deployment.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
 <style>
@@ -98,7 +98,7 @@ h3 { margin: 0 0 10px; font-size: 20px; }
 p, li { line-height: 1.55; }
 .checklist { list-style: none; padding: 0; }
 .checklist li { margin: 8px 0; padding-left: 26px; position: relative; }
-.checklist li::before { content: "OK"; position: absolute; left: 0; color: var(--cp-success); font-size: 11px; font-weight: 900; }
+.checklist li::before { content: "[ ]"; position: absolute; left: 0; color: var(--cp-text-muted); font-size: 12px; font-weight: 700; }
 pre {
   overflow-x: auto; padding: 16px; border: 1px solid var(--cp-border);
   border-radius: 0.625rem; background: var(--cp-bg-elevated); line-height: 1.45; font-size: 13px;
@@ -111,8 +111,8 @@ pre {
   overflow: hidden; background: var(--cp-bg-elevated);
 }
 .portal-bar { padding: 10px 14px; background: var(--cp-surface-soft); border-bottom: 1px solid var(--cp-border); font-size: 12px; color: var(--cp-text-muted); }
-.portal-body { display: grid; grid-template-columns: 190px 1fr; min-height: 190px; }
-.portal-nav { padding: 14px; border-right: 1px solid var(--cp-border); color: var(--cp-text-muted); font-size: 13px; }
+.portal-body { display: block; min-height: 190px; }
+.portal-nav { display: none; }
 .portal-nav strong { display: block; color: var(--cp-accent); margin: 8px 0; }
 .portal-panel { padding: 18px; }
 .portal-panel h4 { margin: 0 0 12px; }
@@ -138,17 +138,16 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
 <main class="shell">
   <header class="topbar">
     <a class="back" href="index.html?v=20261024-3">&larr; Model Mission Control</a>
-    <div class="verified">Reference deployment verified<br><strong>October 25, 2026</strong></div>
+    <div class="verified">Validated against checkpoints 1-7<br><strong>October 25, 2026</strong></div>
   </header>
 
   <section class="hero">
     <div class="eyebrow">Administrator deployment guide</div>
-    <h1>Azure AI assessment runbook</h1>
-    <p class="lede">Deploy the Azure Function that powers <code>Assess with Azure AI</code> in Model Mission Control.</p>
+    <h1>Azure AI assessment deployment runbook</h1>
+    <p class="lede">Model Mission Control recommends a model from a platform catalog for a given prompt. This runbook deploys the backend for its optional <code>Assess with Azure AI</code> feature.</p>
   </section>
 
   <p>Users sign in through Microsoft Entra ID. The API validates their access tokens and checks whether they are allowed to use the service. The Function then calls the deployed model in an Azure OpenAI resource using its managed identity.</p>
-  <p>The reference deployment uses a DIAx tenant for sign-in. In another environment, use that organization's Entra tenant and authorized user.</p>
   <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer. This does not mean the API accepts unauthenticated requests: the function code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI resource.</div>
 
   <p>At each checkpoint, record the result and capture screenshots if required by your deployment process. Redact identifiers before sharing evidence, and never include tokens or credentials.</p>
@@ -160,11 +159,11 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
       <li><a href="#architecture">Architecture</a></li>
       <li><a href="#azure-ai">Azure OpenAI resource and model deployment</a></li>
       <li><a href="#entra-api">Entra API registration</a></li>
-      <li><a href="#entra-web">Entra SPA registration</a></li>
+      <li><a href="#entra-web">Entra single-page application (SPA) registration</a></li>
       <li><a href="#function">Function App</a></li>
       <li><a href="#identity">Managed identity and role</a></li>
       <li><a href="#settings">Application settings and origins</a></li>
-      <li><a href="#deploy">Deploy code and configure website</a></li>
+      <li><a href="#deploy">Deploy the Function and connect the website</a></li>
       <li><a href="#validate">End-to-end validation</a></li>
       <li><a href="#troubleshoot">Troubleshooting and rollback</a></li>
     </ol>
@@ -177,9 +176,12 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
       <li>Azure subscription Contributor or Owner for the target resource group.</li>
       <li>Permission to create Entra app registrations and grant delegated consent.</li>
       <li>Azure CLI, Node.js 22, npm, and Azure Functions Core Tools 4.</li>
+      <li>Git, with permission to clone the Model Mission Control source repository.</li>
       <li>A globally unique suffix for public Azure resource names.</li>
       <li>A GitHub Pages or other HTTPS origin for the static frontend.</li>
     </ul>
+<pre><code>git clone https://github.com/ganymededl/liudavid_od4b_root.git
+cd liudavid_od4b_root</code></pre>
 <pre><code>$SUFFIX = "&lt;unique-suffix&gt;"
 $LOCATION = "eastus2"
 $RG = "rg-model-mission-control-$LOCATION"
@@ -197,8 +199,8 @@ $LOCAL_REDIRECT = "$LOCAL_ORIGIN/model-mission-control/"</code></pre>
   <h2 id="architecture">2. Architecture</h2>
   <section class="architecture">
     <div class="flow">
-      <div class="flow-box"><strong>Static website</strong>MSAL redirect sign-in and a defined catalog of eligible models.</div>
-      <div class="flow-box"><strong>Entra ID</strong>Single-tenant SPA token with <code>access_as_user</code>.</div>
+      <div class="flow-box"><strong>Static website</strong>Microsoft Authentication Library (MSAL) redirect sign-in and a defined catalog of eligible models.</div>
+      <div class="flow-box"><strong>Entra ID</strong>Single-tenant single-page application (SPA) token with <code>access_as_user</code>.</div>
       <div class="flow-box"><strong>Azure Function</strong>Validates origin, tenant, audience, user, and scope.</div>
       <div class="flow-box"><strong>Azure OpenAI</strong>Function managed identity invokes the deployed model.</div>
     </div>
@@ -251,7 +253,7 @@ az cognitiveservices account deployment create `
       <li>Name it <strong>Model Mission Control API</strong>; choose <strong>Accounts in this organizational directory only</strong>.</li>
       <li>Open <strong>Expose an API</strong> and set the Application ID URI to <code>api://&lt;API-CLIENT-ID&gt;</code>.</li>
       <li>Add scope <code>access_as_user</code>. Set both admin and user consent display names and descriptions. Enable the scope.</li>
-      <li>Open <strong>Manifest</strong> and confirm <code>requestedAccessTokenVersion</code> is <code>2</code>.</li>
+      <li>Open <strong>Manifest</strong>, set <code>api.requestedAccessTokenVersion</code> to <code>2</code>, and save. New registrations default to <code>null</code>, which issues v1.0 access tokens that do not match this API's issuer and audience checks.</li>
     </ol>
     <p>Copy the API registration's <strong>Application (client) ID</strong>, then assign it for the remaining commands:</p>
 <pre><code>$API_CLIENT_ID = "&lt;API-APPLICATION-CLIENT-ID&gt;"</code></pre>
@@ -314,7 +316,12 @@ az functionapp create `
   --storage-account $STORAGE `
   --flexconsumption-location $LOCATION `
   --runtime node `
-  --runtime-version 22</code></pre>
+  --runtime-version 22
+
+az functionapp update `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --set httpsOnly=true</code></pre>
     <figure class="portal-shot">
       <div class="portal-bar">Azure portal &gt; Function App &gt; Overview</div>
       <div class="portal-body">
@@ -377,9 +384,11 @@ az role assignment create `
         <tr><td><code>ALLOWED_USER_OBJECT_ID</code></td><td>Authorized user's object ID</td><td>Restricts the endpoint to the user authorized to run assessments.</td></tr>
         <tr><td><code>ALLOWED_ORIGINS</code></td><td>Comma-separated exact origins</td><td>Application-level CORS allow-list.</td></tr>
         <tr><td><code>AZURE_OPENAI_ENDPOINT</code></td><td><code>https://&lt;account&gt;.openai.azure.com/</code></td><td>Azure OpenAI resource endpoint.</td></tr>
-        <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td>Your deployment name</td><td>Model deployment used by the router.</td></tr>
+        <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td>Your deployment name</td><td>Model deployment the Function calls.</td></tr>
       </tbody>
     </table>
+    <p><code>ALLOWED_USER_OBJECT_ID</code> accepts one user object ID. Supporting multiple users or a group requires a code change and a corresponding authorization design review.</p>
+    <p>The Function App also contains platform-managed storage settings such as <code>AzureWebJobsStorage</code> and <code>DEPLOYMENT_STORAGE_CONNECTION_STRING</code>. With the creation command above, these values are storage connection strings and must be treated as secrets. The statement above applies only to Azure OpenAI API keys and application client secrets.</p>
     <p>The user lookup below retrieves the object ID of the account currently signed in to Azure CLI. Use that ID only if this account should be authorized to run assessments. Otherwise, replace it with the intended user's object ID before applying the settings.</p>
 <pre><code>$TENANT_ID = az account show --query tenantId -o tsv
 $USER_OBJECT_ID = az ad signed-in-user show --query id -o tsv
@@ -407,6 +416,7 @@ az functionapp config appsettings set `
           <div class="portal-field"><span>Browser origins</span><span>ALLOWED_ORIGINS</span></div>
           <div class="portal-field"><span>Azure OpenAI</span><span>AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT</span></div>
           <div class="portal-field"><span>Azure OpenAI API key or application client secret</span><strong>Not configured</strong></div>
+          <div class="portal-field"><span>Platform storage settings</span><span>Connection strings; treat as secrets</span></div>
         </div>
       </div>
       <figcaption><strong>Checkpoint 6 - Confirm Function settings.</strong> Verify all six setting names and save the configuration.</figcaption>
@@ -420,13 +430,20 @@ az functionapp config appsettings set `
 <pre><code>cd model-mission-control-api
 npm ci
 npm test
-func azure functionapp publish $FUNCTION_APP --javascript --build remote</code></pre>
+func azure functionapp publish $FUNCTION_APP --javascript --build remote
+
+$FUNC_HOST = az resource show `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --resource-type Microsoft.Web/sites `
+  --query properties.defaultHostName -o tsv</code></pre>
     <p>Then update <code>model-mission-control/ai-config.js</code>:</p>
 <pre><code>window.MODEL_MISSION_AI = Object.freeze({
+  enabled: true,
   tenantId: "&lt;TENANT-ID&gt;",
   clientId: "&lt;WEB-APP-CLIENT-ID&gt;",
   scope: "api://&lt;API-APP-CLIENT-ID&gt;/access_as_user",
-  apiUrl: "https://&lt;FUNCTION-APP&gt;.azurewebsites.net/api/recommend",
+  apiUrl: "https://&lt;VALUE-OF-FUNC-HOST&gt;/api/recommend",
   redirectUri: window.location.hostname === "localhost"
     ? "http://localhost:8765/model-mission-control/"
     : "https://&lt;github-user&gt;.github.io/&lt;repository&gt;/model-mission-control/"
@@ -436,6 +453,15 @@ func azure functionapp publish $FUNCTION_APP --javascript --build remote</code><
       <li>When authentication settings change, update the version on the <code>ai-config.js</code> script URL so browsers load the revised configuration.</li>
       <li>The frontend uses full-page MSAL redirect authentication and resumes the assessment from session storage after sign-in.</li>
     </ul>
+    <h3>Remove development access before production approval</h3>
+    <ol>
+      <li>In the web app registration, remove <code>http://localhost:8765/model-mission-control/</code> from the SPA redirect URIs.</li>
+      <li>Remove the localhost origin from the Function setting:</li>
+    </ol>
+<pre><code>az functionapp config appsettings set `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --settings "ALLOWED_ORIGINS=$WEB_ORIGIN"</code></pre>
   </section>
 
   <h2 id="validate">10. Validate end to end</h2>
@@ -446,26 +472,36 @@ func azure functionapp publish $FUNCTION_APP --javascript --build remote</code><
       <li><strong>Anonymous denial:</strong> POST without a bearer token returns HTTP 401.</li>
       <li><strong>CORS:</strong> OPTIONS from the production origin returns 204 and that exact <code>Access-Control-Allow-Origin</code>.</li>
       <li><strong>Authentication:</strong> selecting <code>Assess with Azure AI</code> redirects the current tab to Microsoft Entra ID. After sign-in, Model Mission Control restores the selected platform and prompt, then continues the assessment automatically.</li>
-      <li><strong>Authorization:</strong> a different tenant/user is rejected even if it can authenticate.</li>
-      <li><strong>Managed identity:</strong> in a dedicated test environment, temporarily remove the managed identity's Azure OpenAI role assignment. Confirm the expected authentication failure, then restore the assignment.</li>
+      <li><strong>Authorization:</strong> sign in with a same-tenant test user whose object ID is not configured in <code>ALLOWED_USER_OBJECT_ID</code>. Submit a synthetic assessment and confirm HTTP 403. A user from another tenant should be blocked during Entra sign-in because both registrations are single tenant.</li>
+      <li><strong>Managed identity:</strong> in a dedicated test environment, temporarily remove the managed identity's Azure OpenAI role assignment. Confirm that the response contains <code>foundry_authentication_failed</code>. Restore the assignment, allow time for role propagation, and retest.</li>
       <li><strong>Eligible models:</strong> verify that the response references only model IDs included in the assessment request from the selected platform's catalog.</li>
     </ol>
-<pre><code># Expected: HTTP 401
-Invoke-WebRequest `
-  -Uri "https://$FUNCTION_APP.azurewebsites.net/api/recommend" `
-  -Method Post `
-  -ContentType "application/json" `
-  -Body '{}'
+<pre><code># Expected output: 401 in Windows PowerShell 5.1 and PowerShell 7
+try {
+  Invoke-WebRequest `
+    -Uri "https://$FUNC_HOST/api/recommend" `
+    -Method Post `
+    -ContentType "application/json" `
+    -Body '{}' `
+    -UseBasicParsing | Out-Null
+  throw "Expected HTTP 401 but the request succeeded."
+}
+catch {
+  $status = [int]$_.Exception.Response.StatusCode
+  if ($status -ne 401) { throw }
+  $status
+}
 
 # Expected: HTTP 204 plus exact production origin
 Invoke-WebRequest `
-  -Uri "https://$FUNCTION_APP.azurewebsites.net/api/recommend" `
+  -Uri "https://$FUNC_HOST/api/recommend" `
   -Method Options `
   -Headers @{
     Origin = $WEB_ORIGIN
     "Access-Control-Request-Method" = "POST"
     "Access-Control-Request-Headers" = "authorization,content-type"
-  }</code></pre>
+  } `
+  -UseBasicParsing</code></pre>
     <figure class="portal-shot">
       <div class="portal-bar">Browser acceptance test &gt; Model Mission Control</div>
       <div class="portal-body">
@@ -484,20 +520,25 @@ Invoke-WebRequest `
 
   <h2 id="troubleshoot">11. Troubleshooting and rollback</h2>
   <section class="step">
+    <p>Error codes use the <code>foundry_</code> prefix for failures while the Function calls the Azure OpenAI resource.</p>
     <table class="vars">
       <thead><tr><th>Symptom</th><th>Likely cause</th><th>Action</th></tr></thead>
       <tbody>
         <tr><td>AADSTS50011</td><td>Redirect URI mismatch</td><td>Match scheme, host, path, and trailing slash under the SPA platform.</td></tr>
         <tr><td>Login succeeds but assessment does not resume</td><td>Cached frontend or stale MSAL state</td><td>Version the config script, close stale tabs, and clear site session storage.</td></tr>
         <tr><td>HTTP 401</td><td>Missing, expired, wrong-audience, or wrong-issuer token</td><td>Check tenant, API client ID, scope URI, and MSAL configuration.</td></tr>
-        <tr><td>HTTP 403</td><td>Origin, user object ID, or delegated scope rejected</td><td>Check <code>ALLOWED_ORIGINS</code>, <code>ALLOWED_USER_OBJECT_ID</code>, and <code>scp</code>.</td></tr>
+        <tr><td>HTTP 403</td><td>Origin, user object ID, or delegated scope rejected</td><td>Check <code>ALLOWED_ORIGINS</code>, <code>ALLOWED_USER_OBJECT_ID</code>, and the token's <code>scp</code> (delegated scopes) claim.</td></tr>
         <tr><td><code>foundry_authentication_failed</code></td><td>Managed identity role missing or not propagated</td><td>Verify system identity and Cognitive Services OpenAI User at the Azure OpenAI account scope; wait for propagation.</td></tr>
         <tr><td><code>foundry_request_failed</code> with HTTP 404</td><td>Wrong endpoint or deployment name</td><td>Use the Azure OpenAI endpoint and deployment name exactly as shown in Model deployments.</td></tr>
         <tr><td>Browser CORS error</td><td>Origin not exact or preflight rejected</td><td>Do not include paths in <code>ALLOWED_ORIGINS</code>; include only scheme and host/port.</td></tr>
       </tbody>
     </table>
     <h3>Disable the feature</h3>
-    <p>Disable the Azure assessment button or remove its frontend configuration to stop users from starting new assessments. Confirm that the local advisor still works.</p>
+    <ol>
+      <li>Set <code>enabled: false</code> in <code>model-mission-control/ai-config.js</code>.</li>
+      <li>Increment the version on the <code>ai-config.js</code> script URL in <code>model-mission-control/index.html</code>, then publish the site.</li>
+      <li>Confirm that <code>Assess with Azure AI</code> is hidden and the local advisor still works.</li>
+    </ol>
     <h3>Block backend access</h3>
     <p>Follow the approved access-revocation procedure. Depending on the incident, disable the delegated API scope, remove SPA preauthorization, or remove the Function managed identity's Azure OpenAI role assignment.</p>
     <h3>Remove resources</h3>

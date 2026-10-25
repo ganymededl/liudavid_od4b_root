@@ -23,7 +23,7 @@
 </script>
 <script src="catalog-state.js"></script>
 <script src="vendor/msal-browser.min.js"></script>
-<script src="ai-config.js?v=20261024-3"></script>
+<script src="ai-config.js?v=20261025-4"></script>
 <title>Model Mission Control | Scout Model Advisor</title>
 <meta name="description" content="Paste a task, compare the available Microsoft Scout models, and get a task-specific recommendation with tradeoffs.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23b11f4b'/%3E%3Cpath d='M8 22V10h3l5 7 5-7h3v12h-4v-6l-4 5-4-5v6z' fill='white'/%3E%3C/svg%3E">
@@ -249,10 +249,10 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
   </header>
 
   <nav class="platform-nav" aria-label="Choose AI platform">
-    <a class="platform-link" data-platform="copilot" href="?v=20261024-3&amp;platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
-    <a class="platform-link" data-platform="cowork" href="?v=20261024-3&amp;platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
-    <a class="platform-link" data-platform="scout" href="?v=20261024-3&amp;platform=scout">Microsoft Scout<small>Desktop agent</small></a>
-    <a class="platform-link" data-platform="github-cli" href="?v=20261024-3&amp;platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
+    <a class="platform-link" data-platform="copilot" href="?v=20261025-4&amp;platform=copilot">Microsoft 365 Copilot<small>Work, web, and apps</small></a>
+    <a class="platform-link" data-platform="cowork" href="?v=20261025-4&amp;platform=cowork">Microsoft Copilot Cowork<small>Agentic workplace tasks</small></a>
+    <a class="platform-link" data-platform="scout" href="?v=20261025-4&amp;platform=scout">Microsoft Scout<small>Desktop agent</small></a>
+    <a class="platform-link" data-platform="github-cli" href="?v=20261025-4&amp;platform=github-cli">GitHub Copilot CLI<small>Terminal coding agent</small></a>
   </nav>
 
   <section class="hero">
@@ -310,7 +310,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
             <small class="control-help">Count everything the model must read, not just your prompt.</small>
           </div>
         </div>
-        <p class="hint"><strong>Local advisor:</strong> your prompt stays in this browser. <strong>Azure AI assessment:</strong> after DIAx sign-in, the prompt and eligible catalog are sent to the dedicated Model Mission Control API. Prompt text is not intentionally logged.</p>
+        <p class="hint" id="advisorPrivacyHint"><strong>Local advisor:</strong> your prompt stays in this browser. <strong>Azure AI assessment:</strong> after DIAx sign-in, the prompt and eligible catalog are sent to the dedicated Model Mission Control API. Prompt text is not intentionally logged.</p>
         <div class="action-row">
           <button class="button primary" id="route">Find locally</button>
           <button class="button" id="routeAi">Assess with Azure AI</button>
@@ -889,6 +889,7 @@ function renderRecommendation() {
 
 const AI_CONFIG = window.MODEL_MISSION_AI;
 const AI_PENDING_KEY = "model-mission-control.pending-ai-assessment";
+const AI_ENABLED = Boolean(AI_CONFIG?.enabled && AI_CONFIG?.apiUrl);
 let aiAuthClient;
 let aiAuthReady;
 let aiAssessmentVersion = 0;
@@ -980,6 +981,10 @@ async function acquireAiToken() {
 }
 
 async function resumeAiAssessmentAfterRedirect() {
+  if (!AI_ENABLED) {
+    sessionStorage.removeItem(AI_PENDING_KEY);
+    return;
+  }
   const saved = sessionStorage.getItem(AI_PENDING_KEY);
   if (!saved) return;
   try {
@@ -1203,6 +1208,11 @@ function renderRecipes() {
 }
 
 renderPlatformChrome();
+if (!AI_ENABLED) {
+  document.getElementById("routeAi").hidden = true;
+  document.getElementById("advisorPrivacyHint").innerHTML =
+    "<strong>Local advisor:</strong> your prompt stays in this browser. Azure AI assessment is disabled.";
+}
 
 document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
   document.querySelectorAll(".tab").forEach(item => item.setAttribute("aria-selected", "false"));
