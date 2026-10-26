@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prompt Escape Room</title>
+    <script>
+      (() => {
+        const param = new URLSearchParams(window.location.search).get("scoutTheme");
+        const theme =
+          param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
+    <style>
+      :root {
+        color-scheme: light;
+        --cp-bg: #f7f4ef;
+        --cp-bg-elevated: #fcfbf8;
+        --cp-surface: #ffffff;
+        --cp-surface-soft: #f5f5f5;
+        --cp-border: #dedede;
+        --cp-border-strong: #919191;
+        --cp-text: #242424;
+        --cp-text-muted: #5c5c5c;
+        --cp-text-soft: #6f6f6f;
+        --cp-accent: #b11f4b;
+        --cp-accent-hover: #9a1a41;
+        --cp-accent-soft: rgba(177, 31, 75, 0.08);
+        --cp-accent-fg: #ffffff;
+        --cp-success: #16a34a;
+        --cp-danger: #dc2626;
+        --cp-warning: #f59e0b;
+        --cp-link: #0078d4;
+        --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+        --cp-card-shadow: 0 0 2px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.14);
+        --cp-overlay: rgba(255, 255, 255, 0.8);
+        --cp-panel: rgba(255, 255, 255, 0.86);
+        --cp-panel-strong: rgba(255, 255, 255, 0.96);
+        --cp-sheen: rgba(255, 255, 255, 0.55);
+        --cp-highlight: rgba(177, 31, 75, 0.12);
+      }
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --cp-bg: #3d3b3a;
+        --cp-bg-elevated: #343231;
+        --cp-surface: #292929;
+        --cp-surface-soft: #2e2e2e;
+        --cp-border: #474747;
+        --cp-border-strong: #5f5f5f;
+        --cp-text: #dedede;
+        --cp-text-muted: #919191;
+        --cp-text-soft: #b0b0b0;
+        --cp-accent: #fd8ea1;
+        --cp-accent-hover: #fb7b91;
+        --cp-accent-soft: rgba(253, 142, 161, 0.14);
+        --cp-accent-fg: #1a1a1a;
+        --cp-success: #4ade80;
+        --cp-danger: #f87171;
+        --cp-warning: #fbbf24;
+        --cp-link: #4da6ff;
+        --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+        --cp-card-shadow: 0 0 2px rgba(0, 0, 0, 0.32), 0 1px 2px rgba(0, 0, 0, 0.36);
+        --cp-overlay: rgba(41, 41, 41, 0.88);
+        --cp-panel: rgba(41, 41, 41, 0.72);
+        --cp-panel-strong: rgba(41, 41, 41, 0.96);
+        --cp-sheen: rgba(255, 255, 255, 0.04);
+        --cp-highlight: rgba(253, 142, 161, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--cp-bg);
+        color: var(--cp-text);
+        font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1.5rem;
+        display: grid;
+        gap: 1rem;
+      }
+      .card {
+        background: var(--cp-surface);
+        border: 1px solid var(--cp-border);
+        border-radius: 16px;
+        box-shadow: var(--cp-card-shadow);
+        padding: 1rem;
+      }
+      h1,
+      h2,
+      h3 {
+        margin: 0 0 0.75rem 0;
+      }
+      h1 {
+        font-size: 1.625rem;
+      }
+      h2 {
+        font-size: 1.125rem;
+      }
+      .muted {
+        color: var(--cp-text-muted);
+      }
+      .roles {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      }
+      .role-btn,
+      button,
+      .chip {
+        border-radius: 0.625rem;
+        border: 1px solid var(--cp-border);
+        padding: 0.625rem 0.75rem;
+        font: inherit;
+      }
+      .role-btn,
+      button {
+        cursor: pointer;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+      }
+      .role-btn.selected {
+        background: var(--cp-accent-soft);
+        border-color: var(--cp-accent);
+      }
+      button.primary {
+        background: var(--cp-accent);
+        border-color: var(--cp-accent);
+        color: var(--cp-accent-fg);
+      }
+      button.primary:hover {
+        background: var(--cp-accent-hover);
+      }
+      .grid-2 {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: 1fr 1fr;
+      }
+      @media (max-width: 960px) {
+        .grid-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+      textarea {
+        width: 100%;
+        min-height: 180px;
+        resize: vertical;
+        background: var(--cp-bg-elevated);
+        border: 1px solid var(--cp-border);
+        color: var(--cp-text);
+        border-radius: 0.625rem;
+        padding: 0.75rem;
+        font: inherit;
+      }
+      .row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      .score {
+        font-size: 1.6rem;
+        font-weight: 700;
+      }
+      .good {
+        color: var(--cp-success);
+      }
+      .warn {
+        color: var(--cp-warning);
+      }
+      .bad {
+        color: var(--cp-danger);
+      }
+      .task {
+        border: 1px solid var(--cp-border);
+        border-radius: 0.625rem;
+        padding: 0.625rem;
+        background: var(--cp-surface-soft);
+      }
+      .task.complete {
+        border-color: var(--cp-success);
+        background: var(--cp-highlight);
+      }
+      .attempt-list {
+        margin: 0;
+        padding-left: 1rem;
+      }
+      .certificate {
+        border: 2px solid var(--cp-border-strong);
+        border-radius: 0.625rem;
+        padding: 1rem;
+        background: var(--cp-surface-soft);
+      }
+      .hidden {
+        display: none;
+      }
+      .mono {
+        font-family: Consolas, "Courier New", Courier, monospace;
+      }
+      a {
+        color: var(--cp-link);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <section class="card">
+        <h1>Prompt Escape Room</h1>
+        <p class="muted">
+          Role-based prompt practice with assignment scoring, iterations, task progression, and printable
+          completion certificate.
+        </p>
+        <div class="row">
+          <span class="chip">Elapsed: <span id="elapsed" class="mono">00:00</span></span>
+          <span class="chip">Best score: <span id="bestScore">0</span>/100</span>
+          <span class="chip">Attempts: <span id="attemptCount">0</span></span>
+          <button id="resetBtn">Reset room</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>1) Choose role / scenario</h2>
+        <div class="roles" id="roleContainer"></div>
+      </section>
+
+      <section class="grid-2">
+        <div class="card">
+          <h2>2) Assignment & tasks</h2>
+          <h3 id="assignmentTitle"></h3>
+          <p id="assignmentText" class="muted"></p>
+          <div id="taskList"></div>
+        </div>
+
+        <div class="card">
+          <h2>3) Write prompt & score</h2>
+          <label for="promptInput" class="muted">Prompt draft</label>
+          <textarea id="promptInput" placeholder="Write your prompt here..."></textarea>
+          <div class="row" style="margin-top: 0.75rem">
+            <button class="primary" id="scoreBtn">Score prompt</button>
+            <button id="nextTaskBtn">Mark task complete / next</button>
+          </div>
+          <div style="margin-top: 0.75rem">
+            <div class="score" id="scoreValue">0/100</div>
+            <div id="scoreLabel" class="muted">No attempt yet.</div>
+            <ul id="feedbackList"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>4) Iteration history</h2>
+        <ol id="attempts" class="attempt-list"></ol>
+      </section>
+
+      <section id="certificateSection" class="card hidden">
+        <h2>5) Completion certificate</h2>
+        <div class="certificate">
+          <p><strong>Prompt Escape Room Completion</strong></p>
+          <p>
+            This certifies that <span id="certLearner">Participant</span> completed the
+            <span id="certRole">Role</span> scenario.
+          </p>
+          <p>Best score: <span id="certScore"></span>/100</p>
+          <p>Total elapsed: <span id="certTime"></span></p>
+          <p>Date: <span id="certDate"></span></p>
+        </div>
+        <div class="row" style="margin-top: 0.75rem">
+          <button class="primary" id="printBtn">Print certificate</button>
+        </div>
+      </section>
+    </div>
+
+    <script>
+      const roles = [
+        {
+          id: "operations",
+          name: "Operations",
+          assignmentTitle: "Transit service disruption response",
+          assignmentText:
+            "You are operations director for a city transit agency. Prepare a response plan for a line outage with rider communications and overtime constraints.",
+          tasks: ["Draft incident summary prompt", "Draft rider communication prompt", "Draft after-action report prompt"],
+        },
+        {
+          id: "finance",
+          name: "Finance",
+          assignmentTitle: "Budget reallocation review",
+          assignmentText:
+            "You are a finance lead preparing options for a midyear budget shift while preserving grants compliance and reporting deadlines.",
+          tasks: ["Draft scenario assumptions prompt", "Draft options comparison prompt", "Draft board-ready summary prompt"],
+        },
+        {
+          id: "hr",
+          name: "HR / People",
+          assignmentTitle: "Policy rollout briefing",
+          assignmentText:
+            "You are HR preparing manager guidance for a policy change, including FAQ handling and accommodations workflow.",
+          tasks: ["Draft policy explainer prompt", "Draft manager FAQ prompt", "Draft escalation procedure prompt"],
+        },
+        {
+          id: "sales",
+          name: "Sales",
+          assignmentTitle: "Account pursuit strategy",
+          assignmentText:
+            "You are sales lead preparing a pursuit plan for a public-sector customer with procurement timeline and compliance constraints.",
+          tasks: ["Draft stakeholder mapping prompt", "Draft value-prop prompt", "Draft negotiation prep prompt"],
+        },
+        {
+          id: "education",
+          name: "Education",
+          assignmentTitle: "Campus Copilot investment pitch",
+          assignmentText:
+            "You are a university CIO preparing for a decision meeting on campus-wide Copilot adoption with budget and governance controls.",
+          tasks: ["Draft benefits framing prompt", "Draft risk mitigation prompt", "Draft implementation roadmap prompt"],
+        },
+      ];
+
+      let selectedRole = roles[0];
+      let taskIndex = 0;
+      let attempts = [];
+      let bestScore = 0;
+      const startedAt = Date.now();
+
+      const roleContainer = document.getElementById("roleContainer");
+      const assignmentTitle = document.getElementById("assignmentTitle");
+      const assignmentText = document.getElementById("assignmentText");
+      const taskList = document.getElementById("taskList");
+      const scoreValue = document.getElementById("scoreValue");
+      const scoreLabel = document.getElementById("scoreLabel");
+      const feedbackList = document.getElementById("feedbackList");
+      const attemptsEl = document.getElementById("attempts");
+      const bestScoreEl = document.getElementById("bestScore");
+      const attemptCountEl = document.getElementById("attemptCount");
+      const elapsedEl = document.getElementById("elapsed");
+      const certificateSection = document.getElementById("certificateSection");
+
+      function formatTime(ms) {
+        const sec = Math.floor(ms / 1000);
+        const m = String(Math.floor(sec / 60)).padStart(2, "0");
+        const s = String(sec % 60).padStart(2, "0");
+        return `${m}:${s}`;
+      }
+
+      function renderRoles() {
+        roleContainer.innerHTML = "";
+        for (const role of roles) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "role-btn" + (role.id === selectedRole.id ? " selected" : "");
+          btn.textContent = role.name;
+          btn.addEventListener("click", () => {
+            selectedRole = role;
+            taskIndex = 0;
+            attempts = [];
+            bestScore = 0;
+            renderAll();
+          });
+          roleContainer.appendChild(btn);
+        }
+      }
+
+      function renderAssignment() {
+        assignmentTitle.textContent = selectedRole.assignmentTitle;
+        assignmentText.textContent = selectedRole.assignmentText;
+        taskList.innerHTML = "";
+        selectedRole.tasks.forEach((task, index) => {
+          const row = document.createElement("div");
+          row.className = "task" + (index < taskIndex ? " complete" : "");
+          row.innerHTML = `<strong>Task ${index + 1}:</strong> ${task}`;
+          taskList.appendChild(row);
+        });
+      }
+
+      function evaluatePrompt(text) {
+        const value = text.trim();
+        const words = value.split(/\s+/).filter(Boolean).length;
+        let score = 10;
+        const feedback = [];
+
+        if (words >= 60) {
+          score += 20;
+          feedback.push("Good detail level for realistic output.");
+        } else {
+          feedback.push("Add more context, constraints, and success criteria.");
+        }
+
+        if (/role|you are|act as/i.test(value)) {
+          score += 15;
+        } else {
+          feedback.push("Explicitly set a role for the model.");
+        }
+
+        if (/output|format|table|bullet|json/i.test(value)) {
+          score += 20;
+        } else {
+          feedback.push("Specify output format so responses are easier to use.");
+        }
+
+        if (/constraint|must|deadline|budget|compliance|risk/i.test(value)) {
+          score += 20;
+        } else {
+          feedback.push("State constraints (budget, compliance, timeline, risk).");
+        }
+
+        if (/step|plan|first|then|next/i.test(value)) {
+          score += 15;
+        } else {
+          feedback.push("Ask for a step-by-step plan.");
+        }
+
+        if (/question|clarify|assumption/i.test(value)) {
+          score += 10;
+        } else {
+          feedback.push("Request clarifying questions or explicit assumptions.");
+        }
+
+        score = Math.min(100, Math.max(0, score));
+        return { score, feedback };
+      }
+
+      function renderAttempts() {
+        attemptsEl.innerHTML = "";
+        for (const item of attempts) {
+          const li = document.createElement("li");
+          li.textContent = `Task ${item.task + 1} • Score ${item.score}/100 • ${item.when}`;
+          attemptsEl.appendChild(li);
+        }
+      }
+
+      function maybeShowCertificate() {
+        if (taskIndex >= selectedRole.tasks.length) {
+          certificateSection.classList.remove("hidden");
+          document.getElementById("certRole").textContent = selectedRole.name;
+          document.getElementById("certScore").textContent = String(bestScore);
+          document.getElementById("certTime").textContent = formatTime(Date.now() - startedAt);
+          document.getElementById("certDate").textContent = new Date().toLocaleDateString();
+        } else {
+          certificateSection.classList.add("hidden");
+        }
+      }
+
+      function renderAll() {
+        renderRoles();
+        renderAssignment();
+        renderAttempts();
+        bestScoreEl.textContent = String(bestScore);
+        attemptCountEl.textContent = String(attempts.length);
+        scoreValue.textContent = "0/100";
+        scoreLabel.textContent = "No attempt yet.";
+        scoreLabel.className = "muted";
+        feedbackList.innerHTML = "";
+        document.getElementById("promptInput").value = "";
+        maybeShowCertificate();
+      }
+
+      document.getElementById("scoreBtn").addEventListener("click", () => {
+        const text = document.getElementById("promptInput").value;
+        const result = evaluatePrompt(text);
+        const when = new Date().toLocaleTimeString();
+        attempts.push({ task: taskIndex, score: result.score, when });
+        bestScore = Math.max(bestScore, result.score);
+        bestScoreEl.textContent = String(bestScore);
+        attemptCountEl.textContent = String(attempts.length);
+        scoreValue.textContent = `${result.score}/100`;
+        scoreLabel.textContent =
+          result.score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.";
+        scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
+        feedbackList.innerHTML = "";
+        result.feedback.forEach((line) => {
+          const li = document.createElement("li");
+          li.textContent = line;
+          feedbackList.appendChild(li);
+        });
+        renderAttempts();
+      });
+
+      document.getElementById("nextTaskBtn").addEventListener("click", () => {
+        if (taskIndex < selectedRole.tasks.length) {
+          taskIndex += 1;
+        }
+        renderAssignment();
+        maybeShowCertificate();
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        taskIndex = 0;
+        attempts = [];
+        bestScore = 0;
+        renderAll();
+      });
+
+      document.getElementById("printBtn").addEventListener("click", () => {
+        window.print();
+      });
+
+      setInterval(() => {
+        elapsedEl.textContent = formatTime(Date.now() - startedAt);
+      }, 1000);
+
+      renderAll();
+    </script>
+  </body>
+</html>
