@@ -562,7 +562,31 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
       <li><strong>403 origin_not_allowed:</strong> origin not in <code>ALLOWED_ORIGINS</code>.</li>
       <li><strong>403 forbidden:</strong> token valid but user not authorized by API logic.</li>
       <li><strong>502 foundry_request_failed:</strong> model deployment name mismatch or missing AOAI role assignment for Function identity.</li>
+      <li><strong>404 on <code>/api/escape-score</code> or <code>/api/recommend</code>:</strong> function routes did not load after deployment. Run the recovery sequence below.</li>
     </ul>
+    <h3>Recovery sequence for 404 function routes</h3>
+<pre><code># 1) Restart app service process
+az functionapp restart `
+  --resource-group $RG `
+  --name $FUNC
+
+# 2) Re-publish API code
+cd model-mission-control-api
+func azure functionapp publish $FUNC
+
+# 3) Confirm functions are indexed
+az functionapp function list `
+  --resource-group $RG `
+  --name $FUNC `
+  --query "[].name" -o tsv
+
+# Expected names include:
+#   escape-score
+#   recommend
+
+# 4) Smoke test endpoint (401 is healthy before token auth)
+curl -i https://$FUNC.azurewebsites.net/api/escape-score</code></pre>
+    <p class="note">If step 4 still returns 404, re-check Mission 6 deployment output and Mission 7 app settings, then re-publish once more.</p>
   </section>
 </main>
 <script>
