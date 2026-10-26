@@ -198,8 +198,32 @@
       .hidden {
         display: none;
       }
+      .takeaways ul {
+        margin: 0;
+        padding-left: 1.25rem;
+        display: grid;
+        gap: 0.375rem;
+      }
       .mono {
         font-family: Consolas, "Courier New", Courier, monospace;
+      }
+      .app-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+      .msft-mark {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--cp-text-muted);
+      }
+      .msft-mark svg {
+        width: 1rem;
+        height: 1rem;
+        display: inline-block;
       }
       a {
         color: var(--cp-link);
@@ -272,6 +296,31 @@
           <button class="primary" id="printBtn">Print certificate</button>
         </div>
       </section>
+
+      <section class="card takeaways">
+        <h2>Field execution actions (from SLED Weekly Frontier)</h2>
+        <ul>
+          <li>Lead with the executive mission and validate the customer's decision plan.</li>
+          <li>Customize proposals to customer priorities (for example sustainability vs. cost).</li>
+          <li>Raise blockers early so leadership can help unblock pipeline progression.</li>
+          <li>Earn conviction before proposal by aligning outcome owners first.</li>
+          <li>Make the cost of waiting visible and convert indecision into action.</li>
+          <li>Weekly discipline: restage top 3 deals, execute 3 outreach emails, submit one gold-standard proposal.</li>
+        </ul>
+      </section>
+
+      <footer class="card app-footer">
+        <span class="msft-mark">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <rect x="0" y="0" width="7" height="7" fill="#f25022"></rect>
+            <rect x="9" y="0" width="7" height="7" fill="#7fba00"></rect>
+            <rect x="0" y="9" width="7" height="7" fill="#00a4ef"></rect>
+            <rect x="9" y="9" width="7" height="7" fill="#ffb900"></rect>
+          </svg>
+          <span>Microsoft</span>
+        </span>
+        <span class="muted">Built by liudavid</span>
+      </footer>
     </div>
 
     <script>
