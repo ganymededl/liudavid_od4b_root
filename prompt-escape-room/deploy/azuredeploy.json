@@ -1,0 +1,129 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 24,
+      "metadata": {
+        "description": "Storage account name for Function App (lowercase, unique)."
+      }
+    },
+    "functionPlanName": {
+      "type": "string",
+      "defaultValue": "plan-prompt-quest"
+    },
+    "functionAppName": {
+      "type": "string",
+      "metadata": {
+        "description": "Function App name (globally unique)."
+      }
+    },
+    "aoaiAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure OpenAI account name (globally unique)."
+      }
+    }
+  },
+  "variables": {
+    "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('functionPlanName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-05-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "StorageV2",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "properties": {
+        "supportsHttpsTrafficOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2023-12-01",
+      "name": "[parameters('functionPlanName')]",
+      "location": "[parameters('location')]",
+      "kind": "linux",
+      "sku": {
+        "name": "B1",
+        "tier": "Basic"
+      },
+      "properties": {
+        "reserved": true
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-12-01",
+      "name": "[parameters('functionAppName')]",
+      "location": "[parameters('location')]",
+      "kind": "functionapp,linux",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('functionPlanName'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+      ],
+      "properties": {
+        "serverFarmId": "[variables('serverFarmId')]",
+        "siteConfig": {
+          "linuxFxVersion": "Node|22",
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "node"
+            },
+            {
+              "name": "WEBSITE_RUN_FROM_PACKAGE",
+              "value": "1"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[format('DefaultEndpointsProtocol=https;AccountName={0};AccountKey={1};EndpointSuffix={2}', parameters('storageAccountName'), listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2023-05-01').keys[0].value, environment().suffixes.storage)]"
+            }
+          ]
+        },
+        "httpsOnly": true
+      }
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "apiVersion": "2024-10-01",
+      "name": "[parameters('aoaiAccountName')]",
+      "location": "[parameters('location')]",
+      "kind": "OpenAI",
+      "sku": {
+        "name": "S0"
+      },
+      "properties": {
+        "customSubDomainName": "[parameters('aoaiAccountName')]",
+        "publicNetworkAccess": "Enabled"
+      }
+    }
+  ],
+  "outputs": {
+    "functionAppName": {
+      "type": "string",
+      "value": "[parameters('functionAppName')]"
+    },
+    "aoaiAccountName": {
+      "type": "string",
+      "value": "[parameters('aoaiAccountName')]"
+    }
+  }
+}

@@ -99,6 +99,22 @@
     .callout-red { border: 3px solid #d92d20; border-radius: 8px; padding: 8px; background: rgba(217, 45, 32, 0.06); }
     .callout-red strong { color: #d92d20; }
     .note { color: var(--cp-text-muted); font-size: 13px; }
+    .deploy-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
+    .deploy-btn {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid #0078d4;
+      background: #0078d4;
+      color: #fff;
+    }
+    .deploy-btn.secondary {
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-color: var(--cp-border-strong);
+    }
     .table-wrap { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th, td { border-bottom: 1px solid var(--cp-border); text-align: left; padding: 10px; vertical-align: top; }
@@ -122,6 +138,15 @@
     <p class="lede">Complete real-world challenges. Build better prompts.</p>
     <div class="callout"><strong>What this deploys:</strong> static web app + protected Function API + managed identity call to Azure OpenAI model deployment. No browser API keys.</div>
     <div class="callout"><strong>Naming note:</strong> this app reuses backend patterns and vendor assets from Model Mission Control, so you will see source folders named <code>model-mission-control/</code> and <code>model-mission-control-api/</code> in this Prompt Quest deployment.</div>
+  </section>
+
+  <section class="panel">
+    <h2>See the end result first</h2>
+    <p class="note">This is the experience you are deploying: scenario selection, prompt submission, AI-style scoring, and completion flow.</p>
+    <figure>
+      <img src="assets/admin-quickstart/04-scored-run-state.png" alt="Prompt Quest scored run preview">
+      <figcaption><strong>Vision preview:</strong> a participant submits a prompt and immediately sees score, feedback, and improvement history.</figcaption>
+    </figure>
   </section>
 
   <section class="panel">
@@ -160,10 +185,10 @@
   </section>
 
   <section class="panel">
-    <h2>Step-by-step build</h2>
+    <h2>Admin missions (deployment path)</h2>
 
     <div class="step">
-      <h3>1. Get source and prepare static publish</h3>
+      <h3>Mission 1. Deploy the frontend gateway</h3>
       <div class="step-grid">
         <div>
           <ol>
@@ -191,7 +216,7 @@ git push origin main</code></pre>
     </div>
 
     <div class="step">
-      <h3>2. Create API app registration (Entra)</h3>
+      <h3>Mission 2. Register the API identity (Entra)</h3>
       <div class="step-grid">
         <div>
           <ol>
@@ -221,7 +246,7 @@ git push origin main</code></pre>
     </div>
 
     <div class="step">
-      <h3>3. Create SPA app registration (Entra)</h3>
+      <h3>Mission 3. Register the web client identity (Entra)</h3>
       <div class="step-grid">
         <div>
           <ol>
@@ -249,7 +274,7 @@ http://localhost:8765/prompt-escape-room/</code></pre>
     </div>
 
     <div class="step">
-      <h3>4. Create Azure infrastructure (including Function App)</h3>
+      <h3>Mission 4. Provision Azure infrastructure</h3>
       <div class="step-grid">
         <div>
 <pre><code># Replace with your values
@@ -294,6 +319,10 @@ az cognitiveservices account create `
           <p class="note">If your standards require Consumption plan on Windows, use this variant:</p>
 <pre><code>az storage account create --name $STORAGE --resource-group $RG --location $LOCATION --sku Standard_LRS
 az functionapp create --name $FUNC --resource-group $RG --storage-account $STORAGE --consumption-plan-location $LOCATION --os-type Windows --runtime node --runtime-version 20</code></pre>
+          <div class="deploy-row">
+            <a class="deploy-btn" target="_blank" rel="noopener noreferrer" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fganymededl%2Fliudavid_od4b_root%2Fmain%2Fprompt-escape-room%2Fdeploy%2Fazuredeploy.json">Deploy to Azure</a>
+            <a class="deploy-btn secondary" target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/ganymededl/liudavid_od4b_root/main/prompt-escape-room/deploy/azuredeploy.json">View ARM template</a>
+          </div>
           <p class="note">If your organization uses a different hosting SKU or region policy, adjust accordingly.</p>
         </div>
         <div class="portal-shot">
@@ -307,7 +336,7 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
     </div>
 
     <div class="step">
-      <h3>5. Deploy model in Azure OpenAI</h3>
+      <h3>Mission 5. Awaken the model engine (AOAI deployment)</h3>
       <div class="step-grid">
         <div>
 <pre><code>az cognitiveservices account deployment create `
@@ -333,7 +362,7 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
     </div>
 
     <div class="step">
-      <h3>6. Deploy API code</h3>
+      <h3>Mission 6. Publish the scoring API</h3>
       <div class="step-grid">
         <div>
 <pre><code>cd model-mission-control-api
@@ -365,7 +394,7 @@ az functionapp deployment source config-zip `
     </div>
 
     <div class="step">
-      <h3>7. Configure Function app settings</h3>
+      <h3>Mission 7. Configure API runtime and CORS</h3>
       <div class="step-grid">
         <div>
 <pre><code>$TENANT = "&lt;tenant-id&gt;"
@@ -402,7 +431,7 @@ az functionapp cors add `
     </div>
 
     <div class="step">
-      <h3>8. Enable managed identity and assign AOAI role</h3>
+      <h3>Mission 8. Grant managed identity access</h3>
       <div class="step-grid">
         <div>
 <pre><code>az functionapp identity assign `
@@ -437,7 +466,7 @@ az role assignment create `
     </div>
 
     <div class="step">
-      <h3>9. Configure Prompt Quest frontend values</h3>
+      <h3>Mission 9. Wire frontend to your tenant</h3>
       <div class="step-grid">
         <div>
           <p>In <code>prompt-escape-room/index.html</code>, update the <code>DIAx_AI</code> object:</p>
@@ -459,7 +488,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
     </div>
 
     <div class="step">
-      <h3>10. Room authoring: edit scenarios, tasks, scoring, certificate</h3>
+      <h3>Mission 10. Author your Prompt Quest content</h3>
       <div class="step-grid">
         <div>
           <p>Admins can customize the room itself in <code>prompt-escape-room/index.html</code>:</p>
@@ -480,7 +509,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
     </div>
 
     <div class="step">
-      <h3>11. Validate and release</h3>
+      <h3>Mission 11. Final validation and launch</h3>
       <div class="step-grid">
         <div>
           <p>Run this checklist before sharing with users:</p>

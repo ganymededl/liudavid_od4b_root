@@ -185,6 +185,31 @@
         font-size: 1.6rem;
         font-weight: 700;
       }
+      .score-track {
+        width: 100%;
+        height: 0.6rem;
+        border-radius: 999px;
+        background: var(--cp-surface-soft);
+        border: 1px solid var(--cp-border);
+        overflow: hidden;
+        margin: 0.5rem 0 0.625rem;
+      }
+      .score-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.6s ease, background-color 0.4s ease;
+        background: var(--cp-danger);
+      }
+      .thinking-terminal {
+        border: 1px dashed var(--cp-border-strong);
+        border-radius: 0.625rem;
+        background: var(--cp-bg-elevated);
+        padding: 0.625rem 0.75rem;
+        margin-bottom: 0.625rem;
+      }
+      .thinking-terminal .mono {
+        font-size: 0.85rem;
+      }
       .good {
         color: var(--cp-success);
       }
@@ -208,6 +233,26 @@
         margin: 0;
         padding-left: 1rem;
       }
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+      }
+      .compare-box {
+        border: 1px solid var(--cp-border);
+        border-radius: 0.625rem;
+        padding: 0.625rem;
+        background: var(--cp-surface-soft);
+      }
+      .compare-box h3 {
+        margin: 0 0 0.4rem;
+        font-size: 0.95rem;
+      }
+      @media (max-width: 960px) {
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+      }
       .certificate {
         border: 2px solid var(--cp-border-strong);
         border-radius: 0.625rem;
@@ -216,12 +261,6 @@
       }
       .hidden {
         display: none;
-      }
-      .takeaways ul {
-        margin: 0;
-        padding-left: 1.25rem;
-        display: grid;
-        gap: 0.375rem;
       }
       .mono {
         font-family: Consolas, "Courier New", Courier, monospace;
@@ -292,7 +331,11 @@
           </div>
           <div style="margin-top: 0.75rem">
             <div class="score" id="scoreValue">0/100</div>
+            <div class="score-track"><div id="scoreFill" class="score-fill"></div></div>
             <div id="scoreLabel" class="muted">No attempt yet.</div>
+            <div id="thinkingTerminal" class="thinking-terminal hidden">
+              <div class="mono" id="thinkingText">&gt; Analyzing prompt structure...</div>
+            </div>
             <ul id="feedbackList"></ul>
           </div>
         </div>
@@ -304,9 +347,15 @@
       </section>
 
       <section class="card">
+        <h2>5) Improvement proof (before vs after)</h2>
+        <p class="muted">See what changed between your last two attempts and why your score moved.</p>
+        <div id="improvementPanel" class="muted">Submit at least two attempts to unlock the comparison view.</div>
+      </section>
+
+      <section class="card">
         <h2>AI scoring (optional)</h2>
         <p class="muted">
-          Sign in with your DIAx account to use live AI scoring. This page does not store API keys.
+          Sign in to use live AI scoring. This page does not store API keys.
         </p>
         <div class="stack">
           <label for="scoringEngine">Scoring engine</label>
@@ -320,7 +369,7 @@
       </section>
 
       <section id="certificateSection" class="card hidden">
-        <h2>5) Completion certificate</h2>
+        <h2>6) Completion certificate</h2>
         <div class="certificate">
           <p><strong>Prompt Quest Completion</strong></p>
           <p>
@@ -334,18 +383,6 @@
         <div class="row" style="margin-top: 0.75rem">
           <button class="primary" id="printBtn">Print certificate</button>
         </div>
-      </section>
-
-      <section class="card takeaways">
-        <h2>Field execution actions (from SLED Weekly Frontier)</h2>
-        <ul>
-          <li>Lead with the executive mission and validate the customer's decision plan.</li>
-          <li>Customize proposals to customer priorities (for example sustainability vs. cost).</li>
-          <li>Raise blockers early so leadership can help unblock pipeline progression.</li>
-          <li>Earn conviction before proposal by aligning outcome owners first.</li>
-          <li>Make the cost of waiting visible and convert indecision into action.</li>
-          <li>Weekly discipline: restage top 3 deals, execute 3 outreach emails, submit one gold-standard proposal.</li>
-        </ul>
       </section>
 
       <footer class="card app-footer">
@@ -468,9 +505,13 @@
       const assignmentText = document.getElementById("assignmentText");
       const taskList = document.getElementById("taskList");
       const scoreValue = document.getElementById("scoreValue");
+      const scoreFill = document.getElementById("scoreFill");
       const scoreLabel = document.getElementById("scoreLabel");
+      const thinkingTerminal = document.getElementById("thinkingTerminal");
+      const thinkingText = document.getElementById("thinkingText");
       const feedbackList = document.getElementById("feedbackList");
       const attemptsEl = document.getElementById("attempts");
+      const improvementPanel = document.getElementById("improvementPanel");
       const bestScoreEl = document.getElementById("bestScore");
       const attemptCountEl = document.getElementById("attemptCount");
       const elapsedEl = document.getElementById("elapsed");
@@ -495,6 +536,13 @@
       const FOUNDARY_PENDING_KEY = "escape-room.pending-assessment";
       let aiAuthClient;
       let aiAuthReady;
+      const thinkingLines = [
+        "Analyzing prompt structure...",
+        "Evaluating role clarity and output format...",
+        "Checking constraints and edge-case resilience...",
+        "Scoring guidance quality...",
+        "Consensus reached."
+      ];
 
       function getActiveRoles() {
         return roleCatalogByMode[selectedMode];
@@ -668,6 +716,68 @@
         });
       }
 
+      function scoreColor(score) {
+        if (score >= 85) return "var(--cp-success)";
+        if (score >= 65) return "var(--cp-warning)";
+        return "var(--cp-danger)";
+      }
+
+      function updateScoreVisual(score) {
+        scoreFill.style.width = `${Math.max(0, Math.min(100, score))}%`;
+        scoreFill.style.backgroundColor = scoreColor(score);
+      }
+
+      function buildPromptSignals(value) {
+        return {
+          role: /role|you are|act as/i.test(value),
+          format: /output|format|table|bullet|json/i.test(value),
+          constraints: /constraint|must|deadline|budget|compliance|risk/i.test(value),
+          steps: /step|plan|first|then|next/i.test(value),
+          clarify: /question|clarify|assumption/i.test(value)
+        };
+      }
+
+      function renderImprovement() {
+        if (attempts.length < 2) {
+          improvementPanel.className = "muted";
+          improvementPanel.textContent = "Submit at least two attempts to unlock the comparison view.";
+          return;
+        }
+        const previous = attempts[attempts.length - 2];
+        const current = attempts[attempts.length - 1];
+        const delta = current.score - previous.score;
+        const prevSignals = buildPromptSignals(previous.prompt);
+        const currSignals = buildPromptSignals(current.prompt);
+
+        const newlyAdded = [
+          !prevSignals.role && currSignals.role ? "Defined a clear AI role." : "",
+          !prevSignals.format && currSignals.format ? "Specified the output format." : "",
+          !prevSignals.constraints && currSignals.constraints ? "Added practical constraints." : "",
+          !prevSignals.steps && currSignals.steps ? "Asked for a step-by-step plan." : "",
+          !prevSignals.clarify && currSignals.clarify ? "Requested assumptions or clarifying questions." : ""
+        ].filter(Boolean);
+
+        const summary = newlyAdded.length
+          ? newlyAdded
+          : ["Refined phrasing and structure for clearer guidance."];
+
+        improvementPanel.className = "";
+        improvementPanel.innerHTML = `
+          <div class="compare-grid">
+            <div class="compare-box">
+              <h3>Before (${previous.score}/100)</h3>
+              <p class="muted">${previous.prompt.slice(0, 320)}${previous.prompt.length > 320 ? "..." : ""}</p>
+            </div>
+            <div class="compare-box">
+              <h3>After (${current.score}/100)</h3>
+              <p class="muted">${current.prompt.slice(0, 320)}${current.prompt.length > 320 ? "..." : ""}</p>
+            </div>
+          </div>
+          <p><strong>Score change:</strong> ${delta >= 0 ? "+" : ""}${delta} points</p>
+          <ul>${summary.map((item) => `<li>${item}</li>`).join("")}</ul>
+        `;
+      }
+
       function evaluatePromptLocal(text) {
         const value = text.trim();
         const words = value.split(/\s+/).filter(Boolean).length;
@@ -770,6 +880,7 @@
           li.textContent = `Task ${item.task + 1} • Score ${item.score}/100 • ${item.when} • ${item.source.toUpperCase()}`;
           attemptsEl.appendChild(li);
         }
+        renderImprovement();
       }
 
       function maybeShowCertificate() {
@@ -792,6 +903,7 @@
         bestScoreEl.textContent = String(bestScore);
         attemptCountEl.textContent = String(attempts.length);
         scoreValue.textContent = "0/100";
+        updateScoreVisual(0);
         scoreLabel.textContent = "No attempt yet.";
         scoreLabel.className = "muted";
         feedbackList.innerHTML = "";
@@ -809,14 +921,22 @@
 
         scoreBtn.disabled = true;
         scoreBtn.textContent = "Scoring...";
+        thinkingTerminal.classList.remove("hidden");
+        let thinkingIndex = 0;
+        thinkingText.textContent = `> ${thinkingLines[thinkingIndex]}`;
+        const thinkingTimer = setInterval(() => {
+          thinkingIndex = (thinkingIndex + 1) % thinkingLines.length;
+          thinkingText.textContent = `> ${thinkingLines[thinkingIndex]}`;
+        }, 700);
         try {
           const result = scoringEngineEl.value === "foundry" ? await evaluatePromptFoundry(text) : evaluatePromptLocal(text);
           const when = new Date().toLocaleTimeString();
-          attempts.push({ task: taskIndex, score: result.score, when, source: result.source });
+          attempts.push({ task: taskIndex, score: result.score, when, source: result.source, prompt: text.trim() });
           bestScore = Math.max(bestScore, result.score);
           bestScoreEl.textContent = String(bestScore);
           attemptCountEl.textContent = String(attempts.length);
           scoreValue.textContent = `${result.score}/100`;
+          updateScoreVisual(result.score);
           scoreLabel.textContent = result.label;
           scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
           feedbackList.innerHTML = "";
@@ -830,6 +950,8 @@
           scoreLabel.textContent = `Scoring failed: ${error.message}`;
           scoreLabel.className = "bad";
         } finally {
+          clearInterval(thinkingTimer);
+          thinkingTerminal.classList.add("hidden");
           scoreBtn.disabled = false;
           scoreBtn.textContent = "Score prompt";
         }
