@@ -401,7 +401,10 @@ az functionapp deployment source config-zip `
 $API_CLIENT = "&lt;api-app-client-id&gt;"
 $ALLOWED_USER = "&lt;user-object-id&gt;"
 $ORIGIN = "https://&lt;your-gh-user&gt;.github.io"
-$AOAI_ENDPOINT = "https://$AOAI.openai.azure.com/"
+$AOAI_ENDPOINT = az cognitiveservices account show `
+  --resource-group $RG `
+  --name $AOAI `
+  --query properties.endpoint -o tsv
 
 az functionapp config appsettings set `
   --resource-group $RG `
@@ -418,6 +421,7 @@ az functionapp cors add `
   --resource-group $RG `
   --name $FUNC `
   --allowed-origins $ORIGIN</code></pre>
+          <p class="note">Use the endpoint returned by Azure CLI exactly as-is. Some OpenAI resources include a generated suffix (for example <code>-91f5d</code>), so do not hand-build the endpoint URL.</p>
           <p class="note">Portal path: Function App &gt; API &gt; CORS. Add your GitHub Pages origin. If your security policy requires it, enable <strong>Access-Control-Allow-Credentials</strong>.</p>
         </div>
         <div class="portal-shot">
