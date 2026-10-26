@@ -74,7 +74,10 @@
       }
       body {
         margin: 0;
-        background: var(--cp-bg);
+        background:
+          radial-gradient(circle at 15% 15%, rgba(77, 166, 255, 0.16), transparent 30%),
+          radial-gradient(circle at 85% 0%, rgba(253, 142, 161, 0.16), transparent 28%),
+          var(--cp-bg);
         color: var(--cp-text);
         font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
       }
@@ -86,11 +89,16 @@
         gap: 1rem;
       }
       .card {
-        background: var(--cp-surface);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.04)), var(--cp-surface);
         border: 1px solid var(--cp-border);
         border-radius: 16px;
         box-shadow: var(--cp-card-shadow);
         padding: 1rem;
+        animation: enter 300ms ease;
+      }
+      @keyframes enter {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
       }
       h1,
       h2,
@@ -185,6 +193,14 @@
         font-size: 1.6rem;
         font-weight: 700;
       }
+      .score.glitch {
+        animation: shake 260ms linear 2;
+      }
+      @keyframes shake {
+        25% { transform: translateX(-1px); }
+        50% { transform: translateX(2px); }
+        75% { transform: translateX(-2px); }
+      }
       .score-track {
         width: 100%;
         height: 0.6rem;
@@ -259,6 +275,54 @@
         padding: 1rem;
         background: var(--cp-surface-soft);
       }
+      .cert-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      .response-grid {
+        display: grid;
+        gap: 0.75rem;
+        grid-template-columns: 1fr 1fr;
+      }
+      .response-box {
+        border: 1px solid var(--cp-border);
+        border-radius: 0.625rem;
+        background: var(--cp-surface-soft);
+        padding: 0.625rem;
+      }
+      .response-box pre {
+        margin: 0;
+        white-space: pre-wrap;
+      }
+      @media (max-width: 960px) {
+        .response-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      #confettiLayer {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 9999;
+      }
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 14px;
+        opacity: 0.95;
+        animation: fall 1200ms linear forwards;
+      }
+      @keyframes fall {
+        from {
+          transform: translateY(-20px) rotate(0deg);
+        }
+        to {
+          transform: translateY(110vh) rotate(780deg);
+          opacity: 0.1;
+        }
+      }
       .hidden {
         display: none;
       }
@@ -289,6 +353,7 @@
     </style>
   </head>
   <body>
+    <div id="confettiLayer"></div>
     <div class="container">
       <section class="card">
         <p class="muted"><a href="../prompt-engineering-public/index.html">&larr; Back to Prompt Engineering</a></p>
@@ -381,7 +446,11 @@
           <p>Date: <span id="certDate"></span></p>
         </div>
         <div class="row" style="margin-top: 0.75rem">
-          <button class="primary" id="printBtn">Print certificate</button>
+          <div class="cert-actions">
+            <button class="primary" id="printBtn">Print certificate</button>
+            <button id="downloadCertBtn">Download certificate image</button>
+            <button id="shareLinkedInBtn">Share achievement to LinkedIn</button>
+          </div>
         </div>
       </section>
 
@@ -518,6 +587,9 @@
       const certificateSection = document.getElementById("certificateSection");
       const promptInput = document.getElementById("promptInput");
       const scoreBtn = document.getElementById("scoreBtn");
+      const confettiLayer = document.getElementById("confettiLayer");
+      const downloadCertBtn = document.getElementById("downloadCertBtn");
+      const shareLinkedInBtn = document.getElementById("shareLinkedInBtn");
 
       const scoringEngineEl = document.getElementById("scoringEngine");
       const signInBtn = document.getElementById("signInBtn");
@@ -727,6 +799,27 @@
         scoreFill.style.backgroundColor = scoreColor(score);
       }
 
+      function triggerScoreFx(score) {
+        scoreValue.classList.remove("glitch");
+        if (score >= 90) {
+          const colors = ["#00a4ef", "#7fba00", "#ffb900", "#f25022", "#fd8ea1", "#4da6ff"];
+          for (let i = 0; i < 70; i++) {
+            const piece = document.createElement("span");
+            piece.className = "confetti";
+            piece.style.left = `${Math.random() * 100}vw`;
+            piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+            piece.style.animationDelay = `${Math.random() * 280}ms`;
+            piece.style.transform = `translateY(-20px) rotate(${Math.random() * 180}deg)`;
+            confettiLayer.appendChild(piece);
+            setTimeout(() => piece.remove(), 1450);
+          }
+          return;
+        }
+        if (score < 60) {
+          scoreValue.classList.add("glitch");
+        }
+      }
+
       function buildPromptSignals(value) {
         return {
           role: /role|you are|act as/i.test(value),
@@ -735,6 +828,41 @@
           steps: /step|plan|first|then|next/i.test(value),
           clarify: /question|clarify|assumption/i.test(value)
         };
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;");
+      }
+
+      function simulateAnswer(prompt, roleName, assignmentTitle) {
+        const signals = buildPromptSignals(prompt);
+        const lines = [];
+        lines.push(`Scenario: ${assignmentTitle}`);
+        if (signals.role) lines.push(`Role lens: ${roleName}`);
+        lines.push("Recommended action:");
+        if (signals.format) {
+          lines.push("- Structured output requested.");
+          lines.push("- Risks and options can be compared quickly.");
+        } else {
+          lines.push("- Broad advice returned with mixed structure.");
+        }
+        if (signals.constraints) {
+          lines.push("- Constraints applied: budget/compliance/timeline.");
+        } else {
+          lines.push("- Constraints missing; recommendations may be generic.");
+        }
+        if (signals.steps) {
+          lines.push("Execution steps: 1) Align stakeholders 2) Compare options 3) Decide 4) Pilot 5) Review.");
+        } else {
+          lines.push("Execution steps not explicitly requested.");
+        }
+        if (signals.clarify) {
+          lines.push("Open questions captured before final recommendation.");
+        }
+        return lines.join("\n");
       }
 
       function renderImprovement() {
@@ -760,22 +888,70 @@
         const summary = newlyAdded.length
           ? newlyAdded
           : ["Refined phrasing and structure for clearer guidance."];
+        const topChange = summary[0];
+        const beforeAnswer = simulateAnswer(previous.prompt, selectedRole.name, selectedRole.assignmentTitle);
+        const afterAnswer = simulateAnswer(current.prompt, selectedRole.name, selectedRole.assignmentTitle);
 
         improvementPanel.className = "";
         improvementPanel.innerHTML = `
           <div class="compare-grid">
             <div class="compare-box">
               <h3>Before (${previous.score}/100)</h3>
-              <p class="muted">${previous.prompt.slice(0, 320)}${previous.prompt.length > 320 ? "..." : ""}</p>
+              <p class="muted">${escapeHtml(previous.prompt.slice(0, 320))}${previous.prompt.length > 320 ? "..." : ""}</p>
             </div>
             <div class="compare-box">
               <h3>After (${current.score}/100)</h3>
-              <p class="muted">${current.prompt.slice(0, 320)}${current.prompt.length > 320 ? "..." : ""}</p>
+              <p class="muted">${escapeHtml(current.prompt.slice(0, 320))}${current.prompt.length > 320 ? "..." : ""}</p>
             </div>
           </div>
           <p><strong>Score change:</strong> ${delta >= 0 ? "+" : ""}${delta} points</p>
+          <p><strong>Most valuable edit:</strong> ${topChange}</p>
           <ul>${summary.map((item) => `<li>${item}</li>`).join("")}</ul>
+          <div class="response-grid">
+            <div class="response-box">
+              <h3>Before answer preview</h3>
+              <pre>${escapeHtml(beforeAnswer)}</pre>
+            </div>
+            <div class="response-box">
+              <h3>After answer preview</h3>
+              <pre>${escapeHtml(afterAnswer)}</pre>
+            </div>
+          </div>
         `;
+      }
+
+      function buildCertificateCanvas() {
+        const canvas = document.createElement("canvas");
+        canvas.width = 1600;
+        canvas.height = 1100;
+        const ctx = canvas.getContext("2d");
+        const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        gradient.addColorStop(0, "#0f172a");
+        gradient.addColorStop(1, "#1f2937");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.strokeStyle = "#38bdf8";
+        ctx.lineWidth = 8;
+        ctx.strokeRect(32, 32, canvas.width - 64, canvas.height - 64);
+
+        ctx.fillStyle = "#e2e8f0";
+        ctx.font = "700 64px Segoe UI";
+        ctx.fillText("Prompt Quest Mission Debrief", 90, 170);
+        ctx.font = "400 32px Segoe UI";
+        ctx.fillText("Completion Certificate", 90, 225);
+
+        ctx.font = "600 40px Segoe UI";
+        ctx.fillText(`Role: ${selectedRole.name} (${selectedMode.toUpperCase()})`, 90, 340);
+        ctx.fillText(`Best score: ${bestScore}/100`, 90, 420);
+        ctx.fillText(`Elapsed: ${formatTime(Date.now() - startedAt)}`, 90, 500);
+        ctx.fillText(`Date: ${new Date().toLocaleDateString()}`, 90, 580);
+
+        ctx.font = "400 28px Segoe UI";
+        ctx.fillText("Awarded for completing real-world prompt missions", 90, 690);
+        ctx.fillText("and demonstrating measurable prompt improvement.", 90, 735);
+        ctx.fillText("Built by liudavid • Microsoft", 90, 880);
+        return canvas;
       }
 
       function evaluatePromptLocal(text) {
@@ -937,6 +1113,7 @@
           attemptCountEl.textContent = String(attempts.length);
           scoreValue.textContent = `${result.score}/100`;
           updateScoreVisual(result.score);
+          triggerScoreFx(result.score);
           scoreLabel.textContent = result.label;
           scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
           feedbackList.innerHTML = "";
@@ -974,6 +1151,31 @@
 
       document.getElementById("printBtn").addEventListener("click", () => {
         window.print();
+      });
+
+      downloadCertBtn.addEventListener("click", () => {
+        if (taskIndex < selectedRole.tasks.length) {
+          scoreLabel.textContent = "Complete all tasks to unlock certificate download.";
+          scoreLabel.className = "warn";
+          return;
+        }
+        const canvas = buildCertificateCanvas();
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        link.download = `prompt-quest-certificate-${selectedMode}-${selectedRole.id}.png`;
+        link.click();
+      });
+
+      shareLinkedInBtn.addEventListener("click", () => {
+        if (taskIndex < selectedRole.tasks.length) {
+          scoreLabel.textContent = "Complete all tasks before sharing your achievement.";
+          scoreLabel.className = "warn";
+          return;
+        }
+        const message = encodeURIComponent(
+          `I completed Prompt Quest (${selectedRole.name}, ${selectedMode.toUpperCase()}) with a best score of ${bestScore}/100.`
+        );
+        window.open(`https://www.linkedin.com/feed/?shareActive=true&text=${message}`, "_blank", "noopener,noreferrer");
       });
 
       signInBtn.addEventListener("click", async () => {
