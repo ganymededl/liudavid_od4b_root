@@ -10,8 +10,8 @@
       document.documentElement.setAttribute("data-theme", theme);
     })();
   </script>
-  <title>Prompt Escape Room Admin Quickstart</title>
-  <meta name="description" content="Complete tenant-admin build guide for Prompt Escape Room with Entra sign-in and Azure AI Foundry scoring.">
+  <title>Prompt Quest Admin Quickstart</title>
+  <meta name="description" content="Complete tenant-admin build guide for Prompt Quest with Entra sign-in and Azure AI Foundry scoring.">
   <style>
     :root {
       color-scheme: light;
@@ -92,15 +92,16 @@
 <body>
 <main class="shell">
   <header class="topbar">
-    <a class="back" href="index.html">&larr; Back to Prompt Escape Room</a>
+    <a class="back" href="index.html">&larr; Back to Prompt Quest</a>
     <div class="stamp">Admin quickstart<br><strong>Updated Oct 26, 2026</strong></div>
   </header>
 
   <section class="hero">
     <div class="eyebrow">For tenant admins</div>
-    <h1>Prompt Escape Room quickstart</h1>
+    <h1>Prompt Quest quickstart</h1>
     <p class="lede">This is a full build guide: source, infrastructure, app registration, API deployment, room configuration, and release checks.</p>
     <div class="callout"><strong>What this deploys:</strong> static web app + protected Function API + managed identity call to Azure OpenAI model deployment. No browser API keys.</div>
+    <div class="callout"><strong>Naming note:</strong> this app reuses backend patterns and vendor assets from Model Mission Control, so you will see source folders named <code>model-mission-control/</code> and <code>model-mission-control-api/</code> in this Prompt Quest deployment.</div>
   </section>
 
   <section class="panel">
@@ -163,8 +164,8 @@ git push origin main</code></pre>
           <p class="note">If your Pages source is branch/folder based, configure that in repository settings before testing URLs.</p>
         </div>
         <figure>
-          <img src="assets/admin-quickstart/01-hub-page.png" alt="Prompt Engineering hub page showing Prompt Escape Room card">
-          <figcaption><strong>Checkpoint:</strong> Prompt Escape Room card is visible on your hub page.</figcaption>
+          <img src="assets/admin-quickstart/01-hub-page.png" alt="Prompt Engineering hub page showing Prompt Quest card">
+          <figcaption><strong>Checkpoint:</strong> Prompt Quest card is visible on your hub page.</figcaption>
         </figure>
       </div>
     </div>
@@ -270,6 +271,9 @@ az cognitiveservices account create `
   --kind OpenAI `
   --sku S0 `
   --custom-domain $AOAI</code></pre>
+          <p class="note">If your standards require Consumption plan on Windows, use this variant:</p>
+<pre><code>az storage account create --name $STORAGE --resource-group $RG --location $LOCATION --sku Standard_LRS
+az functionapp create --name $FUNC --resource-group $RG --storage-account $STORAGE --consumption-plan-location $LOCATION --os-type Windows --runtime node --runtime-version 20</code></pre>
           <p class="note">If your organization uses a different hosting SKU or region policy, adjust accordingly.</p>
         </div>
         <div class="portal-shot">
@@ -316,6 +320,9 @@ az cognitiveservices account create `
 npm ci
 npm test
 
+# Option A: Azure Functions Core Tools (recommended for most admins)
+func azure functionapp publish $FUNC
+
 # Package and deploy (PowerShell)
 $zip = "$env:TEMP\model-mission-control-api.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
@@ -357,12 +364,18 @@ az functionapp config appsettings set `
   ALLOWED_ORIGINS=$ORIGIN `
   ESCAPE_AOAI_ENDPOINT=$AOAI_ENDPOINT `
   ESCAPE_AOAI_DEPLOYMENT=$DEPLOYMENT</code></pre>
+<pre><code># Platform-level CORS (required for browser preflight)
+az functionapp cors add `
+  --resource-group $RG `
+  --name $FUNC `
+  --allowed-origins $ORIGIN</code></pre>
+          <p class="note">Portal path: Function App &gt; API &gt; CORS. Add your GitHub Pages origin. If your security policy requires it, enable <strong>Access-Control-Allow-Credentials</strong>.</p>
         </div>
         <div class="portal-shot">
-          <div class="portal-bar">Function App &gt; Environment variables</div>
+          <div class="portal-bar">Function App &gt; Environment variables + API &gt; CORS</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Critical value</div><div><code>ALLOWED_ORIGINS</code> = exact site origin</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> wrong origin causes <code>origin_not_allowed</code> errors.</div>
+            <div class="callout-red"><strong>Red callout:</strong> set both app-level <code>ALLOWED_ORIGINS</code> and platform CORS allow list, or browser requests will fail.</div>
           </div>
         </div>
       </div>
@@ -404,7 +417,7 @@ az role assignment create `
     </div>
 
     <div class="step">
-      <h3>9. Configure Prompt Escape Room frontend values</h3>
+      <h3>9. Configure Prompt Quest frontend values</h3>
       <div class="step-grid">
         <div>
           <p>In <code>prompt-escape-room/index.html</code>, update the <code>DIAx_AI</code> object:</p>
@@ -416,7 +429,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
           <p>Commit and push these changes so they publish to your site.</p>
         </div>
         <div class="portal-shot">
-          <div class="portal-bar">Prompt Escape Room source &gt; DIAx_AI config block</div>
+          <div class="portal-bar">Prompt Quest source &gt; DIAx_AI config block</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">scope format</div><div><code>api://&lt;api-client-id&gt;/access_as_user</code></div></div>
             <div class="callout-red"><strong>Red callout:</strong> redirect URI in code must exactly match SPA app authentication setting.</div>
@@ -440,7 +453,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
           <p class="note">This is the section that lets admins create their own room, not only copy your existing one.</p>
         </div>
         <figure>
-          <img src="assets/admin-quickstart/02-escape-room-overview.png" alt="Prompt Escape Room page with HE and SLG role options and AI scoring section">
+          <img src="assets/admin-quickstart/02-escape-room-overview.png" alt="Prompt Quest page with HE and SLG role options and AI scoring section">
           <figcaption><strong>Reference:</strong> current room structure (modes, roles, tasks, scoring, attempts, certificate).</figcaption>
         </figure>
       </div>
@@ -461,7 +474,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
           </ul>
         </div>
         <figure>
-          <img src="assets/admin-quickstart/04-scored-run-state.png" alt="Prompt Escape Room showing a scored run with feedback and attempt history">
+          <img src="assets/admin-quickstart/04-scored-run-state.png" alt="Prompt Quest showing a scored run with feedback and attempt history">
           <figcaption><strong>Checkpoint:</strong> scored run state with score + feedback + attempts visible.</figcaption>
         </figure>
       </div>
