@@ -1097,6 +1097,11 @@
 
         scoreBtn.disabled = true;
         scoreBtn.textContent = "Scoring...";
+        scoreValue.textContent = "--/100";
+        updateScoreVisual(0);
+        feedbackList.innerHTML = "";
+        scoreLabel.textContent = "Scoring in progress...";
+        scoreLabel.className = "muted";
         thinkingTerminal.classList.remove("hidden");
         let thinkingIndex = 0;
         thinkingText.textContent = `> ${thinkingLines[thinkingIndex]}`;
@@ -1124,6 +1129,9 @@
           });
           renderAttempts();
         } catch (error) {
+          scoreValue.textContent = "0/100";
+          updateScoreVisual(0);
+          feedbackList.innerHTML = "";
           scoreLabel.textContent = `Scoring failed: ${error.message}`;
           scoreLabel.className = "bad";
         } finally {
