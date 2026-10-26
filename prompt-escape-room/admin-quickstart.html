@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <title>Prompt Escape Room Admin Quickstart</title>
+  <meta name="description" content="Step-by-step admin guide to recreate Prompt Escape Room with secure DIAx + Foundry scoring.">
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-accent: #b11f4b;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-link: #0078d4;
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-link: #4da6ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    a { color: var(--cp-link); }
+    code, pre { font-family: Consolas, "Courier New", Courier, monospace; }
+    .shell {
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 64px;
+    }
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .back { text-decoration: none; font-weight: 700; color: var(--cp-text); }
+    .stamp { color: var(--cp-text-muted); font-size: 13px; text-align: right; }
+    .hero, .panel {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .eyebrow {
+      color: var(--cp-accent);
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+    }
+    h1 {
+      margin: 8px 0 12px;
+      font-size: clamp(30px, 5vw, 54px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+    h2 { margin: 26px 0 10px; font-size: 26px; letter-spacing: -.02em; }
+    h3 { margin: 0 0 10px; font-size: 19px; }
+    p, li { line-height: 1.55; }
+    .lede { color: var(--cp-text-muted); font-size: 18px; margin: 0; }
+    .callout {
+      border-left: 4px solid var(--cp-accent);
+      background: var(--cp-accent-soft);
+      padding: 12px 14px;
+      margin-top: 14px;
+    }
+    .checklist { margin: 0; padding-left: 20px; }
+    pre {
+      overflow-x: auto;
+      background: var(--cp-bg-elevated);
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+    figure {
+      margin: 0;
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 12px;
+      overflow: hidden;
+      background: var(--cp-bg-elevated);
+    }
+    figure img { width: 100%; display: block; }
+    figcaption {
+      border-top: 1px solid var(--cp-border);
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--cp-text-muted);
+    }
+    .note { color: var(--cp-text-muted); font-size: 13px; }
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <a class="back" href="../prompt-engineering-public/index.html">&larr; Back to Prompt Engineering</a>
+    <div class="stamp">Admin quickstart<br><strong>Updated Oct 26, 2026</strong></div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">For tenant admins</div>
+    <h1>Prompt Escape Room quickstart</h1>
+    <p class="lede">Use this guide to recreate the same HE/SLG Prompt Escape Room in your own tenant, with secure sign-in and Azure AI Foundry scoring.</p>
+    <div class="callout"><strong>Security model:</strong> the browser holds no Foundry API key. Users sign in, call your protected Function API, and the Function uses managed identity to call Foundry.</div>
+  </section>
+
+  <section class="panel">
+    <h2>Prerequisites (do this first)</h2>
+    <ul class="checklist">
+      <li>Azure subscription access (Contributor or Owner) for the target resource group.</li>
+      <li>Permission to create App registrations in Microsoft Entra ID.</li>
+      <li>GitHub repo where you can publish static files through GitHub Pages (or equivalent HTTPS static host).</li>
+      <li>Azure CLI installed and signed in on your workstation.</li>
+      <li>Node.js 22+ and npm installed (for tests/build validation).</li>
+      <li>Your user object ID (for <code>ALLOWED_USER_OBJECT_ID</code>) if you want to restrict scoring to specific users.</li>
+    </ul>
+    <p class="note">If you need broad access, replace single-user gating with your own group-based authorization logic before production rollout.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Step-by-step setup</h2>
+
+    <h3>1. Publish the frontend pages</h3>
+    <p>Publish these folders to your GitHub Pages repository:</p>
+    <ul class="checklist">
+      <li><code>prompt-engineering-public/</code></li>
+      <li><code>prompt-escape-room/</code></li>
+      <li><code>model-mission-control/vendor/msal-browser.min.js</code> (already referenced by the page)</li>
+    </ul>
+    <p>After publish, confirm your public entry page is live.</p>
+
+    <h3>2. Create Entra app registrations</h3>
+    <p>Create two registrations:</p>
+    <ul class="checklist">
+      <li><strong>API app</strong> (protected Function API) with scope <code>access_as_user</code>.</li>
+      <li><strong>SPA app</strong> (Prompt Escape Room frontend) with redirect URI:</li>
+    </ul>
+<pre><code>https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/
+http://localhost:8765/prompt-escape-room/</code></pre>
+    <p>Grant delegated permission for the SPA app to call your API app scope.</p>
+
+    <h3>3. Create Azure OpenAI + Function App</h3>
+<pre><code># Example variable names (replace values)
+$RG = "rg-prompt-escape-room"
+$LOCATION = "eastus2"
+$AI_ACCOUNT = "myescaperoomaoai01"
+$AI_DEPLOYMENT = "prompt-score-gpt41mini"
+$FUNC = "func-prompt-escape-room-001"
+$STORAGE = "stpromptroom001"
+
+az group create --name $RG --location $LOCATION
+
+az cognitiveservices account create `
+  --name $AI_ACCOUNT `
+  --resource-group $RG `
+  --location $LOCATION `
+  --kind OpenAI `
+  --sku S0 `
+  --custom-domain $AI_ACCOUNT
+
+# Deploy your model in the AOAI account before continuing.</code></pre>
+
+    <h3>4. Configure Function app settings</h3>
+    <p>Set the required settings in your Function App:</p>
+<pre><code>ENTRA_TENANT_ID=&lt;your-tenant-guid&gt;
+ENTRA_API_CLIENT_ID=&lt;api-app-client-id-guid&gt;
+ALLOWED_USER_OBJECT_ID=&lt;allowed-user-object-id-guid&gt;
+ALLOWED_ORIGINS=https://&lt;your-gh-user&gt;.github.io
+ESCAPE_AOAI_ENDPOINT=https://&lt;your-aoai-account&gt;.openai.azure.com/
+ESCAPE_AOAI_DEPLOYMENT=&lt;your-deployment-name&gt;</code></pre>
+
+    <h3>5. Grant managed identity access</h3>
+    <p>Enable system-assigned identity on the Function App and grant:</p>
+    <ul class="checklist">
+      <li><code>Cognitive Services OpenAI User</code> role on your AOAI resource.</li>
+    </ul>
+
+    <h3>6. Deploy API code and update frontend constants</h3>
+    <p>Deploy <code>model-mission-control-api/</code> to your Function App, then update these constants in <code>prompt-escape-room/index.html</code>:</p>
+<pre><code>tenantId: "&lt;your-tenant-id&gt;",
+clientId: "&lt;your-spa-client-id&gt;",
+scope: "api://&lt;your-api-client-id&gt;/access_as_user",
+apiUrl: "https://&lt;your-function-app&gt;.azurewebsites.net/api/escape-score",
+redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/"</code></pre>
+
+    <h3>7. Validate end-to-end</h3>
+    <ul class="checklist">
+      <li>Open Prompt Escape Room from your public hub page.</li>
+      <li>Switch scoring engine to <strong>Live AI score (Foundry)</strong>.</li>
+      <li>Sign in with your tenant account.</li>
+      <li>Submit a prompt and confirm score + feedback return successfully.</li>
+    </ul>
+  </section>
+
+  <section class="panel">
+    <h2>Screenshots (walk-through)</h2>
+    <div class="grid">
+      <figure>
+        <img src="assets/admin-quickstart/01-hub-page.png" alt="Prompt Engineering hub page showing Prompt Escape Room card">
+        <figcaption><strong>Step 1 checkpoint:</strong> Prompt Escape Room is visible from your public Prompt Engineering hub.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/admin-quickstart/02-escape-room-overview.png" alt="Prompt Escape Room page with HE and SLG role options and AI scoring section">
+        <figcaption><strong>Step 7 checkpoint:</strong> Escape Room page loads with HE/SLG modes, roles, and AI scoring section.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/admin-quickstart/03-model-mission-control-signin-pattern.png" alt="Model Mission Control page showing the DIAx sign-in pattern used for Azure AI assessment">
+        <figcaption><strong>Sign-in pattern reference:</strong> use the same DIAx Entra sign-in pattern as Model Mission Control.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Troubleshooting quick hits</h2>
+    <ul class="checklist">
+      <li><strong>AADSTS50011 redirect mismatch:</strong> add the exact deployed redirect URI to the SPA app registration.</li>
+      <li><strong>WAM 700003 device deleted:</strong> use browser-based sign-in (InPrivate) and re-register/sign-in the work account on the device.</li>
+      <li><strong>Foundry selected but still disabled:</strong> confirm sign-in succeeded and API scope consent was granted.</li>
+      <li><strong>403 origin_not_allowed:</strong> include your page origin in <code>ALLOWED_ORIGINS</code>.</li>
+      <li><strong>502 foundry_request_failed:</strong> verify AOAI deployment name and managed identity role assignment.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
