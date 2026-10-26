@@ -162,6 +162,23 @@
         flex-wrap: wrap;
         align-items: center;
       }
+      .mode-toggle {
+        margin-bottom: 0.75rem;
+      }
+      .stack {
+        display: grid;
+        gap: 0.625rem;
+      }
+      input,
+      select {
+        width: 100%;
+        background: var(--cp-bg-elevated);
+        border: 1px solid var(--cp-border);
+        color: var(--cp-text);
+        border-radius: 0.625rem;
+        padding: 0.5rem 0.625rem;
+        font: inherit;
+      }
       .score {
         font-size: 1.6rem;
         font-weight: 700;
@@ -248,6 +265,7 @@
 
       <section class="card">
         <h2>1) Choose role / scenario</h2>
+        <div class="row mode-toggle" id="modeToggle"></div>
         <div class="roles" id="roleContainer"></div>
       </section>
 
@@ -278,6 +296,30 @@
       <section class="card">
         <h2>4) Iteration history</h2>
         <ol id="attempts" class="attempt-list"></ol>
+      </section>
+
+      <section class="card">
+        <h2>Foundry scoring (optional)</h2>
+        <p class="muted">
+          Use Azure AI Foundry to score prompts with model feedback. API key is kept only in this browser session.
+        </p>
+        <div class="stack">
+          <label for="scoringEngine">Scoring engine</label>
+          <select id="scoringEngine">
+            <option value="local">Local rubric (default)</option>
+            <option value="foundry">Azure AI Foundry model</option>
+          </select>
+          <label for="foundryEndpoint">Foundry endpoint (no trailing slash)</label>
+          <input id="foundryEndpoint" placeholder="https://your-resource.openai.azure.com" />
+          <label for="foundryDeployment">Deployment name</label>
+          <input id="foundryDeployment" placeholder="gpt-4.1-mini" />
+          <label for="foundryApiVersion">API version</label>
+          <input id="foundryApiVersion" value="2024-10-21" />
+          <label for="foundryApiKey">API key</label>
+          <input id="foundryApiKey" type="password" placeholder="Paste API key for this session" />
+          <button id="saveFoundryBtn">Save Foundry settings</button>
+          <div id="foundryStatus" class="muted">Foundry disabled.</div>
+        </div>
       </section>
 
       <section id="certificateSection" class="card hidden">
@@ -324,56 +366,107 @@
     </div>
 
     <script>
-      const roles = [
-        {
-          id: "operations",
-          name: "Operations",
-          assignmentTitle: "Transit service disruption response",
-          assignmentText:
-            "You are operations director for a city transit agency. Prepare a response plan for a line outage with rider communications and overtime constraints.",
-          tasks: ["Draft incident summary prompt", "Draft rider communication prompt", "Draft after-action report prompt"],
-        },
-        {
-          id: "finance",
-          name: "Finance",
-          assignmentTitle: "Budget reallocation review",
-          assignmentText:
-            "You are a finance lead preparing options for a midyear budget shift while preserving grants compliance and reporting deadlines.",
-          tasks: ["Draft scenario assumptions prompt", "Draft options comparison prompt", "Draft board-ready summary prompt"],
-        },
-        {
-          id: "hr",
-          name: "HR / People",
-          assignmentTitle: "Policy rollout briefing",
-          assignmentText:
-            "You are HR preparing manager guidance for a policy change, including FAQ handling and accommodations workflow.",
-          tasks: ["Draft policy explainer prompt", "Draft manager FAQ prompt", "Draft escalation procedure prompt"],
-        },
-        {
-          id: "sales",
-          name: "Sales",
-          assignmentTitle: "Account pursuit strategy",
-          assignmentText:
-            "You are sales lead preparing a pursuit plan for a public-sector customer with procurement timeline and compliance constraints.",
-          tasks: ["Draft stakeholder mapping prompt", "Draft value-prop prompt", "Draft negotiation prep prompt"],
-        },
-        {
-          id: "education",
-          name: "Education",
-          assignmentTitle: "Campus Copilot investment pitch",
-          assignmentText:
-            "You are a university CIO preparing for a decision meeting on campus-wide Copilot adoption with budget and governance controls.",
-          tasks: ["Draft benefits framing prompt", "Draft risk mitigation prompt", "Draft implementation roadmap prompt"],
-        },
+      const modes = [
+        { id: "he", name: "Higher Ed" },
+        { id: "slg", name: "State & Local Government" },
       ];
 
-      let selectedRole = roles[0];
+      const roleCatalogByMode = {
+        he: [
+          {
+            id: "finance",
+            name: "Finance",
+            assignmentTitle: "University budget reallocation review",
+            assignmentText:
+              "You are university finance leadership preparing options for a midyear budget shift while preserving grant controls, academic priorities, and fiscal-year reporting deadlines.",
+            tasks: ["Draft assumptions and guardrails prompt", "Draft options-comparison prompt", "Draft provost-ready summary prompt"],
+          },
+          {
+            id: "hr",
+            name: "HR / People",
+            assignmentTitle: "Faculty and staff policy rollout",
+            assignmentText:
+              "You are HR preparing manager guidance for policy rollout across faculty and staff, including accommodations workflow and union-sensitive communication.",
+            tasks: ["Draft policy explainer prompt", "Draft manager FAQ prompt", "Draft escalation and exception-handling prompt"],
+          },
+          {
+            id: "procurement",
+            name: "Procurement",
+            assignmentTitle: "Campus sourcing and vendor review",
+            assignmentText:
+              "You are procurement lead evaluating a new AI tooling vendor with FERPA, data-retention, and contracting requirements.",
+            tasks: ["Draft requirements validation prompt", "Draft risk and compliance checklist prompt", "Draft procurement decision memo prompt"],
+          },
+          {
+            id: "it-ops",
+            name: "IT Operations",
+            assignmentTitle: "Campus-wide service deployment readiness",
+            assignmentText:
+              "You are IT operations lead preparing phased rollout for a university-wide service with identity integration, change windows, and service desk readiness.",
+            tasks: ["Draft dependency mapping prompt", "Draft phased rollout prompt", "Draft incident-response prompt"],
+          },
+          {
+            id: "compliance",
+            name: "Compliance & Risk",
+            assignmentTitle: "University AI governance checkpoint",
+            assignmentText:
+              "You are governance and risk lead preparing controls review for AI usage, with auditability, policy conformance, and student-data protections.",
+            tasks: ["Draft control-mapping prompt", "Draft risk register prompt", "Draft audit-ready evidence prompt"],
+          },
+        ],
+        slg: [
+          {
+            id: "finance",
+            name: "Finance",
+            assignmentTitle: "Agency budget reallocation review",
+            assignmentText:
+              "You are a public-sector finance lead preparing options for budget reallocation while preserving grants compliance, procurement limits, and reporting milestones.",
+            tasks: ["Draft assumptions and constraints prompt", "Draft funding-options prompt", "Draft executive decision brief prompt"],
+          },
+          {
+            id: "hr",
+            name: "HR / People",
+            assignmentTitle: "Workforce policy rollout",
+            assignmentText:
+              "You are HR preparing manager guidance for policy updates across agencies, including labor considerations, accommodations, and frontline communications.",
+            tasks: ["Draft policy communication prompt", "Draft frontline manager FAQ prompt", "Draft escalation pathway prompt"],
+          },
+          {
+            id: "procurement",
+            name: "Procurement",
+            assignmentTitle: "Public procurement package readiness",
+            assignmentText:
+              "You are procurement lead preparing solicitation and evaluation criteria for AI services under state and local contracting rules.",
+            tasks: ["Draft sourcing requirements prompt", "Draft evaluation rubric prompt", "Draft award recommendation prompt"],
+          },
+          {
+            id: "it-ops",
+            name: "IT Operations",
+            assignmentTitle: "Agency deployment operations plan",
+            assignmentText:
+              "You are IT operations lead planning deployment with identity controls, network boundaries, and continuity-of-operations requirements.",
+            tasks: ["Draft readiness assessment prompt", "Draft deployment runbook prompt", "Draft rollback and continuity prompt"],
+          },
+          {
+            id: "compliance",
+            name: "Compliance & Risk",
+            assignmentTitle: "Policy, records, and oversight readiness",
+            assignmentText:
+              "You are compliance lead preparing records-retention, transparency, and audit guidance for AI-enabled agency workflows.",
+            tasks: ["Draft policy alignment prompt", "Draft records and retention prompt", "Draft oversight briefing prompt"],
+          },
+        ],
+      };
+
+      let selectedMode = "he";
+      let selectedRole = roleCatalogByMode[selectedMode][0];
       let taskIndex = 0;
       let attempts = [];
       let bestScore = 0;
       const startedAt = Date.now();
 
       const roleContainer = document.getElementById("roleContainer");
+      const modeToggle = document.getElementById("modeToggle");
       const assignmentTitle = document.getElementById("assignmentTitle");
       const assignmentText = document.getElementById("assignmentText");
       const taskList = document.getElementById("taskList");
@@ -385,6 +478,28 @@
       const attemptCountEl = document.getElementById("attemptCount");
       const elapsedEl = document.getElementById("elapsed");
       const certificateSection = document.getElementById("certificateSection");
+      const promptInput = document.getElementById("promptInput");
+      const scoreBtn = document.getElementById("scoreBtn");
+
+      const scoringEngineEl = document.getElementById("scoringEngine");
+      const foundryEndpointEl = document.getElementById("foundryEndpoint");
+      const foundryDeploymentEl = document.getElementById("foundryDeployment");
+      const foundryApiVersionEl = document.getElementById("foundryApiVersion");
+      const foundryApiKeyEl = document.getElementById("foundryApiKey");
+      const foundryStatusEl = document.getElementById("foundryStatus");
+      const saveFoundryBtn = document.getElementById("saveFoundryBtn");
+
+      const foundryStorageKeys = {
+        engine: "escape-room-scoring-engine",
+        endpoint: "escape-room-foundry-endpoint",
+        deployment: "escape-room-foundry-deployment",
+        apiVersion: "escape-room-foundry-apiversion",
+        apiKey: "escape-room-foundry-apikey",
+      };
+
+      function getActiveRoles() {
+        return roleCatalogByMode[selectedMode];
+      }
 
       function formatTime(ms) {
         const sec = Math.floor(ms / 1000);
@@ -393,9 +508,64 @@
         return `${m}:${s}`;
       }
 
+      function loadFoundrySettings() {
+        scoringEngineEl.value = localStorage.getItem(foundryStorageKeys.engine) || "local";
+        foundryEndpointEl.value =
+          localStorage.getItem(foundryStorageKeys.endpoint) || "https://diaxpromptroomaoai01-91f5d.openai.azure.com";
+        foundryDeploymentEl.value = localStorage.getItem(foundryStorageKeys.deployment) || "prompt-score-gpt41mini";
+        foundryApiVersionEl.value = localStorage.getItem(foundryStorageKeys.apiVersion) || "2024-10-21";
+        foundryApiKeyEl.value = sessionStorage.getItem(foundryStorageKeys.apiKey) || "";
+        renderFoundryStatus();
+      }
+
+      function saveFoundrySettings() {
+        localStorage.setItem(foundryStorageKeys.engine, scoringEngineEl.value);
+        localStorage.setItem(foundryStorageKeys.endpoint, foundryEndpointEl.value.trim());
+        localStorage.setItem(foundryStorageKeys.deployment, foundryDeploymentEl.value.trim());
+        localStorage.setItem(foundryStorageKeys.apiVersion, foundryApiVersionEl.value.trim());
+        sessionStorage.setItem(foundryStorageKeys.apiKey, foundryApiKeyEl.value.trim());
+        renderFoundryStatus("Foundry settings saved.");
+      }
+
+      function renderFoundryStatus(extra) {
+        const engine = scoringEngineEl.value;
+        if (engine !== "foundry") {
+          foundryStatusEl.textContent = "Foundry disabled.";
+          return;
+        }
+        const configured =
+          foundryEndpointEl.value.trim() &&
+          foundryDeploymentEl.value.trim() &&
+          foundryApiVersionEl.value.trim() &&
+          foundryApiKeyEl.value.trim();
+        foundryStatusEl.textContent = configured
+          ? extra || "Foundry enabled. Scoring uses your configured Azure model."
+          : "Foundry selected. Complete endpoint, deployment, API version, and API key.";
+      }
+
+      function renderModeToggle() {
+        modeToggle.innerHTML = "";
+        for (const mode of modes) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "role-btn" + (mode.id === selectedMode ? " selected" : "");
+          btn.textContent = mode.name;
+          btn.addEventListener("click", () => {
+            if (selectedMode === mode.id) return;
+            selectedMode = mode.id;
+            selectedRole = getActiveRoles()[0];
+            taskIndex = 0;
+            attempts = [];
+            bestScore = 0;
+            renderAll();
+          });
+          modeToggle.appendChild(btn);
+        }
+      }
+
       function renderRoles() {
         roleContainer.innerHTML = "";
-        for (const role of roles) {
+        for (const role of getActiveRoles()) {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "role-btn" + (role.id === selectedRole.id ? " selected" : "");
@@ -423,7 +593,7 @@
         });
       }
 
-      function evaluatePrompt(text) {
+      function evaluatePromptLocal(text) {
         const value = text.trim();
         const words = value.split(/\s+/).filter(Boolean).length;
         let score = 10;
@@ -467,14 +637,75 @@
         }
 
         score = Math.min(100, Math.max(0, score));
-        return { score, feedback };
+        return { score, feedback, label: score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.", source: "local" };
+      }
+
+      async function evaluatePromptFoundry(text) {
+        const endpoint = foundryEndpointEl.value.trim().replace(/\/$/, "");
+        const deployment = foundryDeploymentEl.value.trim();
+        const apiVersion = foundryApiVersionEl.value.trim();
+        const apiKey = foundryApiKeyEl.value.trim();
+        if (!endpoint || !deployment || !apiVersion || !apiKey) {
+          throw new Error("Foundry settings are incomplete.");
+        }
+
+        const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`;
+        const rubricPrompt =
+          "You are a prompt-quality evaluator. Return strict JSON only with this schema: " +
+          "{\"score\": number 0-100, \"label\": string, \"feedback\": string[]}. " +
+          "Score by role clarity, constraints, output format, stepwise reasoning, and assumptions/questions.";
+        const contextPrompt = [
+          `Mode: ${selectedMode.toUpperCase()}`,
+          `Role: ${selectedRole.name}`,
+          `Assignment: ${selectedRole.assignmentTitle}`,
+          `Assignment details: ${selectedRole.assignmentText}`,
+          `Learner prompt: ${text}`,
+        ].join("\n");
+
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "api-key": apiKey,
+          },
+          body: JSON.stringify({
+            messages: [
+              { role: "system", content: rubricPrompt },
+              { role: "user", content: contextPrompt },
+            ],
+          }),
+        });
+        if (!response.ok) {
+          throw new Error(`Foundry request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const payload = await response.json();
+        const raw = payload?.choices?.[0]?.message?.content;
+        if (!raw) {
+          throw new Error("Foundry returned no model content.");
+        }
+
+        let parsed;
+        try {
+          parsed = JSON.parse(raw);
+        } catch {
+          const match = raw.match(/\{[\s\S]*\}/);
+          if (!match) throw new Error("Foundry returned non-JSON scoring output.");
+          parsed = JSON.parse(match[0]);
+        }
+
+        const numericScore = Number(parsed.score);
+        const score = Number.isFinite(numericScore) ? Math.min(100, Math.max(0, Math.round(numericScore))) : 0;
+        const feedback = Array.isArray(parsed.feedback) ? parsed.feedback.map(String).slice(0, 6) : ["No structured feedback returned."];
+        const label = parsed.label ? String(parsed.label) : score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.";
+        return { score, feedback, label, source: "foundry" };
       }
 
       function renderAttempts() {
         attemptsEl.innerHTML = "";
         for (const item of attempts) {
           const li = document.createElement("li");
-          li.textContent = `Task ${item.task + 1} • Score ${item.score}/100 • ${item.when}`;
+          li.textContent = `Task ${item.task + 1} • Score ${item.score}/100 • ${item.when} • ${item.source.toUpperCase()}`;
           attemptsEl.appendChild(li);
         }
       }
@@ -482,7 +713,7 @@
       function maybeShowCertificate() {
         if (taskIndex >= selectedRole.tasks.length) {
           certificateSection.classList.remove("hidden");
-          document.getElementById("certRole").textContent = selectedRole.name;
+          document.getElementById("certRole").textContent = `${selectedRole.name} (${selectedMode.toUpperCase()})`;
           document.getElementById("certScore").textContent = String(bestScore);
           document.getElementById("certTime").textContent = formatTime(Date.now() - startedAt);
           document.getElementById("certDate").textContent = new Date().toLocaleDateString();
@@ -492,6 +723,7 @@
       }
 
       function renderAll() {
+        renderModeToggle();
         renderRoles();
         renderAssignment();
         renderAttempts();
@@ -501,29 +733,44 @@
         scoreLabel.textContent = "No attempt yet.";
         scoreLabel.className = "muted";
         feedbackList.innerHTML = "";
-        document.getElementById("promptInput").value = "";
+        promptInput.value = "";
         maybeShowCertificate();
       }
 
-      document.getElementById("scoreBtn").addEventListener("click", () => {
-        const text = document.getElementById("promptInput").value;
-        const result = evaluatePrompt(text);
-        const when = new Date().toLocaleTimeString();
-        attempts.push({ task: taskIndex, score: result.score, when });
-        bestScore = Math.max(bestScore, result.score);
-        bestScoreEl.textContent = String(bestScore);
-        attemptCountEl.textContent = String(attempts.length);
-        scoreValue.textContent = `${result.score}/100`;
-        scoreLabel.textContent =
-          result.score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.";
-        scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
-        feedbackList.innerHTML = "";
-        result.feedback.forEach((line) => {
-          const li = document.createElement("li");
-          li.textContent = line;
-          feedbackList.appendChild(li);
-        });
-        renderAttempts();
+      scoreBtn.addEventListener("click", async () => {
+        const text = promptInput.value;
+        if (!text.trim()) {
+          scoreLabel.textContent = "Enter a prompt before scoring.";
+          scoreLabel.className = "bad";
+          return;
+        }
+
+        scoreBtn.disabled = true;
+        scoreBtn.textContent = "Scoring...";
+        try {
+          const result = scoringEngineEl.value === "foundry" ? await evaluatePromptFoundry(text) : evaluatePromptLocal(text);
+          const when = new Date().toLocaleTimeString();
+          attempts.push({ task: taskIndex, score: result.score, when, source: result.source });
+          bestScore = Math.max(bestScore, result.score);
+          bestScoreEl.textContent = String(bestScore);
+          attemptCountEl.textContent = String(attempts.length);
+          scoreValue.textContent = `${result.score}/100`;
+          scoreLabel.textContent = result.label;
+          scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
+          feedbackList.innerHTML = "";
+          result.feedback.forEach((line) => {
+            const li = document.createElement("li");
+            li.textContent = line;
+            feedbackList.appendChild(li);
+          });
+          renderAttempts();
+        } catch (error) {
+          scoreLabel.textContent = `Scoring failed: ${error.message}`;
+          scoreLabel.className = "bad";
+        } finally {
+          scoreBtn.disabled = false;
+          scoreBtn.textContent = "Score prompt";
+        }
       });
 
       document.getElementById("nextTaskBtn").addEventListener("click", () => {
@@ -545,10 +792,16 @@
         window.print();
       });
 
+      saveFoundryBtn.addEventListener("click", () => {
+        saveFoundrySettings();
+      });
+      scoringEngineEl.addEventListener("change", () => renderFoundryStatus());
+
       setInterval(() => {
         elapsedEl.textContent = formatTime(Date.now() - startedAt);
       }, 1000);
 
+      loadFoundrySettings();
       renderAll();
     </script>
   </body>
