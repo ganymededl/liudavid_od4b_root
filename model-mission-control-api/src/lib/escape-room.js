@@ -44,9 +44,12 @@ export function validateEscapeScoreRequest(body) {
 function buildEscapeScoringRequest(input, deploymentName) {
   const systemPrompt = [
     "You are Prompt Escape Room evaluator.",
-    "Evaluate learner prompts for back-office scenario quality.",
-    "Score the learner prompt 0-100 across role clarity, constraints, output shape, actionability, and clarifying assumptions.",
-    "Provide concise coaching feedback.",
+    "Evaluate learner prompts for Higher Ed and State/Local Government back-office scenarios.",
+    "Score the learner prompt from 0-100 based on role definition, requested result format, practical limits, step-by-step usability, and handling of unknowns.",
+    "Write feedback in plain everyday language for non-technical users.",
+    "Avoid jargon like role clarity, constraints, output shape, actionability, assumptions, optimization, or model behavior.",
+    "Return 2-5 short coaching bullets. Each bullet must be one sentence and directly tell the learner what to improve next.",
+    "Set label to one of: Excellent prompt., Great start., Good draft; needs a few fixes., Needs more detail.",
     "Return strict JSON only in this format:",
     "{\"score\": number 0-100, \"label\": string, \"feedback\": string[] }"
   ].join(" ");

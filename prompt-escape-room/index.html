@@ -253,8 +253,8 @@
       <section class="card">
         <h1>Prompt Escape Room</h1>
         <p class="muted">
-          Role-based prompt practice with assignment scoring, iterations, task progression, and printable
-          completion certificate.
+          Practice writing better prompts for real Higher Ed and State/Local Government work.
+          You will get a score, clear suggestions, and a completion certificate.
         </p>
         <div class="row">
           <span class="chip">Elapsed: <span id="elapsed" class="mono">00:00</span></span>
@@ -265,21 +265,21 @@
       </section>
 
       <section class="card">
-        <h2>1) Choose role / scenario</h2>
+        <h2>1) Pick your scenario</h2>
         <div class="row mode-toggle" id="modeToggle"></div>
         <div class="roles" id="roleContainer"></div>
       </section>
 
       <section class="grid-2">
         <div class="card">
-          <h2>2) Assignment & tasks</h2>
+          <h2>2) Your assignment</h2>
           <h3 id="assignmentTitle"></h3>
           <p id="assignmentText" class="muted"></p>
           <div id="taskList"></div>
         </div>
 
         <div class="card">
-          <h2>3) Write prompt & score</h2>
+          <h2>3) Write your prompt and get feedback</h2>
           <label for="promptInput" class="muted">Prompt draft</label>
           <textarea id="promptInput" placeholder="Write your prompt here..."></textarea>
           <div class="row" style="margin-top: 0.75rem">
@@ -295,24 +295,23 @@
       </section>
 
       <section class="card">
-        <h2>4) Iteration history</h2>
+        <h2>4) Your attempts</h2>
         <ol id="attempts" class="attempt-list"></ol>
       </section>
 
       <section class="card">
-        <h2>Foundry scoring (optional)</h2>
+        <h2>AI scoring (optional)</h2>
         <p class="muted">
-          Use DIAx sign-in (same pattern as Model Mission Control) to score prompts through a managed-identity
-          backend. No API keys are embedded in this site.
+          Sign in with your DIAx account to use live AI scoring. This page does not store API keys.
         </p>
         <div class="stack">
           <label for="scoringEngine">Scoring engine</label>
           <select id="scoringEngine">
-            <option value="local">Local rubric (default)</option>
-            <option value="foundry">Azure AI Foundry model</option>
+            <option value="local">Quick local score (default)</option>
+            <option value="foundry">Live AI score (Foundry)</option>
           </select>
-          <button id="signInBtn">Sign in to DIAx tenant</button>
-          <div id="foundryStatus" class="muted">Foundry disabled.</div>
+          <button id="signInBtn">Sign in with DIAx</button>
+          <div id="foundryStatus" class="muted">AI scoring is off.</div>
         </div>
       </section>
 
@@ -606,13 +605,13 @@
         const hasAccount = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
         if (engine !== "foundry") {
           foundryStatusEl.textContent = hasAccount
-            ? "Signed in to DIAx. Switch scoring engine to 'Azure AI Foundry model' to enable model scoring."
-            : "Foundry disabled.";
+            ? "You're signed in. Switch the scoring engine to 'Live AI score (Foundry)' when you want AI feedback."
+            : "AI scoring is off.";
           return;
         }
         foundryStatusEl.textContent = hasAccount
-          ? "Foundry enabled with DIAx sign-in via managed identity backend."
-          : "Foundry selected. Sign in to DIAx tenant to use model scoring.";
+          ? "AI scoring is on."
+          : "You picked AI scoring. Sign in with DIAx to continue.";
       }
 
       function renderModeToggle() {
@@ -673,43 +672,44 @@
 
         if (words >= 60) {
           score += 20;
-          feedback.push("Good detail level for realistic output.");
+          feedback.push("Good detail. The AI has enough context to give a useful answer.");
         } else {
-          feedback.push("Add more context, constraints, and success criteria.");
+          feedback.push("Add a little more detail: what you need, limits, and what 'good' looks like.");
         }
 
         if (/role|you are|act as/i.test(value)) {
           score += 15;
         } else {
-          feedback.push("Explicitly set a role for the model.");
+          feedback.push("Tell the AI who it should act like (for example, policy analyst or finance lead).");
         }
 
         if (/output|format|table|bullet|json/i.test(value)) {
           score += 20;
         } else {
-          feedback.push("Specify output format so responses are easier to use.");
+          feedback.push("Ask for a clear format (for example, bullet list or table).");
         }
 
         if (/constraint|must|deadline|budget|compliance|risk/i.test(value)) {
           score += 20;
         } else {
-          feedback.push("State constraints (budget, compliance, timeline, risk).");
+          feedback.push("Add your limits (budget, deadline, policy, or risk rules).");
         }
 
         if (/step|plan|first|then|next/i.test(value)) {
           score += 15;
         } else {
-          feedback.push("Ask for a step-by-step plan.");
+          feedback.push("Ask for steps, not just ideas.");
         }
 
         if (/question|clarify|assumption/i.test(value)) {
           score += 10;
         } else {
-          feedback.push("Request clarifying questions or explicit assumptions.");
+          feedback.push("Ask the AI to list assumptions or ask follow-up questions if anything is unclear.");
         }
 
         score = Math.min(100, Math.max(0, score));
-        return { score, feedback, label: score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.", source: "local" };
+        const label = score >= 90 ? "Excellent prompt." : score >= 80 ? "Great start." : score >= 65 ? "Good draft; needs a few fixes." : "Needs more detail.";
+        return { score, feedback, label, source: "local" };
       }
 
       async function evaluatePromptFoundry(text) {
@@ -747,7 +747,15 @@
         const numericScore = Number(payload.score);
         const score = Number.isFinite(numericScore) ? Math.min(100, Math.max(0, Math.round(numericScore))) : 0;
         const feedback = Array.isArray(payload.feedback) ? payload.feedback.map(String).slice(0, 6) : ["No structured feedback returned."];
-        const label = payload.label ? String(payload.label) : score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.";
+        const label = payload.label
+          ? String(payload.label)
+          : score >= 90
+            ? "Excellent prompt."
+            : score >= 80
+              ? "Great start."
+              : score >= 65
+                ? "Good draft; needs a few fixes."
+                : "Needs more detail.";
         return { score, feedback, label, source: "foundry" };
       }
 
