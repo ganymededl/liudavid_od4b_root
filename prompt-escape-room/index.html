@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Prompt Escape Room</title>
+    <script src="../model-mission-control/vendor/msal-browser.min.js"></script>
     <script>
       (() => {
         const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -301,7 +302,8 @@
       <section class="card">
         <h2>Foundry scoring (optional)</h2>
         <p class="muted">
-          Use Azure AI Foundry to score prompts with model feedback. API key is kept only in this browser session.
+          Use DIAx sign-in (same pattern as Model Mission Control) to score prompts through a managed-identity
+          backend. No API keys are embedded in this site.
         </p>
         <div class="stack">
           <label for="scoringEngine">Scoring engine</label>
@@ -309,15 +311,7 @@
             <option value="local">Local rubric (default)</option>
             <option value="foundry">Azure AI Foundry model</option>
           </select>
-          <label for="foundryEndpoint">Foundry endpoint (no trailing slash)</label>
-          <input id="foundryEndpoint" placeholder="https://your-resource.openai.azure.com" />
-          <label for="foundryDeployment">Deployment name</label>
-          <input id="foundryDeployment" placeholder="gpt-4.1-mini" />
-          <label for="foundryApiVersion">API version</label>
-          <input id="foundryApiVersion" value="2024-10-21" />
-          <label for="foundryApiKey">API key</label>
-          <input id="foundryApiKey" type="password" placeholder="Paste API key for this session" />
-          <button id="saveFoundryBtn">Save Foundry settings</button>
+          <button id="signInBtn">Sign in to DIAx tenant</button>
           <div id="foundryStatus" class="muted">Foundry disabled.</div>
         </div>
       </section>
@@ -482,20 +476,22 @@
       const scoreBtn = document.getElementById("scoreBtn");
 
       const scoringEngineEl = document.getElementById("scoringEngine");
-      const foundryEndpointEl = document.getElementById("foundryEndpoint");
-      const foundryDeploymentEl = document.getElementById("foundryDeployment");
-      const foundryApiVersionEl = document.getElementById("foundryApiVersion");
-      const foundryApiKeyEl = document.getElementById("foundryApiKey");
+      const signInBtn = document.getElementById("signInBtn");
       const foundryStatusEl = document.getElementById("foundryStatus");
-      const saveFoundryBtn = document.getElementById("saveFoundryBtn");
-
-      const foundryStorageKeys = {
-        engine: "escape-room-scoring-engine",
-        endpoint: "escape-room-foundry-endpoint",
-        deployment: "escape-room-foundry-deployment",
-        apiVersion: "escape-room-foundry-apiversion",
-        apiKey: "escape-room-foundry-apikey",
-      };
+      const foundryStorageKeys = { engine: "escape-room-scoring-engine" };
+      const DIAx_AI = Object.freeze({
+        tenantId: "6d5898fd-dcaf-43c3-b0ea-f9be4a9da1a5",
+        clientId: "597be53b-a64b-4759-8469-34379db497d8",
+        scope: "api://2d2b1294-b9d7-4cd0-aa96-2b615cc0a7fb/access_as_user",
+        apiUrl: "https://func-model-mission-control-eecd0085.azurewebsites.net/api/escape-score",
+        redirectUri:
+          window.location.hostname === "localhost"
+            ? "http://localhost:8765/prompt-escape-room/"
+            : "https://ganymededl.github.io/liudavid_od4b_root/prompt-escape-room/",
+      });
+      const FOUNDARY_PENDING_KEY = "escape-room.pending-assessment";
+      let aiAuthClient;
+      let aiAuthReady;
 
       function getActiveRoles() {
         return roleCatalogByMode[selectedMode];
@@ -510,37 +506,111 @@
 
       function loadFoundrySettings() {
         scoringEngineEl.value = localStorage.getItem(foundryStorageKeys.engine) || "local";
-        foundryEndpointEl.value =
-          localStorage.getItem(foundryStorageKeys.endpoint) || "https://diaxpromptroomaoai01-91f5d.openai.azure.com";
-        foundryDeploymentEl.value = localStorage.getItem(foundryStorageKeys.deployment) || "prompt-score-gpt41mini";
-        foundryApiVersionEl.value = localStorage.getItem(foundryStorageKeys.apiVersion) || "2024-10-21";
-        foundryApiKeyEl.value = sessionStorage.getItem(foundryStorageKeys.apiKey) || "";
         renderFoundryStatus();
       }
 
-      function saveFoundrySettings() {
-        localStorage.setItem(foundryStorageKeys.engine, scoringEngineEl.value);
-        localStorage.setItem(foundryStorageKeys.endpoint, foundryEndpointEl.value.trim());
-        localStorage.setItem(foundryStorageKeys.deployment, foundryDeploymentEl.value.trim());
-        localStorage.setItem(foundryStorageKeys.apiVersion, foundryApiVersionEl.value.trim());
-        sessionStorage.setItem(foundryStorageKeys.apiKey, foundryApiKeyEl.value.trim());
-        renderFoundryStatus("Foundry settings saved.");
+      async function initializeAiAuth() {
+        if (aiAuthReady) return aiAuthReady;
+        if (!window.msal) {
+          throw new Error("The DIAx sign-in component is unavailable.");
+        }
+        aiAuthClient = new msal.PublicClientApplication({
+          auth: {
+            clientId: DIAx_AI.clientId,
+            authority: `https://login.microsoftonline.com/${DIAx_AI.tenantId}`,
+            redirectUri: DIAx_AI.redirectUri,
+            navigateToLoginRequestUrl: true,
+          },
+          cache: {
+            cacheLocation: "sessionStorage",
+            storeAuthStateInCookie: false,
+          },
+        });
+        aiAuthReady = (async () => {
+          await aiAuthClient.initialize();
+          const response = await aiAuthClient.handleRedirectPromise();
+          if (response?.account) aiAuthClient.setActiveAccount(response.account);
+          return response;
+        })();
+        return aiAuthReady;
       }
 
-      function renderFoundryStatus(extra) {
+      function savePendingAssessment() {
+        sessionStorage.setItem(
+          FOUNDARY_PENDING_KEY,
+          JSON.stringify({
+            returnUrl: window.location.href,
+            prompt: promptInput.value,
+            selectedMode,
+            selectedRoleId: selectedRole.id,
+          })
+        );
+      }
+
+      async function acquireAiToken() {
+        const redirectResponse = await initializeAiAuth();
+        if (redirectResponse?.accessToken) return redirectResponse.accessToken;
+        const account = aiAuthClient.getActiveAccount() || aiAuthClient.getAllAccounts()[0];
+        if (!account) {
+          savePendingAssessment();
+          foundryStatusEl.textContent = "Redirecting to DIAx sign-in...";
+          await aiAuthClient.loginRedirect({
+            scopes: [DIAx_AI.scope],
+            prompt: "select_account",
+            redirectStartPage: window.location.href,
+          });
+          throw new Error("DIAx sign-in redirect did not complete.");
+        }
+        try {
+          const token = await aiAuthClient.acquireTokenSilent({
+            scopes: [DIAx_AI.scope],
+            account,
+          });
+          return token.accessToken;
+        } catch (error) {
+          if (!(error instanceof msal.InteractionRequiredAuthError)) throw error;
+          savePendingAssessment();
+          foundryStatusEl.textContent = "Redirecting to DIAx to refresh access...";
+          await aiAuthClient.acquireTokenRedirect({
+            scopes: [DIAx_AI.scope],
+            account,
+            redirectStartPage: window.location.href,
+          });
+          throw new Error("DIAx token refresh redirect did not complete.");
+        }
+      }
+
+      function restorePendingState() {
+        const saved = sessionStorage.getItem(FOUNDARY_PENDING_KEY);
+        if (!saved) return;
+        try {
+          const pending = JSON.parse(saved);
+          if (pending.selectedMode && roleCatalogByMode[pending.selectedMode]) {
+            selectedMode = pending.selectedMode;
+            selectedRole =
+              roleCatalogByMode[selectedMode].find((role) => role.id === pending.selectedRoleId) ||
+              roleCatalogByMode[selectedMode][0];
+            renderAll();
+          }
+          if (typeof pending.prompt === "string") {
+            promptInput.value = pending.prompt;
+          }
+        } finally {
+          sessionStorage.removeItem(FOUNDARY_PENDING_KEY);
+        }
+      }
+
+      function renderFoundryStatus() {
         const engine = scoringEngineEl.value;
+        localStorage.setItem(foundryStorageKeys.engine, engine);
         if (engine !== "foundry") {
           foundryStatusEl.textContent = "Foundry disabled.";
           return;
         }
-        const configured =
-          foundryEndpointEl.value.trim() &&
-          foundryDeploymentEl.value.trim() &&
-          foundryApiVersionEl.value.trim() &&
-          foundryApiKeyEl.value.trim();
-        foundryStatusEl.textContent = configured
-          ? extra || "Foundry enabled. Scoring uses your configured Azure model."
-          : "Foundry selected. Complete endpoint, deployment, API version, and API key.";
+        const hasAccount = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
+        foundryStatusEl.textContent = hasAccount
+          ? "Foundry enabled with DIAx sign-in via managed identity backend."
+          : "Foundry selected. Sign in to DIAx tenant to use model scoring.";
       }
 
       function renderModeToggle() {
@@ -641,63 +711,41 @@
       }
 
       async function evaluatePromptFoundry(text) {
-        const endpoint = foundryEndpointEl.value.trim().replace(/\/$/, "");
-        const deployment = foundryDeploymentEl.value.trim();
-        const apiVersion = foundryApiVersionEl.value.trim();
-        const apiKey = foundryApiKeyEl.value.trim();
-        if (!endpoint || !deployment || !apiVersion || !apiKey) {
-          throw new Error("Foundry settings are incomplete.");
-        }
-
-        const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${encodeURIComponent(apiVersion)}`;
-        const rubricPrompt =
-          "You are a prompt-quality evaluator. Return strict JSON only with this schema: " +
-          "{\"score\": number 0-100, \"label\": string, \"feedback\": string[]}. " +
-          "Score by role clarity, constraints, output format, stepwise reasoning, and assumptions/questions.";
-        const contextPrompt = [
-          `Mode: ${selectedMode.toUpperCase()}`,
-          `Role: ${selectedRole.name}`,
-          `Assignment: ${selectedRole.assignmentTitle}`,
-          `Assignment details: ${selectedRole.assignmentText}`,
-          `Learner prompt: ${text}`,
-        ].join("\n");
-
-        const response = await fetch(url, {
+        const accessToken = await acquireAiToken();
+        const response = await fetch(DIAx_AI.apiUrl, {
           method: "POST",
           headers: {
+            Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
-            "api-key": apiKey,
           },
           body: JSON.stringify({
-            messages: [
-              { role: "system", content: rubricPrompt },
-              { role: "user", content: contextPrompt },
-            ],
+            mode: selectedMode,
+            role: {
+              id: selectedRole.id,
+              name: selectedRole.name,
+            },
+            assignment: {
+              title: selectedRole.assignmentTitle,
+              details: selectedRole.assignmentText,
+            },
+            taskIndex,
+            learnerPrompt: text,
           }),
         });
         if (!response.ok) {
-          throw new Error(`Foundry request failed: ${response.status} ${response.statusText}`);
+          let message = `Foundry request failed: ${response.status} ${response.statusText}`;
+          try {
+            const payload = await response.json();
+            if (payload?.message) message = payload.message;
+          } catch {}
+          throw new Error(message);
         }
 
         const payload = await response.json();
-        const raw = payload?.choices?.[0]?.message?.content;
-        if (!raw) {
-          throw new Error("Foundry returned no model content.");
-        }
-
-        let parsed;
-        try {
-          parsed = JSON.parse(raw);
-        } catch {
-          const match = raw.match(/\{[\s\S]*\}/);
-          if (!match) throw new Error("Foundry returned non-JSON scoring output.");
-          parsed = JSON.parse(match[0]);
-        }
-
-        const numericScore = Number(parsed.score);
+        const numericScore = Number(payload.score);
         const score = Number.isFinite(numericScore) ? Math.min(100, Math.max(0, Math.round(numericScore))) : 0;
-        const feedback = Array.isArray(parsed.feedback) ? parsed.feedback.map(String).slice(0, 6) : ["No structured feedback returned."];
-        const label = parsed.label ? String(parsed.label) : score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.";
+        const feedback = Array.isArray(payload.feedback) ? payload.feedback.map(String).slice(0, 6) : ["No structured feedback returned."];
+        const label = payload.label ? String(payload.label) : score >= 80 ? "Challenge passed. Improve again or move forward." : "Needs revision.";
         return { score, feedback, label, source: "foundry" };
       }
 
@@ -792,8 +840,14 @@
         window.print();
       });
 
-      saveFoundryBtn.addEventListener("click", () => {
-        saveFoundrySettings();
+      signInBtn.addEventListener("click", async () => {
+        try {
+          await acquireAiToken();
+        } catch (error) {
+          if (!/redirect/i.test(error.message)) {
+            foundryStatusEl.textContent = `Sign-in failed: ${error.message}`;
+          }
+        }
       });
       scoringEngineEl.addEventListener("change", () => renderFoundryStatus());
 
@@ -802,6 +856,14 @@
       }, 1000);
 
       loadFoundrySettings();
+      initializeAiAuth()
+        .then(() => {
+          restorePendingState();
+          renderFoundryStatus();
+        })
+        .catch(() => {
+          renderFoundryStatus();
+        });
       renderAll();
     </script>
   </body>
