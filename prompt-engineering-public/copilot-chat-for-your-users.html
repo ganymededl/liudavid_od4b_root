@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Copilot Chat for your users - Quickstart</title>
+<meta name="description" content="Admin quickstart and demo gallery for Copilot Chat adoption sites.">
+<style>
+:root{--bg:#060609;--t1:#f4f4f8;--t2:rgba(244,244,248,.72);--tile:rgba(10,10,16,.58);--border:rgba(255,255,255,.09);--c1:#7b61ff;--c2:#00d9ff}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--t1);font-family:"Segoe UI",Aptos,Calibri,sans-serif}
+a{color:#c8bcff}
+a:hover{color:#e2dcff}
+.wrap{max-width:1140px;margin:auto;padding:44px 24px 68px}
+.back{font-size:11px;color:var(--t2);font-weight:600;text-decoration:none}
+.back:hover{color:var(--c2)}
+.hero{margin-top:22px;padding:20px;border:1px solid var(--border);border-radius:16px;background:linear-gradient(180deg,rgba(123,97,255,.18),rgba(0,0,0,0))}
+.hero-logo{display:inline-grid;grid-template-columns:18px 18px;gap:3px;vertical-align:middle}
+.hero-logo span{display:block;width:18px;height:18px}
+.hero-logo .r{background:#f25022}.hero-logo .g{background:#7fba00}.hero-logo .b{background:#00a4ef}.hero-logo .y{background:#ffb900}
+h1{font-size:30px;line-height:1.2;margin:10px 0}
+.sub{color:var(--t2);font-size:13px;line-height:1.6;max-width:900px}
+.quickstart{margin-top:20px;border:1px solid var(--border);border-radius:14px;background:var(--tile);padding:20px}
+.quickstart h2,.gallery h2{font-size:20px;margin:0 0 10px}
+.quickstart h3{font-size:14px;margin:14px 0 8px;color:#ddd4ff}
+.quickstart ol,.quickstart ul{margin:0;padding-left:20px;color:var(--t2);line-height:1.55;font-size:12.5px}
+.quickstart li{margin:4px 0}
+.gallery{margin-top:22px}
+.site-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.site-card{border:1px solid var(--border);border-radius:14px;background:var(--tile);padding:12px}
+.shot{display:block;width:100%;height:190px;object-fit:cover;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:#0d0d12}
+.site-card h3{margin:10px 0 5px;font-size:14px}
+.site-card p{margin:0 0 8px;color:var(--t2);font-size:11.5px;line-height:1.5}
+.url{display:inline-block;font-size:11px;word-break:break-all}
+.footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
+.foot-mark{display:flex;gap:10px;align-items:center;color:var(--t2);font-size:11px}
+.foot-logo{display:grid;grid-template-columns:10px 10px;gap:2px}
+.foot-logo span{display:block;width:10px;height:10px}
+.foot-logo .r{background:#f25022}.foot-logo .g{background:#7fba00}.foot-logo .b{background:#00a4ef}.foot-logo .y{background:#ffb900}
+@media (max-width:760px){
+  .wrap{padding:30px 14px 58px}
+  h1{font-size:24px}
+  .shot{height:160px}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="index.html">&larr; Back to Prompt Engineering</a>
+
+  <section class="hero">
+    <div class="hero-logo" aria-label="Microsoft logo"><span class="r"></span><span class="g"></span><span class="b"></span><span class="y"></span></div>
+    <h1>Copilot Chat for your users</h1>
+    <p class="sub">Quickstart for admins to build and host a self-contained Copilot Chat prompt site for adoption. This condenses the runbook into prerequisites plus step-by-step execution that works for GitHub Pages, intranet, or SharePoint Online hosting.</p>
+  </section>
+
+  <section class="quickstart">
+    <h2>Quickstart (HTML) - admin path</h2>
+    <h3>Prerequisites</h3>
+    <ul>
+      <li>Copilot Cowork access and a new project folder.</li>
+      <li>Two short MP4 background clips and five short MP3 audio cues.</li>
+      <li>Four target back-office roles and three repetitive daily tasks per role.</li>
+      <li>Reference layout from the NYPD or MTA Copilot Chat prompt experience.</li>
+    </ul>
+    <h3>Build steps</h3>
+    <ol>
+      <li>Create one flat folder and keep media at root with <code>index.html</code> (no nested media path).</li>
+      <li>Generate a single self-contained HTML page with inline CSS/JS and local media references.</li>
+      <li>Add role cards, prompt cards, copy buttons, and clear "what it does" + "good output" notes.</li>
+      <li>Include light/EDU mode toggle, background video cross-fade, and user-triggered classroom audio controls.</li>
+      <li>Test locally: cross-fade timing, copy-to-clipboard, mode persistence, and no external network dependencies.</li>
+      <li>Publish path:
+        <ul>
+          <li>SharePoint/intranet: upload folder, open in browser context where autoplay controls are allowed.</li>
+          <li>GitHub Pages or Azure Static Web Apps: publish static assets for easy org sharing.</li>
+          <li>If media is large: move media files to Azure Blob and replace with SAS URLs.</li>
+        </ul>
+      </li>
+      <li>Operationalize: keep version notes in footer and set reminders before SAS expiry if used.</li>
+    </ol>
+  </section>
+
+  <section class="gallery">
+    <h2>Reference adoption sites (URLs + screenshots)</h2>
+    <div class="site-grid">
+      <article class="site-card">
+        <img class="shot" src="assets/copilot-chat/cpchat-site-1-educopilotchat.png" alt="Screenshot of Edu Copilot Chat site">
+        <h3>1. EDU Copilot Chat</h3>
+        <p>Education prompt generation experience for back-office workflows.</p>
+        <a class="url" href="https://ganymededl.github.io/educopilotchat/" target="_blank" rel="noopener noreferrer">https://ganymededl.github.io/educopilotchat/</a>
+      </article>
+      <article class="site-card">
+        <img class="shot" src="assets/copilot-chat/cpchat-site-2-azurestaticapps.png" alt="Screenshot of Azure Static Web Apps hosted Copilot Chat site">
+        <h3>2. MTA Copilot Chat (Azure Static Web Apps)</h3>
+        <p>Static-hosted variant that can be mirrored to SPO/intranet delivery paths.</p>
+        <a class="url" href="https://witty-hill-0bbbc0a10.7.azurestaticapps.net/" target="_blank" rel="noopener noreferrer">https://witty-hill-0bbbc0a10.7.azurestaticapps.net/</a>
+      </article>
+      <article class="site-card">
+        <img class="shot" src="assets/copilot-chat/cpchat-site-3-nypd.png" alt="Screenshot of NYPD Copilot Chat demo site">
+        <h3>3. NYPD Copilot Chat Demo</h3>
+        <p>Role-based prompt demo used as a practical structure baseline.</p>
+        <a class="url" href="https://ganymededl.github.io/nypd_copilotdemo/" target="_blank" rel="noopener noreferrer">https://ganymededl.github.io/nypd_copilotdemo/</a>
+      </article>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="foot-mark">
+      <span class="foot-logo" aria-label="Microsoft logo"><span class="r"></span><span class="g"></span><span class="b"></span><span class="y"></span></span>
+      <span>Microsoft</span>
+    </div>
+    <div class="foot-mark">
+      <span>Built by liudavid</span>
+    </div>
+  </footer>
+</main>
+</body>
+</html>
