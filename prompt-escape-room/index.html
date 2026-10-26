@@ -603,11 +603,13 @@
       function renderFoundryStatus() {
         const engine = scoringEngineEl.value;
         localStorage.setItem(foundryStorageKeys.engine, engine);
+        const hasAccount = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
         if (engine !== "foundry") {
-          foundryStatusEl.textContent = "Foundry disabled.";
+          foundryStatusEl.textContent = hasAccount
+            ? "Signed in to DIAx. Switch scoring engine to 'Azure AI Foundry model' to enable model scoring."
+            : "Foundry disabled.";
           return;
         }
-        const hasAccount = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
         foundryStatusEl.textContent = hasAccount
           ? "Foundry enabled with DIAx sign-in via managed identity backend."
           : "Foundry selected. Sign in to DIAx tenant to use model scoring.";
@@ -843,6 +845,9 @@
       signInBtn.addEventListener("click", async () => {
         try {
           await acquireAiToken();
+          scoringEngineEl.value = "foundry";
+          localStorage.setItem(foundryStorageKeys.engine, "foundry");
+          renderFoundryStatus();
         } catch (error) {
           if (!/redirect/i.test(error.message)) {
             foundryStatusEl.textContent = `Sign-in failed: ${error.message}`;
