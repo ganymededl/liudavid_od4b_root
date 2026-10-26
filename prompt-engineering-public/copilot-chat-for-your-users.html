@@ -37,6 +37,15 @@ h1{font-size:30px;line-height:1.2;margin:10px 0}
 .source-card h3{margin:10px 0 5px;font-size:13px}
 .source-card p{margin:0 0 8px;color:var(--t2);font-size:11.5px;line-height:1.5}
 .mini{font-size:10.5px;color:var(--t2);margin-top:6px}
+.shot-wrap{position:relative}
+.callout{
+  position:absolute;
+  border:3px solid #ff2b2b;
+  border-radius:6px;
+  box-shadow:0 0 0 2px rgba(255,43,43,.2);
+  pointer-events:none;
+}
+.asset-list{margin:8px 0 0;padding-left:18px;color:var(--t2);font-size:11.5px;line-height:1.45}
 .footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
 .foot-mark{display:flex;gap:10px;align-items:center;color:var(--t2);font-size:11px}
 .foot-logo{display:grid;grid-template-columns:10px 10px;gap:2px}
@@ -129,31 +138,87 @@ h1{font-size:30px;line-height:1.2;margin:10px 0}
     <h2>Where admins can grab royalty-free media (video + audio)</h2>
     <div class="source-grid">
       <article class="source-card">
-        <img class="shot" src="assets/copilot-chat/media-source-pexels-video.png" alt="Pexels classroom videos listing">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/media-source-pexels-video.png" alt="Pexels classroom videos listing">
+          <span class="callout" style="left:6%;top:14%;width:88%;height:70%;"></span>
+        </div>
         <h3>Pexels (video)</h3>
         <p>Free stock classroom footage to source short ambient MP4 clips.</p>
         <a class="url" href="https://www.pexels.com/search/videos/classroom/" target="_blank" rel="noopener noreferrer">https://www.pexels.com/search/videos/classroom/</a>
       </article>
       <article class="source-card">
-        <img class="shot" src="assets/copilot-chat/media-source-mixkit-video.png" alt="Mixkit school videos listing">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/media-source-mixkit-video.png" alt="Mixkit school videos listing">
+          <span class="callout" style="left:8%;top:18%;width:84%;height:64%;"></span>
+        </div>
         <h3>Mixkit (video)</h3>
         <p>Another free source for education/school B-roll video loops.</p>
         <a class="url" href="https://mixkit.co/free-stock-video/school/" target="_blank" rel="noopener noreferrer">https://mixkit.co/free-stock-video/school/</a>
       </article>
       <article class="source-card">
-        <img class="shot" src="assets/copilot-chat/media-source-pixabay-audio.png" alt="Pixabay classroom audio search">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/media-source-pixabay-audio.png" alt="Pixabay classroom audio search">
+          <span class="callout" style="left:6%;top:16%;width:88%;height:66%;"></span>
+        </div>
         <h3>Pixabay Music/SFX (audio)</h3>
         <p>Free MP3 music and effects for bell/chatter/typing ambient cues.</p>
         <a class="url" href="https://pixabay.com/music/search/classroom/" target="_blank" rel="noopener noreferrer">https://pixabay.com/music/search/classroom/</a>
       </article>
       <article class="source-card">
-        <img class="shot" src="assets/copilot-chat/media-source-freesound-audio.png" alt="Freesound classroom audio search">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/media-source-freesound-audio.png" alt="Freesound classroom audio search">
+          <span class="callout" style="left:8%;top:20%;width:84%;height:58%;"></span>
+        </div>
         <h3>Freesound (audio)</h3>
         <p>Community audio library for classroom sound effects and alternates.</p>
         <a class="url" href="https://freesound.org/search/?q=classroom" target="_blank" rel="noopener noreferrer">https://freesound.org/search/?q=classroom</a>
       </article>
     </div>
     <p class="mini">Always verify each asset's license terms and attribution requirements before distributing inside your organization.</p>
+  </section>
+
+  <section class="gallery">
+    <h2>Exact asset packs used in your 3 published demos</h2>
+    <div class="source-grid">
+      <article class="source-card">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/assets-edu-github.png" alt="GitHub file list for edu-copilotchat media assets">
+          <span class="callout" style="left:7%;top:32%;width:86%;height:56%;"></span>
+        </div>
+        <h3>EDU site asset pack</h3>
+        <a class="url" href="https://github.com/ganymededl/liudavid_od4b_root/tree/main/demos-public/edu-copilotchat" target="_blank" rel="noopener noreferrer">github.com/.../demos-public/edu-copilotchat</a>
+        <ul class="asset-list">
+          <li>edu_prof.mp4, edu_students.mp4</li>
+          <li>edu_bell.mp3, edu_laugh.mp3, edu_crowdteenager.mp3</li>
+          <li>edu_keyboard.mp3, edu_pencil.mp3</li>
+        </ul>
+      </article>
+      <article class="source-card">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/assets-mta-github.png" alt="GitHub file list for mta-copilot media assets">
+          <span class="callout" style="left:7%;top:32%;width:86%;height:56%;"></span>
+        </div>
+        <h3>MTA site asset pack</h3>
+        <a class="url" href="https://github.com/ganymededl/liudavid_od4b_root/tree/main/demos-public/mta-copilot" target="_blank" rel="noopener noreferrer">github.com/.../demos-public/mta-copilot</a>
+        <ul class="asset-list">
+          <li>mta-bg.mp4</li>
+          <li>mta1_standclear.mp3 ... mta7_subwayinterior.mp3</li>
+        </ul>
+      </article>
+      <article class="source-card">
+        <div class="shot-wrap">
+          <img class="shot" src="assets/copilot-chat/assets-nypd-github.png" alt="GitHub file list for nypd copilot demo media assets">
+          <span class="callout" style="left:7%;top:32%;width:86%;height:56%;"></span>
+        </div>
+        <h3>NYPD site asset pack</h3>
+        <a class="url" href="https://github.com/ganymededl/liudavid_od4b_root/tree/main/demos-public/nypd-copilotchat/nypd_copilotdemo" target="_blank" rel="noopener noreferrer">github.com/.../demos-public/nypd-copilotchat/nypd_copilotdemo</a>
+        <ul class="asset-list">
+          <li>NYPDOfflineHTML_AudioBG_web.mp4</li>
+          <li>nypdlo.mp3</li>
+        </ul>
+      </article>
+    </div>
+    <p class="mini">Red square callouts highlight the media file area so admins can spot the exact assets faster.</p>
   </section>
 
   <footer class="footer">
