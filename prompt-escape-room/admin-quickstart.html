@@ -112,6 +112,57 @@
       gap: 16px;
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     }
+    .step {
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 14px 0;
+      background: var(--cp-surface-soft);
+    }
+    .step-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 14px;
+      align-items: start;
+    }
+    .portal-shot {
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--cp-bg-elevated);
+    }
+    .portal-bar {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--cp-text-muted);
+      border-bottom: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+    }
+    .portal-body {
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      font-size: 13px;
+    }
+    .portal-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px;
+      align-items: center;
+    }
+    .portal-label {
+      color: var(--cp-text-muted);
+      font-size: 12px;
+    }
+    .callout-red {
+      border: 3px solid #d92d20;
+      border-radius: 8px;
+      padding: 8px;
+      background: rgba(217, 45, 32, 0.06);
+    }
+    .callout-red strong {
+      color: #d92d20;
+    }
     figure {
       margin: 0;
       border: 1px solid var(--cp-border-strong);
@@ -126,13 +177,18 @@
       font-size: 13px;
       color: var(--cp-text-muted);
     }
+    @media (max-width: 920px) {
+      .step-grid {
+        grid-template-columns: 1fr;
+      }
+    }
     .note { color: var(--cp-text-muted); font-size: 13px; }
   </style>
 </head>
 <body>
 <main class="shell">
   <header class="topbar">
-    <a class="back" href="../prompt-engineering-public/index.html">&larr; Back to Prompt Engineering</a>
+    <a class="back" href="index.html">&larr; Back to Prompt Escape Room</a>
     <div class="stamp">Admin quickstart<br><strong>Updated Oct 26, 2026</strong></div>
   </header>
 
@@ -159,26 +215,85 @@
   <section class="panel">
     <h2>Step-by-step setup</h2>
 
-    <h3>1. Publish the frontend pages</h3>
-    <p>Publish these folders to your GitHub Pages repository:</p>
-    <ul class="checklist">
-      <li><code>prompt-engineering-public/</code></li>
-      <li><code>prompt-escape-room/</code></li>
-      <li><code>model-mission-control/vendor/msal-browser.min.js</code> (already referenced by the page)</li>
-    </ul>
-    <p>After publish, confirm your public entry page is live.</p>
+    <div class="step">
+      <h3>1. Publish the frontend pages</h3>
+      <div class="step-grid">
+        <div>
+          <p>Publish these folders to your GitHub Pages repository:</p>
+          <ul class="checklist">
+            <li><code>prompt-engineering-public/</code></li>
+            <li><code>prompt-escape-room/</code></li>
+            <li><code>model-mission-control/vendor/msal-browser.min.js</code> (already referenced by the page)</li>
+          </ul>
+          <p>Checkpoint: open the public Prompt Engineering page and confirm the Escape Room card appears.</p>
+        </div>
+        <figure>
+          <img src="assets/admin-quickstart/01-hub-page.png" alt="Prompt Engineering hub page showing Prompt Escape Room card">
+          <figcaption><strong>Screenshot:</strong> card visible on public hub.</figcaption>
+        </figure>
+      </div>
+    </div>
 
-    <h3>2. Create Entra app registrations</h3>
-    <p>Create two registrations:</p>
-    <ul class="checklist">
-      <li><strong>API app</strong> (protected Function API) with scope <code>access_as_user</code>.</li>
-      <li><strong>SPA app</strong> (Prompt Escape Room frontend) with redirect URI:</li>
-    </ul>
+    <div class="step">
+      <h3>2. Create the API app registration (click-by-click)</h3>
+      <div class="step-grid">
+        <div>
+          <ol>
+            <li>Go to <strong>portal.azure.com</strong> &rarr; <strong>Microsoft Entra ID</strong>.</li>
+            <li>Open <strong>App registrations</strong> &rarr; <strong>New registration</strong>.</li>
+            <li>Name it (example: <code>prompt-escape-room-api</code>).</li>
+            <li>Choose <strong>Accounts in this organizational directory only</strong>.</li>
+            <li>Click <strong>Register</strong>.</li>
+            <li>Open <strong>Expose an API</strong> &rarr; set an <strong>Application ID URI</strong> (format: <code>api://&lt;api-client-id&gt;</code>).</li>
+            <li>Click <strong>Add a scope</strong> and create <code>access_as_user</code>.</li>
+          </ol>
+          <p class="note">Copy the <strong>Application (client) ID</strong> and new scope URI. You will need both later.</p>
+        </div>
+        <div class="portal-shot">
+          <div class="portal-bar">Azure portal &gt; Microsoft Entra ID &gt; App registrations &gt; New registration</div>
+          <div class="portal-body">
+            <div class="portal-row"><div class="portal-label">Name</div><div>prompt-escape-room-api</div></div>
+            <div class="portal-row"><div class="portal-label">Supported account types</div><div>Single tenant</div></div>
+            <div class="callout-red"><strong>Red callout:</strong> After register, open <strong>Expose an API</strong> and add scope <code>access_as_user</code>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <h3>3. Create the SPA app registration (click-by-click)</h3>
+      <div class="step-grid">
+        <div>
+          <ol>
+            <li>In <strong>App registrations</strong>, click <strong>New registration</strong>.</li>
+            <li>Name it (example: <code>prompt-escape-room-spa</code>).</li>
+            <li>Choose single-tenant account type.</li>
+            <li>Register the app, then open <strong>Authentication</strong>.</li>
+            <li>Click <strong>Add a platform</strong> &rarr; <strong>Single-page application</strong>.</li>
+            <li>Add both redirect URIs:</li>
+          </ol>
 <pre><code>https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/
 http://localhost:8765/prompt-escape-room/</code></pre>
-    <p>Grant delegated permission for the SPA app to call your API app scope.</p>
+          <ol start="7">
+            <li>Open <strong>API permissions</strong> &rarr; <strong>Add a permission</strong> &rarr; <strong>My APIs</strong> &rarr; choose your API app.</li>
+            <li>Select delegated scope <code>access_as_user</code>, then grant admin consent.</li>
+          </ol>
+        </div>
+        <div class="portal-shot">
+          <div class="portal-bar">Azure portal &gt; App registrations &gt; SPA app &gt; Authentication</div>
+          <div class="portal-body">
+            <div class="portal-row"><div class="portal-label">Platform</div><div>Single-page application</div></div>
+            <div class="callout-red"><strong>Red callout:</strong> Add both redirect URIs exactly (including trailing slash).</div>
+            <div class="portal-row"><div class="portal-label">API permissions</div><div>Add delegated scope <code>access_as_user</code> from your API app.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <h3>3. Create Azure OpenAI + Function App</h3>
+    <div class="step">
+      <h3>4. Create Azure OpenAI + Function App</h3>
+      <div class="step-grid">
+        <div>
 <pre><code># Example variable names (replace values)
 $RG = "rg-prompt-escape-room"
 $LOCATION = "eastus2"
@@ -198,54 +313,115 @@ az cognitiveservices account create `
   --custom-domain $AI_ACCOUNT
 
 # Deploy your model in the AOAI account before continuing.</code></pre>
+          <p>Checkpoint: the AOAI deployment is in <strong>Succeeded</strong> state.</p>
+        </div>
+        <div class="portal-shot">
+          <div class="portal-bar">Azure portal &gt; Azure OpenAI &gt; Model deployments</div>
+          <div class="portal-body">
+            <div class="portal-row"><div class="portal-label">Deployment</div><div>prompt-score-gpt41mini</div></div>
+            <div class="portal-row"><div class="portal-label">Model</div><div>gpt-4.1-mini (or your selected model)</div></div>
+            <div class="callout-red"><strong>Red callout:</strong> ensure deployment status is <strong>Succeeded</strong>.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <h3>4. Configure Function app settings</h3>
-    <p>Set the required settings in your Function App:</p>
+    <div class="step">
+      <h3>5. Configure Function app settings</h3>
+      <div class="step-grid">
+        <div>
+          <p>In your Function App, open <strong>Settings &gt; Environment variables</strong> and add:</p>
 <pre><code>ENTRA_TENANT_ID=&lt;your-tenant-guid&gt;
 ENTRA_API_CLIENT_ID=&lt;api-app-client-id-guid&gt;
 ALLOWED_USER_OBJECT_ID=&lt;allowed-user-object-id-guid&gt;
 ALLOWED_ORIGINS=https://&lt;your-gh-user&gt;.github.io
 ESCAPE_AOAI_ENDPOINT=https://&lt;your-aoai-account&gt;.openai.azure.com/
 ESCAPE_AOAI_DEPLOYMENT=&lt;your-deployment-name&gt;</code></pre>
+          <p>Save and restart the Function App.</p>
+        </div>
+        <div class="portal-shot">
+          <div class="portal-bar">Azure portal &gt; Function App &gt; Environment variables</div>
+          <div class="portal-body">
+            <div class="portal-row"><div class="portal-label">Setting name</div><div>ENTRA_TENANT_ID ... ESCAPE_AOAI_DEPLOYMENT</div></div>
+            <div class="callout-red"><strong>Red callout:</strong> <code>ALLOWED_ORIGINS</code> must include your exact site origin.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <h3>5. Grant managed identity access</h3>
-    <p>Enable system-assigned identity on the Function App and grant:</p>
-    <ul class="checklist">
-      <li><code>Cognitive Services OpenAI User</code> role on your AOAI resource.</li>
-    </ul>
+    <div class="step">
+      <h3>6. Grant managed identity access</h3>
+      <div class="step-grid">
+        <div>
+          <ol>
+            <li>Open Function App &rarr; <strong>Identity</strong> &rarr; turn on <strong>System assigned</strong>.</li>
+            <li>Open your Azure OpenAI resource &rarr; <strong>Access control (IAM)</strong>.</li>
+            <li>Click <strong>Add role assignment</strong> and choose role <code>Cognitive Services OpenAI User</code>.</li>
+            <li>Assign access to <strong>Managed identity</strong>, then select your Function App identity.</li>
+          </ol>
+        </div>
+        <div class="portal-shot">
+          <div class="portal-bar">Azure portal &gt; AOAI resource &gt; IAM &gt; Add role assignment</div>
+          <div class="portal-body">
+            <div class="portal-row"><div class="portal-label">Role</div><div>Cognitive Services OpenAI User</div></div>
+            <div class="portal-row"><div class="portal-label">Assign access to</div><div>Managed identity</div></div>
+            <div class="callout-red"><strong>Red callout:</strong> select the Function App identity, not a user account.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <h3>6. Deploy API code and update frontend constants</h3>
-    <p>Deploy <code>model-mission-control-api/</code> to your Function App, then update these constants in <code>prompt-escape-room/index.html</code>:</p>
+    <div class="step">
+      <h3>7. Deploy API code and update frontend constants</h3>
+      <div class="step-grid">
+        <div>
+          <p>Deploy <code>model-mission-control-api/</code> to your Function App, then update <code>prompt-escape-room/index.html</code>:</p>
 <pre><code>tenantId: "&lt;your-tenant-id&gt;",
 clientId: "&lt;your-spa-client-id&gt;",
 scope: "api://&lt;your-api-client-id&gt;/access_as_user",
 apiUrl: "https://&lt;your-function-app&gt;.azurewebsites.net/api/escape-score",
 redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/"</code></pre>
+        </div>
+        <div class="portal-shot">
+          <div class="portal-bar">Prompt Escape Room source &gt; DIAx_AI config block</div>
+          <div class="portal-body">
+            <div class="portal-row"><div class="portal-label">tenantId</div><div>Your Entra tenant ID</div></div>
+            <div class="portal-row"><div class="portal-label">scope</div><div>api://&lt;api-client-id&gt;/access_as_user</div></div>
+            <div class="callout-red"><strong>Red callout:</strong> trailing slash in <code>redirectUri</code> must match Entra exactly.</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    <h3>7. Validate end-to-end</h3>
-    <ul class="checklist">
-      <li>Open Prompt Escape Room from your public hub page.</li>
-      <li>Switch scoring engine to <strong>Live AI score (Foundry)</strong>.</li>
-      <li>Sign in with your tenant account.</li>
-      <li>Submit a prompt and confirm score + feedback return successfully.</li>
-    </ul>
-  </section>
+    <div class="step">
+      <h3>8. Validate end-to-end</h3>
+      <div class="step-grid">
+        <div>
+          <ul class="checklist">
+            <li>Open Prompt Escape Room from your public hub page.</li>
+            <li>Switch scoring engine to <strong>Live AI score (Foundry)</strong>.</li>
+            <li>Sign in with your tenant account.</li>
+            <li>Submit a prompt and confirm score + feedback return successfully.</li>
+          </ul>
+        </div>
+        <figure>
+          <img src="assets/admin-quickstart/02-escape-room-overview.png" alt="Prompt Escape Room page with HE and SLG role options and AI scoring section">
+          <figcaption><strong>Screenshot:</strong> validation target page.</figcaption>
+        </figure>
+      </div>
+    </div>
 
-  <section class="panel">
-    <h2>Screenshots (walk-through)</h2>
-    <div class="grid">
-      <figure>
-        <img src="assets/admin-quickstart/01-hub-page.png" alt="Prompt Engineering hub page showing Prompt Escape Room card">
-        <figcaption><strong>Step 1 checkpoint:</strong> Prompt Escape Room is visible from your public Prompt Engineering hub.</figcaption>
-      </figure>
-      <figure>
-        <img src="assets/admin-quickstart/02-escape-room-overview.png" alt="Prompt Escape Room page with HE and SLG role options and AI scoring section">
-        <figcaption><strong>Step 7 checkpoint:</strong> Escape Room page loads with HE/SLG modes, roles, and AI scoring section.</figcaption>
-      </figure>
-      <figure>
-        <img src="assets/admin-quickstart/03-model-mission-control-signin-pattern.png" alt="Model Mission Control page showing the DIAx sign-in pattern used for Azure AI assessment">
-        <figcaption><strong>Sign-in pattern reference:</strong> use the same DIAx Entra sign-in pattern as Model Mission Control.</figcaption>
-      </figure>
+    <div class="step">
+      <h3>Reference sign-in pattern</h3>
+      <div class="step-grid">
+        <div>
+          <p>The DIAx sign-in pattern used here mirrors Model Mission Control's browser sign-in + token-based API call flow.</p>
+        </div>
+        <figure>
+          <img src="assets/admin-quickstart/03-model-mission-control-signin-pattern.png" alt="Model Mission Control page showing the DIAx sign-in pattern used for Azure AI assessment">
+          <figcaption><strong>Screenshot:</strong> sign-in pattern reference.</figcaption>
+        </figure>
+      </div>
     </div>
   </section>
 
