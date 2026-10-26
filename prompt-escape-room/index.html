@@ -1179,15 +1179,23 @@
       });
 
       signInBtn.addEventListener("click", async () => {
+        signInBtn.disabled = true;
+        signInBtn.textContent = "Opening sign-in...";
+        foundryStatusEl.textContent = "Starting DIAx sign-in...";
         try {
-          await acquireAiToken();
+          await initializeAiAuth();
           scoringEngineEl.value = "foundry";
           localStorage.setItem(foundryStorageKeys.engine, "foundry");
-          renderFoundryStatus();
+          savePendingAssessment();
+          await aiAuthClient.loginRedirect({
+            scopes: [DIAx_AI.scope],
+            prompt: "select_account",
+            redirectStartPage: window.location.href
+          });
         } catch (error) {
-          if (!/redirect/i.test(error.message)) {
-            foundryStatusEl.textContent = `Sign-in failed: ${error.message}`;
-          }
+          foundryStatusEl.textContent = `Sign-in failed: ${error.message}`;
+          signInBtn.disabled = false;
+          signInBtn.textContent = "Sign in with DIAx";
         }
       });
       scoringEngineEl.addEventListener("change", () => renderFoundryStatus());
@@ -1201,9 +1209,13 @@
         .then(() => {
           restorePendingState();
           renderFoundryStatus();
+          signInBtn.disabled = false;
+          signInBtn.textContent = "Sign in with DIAx";
         })
         .catch(() => {
           renderFoundryStatus();
+          signInBtn.disabled = false;
+          signInBtn.textContent = "Sign in with DIAx";
         });
       renderAll();
     </script>
