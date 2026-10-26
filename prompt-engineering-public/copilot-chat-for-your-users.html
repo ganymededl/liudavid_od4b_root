@@ -32,6 +32,11 @@ h1{font-size:30px;line-height:1.2;margin:10px 0}
 .site-card h3{margin:10px 0 5px;font-size:14px}
 .site-card p{margin:0 0 8px;color:var(--t2);font-size:11.5px;line-height:1.5}
 .url{display:inline-block;font-size:11px;word-break:break-all}
+.source-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.source-card{border:1px solid var(--border);border-radius:14px;background:var(--tile);padding:12px}
+.source-card h3{margin:10px 0 5px;font-size:13px}
+.source-card p{margin:0 0 8px;color:var(--t2);font-size:11.5px;line-height:1.5}
+.mini{font-size:10.5px;color:var(--t2);margin-top:6px}
 .footer{margin-top:30px;padding-top:18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center}
 .foot-mark{display:flex;gap:10px;align-items:center;color:var(--t2);font-size:11px}
 .foot-logo{display:grid;grid-template-columns:10px 10px;gap:2px}
@@ -79,6 +84,21 @@ h1{font-size:30px;line-height:1.2;margin:10px 0}
       </li>
       <li>Operationalize: keep version notes in footer and set reminders before SAS expiry if used.</li>
     </ol>
+    <h3>Tips and tricks (from runbook)</h3>
+    <ul>
+      <li>Keep video files under ~12 MB each for faster first-load over school networks.</li>
+      <li>Use lowercase hyphenated filenames (no spaces) to avoid case/path breaks after publishing.</li>
+      <li>Audio must be user-triggered ("Class is in session"); do not force autoplay audio on load.</li>
+      <li>If copy-to-clipboard fails under <code>file://</code>, use a fallback copy method in the page script.</li>
+      <li>Edit HTML in VS Code/Cowork/Notepad only; smart quotes from Word can break JavaScript.</li>
+    </ul>
+    <h3>Troubleshooting</h3>
+    <ul>
+      <li>Video not playing: path/filename mismatch is the first thing to check.</li>
+      <li>Media returns 403 after Blob hosting: regenerate SAS URL and check for trailing spaces in pasted links.</li>
+      <li>SharePoint preview behavior differs: autoplay/video controls are often restricted in Office preview; test in a regular browser too.</li>
+      <li>Cowork preview quality can look compressed; validate playback in a direct browser tab before final sign-off.</li>
+    </ul>
   </section>
 
   <section class="gallery">
@@ -103,6 +123,37 @@ h1{font-size:30px;line-height:1.2;margin:10px 0}
         <a class="url" href="https://ganymededl.github.io/nypd_copilotdemo/" target="_blank" rel="noopener noreferrer">https://ganymededl.github.io/nypd_copilotdemo/</a>
       </article>
     </div>
+  </section>
+
+  <section class="gallery">
+    <h2>Where admins can grab royalty-free media (video + audio)</h2>
+    <div class="source-grid">
+      <article class="source-card">
+        <img class="shot" src="assets/copilot-chat/media-source-pexels-video.png" alt="Pexels classroom videos listing">
+        <h3>Pexels (video)</h3>
+        <p>Free stock classroom footage to source short ambient MP4 clips.</p>
+        <a class="url" href="https://www.pexels.com/search/videos/classroom/" target="_blank" rel="noopener noreferrer">https://www.pexels.com/search/videos/classroom/</a>
+      </article>
+      <article class="source-card">
+        <img class="shot" src="assets/copilot-chat/media-source-mixkit-video.png" alt="Mixkit school videos listing">
+        <h3>Mixkit (video)</h3>
+        <p>Another free source for education/school B-roll video loops.</p>
+        <a class="url" href="https://mixkit.co/free-stock-video/school/" target="_blank" rel="noopener noreferrer">https://mixkit.co/free-stock-video/school/</a>
+      </article>
+      <article class="source-card">
+        <img class="shot" src="assets/copilot-chat/media-source-pixabay-audio.png" alt="Pixabay classroom audio search">
+        <h3>Pixabay Music/SFX (audio)</h3>
+        <p>Free MP3 music and effects for bell/chatter/typing ambient cues.</p>
+        <a class="url" href="https://pixabay.com/music/search/classroom/" target="_blank" rel="noopener noreferrer">https://pixabay.com/music/search/classroom/</a>
+      </article>
+      <article class="source-card">
+        <img class="shot" src="assets/copilot-chat/media-source-freesound-audio.png" alt="Freesound classroom audio search">
+        <h3>Freesound (audio)</h3>
+        <p>Community audio library for classroom sound effects and alternates.</p>
+        <a class="url" href="https://freesound.org/search/?q=classroom" target="_blank" rel="noopener noreferrer">https://freesound.org/search/?q=classroom</a>
+      </article>
+    </div>
+    <p class="mini">Always verify each asset's license terms and attribution requirements before distributing inside your organization.</p>
   </section>
 
   <footer class="footer">
