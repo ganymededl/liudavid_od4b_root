@@ -12,7 +12,7 @@
     })();
   </script>
   <title>Prompt Quest Admin Quickstart</title>
-  <meta name="description" content="Complete tenant-admin build guide for Prompt Quest with Entra sign-in and Azure AI Foundry scoring.">
+  <meta name="description" content="Complete tenant-admin build guide for Prompt Quest with Entra sign-in and Microsoft Foundry scoring.">
   <style>
     :root {
       color-scheme: light;
@@ -159,7 +159,16 @@
       <li>Azure CLI + Node.js 22 + npm on workstation.</li>
       <li>A tenant admin or delegated admin available to grant API permissions consent.</li>
     </ul>
-    <p class="note">Terms used in this guide: <strong>AOAI</strong> = Azure OpenAI resource. <strong>Foundry scoring</strong> here means the app calling your AOAI model deployment through the Function API.</p>
+    <p class="note">Terms used in this guide: <strong>AOAI</strong> = Azure OpenAI resource. <strong>Microsoft Foundry scoring</strong> here means the app calling your AOAI model deployment through the Function API.</p>
+  </section>
+
+  <section class="panel">
+    <h2>Cloud applicability</h2>
+    <ul class="checklist">
+      <li><strong>Microsoft Entra ID:</strong> registration and consent steps are the same for commercial and GCC-Moderate tenants.</li>
+      <li><strong>Azure resources:</strong> this guide and Deploy button target the commercial Azure portal and endpoints.</li>
+      <li><strong>Azure Government:</strong> use portal.usgovcloudapi.net equivalent flows and verify AOAI endpoint/domain differences before deploying.</li>
+    </ul>
   </section>
 
   <section class="panel">
@@ -170,9 +179,9 @@
           <tr><th>Value</th><th>Example</th><th>Where to get it</th><th>Where to set it</th></tr>
         </thead>
         <tbody>
-          <tr><td>Tenant ID</td><td>6d58...da1a5</td><td>Entra ID overview</td><td><code>DIAx_AI.tenantId</code>, <code>ENTRA_TENANT_ID</code></td></tr>
-          <tr><td>API app client ID</td><td>2d2b...0a7fb</td><td>API app registration overview</td><td><code>ENTRA_API_CLIENT_ID</code>, scope URI</td></tr>
-          <tr><td>SPA app client ID</td><td>597b...97d8</td><td>SPA app registration overview</td><td><code>DIAx_AI.clientId</code></td></tr>
+          <tr><td>Tenant ID</td><td><code>&lt;tenant-guid&gt;</code></td><td>Entra ID overview</td><td><code>DIAx_AI.tenantId</code>, <code>ENTRA_TENANT_ID</code></td></tr>
+          <tr><td>API app client ID</td><td><code>&lt;api-app-guid&gt;</code></td><td>API app registration overview</td><td><code>ENTRA_API_CLIENT_ID</code>, scope URI</td></tr>
+          <tr><td>SPA app client ID</td><td><code>&lt;spa-app-guid&gt;</code></td><td>SPA app registration overview</td><td><code>DIAx_AI.clientId</code></td></tr>
           <tr><td>Scope URI</td><td><code>api://&lt;api-client-id&gt;/access_as_user</code></td><td>API app &gt; Expose an API</td><td><code>DIAx_AI.scope</code></td></tr>
           <tr><td>Function API URL</td><td><code>https://&lt;func&gt;.azurewebsites.net/api/escape-score</code></td><td>Function app name</td><td><code>DIAx_AI.apiUrl</code></td></tr>
           <tr><td>Redirect URI (prod)</td><td><code>https://&lt;user&gt;.github.io/&lt;repo&gt;/prompt-escape-room/</code></td><td>GitHub Pages URL</td><td>SPA app Authentication + <code>DIAx_AI.redirectUri</code></td></tr>
@@ -192,7 +201,7 @@
       <div class="step-grid">
         <div>
           <ol>
-            <li>Clone your repository locally (or copy these folders into your existing site repo).</li>
+            <li>Get the Prompt Quest sample source (either clone or download zip), then copy it into your publishing repository.</li>
             <li>Confirm these paths are present:
               <ul class="checklist">
                 <li><code>prompt-engineering-public/</code></li>
@@ -201,10 +210,19 @@
                 <li><code>model-mission-control/vendor/msal-browser.min.js</code></li>
               </ul>
             </li>
-            <li>Publish your repo to GitHub Pages.</li>
+            <li>Commit and publish your updated site repository to GitHub Pages.</li>
           </ol>
-<pre><code>git clone https://github.com/&lt;your-user&gt;/&lt;your-repo&gt;.git
-cd &lt;your-repo&gt;
+<pre><code># 1) Get sample source
+git clone https://github.com/ganymededl/liudavid_od4b_root.git
+
+# 2) Copy required folders into your own site repo
+# prompt-engineering-public/
+# prompt-escape-room/
+# model-mission-control-api/
+
+# 3) Commit in your site repo and publish
+git add .
+git commit -m "Add Prompt Quest sample"
 git push origin main</code></pre>
           <p class="note">If your Pages source is branch/folder based, configure that in repository settings before testing URLs.</p>
         </div>
@@ -256,6 +274,7 @@ git push origin main</code></pre>
           </ol>
 <pre><code>https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/
 http://localhost:8765/prompt-escape-room/</code></pre>
+          <p class="note"><strong>Dev-only URI:</strong> keep <code>localhost:8765</code> only for local testing. Remove it for production-only registrations if your security standard requires that.</p>
           <ol start="4">
             <li>Open <strong>API permissions</strong> &rarr; <strong>Add a permission</strong> &rarr; <strong>My APIs</strong> &rarr; choose API app.</li>
             <li>Select delegated <code>access_as_user</code>.</li>
@@ -318,18 +337,20 @@ az cognitiveservices account create `
   --custom-domain $AOAI</code></pre>
           <p class="note">If your standards require Consumption plan on Windows, use this variant:</p>
 <pre><code>az storage account create --name $STORAGE --resource-group $RG --location $LOCATION --sku Standard_LRS
-az functionapp create --name $FUNC --resource-group $RG --storage-account $STORAGE --consumption-plan-location $LOCATION --os-type Windows --runtime node --runtime-version 20</code></pre>
+az functionapp create --name $FUNC --resource-group $RG --storage-account $STORAGE --consumption-plan-location $LOCATION --os-type Windows --runtime node --runtime-version 22</code></pre>
           <div class="deploy-row">
             <a class="deploy-btn" target="_blank" rel="noopener noreferrer" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fganymededl%2Fliudavid_od4b_root%2Fmain%2Fprompt-escape-room%2Fdeploy%2Fazuredeploy.json">Deploy to Azure</a>
             <a class="deploy-btn secondary" target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/ganymededl/liudavid_od4b_root/main/prompt-escape-room/deploy/azuredeploy.json">View ARM template</a>
           </div>
+          <p class="note"><strong>Deploy button scope:</strong> this template provisions storage + hosting plan + Function App + AOAI account only. You still must complete Missions 5-9 for deployment, identity role assignment, CORS, and app settings.</p>
+          <p class="note"><strong>Storage policy note:</strong> the template sets <code>AzureWebJobsStorage</code> using a storage account key. If your policy blocks shared-key access, use manual provisioning and your approved Functions storage pattern instead of this template.</p>
           <p class="note">If your organization uses a different hosting SKU or region policy, adjust accordingly.</p>
         </div>
         <div class="portal-shot">
           <div class="portal-bar">Azure portal &gt; Resource group</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Must exist</div><div>Function App + Storage + AOAI</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> Step 5 and beyond require Function App to exist first.</div>
+            <div class="callout-red"><strong>Red callout:</strong> Mission 5 and beyond require Function App to exist first.</div>
           </div>
         </div>
       </div>
@@ -369,18 +390,8 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
 npm ci
 npm test
 
-# Option A: Azure Functions Core Tools (recommended for most admins)
-func azure functionapp publish $FUNC
-
-# Package and deploy (PowerShell)
-$zip = "$env:TEMP\model-mission-control-api.zip"
-if (Test-Path $zip) { Remove-Item $zip -Force }
-Compress-Archive -Path * -DestinationPath $zip -Force
-
-az functionapp deployment source config-zip `
-  --resource-group $RG `
-  --name $FUNC `
-  --src $zip</code></pre>
+# Publish API code (recommended path)
+func azure functionapp publish $FUNC</code></pre>
           <p>After deploy, verify the app starts and triggers are synced.</p>
         </div>
         <div class="portal-shot">
@@ -539,7 +550,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
       <h3>Reference sign-in pattern</h3>
       <div class="step-grid">
         <div>
-          <p>This implementation follows the same DIAx browser sign-in pattern used in Model Mission Control.</p>
+          <p>This implementation follows the same Microsoft Entra browser sign-in pattern used in Model Mission Control.</p>
         </div>
         <figure>
           <img src="assets/admin-quickstart/03-model-mission-control-signin-pattern.png" alt="Model Mission Control sign-in pattern reference page">
@@ -569,7 +580,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
       <li><strong>403 origin_not_allowed:</strong> origin not in <code>ALLOWED_ORIGINS</code>.</li>
       <li><strong>403 forbidden:</strong> token valid but user not authorized by API logic.</li>
       <li><strong>502 foundry_request_failed:</strong> model deployment name mismatch or missing AOAI role assignment for Function identity.</li>
-      <li><strong>404 on <code>/api/escape-score</code> or <code>/api/recommend</code>:</strong> function routes did not load after deployment. Run the recovery sequence below.</li>
+      <li><strong>404 on <code>/api/escape-score</code>:</strong> function routes did not load after deployment. Run the recovery sequence below.</li>
     </ul>
     <h3>Recovery sequence for 404 function routes</h3>
 <pre><code># 1) Restart app service process
@@ -589,10 +600,9 @@ az functionapp function list `
 
 # Expected names include:
 #   escape-score
-#   recommend
 
 # 4) Smoke test endpoint (401 is healthy before token auth)
-curl -i https://$FUNC.azurewebsites.net/api/escape-score</code></pre>
+curl.exe -i https://$FUNC.azurewebsites.net/api/escape-score</code></pre>
     <p class="note">If step 4 still returns 404, re-check Mission 6 deployment output and Mission 7 app settings, then re-publish once more.</p>
   </section>
 </main>

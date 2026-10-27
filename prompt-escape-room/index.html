@@ -444,7 +444,7 @@
             <option value="local">Rule-based practice score (default)</option>
             <option value="foundry">Live AI score (Foundry)</option>
           </select>
-          <button id="signInBtn">Sign in with DIAx</button>
+          <button id="signInBtn">Sign in with Microsoft Entra ID</button>
           <div id="foundryStatus" class="muted">AI scoring is off.</div>
         </div>
       </section>
@@ -464,7 +464,7 @@
           <div class="cert-actions">
             <button class="primary" id="printBtn">Print certificate</button>
             <button id="downloadCertBtn">Download certificate image</button>
-            <button id="shareLinkedInBtn">Share achievement to LinkedIn</button>
+            <button id="shareLinkedInBtn">Share achievement (optional)</button>
           </div>
         </div>
       </section>
@@ -477,7 +477,7 @@
             <rect x="0" y="9" width="7" height="7" fill="#00a4ef"></rect>
             <rect x="9" y="9" width="7" height="7" fill="#ffb900"></rect>
           </svg>
-          <span>Microsoft</span>
+          <span>Prompt Quest</span>
         </span>
         <span class="muted">Built by liudavid</span>
       </footer>
@@ -652,7 +652,7 @@
       async function initializeAiAuth() {
         if (aiAuthReady) return aiAuthReady;
         if (!window.msal) {
-          throw new Error("The DIAx sign-in component is unavailable.");
+          throw new Error("The Microsoft Entra sign-in component is unavailable.");
         }
         aiAuthClient = new msal.PublicClientApplication({
           auth: {
@@ -694,13 +694,13 @@
         const account = aiAuthClient.getActiveAccount() || aiAuthClient.getAllAccounts()[0];
         if (!account) {
           savePendingAssessment();
-          foundryStatusEl.textContent = "Redirecting to DIAx sign-in...";
+          foundryStatusEl.textContent = "Redirecting to Microsoft Entra sign-in...";
           await aiAuthClient.loginRedirect({
             scopes: [DIAx_AI.scope],
             prompt: "select_account",
             redirectStartPage: window.location.href,
           });
-          throw new Error("DIAx sign-in redirect did not complete.");
+          throw new Error("Microsoft Entra sign-in redirect did not complete.");
         }
         try {
           const token = await aiAuthClient.acquireTokenSilent({
@@ -711,13 +711,13 @@
         } catch (error) {
           if (!(error instanceof msal.InteractionRequiredAuthError)) throw error;
           savePendingAssessment();
-          foundryStatusEl.textContent = "Redirecting to DIAx to refresh access...";
+          foundryStatusEl.textContent = "Redirecting to Microsoft Entra to refresh access...";
           await aiAuthClient.acquireTokenRedirect({
             scopes: [DIAx_AI.scope],
             account,
             redirectStartPage: window.location.href,
           });
-          throw new Error("DIAx token refresh redirect did not complete.");
+          throw new Error("Microsoft Entra token refresh redirect did not complete.");
         }
       }
 
@@ -759,7 +759,7 @@
         }
         foundryStatusEl.textContent = hasAccount
           ? "AI scoring is on."
-          : "You picked AI scoring. Sign in with DIAx to continue.";
+          : "You picked AI scoring. Sign in with Microsoft Entra ID to continue.";
       }
 
       function renderModeToggle() {
@@ -1014,7 +1014,7 @@
         ctx.font = "400 28px Segoe UI";
         ctx.fillText("Awarded for completing real-world prompt missions", 90, 690);
         ctx.fillText(`and meeting the practice-score threshold (${MIN_SCORE_TO_ADVANCE}+).`, 90, 735);
-        ctx.fillText("Built by liudavid • Microsoft", 90, 880);
+        ctx.fillText("Built by liudavid", 90, 880);
         return canvas;
       }
 
@@ -1294,7 +1294,7 @@
       signInBtn.addEventListener("click", async () => {
         signInBtn.disabled = true;
         signInBtn.textContent = "Opening sign-in...";
-        foundryStatusEl.textContent = "Starting DIAx sign-in...";
+        foundryStatusEl.textContent = "Starting Microsoft Entra sign-in...";
         try {
           await initializeAiAuth();
           scoringEngineEl.value = "foundry";
@@ -1308,7 +1308,7 @@
         } catch (error) {
           foundryStatusEl.textContent = `Sign-in failed: ${error.message}`;
           signInBtn.disabled = false;
-          signInBtn.textContent = "Sign in with DIAx";
+          signInBtn.textContent = "Sign in with Microsoft Entra ID";
         }
       });
       scoringEngineEl.addEventListener("change", () => renderFoundryStatus());
@@ -1323,12 +1323,12 @@
           restorePendingState();
           renderFoundryStatus();
           signInBtn.disabled = false;
-          signInBtn.textContent = "Sign in with DIAx";
+          signInBtn.textContent = "Sign in with Microsoft Entra ID";
         })
         .catch(() => {
           renderFoundryStatus();
           signInBtn.disabled = false;
-          signInBtn.textContent = "Sign in with DIAx";
+          signInBtn.textContent = "Sign in with Microsoft Entra ID";
         });
       renderAll();
     </script>
