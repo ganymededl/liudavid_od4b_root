@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- publish: 2026-10-27T03:56Z -->
+<!-- publish: 2026-10-27T04:18Z -->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -129,7 +129,7 @@
 <main class="shell">
   <header class="topbar">
     <a class="back" href="index.html">&larr; Back to Prompt Quest</a>
-    <div class="stamp">Admin quickstart<br><strong>Updated Oct 26, 2026</strong></div>
+    <div class="stamp">Admin quickstart<br><strong>Updated Oct 27, 2026</strong></div>
   </header>
 
   <section class="hero">
@@ -371,6 +371,12 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
   --sku-name GlobalStandard `
   --sku-capacity 10</code></pre>
           <p>Use your approved model/version if different, and confirm regional availability + quota first. Keep deployment name, because you will reuse it in app settings.</p>
+<pre><code># Check what your subscription can deploy in this region
+az cognitiveservices account list-models `
+  --name $AOAI `
+  --resource-group $RG `
+  --query "[?contains(name, 'gpt-4.1') || contains(name, 'gpt-4o')].{name:name,version:version,status:deprecation.status}" -o table</code></pre>
+          <p class="note">If your subscription cannot deploy the default model version, choose a currently deployable model from your list-models output and keep <code>$DEPLOYMENT</code> aligned with that choice.</p>
         </div>
         <div class="portal-shot">
           <div class="portal-bar">AOAI resource &gt; Model deployments</div>

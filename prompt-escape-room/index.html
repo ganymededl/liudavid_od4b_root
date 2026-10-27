@@ -454,7 +454,7 @@
         <div class="certificate">
           <p><strong>Prompt Quest Completion</strong></p>
           <p>
-            This confirms completion of the <span id="certRole">Role</span> scenario.
+            This confirms completion of the <span id="certRole">Role</span> scenario and meeting the practice-score threshold (65+).
           </p>
           <p>Best score: <span id="certScore"></span>/100</p>
           <p>Total elapsed: <span id="certTime"></span></p>
@@ -735,8 +735,13 @@
 
       async function acquireAiToken() {
         const redirectResponse = await initializeAiAuth();
-        if (redirectResponse?.accessToken) return redirectResponse.accessToken;
-        const account = aiAuthClient.getActiveAccount() || aiAuthClient.getAllAccounts()[0];
+        const account =
+          aiAuthClient.getActiveAccount() ||
+          redirectResponse?.account ||
+          aiAuthClient.getAllAccounts()[0];
+        if (redirectResponse?.account) {
+          aiAuthClient.setActiveAccount(redirectResponse.account);
+        }
         if (!account) {
           savePendingAssessment();
           foundryStatusEl.textContent = "Redirecting to Microsoft Entra sign-in...";
@@ -1240,6 +1245,8 @@
         scoreLabel.textContent = "Scoring in progress...";
         scoreLabel.className = "muted";
         resetBtn.disabled = true;
+        renderModeToggle();
+        renderRoles();
         updateCurrentTaskUiState();
         thinkingTerminal.classList.remove("hidden");
         let thinkingIndex = 0;
@@ -1251,6 +1258,18 @@
         try {
           const result = assessment.engine === "foundry" ? await evaluatePromptFoundry(assessment) : evaluatePromptLocal(assessment.prompt);
           const when = new Date().toLocaleTimeString();
+          const stateMatchesAssessment =
+            selectedMode === assessment.mode &&
+            selectedRole.id === assessment.roleId &&
+            taskIndex === assessment.task;
+          if (!stateMatchesAssessment) {
+            scoreValue.textContent = "0/100";
+            updateScoreVisual(0);
+            feedbackList.innerHTML = "";
+            scoreLabel.textContent = "Scoring context changed before the result returned. The result was discarded.";
+            scoreLabel.className = "warn";
+            return;
+          }
           attempts.push({
             mode: assessment.mode,
             roleId: assessment.roleId,
@@ -1263,29 +1282,17 @@
           bestScore = Math.max(bestScore, result.score);
           bestScoreEl.textContent = String(bestScore);
           attemptCountEl.textContent = String(attempts.length);
-          const stateMatchesAssessment =
-            selectedMode === assessment.mode &&
-            selectedRole.id === assessment.roleId &&
-            taskIndex === assessment.task;
-          if (stateMatchesAssessment) {
-            scoreValue.textContent = `${result.score}/100`;
-            updateScoreVisual(result.score);
-            triggerScoreFx(result.score);
-            scoreLabel.textContent = result.label;
-            scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
-            feedbackList.innerHTML = "";
-            result.feedback.forEach((line) => {
-              const li = document.createElement("li");
-              li.textContent = line;
-              feedbackList.appendChild(li);
-            });
-          } else {
-            scoreValue.textContent = "0/100";
-            updateScoreVisual(0);
-            feedbackList.innerHTML = "";
-            scoreLabel.textContent = `Scoring completed for ${assessment.roleName}, Task ${assessment.task + 1}. Open that task to view context.`;
-            scoreLabel.className = "warn";
-          }
+          scoreValue.textContent = `${result.score}/100`;
+          updateScoreVisual(result.score);
+          triggerScoreFx(result.score);
+          scoreLabel.textContent = result.label;
+          scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
+          feedbackList.innerHTML = "";
+          result.feedback.forEach((line) => {
+            const li = document.createElement("li");
+            li.textContent = line;
+            feedbackList.appendChild(li);
+          });
           renderAttempts();
           updateCurrentTaskUiState();
         } catch (error) {
