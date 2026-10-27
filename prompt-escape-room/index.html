@@ -487,6 +487,7 @@
       const modes = [
         { id: "he", name: "Higher Ed" },
         { id: "slg", name: "State & Local Government" },
+        { id: "med", name: "Medical Centers" },
       ];
 
       const roleCatalogByMode = {
@@ -572,6 +573,48 @@
             assignmentText:
               "You are compliance lead preparing records-retention, transparency, and audit guidance for AI-enabled agency workflows.",
             tasks: ["Draft policy alignment prompt", "Draft records and retention prompt", "Draft oversight briefing prompt"],
+          },
+        ],
+        med: [
+          {
+            id: "clinical-ops",
+            name: "Clinical Operations",
+            assignmentTitle: "Inpatient discharge workflow improvement",
+            assignmentText:
+              "You are clinical operations leadership preparing a safer, faster discharge workflow with capacity constraints, care-team handoffs, and quality reporting requirements at institutions like Johns Hopkins, CUIMC, and Weill Cornell.",
+            tasks: ["Draft current-state workflow prompt", "Draft bottleneck and risk analysis prompt", "Draft phased implementation plan prompt"],
+          },
+          {
+            id: "nursing-admin",
+            name: "Nursing Administration",
+            assignmentTitle: "Nurse staffing coverage planning",
+            assignmentText:
+              "You are nursing administration preparing staffing options that balance patient acuity, burnout risk, schedule fairness, and labor-policy constraints across multiple units.",
+            tasks: ["Draft coverage gap assessment prompt", "Draft staffing options-comparison prompt", "Draft escalation and contingency prompt"],
+          },
+          {
+            id: "revenue-cycle",
+            name: "Revenue Cycle",
+            assignmentTitle: "Prior authorization and denial reduction",
+            assignmentText:
+              "You are revenue-cycle leadership improving prior authorization throughput and denial prevention while preserving coding quality, payer policy adherence, and turnaround SLAs.",
+            tasks: ["Draft denial-pattern analysis prompt", "Draft prior-auth acceleration prompt", "Draft payer-ready remediation brief prompt"],
+          },
+          {
+            id: "health-it",
+            name: "Health IT",
+            assignmentTitle: "EHR-integrated AI service rollout",
+            assignmentText:
+              "You are Health IT operations planning an EHR-adjacent AI rollout with identity controls, PHI boundaries, downtime procedures, and support readiness.",
+            tasks: ["Draft technical dependency mapping prompt", "Draft rollout runbook prompt", "Draft incident and rollback prompt"],
+          },
+          {
+            id: "privacy-compliance",
+            name: "Privacy & Compliance",
+            assignmentTitle: "HIPAA and audit readiness review",
+            assignmentText:
+              "You are privacy and compliance leadership preparing controls for HIPAA safeguards, minimum-necessary access, retention, and audit evidence for AI-assisted workflows.",
+            tasks: ["Draft HIPAA control-mapping prompt", "Draft access and retention policy prompt", "Draft audit-response packet prompt"],
           },
         ],
       };

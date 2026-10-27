@@ -1,7 +1,7 @@
 import { HttpError } from "./errors.js";
 import { getManagedIdentityToken } from "./foundry.js";
 
-const MODES = new Set(["he", "slg"]);
+const MODES = new Set(["he", "slg", "med"]);
 
 function boundedString(value, name, maxLength, minLength = 1) {
   if (typeof value !== "string") {
@@ -19,7 +19,7 @@ export function validateEscapeScoreRequest(body) {
     throw new HttpError(400, "invalid_request", "The request body must be a JSON object.");
   }
   if (!MODES.has(body.mode)) {
-    throw new HttpError(400, "invalid_request", "mode must be he or slg.");
+    throw new HttpError(400, "invalid_request", "mode must be he, slg, or med.");
   }
   const roleId = boundedString(body.role?.id, "role.id", 80);
   const roleName = boundedString(body.role?.name, "role.name", 120);
@@ -44,7 +44,7 @@ export function validateEscapeScoreRequest(body) {
 function buildEscapeScoringRequest(input, deploymentName) {
   const systemPrompt = [
     "You are Prompt Escape Room evaluator.",
-    "Evaluate learner prompts for Higher Ed and State/Local Government back-office scenarios.",
+    "Evaluate learner prompts for Higher Ed, State/Local Government, and Medical Center back-office scenarios.",
     "Score the learner prompt from 0-100 based on role definition, requested result format, practical limits, step-by-step usability, and handling of unknowns.",
     "Write feedback in plain everyday language for non-technical users.",
     "Avoid jargon like role clarity, constraints, output shape, actionability, assumptions, optimization, or model behavior.",
