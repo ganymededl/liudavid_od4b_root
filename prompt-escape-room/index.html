@@ -245,6 +245,10 @@
         border-color: var(--cp-success);
         background: var(--cp-highlight);
       }
+      .task.active {
+        border-color: var(--cp-link);
+        box-shadow: 0 0 0 1px color-mix(in srgb, var(--cp-link) 55%, transparent);
+      }
       .attempt-list {
         margin: 0;
         padding-left: 1rem;
@@ -414,7 +418,7 @@
       <section class="card">
         <h2>5) Improvement proof (before vs after)</h2>
         <p class="muted">See what changed between your last two attempts and why your score moved.</p>
-        <div id="improvementPanel" class="muted">Submit at least two attempts to unlock the comparison view.</div>
+        <div id="improvementPanel" class="muted">Submit at least two attempts for this task to unlock the comparison view.</div>
       </section>
 
       <section class="card">
@@ -422,10 +426,13 @@
         <p class="muted">
           Sign in to use live AI scoring. This page does not store API keys.
         </p>
+        <p class="muted">
+          Live AI scoring sends your prompt text to your configured Azure AI endpoint. During sign-in redirects, your draft is temporarily kept in browser session storage so your work is not lost. Do not paste sensitive data unless this deployment is approved for it.
+        </p>
         <div class="stack">
           <label for="scoringEngine">Scoring engine</label>
           <select id="scoringEngine">
-            <option value="local">Quick local score (default)</option>
+            <option value="local">Rule-based practice score (default)</option>
             <option value="foundry">Live AI score (Foundry)</option>
           </select>
           <button id="signInBtn">Sign in with DIAx</button>
@@ -438,8 +445,7 @@
         <div class="certificate">
           <p><strong>Prompt Quest Completion</strong></p>
           <p>
-            This certifies that <span id="certLearner">Participant</span> completed the
-            <span id="certRole">Role</span> scenario.
+            This confirms completion of the <span id="certRole">Role</span> scenario.
           </p>
           <p>Best score: <span id="certScore"></span>/100</p>
           <p>Total elapsed: <span id="certTime"></span></p>
@@ -566,7 +572,8 @@
       let taskIndex = 0;
       let attempts = [];
       let bestScore = 0;
-      const startedAt = Date.now();
+      let startedAt = Date.now();
+      const MIN_SCORE_TO_ADVANCE = 65;
 
       const roleContainer = document.getElementById("roleContainer");
       const modeToggle = document.getElementById("modeToggle");
@@ -752,6 +759,7 @@
             taskIndex = 0;
             attempts = [];
             bestScore = 0;
+            startedAt = Date.now();
             renderAll();
           });
           modeToggle.appendChild(btn);
@@ -770,6 +778,7 @@
             taskIndex = 0;
             attempts = [];
             bestScore = 0;
+            startedAt = Date.now();
             renderAll();
           });
           roleContainer.appendChild(btn);
@@ -782,7 +791,13 @@
         taskList.innerHTML = "";
         selectedRole.tasks.forEach((task, index) => {
           const row = document.createElement("div");
-          row.className = "task" + (index < taskIndex ? " complete" : "");
+          row.className = "task";
+          if (index < taskIndex) {
+            row.classList.add("complete");
+          } else if (index === taskIndex) {
+            row.classList.add("active");
+            row.setAttribute("aria-current", "step");
+          }
           row.innerHTML = `<strong>Task ${index + 1}:</strong> ${task}`;
           taskList.appendChild(row);
         });
@@ -866,13 +881,18 @@
       }
 
       function renderImprovement() {
-        if (attempts.length < 2) {
+        const taskAttempts = attempts.filter((item) =>
+          item.mode === selectedMode &&
+          item.roleId === selectedRole.id &&
+          item.task === taskIndex
+        );
+        if (taskAttempts.length < 2) {
           improvementPanel.className = "muted";
-          improvementPanel.textContent = "Submit at least two attempts to unlock the comparison view.";
+          improvementPanel.textContent = "Submit at least two attempts for this task to unlock comparison.";
           return;
         }
-        const previous = attempts[attempts.length - 2];
-        const current = attempts[attempts.length - 1];
+        const previous = taskAttempts[taskAttempts.length - 2];
+        const current = taskAttempts[taskAttempts.length - 1];
         const delta = current.score - previous.score;
         const prevSignals = buildPromptSignals(previous.prompt);
         const currSignals = buildPromptSignals(current.prompt);
@@ -909,14 +929,15 @@
           <ul>${summary.map((item) => `<li>${item}</li>`).join("")}</ul>
           <div class="response-grid">
             <div class="response-box">
-              <h3>Before answer preview</h3>
+              <h3>Before illustrative output preview</h3>
               <pre>${escapeHtml(beforeAnswer)}</pre>
             </div>
             <div class="response-box">
-              <h3>After answer preview</h3>
+              <h3>After illustrative output preview</h3>
               <pre>${escapeHtml(afterAnswer)}</pre>
             </div>
           </div>
+          <p class="muted"><strong>Note:</strong> This preview demonstrates how added instructions can change response structure. It is not a generated AI answer.</p>
         `;
       }
 
@@ -1112,7 +1133,15 @@
         try {
           const result = scoringEngineEl.value === "foundry" ? await evaluatePromptFoundry(text) : evaluatePromptLocal(text);
           const when = new Date().toLocaleTimeString();
-          attempts.push({ task: taskIndex, score: result.score, when, source: result.source, prompt: text.trim() });
+          attempts.push({
+            mode: selectedMode,
+            roleId: selectedRole.id,
+            task: taskIndex,
+            score: result.score,
+            when,
+            source: result.source,
+            prompt: text.trim()
+          });
           bestScore = Math.max(bestScore, result.score);
           bestScoreEl.textContent = String(bestScore);
           attemptCountEl.textContent = String(attempts.length);
@@ -1143,17 +1172,40 @@
       });
 
       document.getElementById("nextTaskBtn").addEventListener("click", () => {
+        if (taskIndex >= selectedRole.tasks.length) {
+          scoreLabel.textContent = "All tasks are already complete for this role.";
+          scoreLabel.className = "good";
+          return;
+        }
+        const taskAttempts = attempts.filter((item) =>
+          item.mode === selectedMode &&
+          item.roleId === selectedRole.id &&
+          item.task === taskIndex
+        );
+        if (!taskAttempts.length) {
+          scoreLabel.textContent = "Score at least one prompt for this task before moving on.";
+          scoreLabel.className = "warn";
+          return;
+        }
+        const latestTaskAttempt = taskAttempts[taskAttempts.length - 1];
+        if (latestTaskAttempt.score < MIN_SCORE_TO_ADVANCE) {
+          scoreLabel.textContent = `Need ${MIN_SCORE_TO_ADVANCE}+ on this task before moving on. Improve your prompt and score again.`;
+          scoreLabel.className = "warn";
+          return;
+        }
         if (taskIndex < selectedRole.tasks.length) {
           taskIndex += 1;
         }
         renderAssignment();
         maybeShowCertificate();
+        renderAttempts();
       });
 
       document.getElementById("resetBtn").addEventListener("click", () => {
         taskIndex = 0;
         attempts = [];
         bestScore = 0;
+        startedAt = Date.now();
         renderAll();
       });
 

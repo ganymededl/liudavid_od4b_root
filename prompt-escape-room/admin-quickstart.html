@@ -345,10 +345,10 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
   --deployment-name $DEPLOYMENT `
   --model-format OpenAI `
   --model-name gpt-4.1-mini `
-  --model-version 2024-07-18 `
+  --model-version 2025-04-14 `
   --sku-name GlobalStandard `
   --sku-capacity 10</code></pre>
-          <p>Use your approved model/version if different. Keep deployment name, because you will reuse it in app settings.</p>
+          <p>Use your approved model/version if different, and confirm regional availability + quota first. Keep deployment name, because you will reuse it in app settings.</p>
         </div>
         <div class="portal-shot">
           <div class="portal-bar">AOAI resource &gt; Model deployments</div>
@@ -524,6 +524,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
             <li>Unauthorized user is rejected (403 expected).</li>
             <li>Task progression and reset room controls work.</li>
             <li>Completion certificate renders and prints.</li>
+            <li>Participant notice is visible: live AI scoring sends prompt text to your Azure AI endpoint.</li>
           </ul>
         </div>
         <figure>
@@ -549,13 +550,14 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
 
   <section class="panel">
     <h2>Multi-user deployment guidance</h2>
-    <p>Current sample uses <code>ALLOWED_USER_OBJECT_ID</code> for a controlled setup. For workshops or production, replace that gate with one of:</p>
+    <p>Current sample is implemented as a <strong>single-user gate</strong> via <code>ALLOWED_USER_OBJECT_ID</code>.</p>
+    <p>The options below are design directions for future enhancement, not configuration-only switches in this sample build:</p>
     <ul class="checklist">
       <li>Allowed security group IDs from token claims.</li>
       <li>Allowed app roles.</li>
       <li>Tenant-wide access with explicit abuse controls and monitoring.</li>
     </ul>
-    <p class="note">Do not remove authorization checks without replacing them with a supported access model.</p>
+    <p class="note">Do not remove authorization checks without implementing and testing one supported multi-user authorization model in API code.</p>
   </section>
 
   <section class="panel">
