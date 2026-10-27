@@ -1,9 +1,9 @@
 window.MODEL_MISSION_CATALOGS = {
-  updatedAt: "2026-10-24T21:18:17-04:00",
+  updatedAt: "2026-10-27T06:31:00-04:00",
   platforms: {
     copilot: {
       confidence: "account-observed",
-      source: "Authenticated Microsoft 365 Copilot model picker screenshots",
+      source: "Authenticated Microsoft 365 Copilot model picker capture (2026-10-27)",
       models: [
         "copilot-auto",
         "copilot-quick-response",
@@ -19,8 +19,8 @@ window.MODEL_MISSION_CATALOGS = {
       ]
     },
     cowork: {
-      confidence: "live-capture-pending",
-      source: "Microsoft Copilot Cowork authenticated picker pending",
+      confidence: "account-observed",
+      source: "Authenticated Microsoft Copilot Cowork picker capture (2026-10-27); visible choices captured, stable state IDs unresolved",
       models: [
         "cowork-managed"
       ]
@@ -42,6 +42,7 @@ window.MODEL_MISSION_CATALOGS = {
         "gemini-4-argon",
         "gpt-5.6-sol-fast",
         "gpt-6.1-sol",
+        "gpt-6.1-terra",
         "gpt-6-luna",
         "gpt-6-sol",
         "grok-4.6",
