@@ -354,6 +354,15 @@
       a {
         color: var(--cp-link);
       }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -396,7 +405,7 @@
           <textarea id="promptInput" placeholder="Write your prompt here..."></textarea>
           <div class="row" style="margin-top: 0.75rem">
             <button class="primary" id="scoreBtn">Score prompt</button>
-            <button id="nextTaskBtn">Mark task complete / next</button>
+            <button id="nextTaskBtn" disabled>Continue to next task</button>
           </div>
           <div style="margin-top: 0.75rem">
             <div class="score" id="scoreValue">0/100</div>
@@ -594,6 +603,7 @@
       const certificateSection = document.getElementById("certificateSection");
       const promptInput = document.getElementById("promptInput");
       const scoreBtn = document.getElementById("scoreBtn");
+      const nextTaskBtn = document.getElementById("nextTaskBtn");
       const confettiLayer = document.getElementById("confettiLayer");
       const downloadCertBtn = document.getElementById("downloadCertBtn");
       const shareLinkedInBtn = document.getElementById("shareLinkedInBtn");
@@ -673,6 +683,7 @@
             prompt: promptInput.value,
             selectedMode,
             selectedRoleId: selectedRole.id,
+            taskIndex
           })
         );
       }
@@ -720,6 +731,12 @@
             selectedRole =
               roleCatalogByMode[selectedMode].find((role) => role.id === pending.selectedRoleId) ||
               roleCatalogByMode[selectedMode][0];
+            const restoredTask = Number(pending.taskIndex);
+            const maxTaskIndex = Math.max(0, selectedRole.tasks.length - 1);
+            taskIndex =
+              Number.isInteger(restoredTask) && restoredTask >= 0 && restoredTask <= maxTaskIndex
+                ? restoredTask
+                : 0;
             renderAll();
           }
           if (typeof pending.prompt === "string") {
@@ -760,6 +777,7 @@
             attempts = [];
             bestScore = 0;
             startedAt = Date.now();
+            promptInput.value = "";
             renderAll();
           });
           modeToggle.appendChild(btn);
@@ -779,6 +797,7 @@
             attempts = [];
             bestScore = 0;
             startedAt = Date.now();
+            promptInput.value = "";
             renderAll();
           });
           roleContainer.appendChild(btn);
@@ -801,6 +820,31 @@
           row.innerHTML = `<strong>Task ${index + 1}:</strong> ${task}`;
           taskList.appendChild(row);
         });
+      }
+
+      function currentTaskAttempts() {
+        return attempts.filter((item) =>
+          item.mode === selectedMode &&
+          item.roleId === selectedRole.id &&
+          item.task === taskIndex
+        );
+      }
+
+      function updateCurrentTaskUiState() {
+        const done = taskIndex >= selectedRole.tasks.length;
+        if (done) {
+          nextTaskBtn.disabled = true;
+          nextTaskBtn.textContent = "Quest complete";
+          return;
+        }
+        const currentAttempts = currentTaskAttempts();
+        const latest = currentAttempts[currentAttempts.length - 1];
+        const canAdvance = Boolean(latest && latest.score >= MIN_SCORE_TO_ADVANCE);
+        const label = taskIndex >= selectedRole.tasks.length - 1
+          ? "Complete Prompt Quest"
+          : `Continue to Task ${taskIndex + 2}`;
+        nextTaskBtn.textContent = label;
+        nextTaskBtn.disabled = !canAdvance;
       }
 
       function scoreColor(score) {
@@ -881,11 +925,7 @@
       }
 
       function renderImprovement() {
-        const taskAttempts = attempts.filter((item) =>
-          item.mode === selectedMode &&
-          item.roleId === selectedRole.id &&
-          item.task === taskIndex
-        );
+        const taskAttempts = currentTaskAttempts();
         if (taskAttempts.length < 2) {
           improvementPanel.className = "muted";
           improvementPanel.textContent = "Submit at least two attempts for this task to unlock comparison.";
@@ -905,9 +945,12 @@
           !prevSignals.clarify && currSignals.clarify ? "Requested assumptions or clarifying questions." : ""
         ].filter(Boolean);
 
-        const summary = newlyAdded.length
-          ? newlyAdded
-          : ["Refined phrasing and structure for clearer guidance."];
+        const fallbackSummary = delta > 0
+          ? "The score improved, but this rule-based comparison did not isolate one structural addition."
+          : delta === 0
+            ? "No rubric-level structural change was detected."
+            : "The latest revision scored lower. Review removed or weakened instructions.";
+        const summary = newlyAdded.length ? newlyAdded : [fallbackSummary];
         const topChange = summary[0];
         const beforeAnswer = simulateAnswer(previous.prompt, selectedRole.name, selectedRole.assignmentTitle);
         const afterAnswer = simulateAnswer(current.prompt, selectedRole.name, selectedRole.assignmentTitle);
@@ -970,7 +1013,7 @@
 
         ctx.font = "400 28px Segoe UI";
         ctx.fillText("Awarded for completing real-world prompt missions", 90, 690);
-        ctx.fillText("and demonstrating measurable prompt improvement.", 90, 735);
+        ctx.fillText(`and meeting the practice-score threshold (${MIN_SCORE_TO_ADVANCE}+).`, 90, 735);
         ctx.fillText("Built by liudavid • Microsoft", 90, 880);
         return canvas;
       }
@@ -1104,7 +1147,10 @@
         scoreLabel.textContent = "No attempt yet.";
         scoreLabel.className = "muted";
         feedbackList.innerHTML = "";
-        promptInput.value = "";
+        if (!promptInput.value) {
+          promptInput.value = "";
+        }
+        updateCurrentTaskUiState();
         maybeShowCertificate();
       }
 
@@ -1157,12 +1203,14 @@
             feedbackList.appendChild(li);
           });
           renderAttempts();
+          updateCurrentTaskUiState();
         } catch (error) {
           scoreValue.textContent = "0/100";
           updateScoreVisual(0);
           feedbackList.innerHTML = "";
           scoreLabel.textContent = `Scoring failed: ${error.message}`;
           scoreLabel.className = "bad";
+          updateCurrentTaskUiState();
         } finally {
           clearInterval(thinkingTimer);
           thinkingTerminal.classList.add("hidden");
@@ -1171,17 +1219,13 @@
         }
       });
 
-      document.getElementById("nextTaskBtn").addEventListener("click", () => {
+      nextTaskBtn.addEventListener("click", () => {
         if (taskIndex >= selectedRole.tasks.length) {
           scoreLabel.textContent = "All tasks are already complete for this role.";
           scoreLabel.className = "good";
           return;
         }
-        const taskAttempts = attempts.filter((item) =>
-          item.mode === selectedMode &&
-          item.roleId === selectedRole.id &&
-          item.task === taskIndex
-        );
+        const taskAttempts = currentTaskAttempts();
         if (!taskAttempts.length) {
           scoreLabel.textContent = "Score at least one prompt for this task before moving on.";
           scoreLabel.className = "warn";
@@ -1199,6 +1243,14 @@
         renderAssignment();
         maybeShowCertificate();
         renderAttempts();
+        scoreValue.textContent = "0/100";
+        updateScoreVisual(0);
+        scoreLabel.textContent = "No attempt yet.";
+        scoreLabel.className = "muted";
+        feedbackList.innerHTML = "";
+        promptInput.value = "";
+        promptInput.focus();
+        updateCurrentTaskUiState();
       });
 
       document.getElementById("resetBtn").addEventListener("click", () => {
@@ -1206,6 +1258,7 @@
         attempts = [];
         bestScore = 0;
         startedAt = Date.now();
+        promptInput.value = "";
         renderAll();
       });
 
