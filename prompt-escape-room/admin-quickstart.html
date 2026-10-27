@@ -536,6 +536,8 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
             <li>While on Task 2 or Task 3, sign-in redirect returns to the same task with the draft preserved.</li>
             <li>Unauthorized user is rejected (403 expected).</li>
             <li>Task progression and reset room controls work.</li>
+            <li>After quest completion, scoring controls are disabled and no additional (Task 4) attempt can be created.</li>
+            <li>During a deliberately delayed AI score call, changing scenario/role is blocked so the result cannot attach to the wrong task.</li>
             <li>Completion certificate renders and prints.</li>
             <li>Participant notice is visible: live AI scoring sends prompt text to your Azure AI endpoint.</li>
           </ul>

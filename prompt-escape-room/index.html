@@ -583,6 +583,7 @@
       let bestScore = 0;
       let startedAt = Date.now();
       const MIN_SCORE_TO_ADVANCE = 65;
+      let isScoring = false;
 
       const roleContainer = document.getElementById("roleContainer");
       const modeToggle = document.getElementById("modeToggle");
@@ -604,6 +605,7 @@
       const promptInput = document.getElementById("promptInput");
       const scoreBtn = document.getElementById("scoreBtn");
       const nextTaskBtn = document.getElementById("nextTaskBtn");
+      const resetBtn = document.getElementById("resetBtn");
       const confettiLayer = document.getElementById("confettiLayer");
       const downloadCertBtn = document.getElementById("downloadCertBtn");
       const shareLinkedInBtn = document.getElementById("shareLinkedInBtn");
@@ -768,6 +770,7 @@
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "role-btn" + (mode.id === selectedMode ? " selected" : "");
+          btn.disabled = isScoring;
           btn.textContent = mode.name;
           btn.addEventListener("click", () => {
             if (selectedMode === mode.id) return;
@@ -790,6 +793,7 @@
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "role-btn" + (role.id === selectedRole.id ? " selected" : "");
+          btn.disabled = isScoring;
           btn.textContent = role.name;
           btn.addEventListener("click", () => {
             selectedRole = role;
@@ -835,6 +839,10 @@
         if (done) {
           nextTaskBtn.disabled = true;
           nextTaskBtn.textContent = "Quest complete";
+          promptInput.disabled = true;
+          scoreBtn.disabled = true;
+          scoringEngineEl.disabled = true;
+          signInBtn.disabled = true;
           return;
         }
         const currentAttempts = currentTaskAttempts();
@@ -844,7 +852,11 @@
           ? "Complete Prompt Quest"
           : `Continue to Task ${taskIndex + 2}`;
         nextTaskBtn.textContent = label;
-        nextTaskBtn.disabled = !canAdvance;
+        nextTaskBtn.disabled = isScoring || !canAdvance;
+        promptInput.disabled = isScoring;
+        scoreBtn.disabled = isScoring;
+        scoringEngineEl.disabled = isScoring;
+        signInBtn.disabled = isScoring;
       }
 
       function scoreColor(score) {
@@ -1066,7 +1078,7 @@
         return { score, feedback, label, source: "local" };
       }
 
-      async function evaluatePromptFoundry(text) {
+      async function evaluatePromptFoundry(assessment) {
         const accessToken = await acquireAiToken();
         const response = await fetch(DIAx_AI.apiUrl, {
           method: "POST",
@@ -1075,17 +1087,17 @@
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            mode: selectedMode,
+            mode: assessment.mode,
             role: {
-              id: selectedRole.id,
-              name: selectedRole.name,
+              id: assessment.roleId,
+              name: assessment.roleName,
             },
             assignment: {
-              title: selectedRole.assignmentTitle,
-              details: selectedRole.assignmentText,
+              title: assessment.assignmentTitle,
+              details: assessment.assignmentDetails,
             },
-            taskIndex,
-            learnerPrompt: text,
+            taskIndex: assessment.task,
+            learnerPrompt: assessment.prompt,
           }),
         });
         if (!response.ok) {
@@ -1161,14 +1173,31 @@
           scoreLabel.className = "bad";
           return;
         }
+        if (taskIndex >= selectedRole.tasks.length) {
+          scoreLabel.textContent = "Quest is complete. Start a new run to score again.";
+          scoreLabel.className = "warn";
+          return;
+        }
+        const assessment = {
+          mode: selectedMode,
+          roleId: selectedRole.id,
+          roleName: selectedRole.name,
+          assignmentTitle: selectedRole.assignmentTitle,
+          assignmentDetails: selectedRole.assignmentText,
+          task: taskIndex,
+          prompt: text.trim(),
+          engine: scoringEngineEl.value
+        };
 
-        scoreBtn.disabled = true;
+        isScoring = true;
         scoreBtn.textContent = "Scoring...";
         scoreValue.textContent = "--/100";
         updateScoreVisual(0);
         feedbackList.innerHTML = "";
         scoreLabel.textContent = "Scoring in progress...";
         scoreLabel.className = "muted";
+        resetBtn.disabled = true;
+        updateCurrentTaskUiState();
         thinkingTerminal.classList.remove("hidden");
         let thinkingIndex = 0;
         thinkingText.textContent = `> ${thinkingLines[thinkingIndex]}`;
@@ -1177,31 +1206,43 @@
           thinkingText.textContent = `> ${thinkingLines[thinkingIndex]}`;
         }, 700);
         try {
-          const result = scoringEngineEl.value === "foundry" ? await evaluatePromptFoundry(text) : evaluatePromptLocal(text);
+          const result = assessment.engine === "foundry" ? await evaluatePromptFoundry(assessment) : evaluatePromptLocal(assessment.prompt);
           const when = new Date().toLocaleTimeString();
           attempts.push({
-            mode: selectedMode,
-            roleId: selectedRole.id,
-            task: taskIndex,
+            mode: assessment.mode,
+            roleId: assessment.roleId,
+            task: assessment.task,
             score: result.score,
             when,
             source: result.source,
-            prompt: text.trim()
+            prompt: assessment.prompt
           });
           bestScore = Math.max(bestScore, result.score);
           bestScoreEl.textContent = String(bestScore);
           attemptCountEl.textContent = String(attempts.length);
-          scoreValue.textContent = `${result.score}/100`;
-          updateScoreVisual(result.score);
-          triggerScoreFx(result.score);
-          scoreLabel.textContent = result.label;
-          scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
-          feedbackList.innerHTML = "";
-          result.feedback.forEach((line) => {
-            const li = document.createElement("li");
-            li.textContent = line;
-            feedbackList.appendChild(li);
-          });
+          const stateMatchesAssessment =
+            selectedMode === assessment.mode &&
+            selectedRole.id === assessment.roleId &&
+            taskIndex === assessment.task;
+          if (stateMatchesAssessment) {
+            scoreValue.textContent = `${result.score}/100`;
+            updateScoreVisual(result.score);
+            triggerScoreFx(result.score);
+            scoreLabel.textContent = result.label;
+            scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
+            feedbackList.innerHTML = "";
+            result.feedback.forEach((line) => {
+              const li = document.createElement("li");
+              li.textContent = line;
+              feedbackList.appendChild(li);
+            });
+          } else {
+            scoreValue.textContent = "0/100";
+            updateScoreVisual(0);
+            feedbackList.innerHTML = "";
+            scoreLabel.textContent = `Scoring completed for ${assessment.roleName}, Task ${assessment.task + 1}. Open that task to view context.`;
+            scoreLabel.className = "warn";
+          }
           renderAttempts();
           updateCurrentTaskUiState();
         } catch (error) {
@@ -1212,10 +1253,15 @@
           scoreLabel.className = "bad";
           updateCurrentTaskUiState();
         } finally {
+          isScoring = false;
           clearInterval(thinkingTimer);
           thinkingTerminal.classList.add("hidden");
-          scoreBtn.disabled = false;
           scoreBtn.textContent = "Score prompt";
+          resetBtn.disabled = false;
+          renderModeToggle();
+          renderRoles();
+          renderAssignment();
+          updateCurrentTaskUiState();
         }
       });
 
@@ -1253,7 +1299,8 @@
         updateCurrentTaskUiState();
       });
 
-      document.getElementById("resetBtn").addEventListener("click", () => {
+      resetBtn.addEventListener("click", () => {
+        if (isScoring) return;
         taskIndex = 0;
         attempts = [];
         bestScore = 0;
