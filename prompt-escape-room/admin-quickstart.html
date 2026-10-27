@@ -159,6 +159,7 @@
       <li>Azure CLI + Node.js 22 + npm on workstation.</li>
       <li>A tenant admin or delegated admin available to grant API permissions consent.</li>
     </ul>
+    <p class="note">Node.js 24 is also supported on current Functions plans. Use 22 or 24 consistently across your build and deployment tooling.</p>
     <p class="note">Terms used in this guide: <strong>AOAI</strong> = Azure OpenAI resource. <strong>Microsoft Foundry scoring</strong> here means the app calling your AOAI model deployment through the Function API.</p>
   </section>
 
@@ -602,7 +603,7 @@ az functionapp function list `
 #   escape-score
 
 # 4) Smoke test endpoint (401 is healthy before token auth)
-curl.exe -i https://$FUNC.azurewebsites.net/api/escape-score</code></pre>
+curl.exe -i -X POST "https://$FUNC.azurewebsites.net/api/escape-score" -H "Origin: https://<your-gh-user>.github.io" -H "Authorization: Bearer fake" -H "Content-Type: application/json" --data "{}"</code></pre>
     <p class="note">If step 4 still returns 404, re-check Mission 6 deployment output and Mission 7 app settings, then re-publish once more.</p>
   </section>
 </main>
