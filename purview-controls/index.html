@@ -120,8 +120,20 @@ ul.links li { margin: 0 0 8px; }
 .disclosure[open] > summary { border-bottom: 1px solid var(--cp-border); margin-bottom: 14px; }
 .accuracy-note { margin-top: 10px; padding: 10px 12px; border-left: 3px solid var(--cp-warning); background: var(--cp-surface-soft); color: var(--cp-text-muted); }
 .tablewrap { overflow-x: auto; }
+.medical-view { display: none; }
+.medical-view.on { display: block; }
+.medical-hero { margin-bottom: 18px; }
+.medical-hero h2 { margin: 0 0 6px; font-size: 24px; }
+.medical-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px; }
+.medical-control { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 18px; }
+.medical-control h3 { margin: 0 0 8px; font-size: 17px; }
+.medical-control p { margin: 0 0 10px; color: var(--cp-text-muted); }
+.medical-control .policy-name { font: 12px Consolas, "Courier New", monospace; color: var(--cp-text-soft); overflow-wrap: anywhere; }
+.medical-result { border-top: 1px solid var(--cp-border); margin-top: 12px; padding-top: 12px; }
+.medical-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.medical-boundaries { margin-bottom: 18px; }
 @media (max-width: 760px) { .intro, .cols, .figs { grid-template-columns: 1fr; } }
-@media (max-width: 760px) { .fact-strip, .outcome-grid { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .fact-strip, .outcome-grid, .medical-controls { grid-template-columns: 1fr; } }
 @media print {
   :root, html[data-theme="dark"] {
     color-scheme: light;
@@ -154,7 +166,7 @@ ul.links li { margin: 0 0 8px; }
       <h1>Protect sensitive information when people use Copilot and Cowork</h1>
       <p class="sub">See which Microsoft Purview controls can detect risky prompts, preserve conversations, support investigations, and limit how sensitive content is used. Start with the question you need to answer.</p>
     </div>
-    <div class="btns noprint"><span class="tag">Public guide</span> <a class="tag audience" href="medical-centers.html">Medical Centers</a> <span class="tag">Video links require Microsoft sign-in</span> <a class="btn" id="pdfAll" href="copilot-cowork-purview-quick-guide.pdf">Open PDF</a></div>
+    <div class="btns noprint"><span class="tag">Public guide</span> <a class="tag audience" href="#medical-centers">Medical Centers</a> <span class="tag">Video links require Microsoft sign-in</span> <a class="btn" id="pdfAll" href="copilot-cowork-purview-quick-guide.pdf">Open PDF</a></div>
   </header>
 
 
@@ -188,6 +200,71 @@ ul.links li { margin: 0 0 8px; }
     <h2 class="section-title">Choose a control question</h2>
     <div class="grid" id="grid"></div>
     <p class="note noprint">Open a card for the plain-language outcome. Admin steps, evidence, licensing, and source links stay collapsed until you need them.</p>
+  </section>
+
+  <section class="medical-view" id="medical-view">
+    <div class="dhead">
+      <div>
+        <span class="tag audience">Medical Centers</span>
+        <h2>Three controls validated for clinical and research scenarios</h2>
+        <p class="sub">These controls are part of this integrated guide. They were tested with synthetic identifiers and documents in a Microsoft test tenant; no patient or production data was used.</p>
+      </div>
+      <button class="btn noprint" id="medical-back" type="button">&larr; All controls</button>
+    </div>
+
+    <div class="medical-controls">
+      <article class="medical-control">
+        <h3>P1 &mdash; Block clinical prompts</h3>
+        <p>Detects a medical record number (MRN) with a sensitive information type (SIT) and a keyword condition, then blocks the prompt.</p>
+        <div class="policy-name">DIAX-LAB-Cowork-01-Block-Clinical-Prompts</div>
+        <div class="medical-result">
+          <strong>Where tested:</strong> Copilot Chat<br>
+          <strong>Result:</strong> T1 positive prompt matched; the negative control did not. T8a confirmed the rule did not apply to a user outside the Testers group.
+        </div>
+        <div class="medical-actions">
+          <button class="btn" type="button" data-open="dlp">Open prompt DLP control</button>
+        </div>
+      </article>
+
+      <article class="medical-control">
+        <h3>P2 &mdash; Suppress sensitive web searches</h3>
+        <p>Uses a research-protocol SIT and keyword condition to suppress external web grounding. Copilot can still respond from permitted sources.</p>
+        <div class="policy-name">DIAX-LAB-Cowork-02-Block-Sensitive-WebSearch</div>
+        <div class="medical-result">
+          <strong>Where tested:</strong> Cowork<br>
+          <strong>Result:</strong> Activity Explorer later showed matches aligned with both T2 runs. T8b confirmed the rule did not apply to a user outside the Testers group.
+        </div>
+        <div class="medical-actions">
+          <button class="btn" type="button" data-open="dlp">Open prompt DLP control</button>
+        </div>
+      </article>
+
+      <article class="medical-control">
+        <h3>P3 &mdash; Exclude restricted files</h3>
+        <p>Uses a sensitivity-label condition to exclude matching clinical or research files from Copilot grounding.</p>
+        <div class="policy-name">DIAX-LAB-Cowork-03-Exclude-Restricted-Grounding</div>
+        <div class="medical-result">
+          <strong>Where tested:</strong> Cowork<br>
+          <strong>Result:</strong> T4 and T5 passed after label metadata was repopulated. T8c-1 passed outside the Testers group; T8c-2 remained inconclusive.
+        </div>
+        <div class="medical-actions">
+          <button class="btn" type="button" data-open="labels">Open labeled-content control</button>
+        </div>
+      </article>
+    </div>
+
+    <div class="panel medical-boundaries">
+      <h2>Evidence boundaries</h2>
+      <ul>
+        <li>P1 was tested in Copilot Chat; P2 and P3 were tested in Cowork.</li>
+        <li>P3 behavioral retests passed, but audit corroboration of those specific retests was still pending when the report was written.</li>
+        <li>The P3 investigation observed empty SharePoint label metadata followed by passing retests after labels were reapplied. The exact synchronization mechanism was not independently confirmed.</li>
+        <li>Validate the rules, scope, licensing, and propagation behavior in your own tenant before enforcement.</li>
+      </ul>
+      <div class="medical-actions">
+        <a class="btn primary" href="medical-centers.html">Open full lab evidence and test matrix</a>
+      </div>
+    </div>
   </section>
 
   <section id="details"></section>
@@ -416,25 +493,37 @@ DATA.cards.forEach(c => {
 
 function show(id) {
   document.getElementById("home").style.display = "none";
+  document.getElementById("medical-view").classList.remove("on");
   document.querySelectorAll(".detail").forEach(x => x.classList.toggle("on", x.id === "d-" + id));
   try { if (location.hash !== "#" + id) location.hash = id; } catch (e) {}
   window.scrollTo(0, 0);
 }
+function showMedical() {
+  document.getElementById("home").style.display = "none";
+  document.querySelectorAll(".detail").forEach(x => x.classList.remove("on"));
+  document.getElementById("medical-view").classList.add("on");
+  try { if (location.hash !== "#medical-centers") location.hash = "medical-centers"; } catch (e) {}
+  window.scrollTo(0, 0);
+}
 function home() {
   document.querySelectorAll(".detail").forEach(x => x.classList.remove("on"));
+  document.getElementById("medical-view").classList.remove("on");
   document.getElementById("home").style.display = "";
   try { location.hash = ""; } catch (e) {}
 }
+document.getElementById("medical-back").addEventListener("click", home);
 function zoom(src) { const lb = document.getElementById("lb"); lb.querySelector("img").src = src; lb.classList.add("on"); }
 document.getElementById("lb").addEventListener("click", e => e.currentTarget.classList.remove("on"));
 document.addEventListener("keydown", e => { if (e.key === "Escape") { document.getElementById("lb").classList.remove("on"); } });
 
 const h = (location.hash || "").slice(1);
 if (h === "print-all") { document.body.classList.add("print-all"); document.querySelectorAll("img[loading]").forEach(i => i.removeAttribute("loading")); }
+else if (h === "medical-centers") showMedical();
 else if (h && document.getElementById("d-" + h)) show(h);
 window.addEventListener("hashchange", () => {
   const id = (location.hash || "").slice(1);
-  if (id && document.getElementById("d-" + id)) show(id);
+  if (id === "medical-centers") showMedical();
+  else if (id && document.getElementById("d-" + id)) show(id);
   else home();
 });
 </script>
