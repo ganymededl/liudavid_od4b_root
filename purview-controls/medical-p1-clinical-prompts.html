@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P1 Lab Evidence - Block Clinical Prompts</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("scoutTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font: 15px/1.55 "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+code { font-family: Consolas, "Courier New", Courier, monospace; overflow-wrap: anywhere; }
+a { color: var(--cp-link); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 24px 20px 64px; }
+.back { display: inline-block; margin-bottom: 16px; color: var(--cp-accent); text-decoration: none; font-weight: 600; }
+.hero, .panel { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 20px 24px; box-shadow: 0 0 2px var(--cp-border); margin-bottom: 16px; }
+.hero h1 { margin: 4px 0 6px; font-size: 28px; }
+.hero p { margin: 0; color: var(--cp-text-muted); }
+.tag { display: inline-block; border: 1px solid var(--cp-accent); border-radius: 999px; padding: 2px 9px; color: var(--cp-accent); background: var(--cp-accent-soft); font-size: 12px; font-weight: 600; }
+.stats, .cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+.cols { grid-template-columns: 1fr 1fr; }
+.stat { background: var(--cp-surface-soft); border: 1px solid var(--cp-border); border-radius: 10px; padding: 12px; }
+.stat strong { display: block; color: var(--cp-accent); }
+h2 { margin: 0 0 10px; font-size: 19px; }
+h3 { margin: 0 0 6px; font-size: 15px; color: var(--cp-accent); }
+ul, ol { margin: 6px 0; padding-left: 22px; }
+li { margin: 5px 0; }
+.config { display: grid; grid-template-columns: 180px 1fr; border-top: 1px solid var(--cp-border); }
+.config div { padding: 8px; border-bottom: 1px solid var(--cp-border); }
+.config div:nth-child(odd) { color: var(--cp-text-muted); }
+.callout { border-left: 4px solid var(--cp-warning); background: var(--cp-surface-soft); padding: 12px 14px; margin-top: 12px; }
+figure { margin: 0; }
+figure img { width: 100%; display: block; border: 1px solid var(--cp-border); border-radius: 10px; }
+figcaption { margin-top: 6px; color: var(--cp-text-muted); font-size: 13px; }
+.evidence-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { display: inline-block; padding: 7px 12px; border: 1px solid var(--cp-border-strong); border-radius: 10px; color: var(--cp-text); background: var(--cp-surface); text-decoration: none; }
+.btn.primary { color: var(--cp-accent-fg); background: var(--cp-accent); border-color: var(--cp-accent); }
+@media (max-width: 760px) { .stats, .cols, .evidence-grid { grid-template-columns: 1fr; } .config { grid-template-columns: 1fr; } .config div:nth-child(odd) { padding-bottom: 0; border-bottom: 0; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="back" href="index.html#medical-centers">&larr; Medical Centers controls</a>
+  <header class="hero">
+    <span class="tag">Medical Centers lab control P1</span>
+    <h1>Block clinical prompts containing a synthetic MRN</h1>
+    <p>This page documents the actual custom detector, DLP policy, positive and negative controls, and observed results from the lab.</p>
+    <div class="stats">
+      <div class="stat"><strong>Experience</strong>Microsoft 365 Copilot Chat</div>
+      <div class="stat"><strong>Result</strong>PASS</div>
+      <div class="stat"><strong>Scope control</strong>T8a PASS</div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>What was configured</h2>
+    <div class="config">
+      <div>Custom detector</div><div><code>DIAX-LAB-Cowork-Synthetic-MRN</code></div>
+      <div>Primary pattern</div><div><code>\b(DIAXMRN-[0-9]{8})\b</code></div>
+      <div>Supporting terms</div><div><code>medical record number</code> or <code>MRN</code>, within 300 characters</div>
+      <div>Confidence</div><div>High, 85-100</div>
+      <div>DLP policy</div><div><code>DIAX-LAB-Cowork-01-Block-Clinical-Prompts</code></div>
+      <div>Condition</div><div>Copilot <code>UploadText</code> activity containing at least one match of the custom MRN detector</div>
+      <div>Action</div><div><code>RestrictAccess: Block</code>; web grounding was not the action tested here</div>
+      <div>Scope</div><div>Lab Testers group only; control identity intentionally outside that group</div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>What was tested</h2>
+    <ol>
+      <li>The custom detector matched <code>DIAXMRN-48276105</code> when the supporting MRN wording was present.</li>
+      <li>A short value, <code>DIAXMRN-1234</code>, did not match.</li>
+      <li>A full-length value without the supporting keyword did not match.</li>
+      <li>The first Copilot Chat attempt before enforcement propagation was not blocked.</li>
+      <li>A genuine retry at 14:08 with the MRN wording was blocked with the organization's policy message.</li>
+      <li>A 14:15 negative control containing a full synthetic identifier but no MRN keyword was allowed.</li>
+      <li>Activity Explorer later showed the P1 rule match for the positive prompt; the negative control had no P1 match.</li>
+      <li>T8a, run as a user outside the Testers group, was allowed without a policy banner.</li>
+    </ol>
+  </section>
+
+  <section class="panel">
+    <h2>Evidence screenshots</h2>
+    <div class="evidence-grid">
+      <figure>
+        <img src="assets/medical-lab/label-applied-clinical-summary-20261026-0827.png" alt="Synthetic clinical lab document showing the MRN fixture">
+        <figcaption>The synthetic clinical fixture shows the exact eight-digit MRN pattern and supporting wording used to validate the detector. This is not a screenshot of the T1 block result.</figcaption>
+      </figure>
+      <figure>
+        <img src="assets/medical-lab/Audit-P2-DLPRuleMatched-20261027-0149.png" alt="Purview Activity Explorer showing DLP rule matched events">
+        <figcaption>Activity Explorer evidence from the lab's final audit review. The underlying audit review confirmed P1 matches at 12:50 and 14:08 and no P1 match for the negative control.</figcaption>
+      </figure>
+    </div>
+    <div class="callout"><strong>Evidence limitation:</strong> no dedicated screenshot of the genuine 14:08 T1 block was saved. The block text was observed in the tested surface and the P1 attribution was confirmed in Activity Explorer. This page does not substitute the earlier invalid 12:50 screenshot claim.</div>
+  </section>
+
+  <section class="panel">
+    <h2>What this result does and does not establish</h2>
+    <div class="cols">
+      <div><h3>Supported by the lab</h3><ul><li>The custom MRN detector required both the pattern and supporting clinical wording.</li><li>The scoped P1 policy matched the positive prompt and did not match the negative control.</li><li>The non-Testers control behaved as expected.</li></ul></div>
+      <div><h3>Still tenant-dependent</h3><ul><li>The detector is synthetic and is not a comprehensive PHI classifier.</li><li>Policy propagation delayed the first test.</li><li>Licensing, roles, and enforcement behavior must be validated in the target tenant.</li></ul></div>
+    </div>
+  </section>
+
+  <div class="actions">
+    <a class="btn primary" href="medical-p2-research-web.html">Next: P2 research web searches</a>
+    <a class="btn" href="medical-centers.html">Full test matrix</a>
+  </div>
+</main>
+</body>
+</html>
