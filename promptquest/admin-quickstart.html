@@ -88,6 +88,7 @@
     }
     .step { border: 1px solid var(--cp-border); border-radius: 12px; padding: 14px; margin: 14px 0; background: var(--cp-surface-soft); }
     .step-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px; align-items: start; }
+    .step-grid > * { min-width: 0; }
     figure { margin: 0; border: 1px solid var(--cp-border-strong); border-radius: 12px; overflow: hidden; background: var(--cp-bg-elevated); }
     figure img { width: 100%; display: block; }
     figcaption { border-top: 1px solid var(--cp-border); padding: 10px 12px; font-size: 13px; color: var(--cp-text-muted); }
@@ -96,8 +97,8 @@
     .portal-body { display: grid; gap: 8px; padding: 10px; font-size: 13px; }
     .portal-row { display: grid; grid-template-columns: 132px 1fr; gap: 8px; align-items: center; }
     .portal-label { color: var(--cp-text-muted); font-size: 12px; }
-    .callout-red { border: 3px solid #d92d20; border-radius: 8px; padding: 8px; background: rgba(217, 45, 32, 0.06); }
-    .callout-red strong { color: #d92d20; }
+    .callout-red { border: 3px solid #9f1d16; border-radius: 8px; padding: 8px; background: rgba(159, 29, 22, 0.1); }
+    .callout-red strong { color: #9f1d16; }
     .note { color: var(--cp-text-muted); font-size: 13px; }
     .deploy-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0 4px; }
     .deploy-btn {
@@ -168,7 +169,7 @@
     <ul class="checklist">
       <li><strong>Microsoft Entra ID:</strong> registration and consent steps are the same for commercial and GCC-Moderate tenants.</li>
       <li><strong>Azure resources:</strong> this guide and Deploy button target the commercial Azure portal and endpoints.</li>
-      <li><strong>Azure Government:</strong> use portal.usgovcloudapi.net equivalent flows and verify AOAI endpoint/domain differences before deploying.</li>
+      <li><strong>Azure Government:</strong> use <code>portal.azure.us</code> and verify authority host, token audience, and AOAI endpoint/domain differences before deploying.</li>
     </ul>
   </section>
 
@@ -185,8 +186,9 @@
           <tr><td>SPA app client ID</td><td><code>&lt;spa-app-guid&gt;</code></td><td>SPA app registration overview</td><td><code>DIAx_AI.clientId</code></td></tr>
           <tr><td>Scope URI</td><td><code>api://&lt;api-client-id&gt;/access_as_user</code></td><td>API app &gt; Expose an API</td><td><code>DIAx_AI.scope</code></td></tr>
           <tr><td>Function API URL</td><td><code>https://&lt;func&gt;.azurewebsites.net/api/escape-score</code></td><td>Function app name</td><td><code>DIAx_AI.apiUrl</code></td></tr>
-          <tr><td>Redirect URI (prod)</td><td><code>https://&lt;user&gt;.github.io/&lt;repo&gt;/prompt-escape-room/</code></td><td>GitHub Pages URL</td><td>SPA app Authentication + <code>DIAx_AI.redirectUri</code></td></tr>
+          <tr><td>Redirect URI (prod)</td><td><code>https://&lt;user&gt;.github.io/&lt;repo&gt;/promptquest/</code></td><td>GitHub Pages URL</td><td>SPA app Authentication + <code>DIAx_AI.redirectUri</code></td></tr>
           <tr><td>Allowed origin</td><td><code>https://&lt;user&gt;.github.io</code></td><td>Your site origin</td><td><code>ALLOWED_ORIGINS</code></td></tr>
+          <tr><td>Allowed user object ID</td><td><code>&lt;entra-user-object-id&gt;</code></td><td><code>az ad signed-in-user show --query id -o tsv</code></td><td><code>ALLOWED_USER_OBJECT_ID</code></td></tr>
           <tr><td>AOAI endpoint</td><td><code>https://&lt;aoai&gt;.openai.azure.com/</code></td><td>AOAI resource overview</td><td><code>ESCAPE_AOAI_ENDPOINT</code></td></tr>
           <tr><td>AOAI deployment</td><td><code>prompt-score-gpt41mini</code></td><td>AOAI model deployments</td><td><code>ESCAPE_AOAI_DEPLOYMENT</code></td></tr>
         </tbody>
@@ -206,7 +208,7 @@
             <li>Confirm these paths are present:
               <ul class="checklist">
                 <li><code>prompt-engineering-public/</code></li>
-                <li><code>prompt-escape-room/</code></li>
+                <li><code>promptquest/</code></li>
                 <li><code>model-mission-control-api/</code></li>
                 <li><code>model-mission-control/vendor/msal-browser.min.js</code></li>
               </ul>
@@ -218,7 +220,7 @@ git clone https://github.com/ganymededl/liudavid_od4b_root.git
 
 # 2) Copy required folders into your own site repo
 # prompt-engineering-public/
-# prompt-escape-room/
+# promptquest/
 # model-mission-control-api/
 
 # 3) Commit in your site repo and publish
@@ -240,7 +242,7 @@ git push origin main</code></pre>
         <div>
           <ol>
             <li>Portal &rarr; <strong>Microsoft Entra ID</strong> &rarr; <strong>App registrations</strong> &rarr; <strong>New registration</strong>.</li>
-            <li>Name it <code>prompt-escape-room-api</code> (or your naming standard).</li>
+            <li>Name it <code>promptquest-api</code> (or your naming standard).</li>
             <li>Use <strong>single tenant</strong>.</li>
             <li>Register, then open <strong>Expose an API</strong>.</li>
             <li>Set Application ID URI to <code>api://&lt;api-client-id&gt;</code>.</li>
@@ -256,9 +258,9 @@ git push origin main</code></pre>
         <div class="portal-shot">
           <div class="portal-bar">Entra ID &gt; App registrations &gt; API app</div>
           <div class="portal-body">
-            <div class="portal-row"><div class="portal-label">Name</div><div>prompt-escape-room-api</div></div>
+            <div class="portal-row"><div class="portal-label">Name</div><div>promptquest-api</div></div>
             <div class="portal-row"><div class="portal-label">Account type</div><div>Single tenant</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> create scope <code>access_as_user</code> before configuring SPA permissions.</div>
+            <div class="callout-red"><strong>Important:</strong> create scope <code>access_as_user</code> before configuring SPA permissions.</div>
           </div>
         </div>
       </div>
@@ -269,12 +271,12 @@ git push origin main</code></pre>
       <div class="step-grid">
         <div>
           <ol>
-            <li>Create another app registration: <code>prompt-escape-room-spa</code>.</li>
+            <li>Create another app registration: <code>promptquest-spa</code>.</li>
             <li>Open <strong>Authentication</strong> &rarr; <strong>Add a platform</strong> &rarr; <strong>Single-page application</strong>.</li>
             <li>Add redirect URIs exactly:</li>
           </ol>
-<pre><code>https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/
-http://localhost:8765/prompt-escape-room/</code></pre>
+<pre><code>https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/promptquest/
+http://localhost:8765/promptquest/</code></pre>
           <p class="note"><strong>Dev-only URI:</strong> keep <code>localhost:8765</code> only for local testing. Remove it for production-only registrations if your security standard requires that.</p>
           <ol start="4">
             <li>Open <strong>API permissions</strong> &rarr; <strong>Add a permission</strong> &rarr; <strong>My APIs</strong> &rarr; choose API app.</li>
@@ -287,7 +289,7 @@ http://localhost:8765/prompt-escape-room/</code></pre>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Platform</div><div>Single-page application</div></div>
             <div class="portal-row"><div class="portal-label">Permission</div><div>Delegated <code>access_as_user</code></div></div>
-            <div class="callout-red"><strong>Red callout:</strong> redirect URI must match exactly, including trailing slash.</div>
+            <div class="callout-red"><strong>Important:</strong> redirect URI must match exactly, including trailing slash.</div>
           </div>
         </div>
       </div>
@@ -298,7 +300,7 @@ http://localhost:8765/prompt-escape-room/</code></pre>
       <div class="step-grid">
         <div>
 <pre><code># Replace with your values
-$RG = "rg-prompt-escape-room-eastus2"
+$RG = "rg-promptquest-eastus2"
 $LOCATION = "eastus2"
 $STORAGE = "stpromptroom12345"
 $PLAN = "plan-prompt-room"
@@ -340,8 +342,8 @@ az cognitiveservices account create `
 <pre><code>az storage account create --name $STORAGE --resource-group $RG --location $LOCATION --sku Standard_LRS
 az functionapp create --name $FUNC --resource-group $RG --storage-account $STORAGE --consumption-plan-location $LOCATION --os-type Windows --runtime node --runtime-version 22</code></pre>
           <div class="deploy-row">
-            <a class="deploy-btn" target="_blank" rel="noopener noreferrer" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fganymededl%2Fliudavid_od4b_root%2Fmain%2Fprompt-escape-room%2Fdeploy%2Fazuredeploy.json">Deploy to Azure</a>
-            <a class="deploy-btn secondary" target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/ganymededl/liudavid_od4b_root/main/prompt-escape-room/deploy/azuredeploy.json">View ARM template</a>
+            <a class="deploy-btn" target="_blank" rel="noopener noreferrer" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fganymededl%2Fliudavid_od4b_root%2Fmain%2Fpromptquest%2Fdeploy%2Fazuredeploy.json">Deploy to Azure</a>
+            <a class="deploy-btn secondary" target="_blank" rel="noopener noreferrer" href="https://raw.githubusercontent.com/ganymededl/liudavid_od4b_root/main/promptquest/deploy/azuredeploy.json">View ARM template</a>
           </div>
           <p class="note"><strong>Deploy button scope:</strong> this template provisions storage + hosting plan + Function App + AOAI account only. You still must complete Missions 5-9 for deployment, identity role assignment, CORS, and app settings.</p>
           <p class="note"><strong>Storage policy note:</strong> the template sets <code>AzureWebJobsStorage</code> using a storage account key. If your policy blocks shared-key access, use manual provisioning and your approved Functions storage pattern instead of this template.</p>
@@ -351,7 +353,7 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
           <div class="portal-bar">Azure portal &gt; Resource group</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Must exist</div><div>Function App + Storage + AOAI</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> Mission 5 and beyond require Function App to exist first.</div>
+            <div class="callout-red"><strong>Important:</strong> Mission 6 and beyond require Function App to exist first.</div>
           </div>
         </div>
       </div>
@@ -375,7 +377,7 @@ az functionapp create --name $FUNC --resource-group $RG --storage-account $STORA
 az cognitiveservices account list-models `
   --name $AOAI `
   --resource-group $RG `
-  --query "[?contains(name, 'gpt-4.1') || contains(name, 'gpt-4o')].{name:name,version:version,status:deprecation.status}" -o table</code></pre>
+  --query "[?contains(name, 'gpt-4.1') || contains(name, 'gpt-4o') || contains(name, 'gpt-5')].{name:name,version:version,lifecycle:lifecycleStatus,retireInference:deprecation.inference}" -o table</code></pre>
           <p class="note">If your subscription cannot deploy the default model version, choose a currently deployable model from your list-models output and keep <code>$DEPLOYMENT</code> aligned with that choice.</p>
         </div>
         <div class="portal-shot">
@@ -383,7 +385,7 @@ az cognitiveservices account list-models `
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Deployment name</div><div>prompt-score-gpt41mini</div></div>
             <div class="portal-row"><div class="portal-label">Status</div><div>Succeeded</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> deployment name must match <code>ESCAPE_AOAI_DEPLOYMENT</code>.</div>
+            <div class="callout-red"><strong>Important:</strong> deployment name must match <code>ESCAPE_AOAI_DEPLOYMENT</code>.</div>
           </div>
         </div>
       </div>
@@ -405,7 +407,7 @@ func azure functionapp publish $FUNC</code></pre>
           <div class="portal-bar">Function App &gt; Deployment Center / Log stream</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Expected</div><div>Deployment successful, no startup errors</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> if deployment succeeds but endpoint fails, restart app and re-check app settings.</div>
+            <div class="callout-red"><strong>Important:</strong> if deployment succeeds but endpoint fails, restart app and re-check app settings.</div>
           </div>
         </div>
       </div>
@@ -417,7 +419,7 @@ func azure functionapp publish $FUNC</code></pre>
         <div>
 <pre><code>$TENANT = "&lt;tenant-id&gt;"
 $API_CLIENT = "&lt;api-app-client-id&gt;"
-$ALLOWED_USER = "&lt;user-object-id&gt;"
+$ALLOWED_USER = az ad signed-in-user show --query id -o tsv
 $ORIGIN = "https://&lt;your-gh-user&gt;.github.io"
 $AOAI_ENDPOINT = az cognitiveservices account show `
   --resource-group $RG `
@@ -446,7 +448,7 @@ az functionapp cors add `
           <div class="portal-bar">Function App &gt; Environment variables + API &gt; CORS</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Critical value</div><div><code>ALLOWED_ORIGINS</code> = exact site origin</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> set both app-level <code>ALLOWED_ORIGINS</code> and platform CORS allow list, or browser requests will fail.</div>
+            <div class="callout-red"><strong>Important:</strong> set both app-level <code>ALLOWED_ORIGINS</code> and platform CORS allow list, or browser requests will fail.</div>
           </div>
         </div>
       </div>
@@ -481,7 +483,7 @@ az role assignment create `
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">Role</div><div>Cognitive Services OpenAI User</div></div>
             <div class="portal-row"><div class="portal-label">Identity type</div><div>Managed identity (Function App)</div></div>
-            <div class="callout-red"><strong>Red callout:</strong> assign role to Function identity, not to your user account.</div>
+            <div class="callout-red"><strong>Important:</strong> assign role to Function identity, not to your user account.</div>
           </div>
         </div>
       </div>
@@ -491,19 +493,19 @@ az role assignment create `
       <h3>Mission 9. Wire frontend to your tenant</h3>
       <div class="step-grid">
         <div>
-          <p>In <code>prompt-escape-room/index.html</code>, update the <code>DIAx_AI</code> object:</p>
+          <p>In <code>promptquest/index.html</code>, update the <code>DIAx_AI</code> object:</p>
 <pre><code>tenantId: "&lt;your-tenant-id&gt;",
 clientId: "&lt;your-spa-client-id&gt;",
 scope: "api://&lt;your-api-client-id&gt;/access_as_user",
 apiUrl: "https://&lt;your-function-app&gt;.azurewebsites.net/api/escape-score",
-redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-escape-room/"</code></pre>
+redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/promptquest/"</code></pre>
           <p>Commit and push these changes so they publish to your site.</p>
         </div>
         <div class="portal-shot">
           <div class="portal-bar">Prompt Quest source &gt; DIAx_AI config block</div>
           <div class="portal-body">
             <div class="portal-row"><div class="portal-label">scope format</div><div><code>api://&lt;api-client-id&gt;/access_as_user</code></div></div>
-            <div class="callout-red"><strong>Red callout:</strong> redirect URI in code must exactly match SPA app authentication setting.</div>
+            <div class="callout-red"><strong>Important:</strong> redirect URI in code must exactly match SPA app authentication setting.</div>
           </div>
         </div>
       </div>
@@ -513,7 +515,7 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
       <h3>Mission 10. Author your Prompt Quest content</h3>
       <div class="step-grid">
         <div>
-          <p>Admins can customize the room itself in <code>prompt-escape-room/index.html</code>:</p>
+          <p>Admins can customize the room itself in <code>promptquest/index.html</code>:</p>
           <ul class="checklist">
             <li><strong>Scenarios and roles:</strong> update <code>roleCatalogByMode</code> for HE, SLG, and Medical Centers.</li>
             <li><strong>Assignment text and tasks:</strong> edit each role's <code>assignmentTitle</code>, <code>assignmentText</code>, and <code>tasks</code>.</li>
@@ -582,6 +584,16 @@ redirectUri: "https://&lt;your-gh-user&gt;.github.io/&lt;your-repo&gt;/prompt-es
   </section>
 
   <section class="panel">
+    <h2>Governance and data-handling notes</h2>
+    <ul class="checklist">
+      <li>Training guidance: keep learner inputs synthetic. Do not enter PHI, CJIS, FERPA-protected student records, or production case identifiers unless your deployment has explicit approval.</li>
+      <li>Data flow: browser prompt text is posted to Function API, then forwarded to your Azure OpenAI deployment for scoring.</li>
+      <li>Regulatory review: confirm your tenant policy for retention, abuse monitoring, residency, and logging before enabling live AI scoring.</li>
+      <li>Security hardening baseline: review private endpoint options, disable local auth where allowed, and send diagnostics to Log Analytics.</li>
+    </ul>
+  </section>
+
+  <section class="panel">
     <h2>Troubleshooting</h2>
     <ul class="checklist">
       <li><strong>AADSTS50011:</strong> redirect URI mismatch. Add exact URI with trailing slash to SPA app registration.</li>
@@ -612,6 +624,7 @@ az functionapp function list `
 
 # 4) Smoke test endpoint (401 is healthy before token auth)
 curl.exe -i -X POST "https://$FUNC.azurewebsites.net/api/escape-score" -H "Origin: https://<your-gh-user>.github.io" -H "Authorization: Bearer fake" -H "Content-Type: application/json" --data "{}"</code></pre>
+    <p class="note">Use this exact origin placeholder format when you copy the smoke test command: <code>https://&lt;your-gh-user&gt;.github.io</code>.</p>
     <p class="note">If step 4 still returns 404, re-check Mission 6 deployment output and Mission 7 app settings, then re-publish once more.</p>
   </section>
 </main>
@@ -641,6 +654,8 @@ curl.exe -i -X POST "https://$FUNC.azurewebsites.net/api/escape-score" -H "Origi
       wrapper.className = "code-wrap";
       pre.parentNode.insertBefore(wrapper, pre);
       wrapper.appendChild(pre);
+      pre.setAttribute("tabindex", "0");
+      pre.setAttribute("aria-label", "Command block");
 
       const btn = document.createElement("button");
       btn.type = "button";

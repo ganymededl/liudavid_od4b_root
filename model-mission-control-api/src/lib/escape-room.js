@@ -43,7 +43,7 @@ export function validateEscapeScoreRequest(body) {
 
 function buildEscapeScoringRequest(input, deploymentName) {
   const systemPrompt = [
-    "You are Prompt Escape Room evaluator.",
+    "You are Prompt Quest evaluator.",
     "Evaluate learner prompts for Higher Ed, State/Local Government, and Medical Center back-office scenarios.",
     "Score the learner prompt from 0-100 based on role definition, requested result format, practical limits, step-by-step usability, and handling of unknowns.",
     "Write feedback in plain everyday language for non-technical users.",
@@ -62,13 +62,16 @@ function buildEscapeScoringRequest(input, deploymentName) {
     learnerPrompt: input.learnerPrompt
   };
 
+  const tokenLimitField = /^gpt-(5|6)/i.test(deploymentName)
+    ? { max_completion_tokens: 800 }
+    : { max_tokens: 800 };
   return {
     model: deploymentName,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: JSON.stringify(userData) }
     ],
-    max_tokens: 800
+    ...tokenLimitField
   };
 }
 

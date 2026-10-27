@@ -5,6 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Prompt Quest</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23111'/%3E%3Cpath d='M8 10h16v4H8zm0 8h12v4H8z' fill='%23fff'/%3E%3C/svg%3E" />
     <script src="../model-mission-control/vendor/msal-browser.min.js"></script>
     <script>
       (() => {
@@ -363,11 +364,28 @@
           scroll-behavior: auto !important;
         }
       }
+      @media print {
+        body * {
+          visibility: hidden !important;
+        }
+        #certificateSection,
+        #certificateSection * {
+          visibility: visible !important;
+        }
+        #certificateSection {
+          position: absolute;
+          inset: 0;
+          margin: 0;
+        }
+        .cert-actions {
+          display: none !important;
+        }
+      }
     </style>
   </head>
   <body>
     <div id="confettiLayer"></div>
-    <div class="container">
+    <main class="container" id="mainContent">
       <section class="card">
         <p class="muted"><a href="../prompt-engineering-public/index.html">&larr; Back to Prompt Engineering</a></p>
         <h1>Prompt Quest</h1>
@@ -396,6 +414,7 @@
           <h2>2) Your assignment</h2>
           <h3 id="assignmentTitle"></h3>
           <p id="assignmentText" class="muted"></p>
+          <p id="medNotice" class="warn hidden">Medical Centers mode is for training content only. Do not paste PHI, patient identifiers, or real clinical records.</p>
           <div id="taskList"></div>
         </div>
 
@@ -405,12 +424,13 @@
           <textarea id="promptInput" placeholder="Write your prompt here..."></textarea>
           <div class="row" style="margin-top: 0.75rem">
             <button class="primary" id="scoreBtn">Score prompt</button>
+            <button id="cancelScoreBtn" class="hidden">Cancel scoring</button>
             <button id="nextTaskBtn" disabled>Continue to next task</button>
           </div>
           <div style="margin-top: 0.75rem">
             <div class="score" id="scoreValue">0/100</div>
             <div class="score-track"><div id="scoreFill" class="score-fill"></div></div>
-            <div id="scoreLabel" class="muted">No attempt yet.</div>
+            <div id="scoreLabel" class="muted" role="status" aria-live="polite">No attempt yet.</div>
             <div id="thinkingTerminal" class="thinking-terminal hidden">
               <div class="mono" id="thinkingText">&gt; Analyzing prompt structure...</div>
             </div>
@@ -438,25 +458,33 @@
         <p class="muted">
           Live AI scoring sends your prompt text to your configured Azure AI endpoint. During sign-in redirects, your draft is temporarily kept in browser session storage so your work is not lost. Do not paste sensitive data unless this deployment is approved for it.
         </p>
+        <p class="muted">
+          This public demo supports live AI sign-in only for its configured tenant/user. For customer usage, deploy your own tenant and app registrations from the admin quickstart.
+        </p>
         <div class="stack">
           <label for="scoringEngine">Scoring engine</label>
           <select id="scoringEngine">
             <option value="local">Rule-based practice score (default)</option>
             <option value="foundry">Live AI score (Foundry)</option>
           </select>
-          <button id="signInBtn">Sign in with Microsoft Entra ID</button>
-          <div id="foundryStatus" class="muted">AI scoring is off.</div>
+          <div class="row">
+            <button id="signInBtn">Sign in with Microsoft Entra ID</button>
+            <button id="signOutBtn" disabled>Sign out</button>
+          </div>
+          <div id="accountStatus" class="muted" role="status" aria-live="polite">Not signed in.</div>
+          <div id="foundryStatus" class="muted" role="status" aria-live="polite">AI scoring is off.</div>
         </div>
       </section>
 
       <section id="certificateSection" class="card hidden">
-        <h2>6) Completion certificate</h2>
+        <h2>6) Practice summary</h2>
         <div class="certificate">
-          <p><strong>Prompt Quest Completion</strong></p>
+          <p><strong>Prompt Quest Practice Summary</strong></p>
           <p>
             This confirms completion of the <span id="certRole">Role</span> scenario and meeting the practice-score threshold (65+).
           </p>
           <p>Best score: <span id="certScore"></span>/100</p>
+          <p id="certTaskScores" class="muted"></p>
           <p>Total elapsed: <span id="certTime"></span></p>
           <p>Date: <span id="certDate"></span></p>
         </div>
@@ -470,18 +498,10 @@
       </section>
 
       <footer class="card app-footer">
-        <span class="msft-mark">
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <rect x="0" y="0" width="7" height="7" fill="#f25022"></rect>
-            <rect x="9" y="0" width="7" height="7" fill="#7fba00"></rect>
-            <rect x="0" y="9" width="7" height="7" fill="#00a4ef"></rect>
-            <rect x="9" y="9" width="7" height="7" fill="#ffb900"></rect>
-          </svg>
-          <span>Prompt Quest</span>
-        </span>
+        <span class="muted">Prompt Quest sample</span>
         <span class="muted">Built by liudavid</span>
       </footer>
-    </div>
+    </main>
 
     <script>
       const modes = [
@@ -581,7 +601,7 @@
             name: "Clinical Operations",
             assignmentTitle: "Inpatient discharge workflow improvement",
             assignmentText:
-              "You are clinical operations leadership preparing a safer, faster discharge workflow with capacity constraints, care-team handoffs, and quality reporting requirements at institutions like Johns Hopkins, CUIMC, and Weill Cornell.",
+              "You are clinical operations leadership preparing a safer, faster discharge workflow with capacity constraints, care-team handoffs, and quality reporting requirements across multiple regional academic medical centers.",
             tasks: ["Draft current-state workflow prompt", "Draft bottleneck and risk analysis prompt", "Draft phased implementation plan prompt"],
           },
           {
@@ -648,15 +668,19 @@
       const promptInput = document.getElementById("promptInput");
       const scoreBtn = document.getElementById("scoreBtn");
       const nextTaskBtn = document.getElementById("nextTaskBtn");
+      const cancelScoreBtn = document.getElementById("cancelScoreBtn");
       const resetBtn = document.getElementById("resetBtn");
       const confettiLayer = document.getElementById("confettiLayer");
       const downloadCertBtn = document.getElementById("downloadCertBtn");
       const shareLinkedInBtn = document.getElementById("shareLinkedInBtn");
+      const medNoticeEl = document.getElementById("medNotice");
 
       const scoringEngineEl = document.getElementById("scoringEngine");
       const signInBtn = document.getElementById("signInBtn");
+      const signOutBtn = document.getElementById("signOutBtn");
+      const accountStatusEl = document.getElementById("accountStatus");
       const foundryStatusEl = document.getElementById("foundryStatus");
-      const foundryStorageKeys = { engine: "escape-room-scoring-engine" };
+      const foundryStorageKeys = { engine: "promptquest-scoring-engine" };
       const DIAx_AI = Object.freeze({
         tenantId: "6d5898fd-dcaf-43c3-b0ea-f9be4a9da1a5",
         clientId: "597be53b-a64b-4759-8469-34379db497d8",
@@ -664,18 +688,20 @@
         apiUrl: "https://func-model-mission-control-eecd0085.azurewebsites.net/api/escape-score",
         redirectUri:
           window.location.hostname === "localhost"
-            ? "http://localhost:8765/prompt-escape-room/"
-            : "https://ganymededl.github.io/liudavid_od4b_root/prompt-escape-room/",
+            ? "http://localhost:8765/promptquest/"
+            : "https://ganymededl.github.io/liudavid_od4b_root/promptquest/",
       });
-      const FOUNDARY_PENDING_KEY = "escape-room.pending-assessment";
+      const FOUNDRY_PENDING_KEY = "promptquest.pending-assessment";
       let aiAuthClient;
       let aiAuthReady;
+      let inFlightController;
+      let completionSnapshot = null;
       const thinkingLines = [
         "Analyzing prompt structure...",
         "Evaluating role clarity and output format...",
         "Checking constraints and edge-case resilience...",
         "Scoring guidance quality...",
-        "Consensus reached."
+        "Review complete."
       ];
 
       function getActiveRoles() {
@@ -722,7 +748,7 @@
 
       function savePendingAssessment() {
         sessionStorage.setItem(
-          FOUNDARY_PENDING_KEY,
+          FOUNDRY_PENDING_KEY,
           JSON.stringify({
             returnUrl: window.location.href,
             prompt: promptInput.value,
@@ -772,7 +798,7 @@
       }
 
       function restorePendingState() {
-        const saved = sessionStorage.getItem(FOUNDARY_PENDING_KEY);
+        const saved = sessionStorage.getItem(FOUNDRY_PENDING_KEY);
         if (!saved) return;
         try {
           const pending = JSON.parse(saved);
@@ -793,21 +819,24 @@
             promptInput.value = pending.prompt;
           }
         } finally {
-          sessionStorage.removeItem(FOUNDARY_PENDING_KEY);
+          sessionStorage.removeItem(FOUNDRY_PENDING_KEY);
         }
       }
 
       function renderFoundryStatus() {
         const engine = scoringEngineEl.value;
         localStorage.setItem(foundryStorageKeys.engine, engine);
-        const hasAccount = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
+        const account = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
+        const accountLabel = account ? (account.username || account.name || account.localAccountId || "signed-in account") : "";
+        accountStatusEl.textContent = account ? `Signed in as ${accountLabel}.` : "Not signed in.";
+        signOutBtn.disabled = !account || isScoring;
         if (engine !== "foundry") {
-          foundryStatusEl.textContent = hasAccount
+          foundryStatusEl.textContent = account
             ? "You're signed in. Switch the scoring engine to 'Live AI score (Foundry)' when you want AI feedback."
             : "AI scoring is off.";
           return;
         }
-        foundryStatusEl.textContent = hasAccount
+        foundryStatusEl.textContent = account
           ? "AI scoring is on."
           : "You picked AI scoring. Sign in with Microsoft Entra ID to continue.";
       }
@@ -818,6 +847,7 @@
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "role-btn" + (mode.id === selectedMode ? " selected" : "");
+          btn.setAttribute("aria-pressed", String(mode.id === selectedMode));
           btn.disabled = isScoring;
           btn.textContent = mode.name;
           btn.addEventListener("click", () => {
@@ -828,6 +858,7 @@
             attempts = [];
             bestScore = 0;
             startedAt = Date.now();
+            completionSnapshot = null;
             promptInput.value = "";
             renderAll();
           });
@@ -841,14 +872,17 @@
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "role-btn" + (role.id === selectedRole.id ? " selected" : "");
+          btn.setAttribute("aria-pressed", String(role.id === selectedRole.id));
           btn.disabled = isScoring;
           btn.textContent = role.name;
           btn.addEventListener("click", () => {
+            if (selectedRole.id === role.id) return;
             selectedRole = role;
             taskIndex = 0;
             attempts = [];
             bestScore = 0;
             startedAt = Date.now();
+            completionSnapshot = null;
             promptInput.value = "";
             renderAll();
           });
@@ -859,6 +893,7 @@
       function renderAssignment() {
         assignmentTitle.textContent = selectedRole.assignmentTitle;
         assignmentText.textContent = selectedRole.assignmentText;
+        medNoticeEl.classList.toggle("hidden", selectedMode !== "med");
         taskList.innerHTML = "";
         selectedRole.tasks.forEach((task, index) => {
           const row = document.createElement("div");
@@ -883,6 +918,7 @@
       }
 
       function updateCurrentTaskUiState() {
+        const hasAccount = aiAuthClient?.getActiveAccount() || aiAuthClient?.getAllAccounts?.()[0];
         const done = taskIndex >= selectedRole.tasks.length;
         if (done) {
           nextTaskBtn.disabled = true;
@@ -891,6 +927,7 @@
           scoreBtn.disabled = true;
           scoringEngineEl.disabled = true;
           signInBtn.disabled = true;
+          signOutBtn.disabled = !hasAccount || isScoring;
           return;
         }
         const currentAttempts = currentTaskAttempts();
@@ -905,10 +942,11 @@
         scoreBtn.disabled = isScoring;
         scoringEngineEl.disabled = isScoring;
         signInBtn.disabled = isScoring;
+        signOutBtn.disabled = isScoring || !hasAccount;
       }
 
       function scoreColor(score) {
-        if (score >= 85) return "var(--cp-success)";
+        if (score >= 90) return "var(--cp-success)";
         if (score >= 65) return "var(--cp-warning)";
         return "var(--cp-danger)";
       }
@@ -1061,19 +1099,26 @@
 
         ctx.fillStyle = "#e2e8f0";
         ctx.font = "700 64px Segoe UI";
-        ctx.fillText("Prompt Quest Mission Debrief", 90, 170);
+        ctx.fillText("Prompt Quest Practice Summary", 90, 170);
         ctx.font = "400 32px Segoe UI";
-        ctx.fillText("Completion Certificate", 90, 225);
+        ctx.fillText("Completion Record", 90, 225);
 
         ctx.font = "600 40px Segoe UI";
         ctx.fillText(`Role: ${selectedRole.name} (${selectedMode.toUpperCase()})`, 90, 340);
         ctx.fillText(`Best score: ${bestScore}/100`, 90, 420);
-        ctx.fillText(`Elapsed: ${formatTime(Date.now() - startedAt)}`, 90, 500);
-        ctx.fillText(`Date: ${new Date().toLocaleDateString()}`, 90, 580);
+        const snapshot = completionSnapshot || {
+          elapsedMs: Date.now() - startedAt,
+          dateLabel: new Date().toLocaleDateString(),
+          taskBestScores: getCurrentRoleTaskBestScores(),
+        };
+        ctx.fillText(`Elapsed: ${formatTime(snapshot.elapsedMs)}`, 90, 500);
+        ctx.fillText(`Date: ${snapshot.dateLabel}`, 90, 580);
+        ctx.font = "500 30px Segoe UI";
+        ctx.fillText(`Per-task best: ${snapshot.taskBestScores.map((score, idx) => `T${idx + 1} ${score}`).join(" | ")}`, 90, 650);
 
         ctx.font = "400 28px Segoe UI";
-        ctx.fillText("Awarded for completing real-world prompt missions", 90, 690);
-        ctx.fillText(`and meeting the practice-score threshold (${MIN_SCORE_TO_ADVANCE}+).`, 90, 735);
+        ctx.fillText("Awarded for completing real-world prompt missions", 90, 760);
+        ctx.fillText(`and meeting the practice-score threshold (${MIN_SCORE_TO_ADVANCE}+).`, 90, 805);
         ctx.fillText("Built by liudavid", 90, 880);
         return canvas;
       }
@@ -1081,6 +1126,12 @@
       function evaluatePromptLocal(text) {
         const value = text.trim();
         const words = value.split(/\s+/).filter(Boolean).length;
+        const tokens = value.toLowerCase().match(/[a-z0-9]+/g) || [];
+        const tokenFreq = new Map();
+        for (const token of tokens) {
+          tokenFreq.set(token, (tokenFreq.get(token) || 0) + 1);
+        }
+        const maxTokenRepeat = tokenFreq.size ? Math.max(...tokenFreq.values()) : 0;
         let score = 10;
         const feedback = [];
 
@@ -1121,33 +1172,67 @@
           feedback.push("Ask the AI to list assumptions or ask follow-up questions if anything is unclear.");
         }
 
+        if (maxTokenRepeat >= 8) {
+          score -= 25;
+          feedback.push("Avoid repeating the same word many times; use specific context instead.");
+        }
+
         score = Math.min(100, Math.max(0, score));
         const label = score >= 90 ? "Excellent prompt." : score >= 80 ? "Great start." : score >= 65 ? "Good draft; needs a few fixes." : "Needs more detail.";
         return { score, feedback, label, source: "local" };
       }
 
-      async function evaluatePromptFoundry(assessment) {
+      async function evaluatePromptFoundry(assessment, options = {}) {
+        const timeoutMs = Number.isInteger(options.timeoutMs) ? options.timeoutMs : 45000;
+        const requestController = new AbortController();
+        let timeoutHandle;
+        let abortForwarder;
+        if (options.signal) {
+          abortForwarder = () => requestController.abort(options.signal.reason);
+          if (options.signal.aborted) {
+            abortForwarder();
+          } else {
+            options.signal.addEventListener("abort", abortForwarder, { once: true });
+          }
+        }
+        timeoutHandle = setTimeout(() => {
+          requestController.abort(new DOMException("Scoring timed out.", "AbortError"));
+        }, timeoutMs);
         const accessToken = await acquireAiToken();
-        const response = await fetch(DIAx_AI.apiUrl, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: assessment.mode,
-            role: {
-              id: assessment.roleId,
-              name: assessment.roleName,
+        let response;
+        try {
+          response = await fetch(DIAx_AI.apiUrl, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+              "Content-Type": "application/json",
             },
-            assignment: {
-              title: assessment.assignmentTitle,
-              details: assessment.assignmentDetails,
-            },
-            taskIndex: assessment.task,
-            learnerPrompt: assessment.prompt,
-          }),
-        });
+            body: JSON.stringify({
+              mode: assessment.mode,
+              role: {
+                id: assessment.roleId,
+                name: assessment.roleName,
+              },
+              assignment: {
+                title: assessment.assignmentTitle,
+                details: assessment.assignmentDetails,
+              },
+              taskIndex: assessment.task,
+              learnerPrompt: assessment.prompt,
+            }),
+            signal: requestController.signal,
+          });
+        } catch (error) {
+          if (requestController.signal.aborted) {
+            throw new Error("Scoring was canceled or timed out. Please retry.");
+          }
+          throw error;
+        } finally {
+          clearTimeout(timeoutHandle);
+          if (options.signal && abortForwarder) {
+            options.signal.removeEventListener("abort", abortForwarder);
+          }
+        }
         if (!response.ok) {
           let message = `Foundry request failed: ${response.status} ${response.statusText}`;
           try {
@@ -1183,14 +1268,32 @@
         renderImprovement();
       }
 
+      function getCurrentRoleTaskBestScores() {
+        return selectedRole.tasks.map((_, idx) => {
+          const scores = attempts
+            .filter((item) => item.mode === selectedMode && item.roleId === selectedRole.id && item.task === idx)
+            .map((item) => item.score);
+          return scores.length ? Math.max(...scores) : 0;
+        });
+      }
+
       function maybeShowCertificate() {
         if (taskIndex >= selectedRole.tasks.length) {
+          if (!completionSnapshot) {
+            completionSnapshot = {
+              elapsedMs: Date.now() - startedAt,
+              dateLabel: new Date().toLocaleDateString(),
+              taskBestScores: getCurrentRoleTaskBestScores(),
+            };
+          }
           certificateSection.classList.remove("hidden");
           document.getElementById("certRole").textContent = `${selectedRole.name} (${selectedMode.toUpperCase()})`;
           document.getElementById("certScore").textContent = String(bestScore);
-          document.getElementById("certTime").textContent = formatTime(Date.now() - startedAt);
-          document.getElementById("certDate").textContent = new Date().toLocaleDateString();
+          document.getElementById("certTaskScores").textContent = `Per-task best scores: ${completionSnapshot.taskBestScores.map((score, idx) => `T${idx + 1} ${score}/100`).join(" • ")}`;
+          document.getElementById("certTime").textContent = formatTime(completionSnapshot.elapsedMs);
+          document.getElementById("certDate").textContent = completionSnapshot.dateLabel;
         } else {
+          completionSnapshot = null;
           certificateSection.classList.add("hidden");
         }
       }
@@ -1238,6 +1341,9 @@
         };
 
         isScoring = true;
+        inFlightController = new AbortController();
+        cancelScoreBtn.disabled = false;
+        cancelScoreBtn.classList.remove("hidden");
         scoreBtn.textContent = "Scoring...";
         scoreValue.textContent = "--/100";
         updateScoreVisual(0);
@@ -1256,7 +1362,9 @@
           thinkingText.textContent = `> ${thinkingLines[thinkingIndex]}`;
         }, 700);
         try {
-          const result = assessment.engine === "foundry" ? await evaluatePromptFoundry(assessment) : evaluatePromptLocal(assessment.prompt);
+          const result = assessment.engine === "foundry"
+            ? await evaluatePromptFoundry(assessment, { signal: inFlightController.signal, timeoutMs: 45000 })
+            : evaluatePromptLocal(assessment.prompt);
           const when = new Date().toLocaleTimeString();
           const stateMatchesAssessment =
             selectedMode === assessment.mode &&
@@ -1286,7 +1394,7 @@
           updateScoreVisual(result.score);
           triggerScoreFx(result.score);
           scoreLabel.textContent = result.label;
-          scoreLabel.className = result.score >= 80 ? "good" : result.score >= 60 ? "warn" : "bad";
+          scoreLabel.className = result.score >= 90 ? "good" : result.score >= 65 ? "warn" : "bad";
           feedbackList.innerHTML = "";
           result.feedback.forEach((line) => {
             const li = document.createElement("li");
@@ -1303,7 +1411,10 @@
           scoreLabel.className = "bad";
           updateCurrentTaskUiState();
         } finally {
+          inFlightController = undefined;
           isScoring = false;
+          cancelScoreBtn.disabled = true;
+          cancelScoreBtn.classList.add("hidden");
           clearInterval(thinkingTimer);
           thinkingTerminal.classList.add("hidden");
           scoreBtn.textContent = "Score prompt";
@@ -1355,6 +1466,7 @@
         attempts = [];
         bestScore = 0;
         startedAt = Date.now();
+        completionSnapshot = null;
         promptInput.value = "";
         renderAll();
       });
@@ -1407,6 +1519,26 @@
           signInBtn.disabled = false;
           signInBtn.textContent = "Sign in with Microsoft Entra ID";
         }
+      });
+      signOutBtn.addEventListener("click", async () => {
+        try {
+          await initializeAiAuth();
+          const account = aiAuthClient.getActiveAccount() || aiAuthClient.getAllAccounts()[0];
+          if (!account) {
+            renderFoundryStatus();
+            return;
+          }
+          await aiAuthClient.logoutRedirect({
+            account,
+            postLogoutRedirectUri: DIAx_AI.redirectUri,
+          });
+        } catch (error) {
+          foundryStatusEl.textContent = `Sign-out failed: ${error.message}`;
+        }
+      });
+      cancelScoreBtn.addEventListener("click", () => {
+        if (!isScoring || !inFlightController) return;
+        inFlightController.abort(new DOMException("User canceled scoring.", "AbortError"));
       });
       scoringEngineEl.addEventListener("change", () => renderFoundryStatus());
 

@@ -24,6 +24,6 @@ test("rejects unsupported mode", () => {
         taskIndex: 1,
         learnerPrompt: "Prompt text"
       }),
-    /mode must be he or slg/
+    /mode must be he, slg, or med/
   );
 });
