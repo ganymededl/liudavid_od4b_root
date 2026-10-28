@@ -197,10 +197,18 @@
     <a class="back-link" href="../index.html">&larr; Back to hub</a>
     <header>
       <h1>Cowork FinOps Quickstart</h1>
-      <p class="meta"><strong>Generating a Copilot Cowork credit cost report, end to end, against a live tenant.</strong> Written up October 28, 2026 using Microsoft's public <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Analytics Hub &mdash; Cowork Billing</a> templates and browser tools.</p>
-      <p>This walks through pulling the two tenant exports, running the free FinOps browser report (no install), reading the output, and &mdash; if you want the deeper departmental view &mdash; opening the companion Power BI templates. Every screenshot below is from a real run against a Microsoft test/lab tenant with synthetic users; no customer data is shown.</p>
+      <p class="meta">Generate a rate-based, FOCUS-aligned view of Microsoft 365 Copilot Credit consumption (branded "Cowork" in these community templates) from two tenant exports, using Microsoft's public <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Analytics Hub &mdash; Cowork Billing</a> browser tool. Originally written October 28, 2026; revised after independent technical review on the same day.</p>
+      <p><strong>Audience:</strong> Microsoft 365 administrators, FinOps practitioners, and finance analysts who already have (or can request) Copilot Cost Management and Entra export access.<br>
+      <strong>Prerequisites:</strong> a supported admin role for each export (see Step 02), an agreed reporting period, and an agreed allocation rule before you circulate any output as a real chargeback.</p>
+      <div class="warning">
+        <p><strong>This is an independent companion walkthrough, not official Microsoft documentation.</strong> It documents a specific community-built browser tool and two public GitHub Power BI templates linked from Microsoft's Analytics Hub page; it is not a Microsoft support article and carries no Microsoft endorsement of accuracy.</p>
+      </div>
+      <div class="warning">
+        <p><strong>Suitable for:</strong> consumption analysis, showback, allocation modeling, and pilot/internal review.<br>
+        <strong>Not sufficient by itself for:</strong> invoice reconciliation, general-ledger posting, or a disputed chargeback &mdash; those require your actual Microsoft billing record.</p>
+      </div>
       <div class="warning success">
-        <p><strong>Nothing you upload leaves your browser.</strong> The FinOps report and the Cowork Billing browser tools run 100% client-side &mdash; no server, no upload, no telemetry of file contents. You can verify this yourself: open DevTools &rarr; Network tab while using the tool and watch that your CSVs never appear in a request.</p>
+        <p><strong>Privacy:</strong> the tool is designed to process your CSVs entirely in the browser &mdash; no upload, no backend. In the run documented here, the CSV contents were not transmitted in observed network requests (verified via DevTools &rarr; Network). That is a spot-check, not a code audit: for sensitive or regulated data, review the <a href="https://github.com/microsoft/Analytics-Hub" target="_blank" rel="noopener">published source</a> yourself and confirm it meets your organization's data-handling requirements before loading identifiable production data. Prefer synthetic or approved data for evaluation runs.</p>
       </div>
       <div class="pill-row">
         <a class="pill" href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Cowork Billing hub &#8599;</a>
@@ -210,16 +218,30 @@
       </div>
     </header>
 
+    <section class="step" id="read-the-numbers">
+      <h2>How to read the numbers</h2>
+      <p>The report borrows FOCUS (FinOps Open Cost &amp; Usage Specification) vocabulary &mdash; List, Contracted, Effective, and Billed cost &mdash; but it computes those columns from credits &times; a rate you configure, not from your invoice. Keep these three concepts separate:</p>
+      <table>
+        <tr><th>Term</th><th>What it actually is</th><th>Safe to use for</th></tr>
+        <tr><td>Consumed credits</td><td>Operational usage pulled straight from the Copilot Cost Management export</td><td>Adoption, policy, and usage trend analysis</td></tr>
+        <tr><td>Modeled cost (shown as "List/Contracted/Effective" cost)</td><td>Credits &times; the list or contracted unit price you type into the rate fields</td><td>Planning and illustrative allocation &mdash; not a certified FOCUS dataset</td></tr>
+        <tr><td>Estimated billed cost</td><td>The report's "Billed cost" figure &mdash; still a modeled estimate, not pulled from your invoice</td><td>Directional planning only; reconcile against your actual Microsoft invoice before using it financially</td></tr>
+      </table>
+      <div class="visual-note">
+        <p>The "FOCUS v1.2 columns" badge on the report means the column <em>labels</em> follow FOCUS terminology, not that the dataset is a certified, fully conformant FOCUS export (it doesn't model prepaid-commitment amortization or shared-cost allocation). Treat every dollar figure on the page as a planning estimate until reconciled against your bill.</p>
+      </div>
+    </section>
+
     <section class="step" id="command-map">
       <h2>What you end up with</h2>
       <table>
         <tr><th>Artifact</th><th>Where it comes from</th><th>Use it for</th></tr>
-        <tr><td>FinOps Cost Report (on-screen)</td><td>Browser tool, generated live from your two CSVs</td><td>FOCUS-aligned List / Contracted / Effective / Billed cost, allocation by department/cost center</td></tr>
+        <tr><td>FinOps Cost Report (on-screen)</td><td>Browser tool, generated live from your two CSVs</td><td>FOCUS-aligned modeled cost view, allocation by department/cost center (see "How to read the numbers" above)</td></tr>
         <tr><td><code>cowork-finops-by-usertype-&lt;date&gt;.csv</code></td><td>"Export by unit" button</td><td>Cost rolled up by your chosen allocation dimension</td></tr>
-        <tr><td><code>cowork-finops-by-user-&lt;date&gt;.csv</code></td><td>"Export by user" button</td><td>Per-person detail for chargeback or audit</td></tr>
+        <tr><td><code>cowork-finops-by-user-&lt;date&gt;.csv</code></td><td>"Export by user" button</td><td>Per-person detail for showback, illustrative chargeback, or audit</td></tr>
         <tr><td><code>Cowork_FinOps_Report.pptx</code></td><td>"Export deck" button</td><td>Five-slide leadership summary (KPI, chargeback chart, allocation table, methodology)</td></tr>
-        <tr><td><code>Cowork_FinOps_Report.pdf</code></td><td>"PDF" button</td><td>Full-page print capture of the on-screen report</td></tr>
-        <tr><td>Three <code>.pbit</code> Power BI templates</td><td>GitHub repos linked above</td><td>Deeper, refreshable chargeback/consumption modelling beyond a single CSV snapshot</td></tr>
+        <tr><td><code>Cowork_FinOps_Report.pdf</code></td><td>"PDF" button</td><td>Image-based snapshot of the on-screen report (see Step 06 for a lighter-weight alternative)</td></tr>
+        <tr><td>Three <code>.pbit</code> Power BI templates</td><td>GitHub repos, see Step 07</td><td>Recurring, refreshable chargeback/consumption modelling beyond a single CSV snapshot</td></tr>
       </table>
     </section>
 
@@ -228,26 +250,23 @@
       <p>Everything lives off one page: <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">microsoft.github.io/Analytics-Hub/cowork-billing</a>. It lists the Power BI templates (Consumption Central, Cowork Chargeback) and the no-install browser tools (Chargeback, FinOps &amp; FOCUS, ROI Model, Policy Helper).</p>
       <figure class="screenshot">
         <img src="images/01-billing-hub.png" loading="lazy" alt="Analytics Hub Cowork Billing landing page listing the Consumption Central and Cowork Chargeback Power BI templates plus the browser tools grid">
-        <figcaption>The hub page. <strong>Chargeback</strong> answers "bill this department"; <strong>FinOps</strong> (used in this walkthrough) answers "show Cowork spend next to our other cloud spend" in FOCUS terms.</figcaption>
+        <figcaption>The hub page. <strong>Chargeback</strong> answers "bill this department"; <strong>FinOps</strong> (used in this walkthrough) answers "show Cowork spend next to our other cloud spend" in FOCUS-aligned terms.</figcaption>
       </figure>
-      <p>If you only need the Power BI templates, grab them directly from GitHub &mdash; no sign-in required:</p>
-      <ul class="checklist">
-        <li><code>Consumption Central - Local CSV.pbit</code> &mdash; <a href="https://github.com/microsoft/ConsumptionCentral-for-Microsoft-Copilot/blob/main/1.%20Local%20CSV/Consumption%20Central%20-%20Local%20CSV.pbit" target="_blank" rel="noopener">download</a> (also has Fabric and live Viva Direct Query variants in the same repo)</li>
-        <li><code>Cowork Chargeback - CSV.pbit</code> and <code>Cowork Chargeback - Direct Query.pbit</code> &mdash; <a href="https://github.com/microsoft/CreditUsage" target="_blank" rel="noopener">download</a></li>
-      </ul>
+      <p>This walkthrough uses the FinOps browser tool first (Steps 02&ndash;06); the Power BI templates are covered in Step 07 once you know what data they need.</p>
     </section>
 
     <section class="step">
-      <h2><span class="badge">02</span>Export your two tenant files</h2>
-      <p>The FinOps report (and the Chargeback tool) both read the same two exports:</p>
+      <h2><span class="badge">02</span>Confirm your export format, then pull your two files</h2>
+      <p>The FinOps tool expects exactly these two exports &mdash; and specifically the Copilot <em>Cost Management</em> consumption export, not a different Copilot usage report (Microsoft also ships other Copilot usage views, such as the Viva Insights consumption/AI cost dashboard, with their own schemas; don't substitute one for the other without checking column names first).</p>
       <table>
-        <tr><th>Export</th><th>Where</th><th>Gives you</th></tr>
-        <tr><td>Entra users</td><td><a href="https://entra.microsoft.com" target="_blank" rel="noopener">Entra admin center</a> &rarr; <em>Identity &rarr; Users &rarr; All users</em> &rarr; <strong>Download users</strong></td><td>Department, Cost Center, Business Unit, Job Title, Country, Manager &mdash; the allocation dimensions</td></tr>
-        <tr><td>Copilot credit usage</td><td><em>Microsoft 365 admin center</em> &rarr; <em>Copilot &rarr; Cost management &rarr; Consumption</em> &rarr; <strong>Export CSV</strong></td><td>One row per user: credits used, credit limit, license status, last activity, session count</td></tr>
+        <tr><th>Export</th><th>Where</th><th>Typical role required</th><th>Gives you</th></tr>
+        <tr><td>Entra users</td><td><a href="https://entra.microsoft.com" target="_blank" rel="noopener">Entra admin center</a> &rarr; <em>Identity &rarr; Users &rarr; All users</em> &rarr; <strong>Download users</strong></td><td>A directory role with user read access, e.g. <strong>User Administrator</strong>, <strong>Reports Reader</strong>, or <strong>Global Reader</strong> &mdash; confirm with your Entra admin if the download option isn't available to you</td><td>Display name and UPN plus whichever organizational attributes your tenant's export includes</td></tr>
+        <tr><td>Copilot credit usage</td><td><em>Microsoft 365 admin center</em> &rarr; <em>Copilot &rarr; Cost management &rarr; Consumption</em> &rarr; <strong>Export CSV</strong></td><td>A reader-based role such as <strong>AI Reader</strong>, <strong>Global Reader</strong>, or <strong>License Administrator</strong> (per Microsoft's current Cost Management role guidance)</td><td>One row per user: credits used, credit limit, license status, last activity, session count</td></tr>
       </table>
       <div class="visual-note">
-        <p>Column names are auto-detected by the tool, so most export layouts work unmodified. Both files are plain CSV &mdash; open them in Excel first if you want to sanity-check row counts before loading.</p>
+        <p><strong>Not every organizational attribute is guaranteed.</strong> Display name, UPN, job title, department, and country are typically present in a standard Entra users export. <strong>Cost Center</strong>, <strong>Business Unit</strong>, <strong>Job Family</strong>, and <strong>Manager</strong> may need additional attribute selection in the export experience or enrichment from an HR/org system &mdash; verify those columns exist and are populated before you rely on them for allocation.</p>
       </div>
+      <p class="meta">Column names are auto-detected by the tool, so most layouts of <em>this specific export</em> work unmodified. Open both files in Excel first to sanity-check row counts and confirm the expected columns are present before loading them.</p>
     </section>
 
     <section class="step">
@@ -255,60 +274,78 @@
       <p>Open the tool and drop each file in its own zone &mdash; Entra export on the left, Copilot credit export on the right. The <strong>Generate FinOps Report</strong> button stays disabled until both are loaded.</p>
       <figure class="screenshot">
         <img src="images/02-finops-landing.png" loading="lazy" alt="FinOps Cowork tool landing page before any files are loaded, showing the three-step explainer and two upload dropzones">
-        <figcaption>Landing state. The privacy banner at the top is accurate: this is a static page with no backend &mdash; check your browser's Network tab if you want to confirm it yourself.</figcaption>
+        <figcaption>Landing state, before any file is loaded.</figcaption>
       </figure>
       <figure class="screenshot">
         <img src="images/03-finops-files-loaded.png" loading="lazy" alt="FinOps tool with the Entra export (78 rows) and Copilot credit export loaded, Generate FinOps Report button now enabled">
-        <figcaption>Both files loaded &mdash; the dropzones confirm row counts and the Generate button is now live. (This particular run used Microsoft's internal DIAx lab tenant, which seeds synthetic users like Ada Lovelace and Elon Musk for testing &mdash; no real customer data.)</figcaption>
+        <figcaption>Both files loaded &mdash; the dropzones confirm row counts and the Generate button is now live. This run used a Microsoft test tenant with synthetic, fictional identities; no customer data is shown anywhere on this page.</figcaption>
       </figure>
-      <p>There's also a <strong>Fallback credit limit</strong> field, used only if your credit export is missing a per-user limit column &mdash; leave the default unless you know your tenant's policy limit differs.</p>
-    </section>
-
-    <section class="step">
-      <h2><span class="badge">04</span>Click Generate and read the report</h2>
-      <p>The two files join on User Principal Name and the page renders a full FOCUS-aligned cost view: scope strip, live rate controls (List vs. Contracted unit price), KPI band, cost-allocation cut (department / cost center / business unit, searchable and filterable), rate-comparison bars, and a methodology/glossary section.</p>
-      <figure class="screenshot">
-        <img src="images/04-finops-report-top.png" loading="lazy" alt="Top of the generated FinOps report, showing the hero, FOCUS/FinOps Framework badges, and the overage notice banner">
-        <figcaption>Report header. The badges confirm what you're looking at: FOCUS v1.2 columns and FinOps Framework capabilities, computed live from your uploaded files (not demo data, once you've loaded your own exports).</figcaption>
-      </figure>
-      <figure class="screenshot">
-        <img src="images/06-finops-report-kpis.png" loading="lazy" alt="FinOps report KPI band and rate controls further down the page">
-        <figcaption>Scroll down for the live rate controls and KPI cards &mdash; List cost, Effective cost, Billed cost, Effective Savings Rate, allocation coverage, and users in scope. Adjust the rate fields and every number on the page recomputes instantly.</figcaption>
-      </figure>
-      <div class="warning">
-        <p><strong>Read the overage notice on the page.</strong> Per-user spending-limit overage is, at Microsoft's sole discretion, not billed and does not appear as consumed credits &mdash; so any "overage" figure here is a planning estimate, not a reconciled bill. The policy-level budget is the real hard stop. Always reconcile the Billed cost figure against your actual Microsoft invoice.</p>
+      <p>There's also a <strong>Fallback credit limit</strong> field. It only applies when your credit export has no per-user limit column &mdash; which happens with older export layouts or tenants still on earlier consumption-reporting formats that predate the per-user limit column. Leave the default unless you know your tenant's actual policy limit differs; if your export does include a limit column, this field is ignored.</p>
+      <div class="visual-note">
+        <p><strong>Large tenants:</strong> this tool parses both CSVs entirely in your browser's memory. For tenants in the tens of thousands of users (a rough guide, not a hard cutoff), the page may become slow or unresponsive. If that happens, skip ahead to the Power BI templates in Step 07, which are built for larger, refreshable datasets.</p>
       </div>
     </section>
 
     <section class="step">
-      <h2><span class="badge">05</span>Export the artifacts you need</h2>
-      <p>Four buttons sit above the report body:</p>
+      <h2><span class="badge">04</span>Click Generate and read the report</h2>
+      <p>The two files join on User Principal Name &mdash; that's how <em>this tool</em> matches records, not a platform-wide identity standard &mdash; and the page renders a FOCUS-aligned modeled cost view: scope strip, live rate controls (List vs. Contracted unit price), KPI band, cost-allocation cut (department / cost center / business unit, searchable and filterable), rate-comparison bars, and a methodology/glossary section.</p>
       <figure class="screenshot">
-        <img src="images/05-finops-export-buttons.png" loading="lazy" alt="Export actions toolbar: Load different data, Export by unit CSV, Export by user CSV, Export deck, PDF">
-        <figcaption>Everything downloads straight to your browser's download folder &mdash; <code>Export by unit</code> and <code>Export by user</code> are CSV, <code>Export deck</code> is a five-slide <code>.pptx</code> built with PptxGenJS, and <code>PDF</code> is a full-resolution page capture via <code>html2canvas</code> + <code>jsPDF</code>.</figcaption>
+        <img src="images/04-finops-report-top.png" loading="lazy" alt="Top of the generated FinOps report, showing the hero, FOCUS/FinOps Framework badges, and the overage notice banner">
+        <figcaption>Report header, computed live from your uploaded files (not demo data, once you've loaded your own exports). Read the badges as "FOCUS-aligned terminology," per the caveat in "How to read the numbers" above.</figcaption>
       </figure>
-      <p>One thing worth knowing before you click <strong>PDF</strong>: because it captures the live report at 2x scale, the resulting file can be large (tens to 100+ MB for a report with a long allocation table) &mdash; if you only need the numbers, the two CSV exports are far smaller and easier to route into Excel or Power BI.</p>
+      <figure class="screenshot">
+        <img src="images/06-finops-report-kpis.png" loading="lazy" alt="FinOps report KPI band and rate controls further down the page">
+        <figcaption>Scroll down for the live rate controls and KPI cards. The <strong>Billing period</strong> selector here is specifically about how Microsoft counts credits when a user changes spending-policy tier mid-month (a Sept 2026 billing-mechanics change) &mdash; it does not change the report into a multi-month view; the report itself is always a single-period snapshot of whatever your credit export covers. Treat <strong>Effective Savings Rate</strong> and every other KPI as a modeled estimate, adjustable by the rate fields, not an audited figure.</figcaption>
+      </figure>
+      <div class="warning">
+        <p><strong>Read the overage notice on the page.</strong> Microsoft's current documentation states that qualifying per-user overage from a running task can, at Microsoft's sole discretion, be excluded from policy-limit consumption, not billed, and not shown as consumed credits in Cost Management &mdash; this is current behavior, not a contractual guarantee, and the report cannot reconstruct unrecorded overage from a credit export. The <strong>policy-level spending limit</strong> is the governing budget control for a given spending policy, but don't present it to Finance as an invoice-grade hard ceiling &mdash; in-flight work and enforcement timing mean dashboard consumption doesn't map 1:1 to billed usage. Always reconcile the report's "Billed cost" figure against your actual Microsoft invoice before treating it as a financial number.</p>
+      </div>
     </section>
 
     <section class="step">
-      <h2><span class="badge">06</span>Optional: go deeper in Power BI</h2>
-      <p>The browser tool is a fast first read. For recurring, refreshable reporting &mdash; departmental chargeback with billing-model comparison, prepaid pool allocation, per-user watchlists, row-level security, or a cross-product view spanning Cowork + Copilot Studio + GitHub Copilot + Azure AI Foundry &mdash; open the matching <code>.pbit</code> template in Power BI Desktop and point it at the same two CSVs (or Fabric / live Viva Direct Query, depending on the template).</p>
+      <h2><span class="badge">05</span>Validate before you trust the report</h2>
+      <p>Before you circulate any allocation or chargeback figure, check these in the on-screen report and your source files:</p>
       <ul class="checklist">
-        <li><strong>Consumption Central</strong> &mdash; one model across four products, synthetic sample data ships with it so you can see the whole report before touching a tenant.</li>
-        <li><strong>Cowork Chargeback</strong> &mdash; three billing models priced side by side (pay-as-you-go, prepaid, hybrid), prepaid pool allocation, per-user watchlist, row-level security, FOCUS cost view.</li>
+        <li>Confirm the reporting period the credit export actually covers, and whether your read of it is monthly or cumulative.</li>
+        <li>Record total usage rows and distinct people in the source export before comparing to what the tool shows.</li>
+        <li>Look for unmatched identities &mdash; UPNs present in one file but not the other won't be allocated correctly.</li>
+        <li>Check for blank Department / Cost Center / Business Unit values; those rows fall outside your allocation cut.</li>
+        <li>Watch for duplicate rows if your credit export spans multiple services or dates.</li>
+        <li>If anyone changed security groups or spending policy mid-period, confirm their usage is still attributed the way you expect.</li>
+        <li>Reconcile total imported credits in the tool against the total in your source CSV before trusting any allocation.</li>
+        <li>Don't post a chargeback until unmatched and unallocated usage has an agreed treatment (exclude, re-assign, or flag).</li>
+      </ul>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">06</span>Export the artifacts you need</h2>
+      <p>The toolbar above the report body has five actions: one to load a different dataset, and four exports.</p>
+      <figure class="screenshot">
+        <img src="images/05-finops-export-buttons.png" loading="lazy" alt="Export actions toolbar: Load different data, Export by unit CSV, Export by user CSV, Export deck, PDF">
+        <figcaption><code>Export by unit</code> and <code>Export by user</code> are CSV, <code>Export deck</code> is a five-slide <code>.pptx</code> built with PptxGenJS, and <code>PDF</code> is an image-based snapshot of the live page via <code>html2canvas</code> + <code>jsPDF</code> (not a conventional, text-searchable PDF).</figcaption>
+      </figure>
+      <p>Because the PDF captures the live report at 2x scale as an image, the resulting file can be large (tens to 100+ MB for a report with a long allocation table) and its text isn't selectable. If you need numbers for analysis, use the two CSV exports instead; if you need a smaller, text-searchable PDF for sharing, your browser's own Print &rarr; Save as PDF on this page will generally produce a much lighter file.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">07</span>Optional: go deeper in Power BI</h2>
+      <p>The browser tool is a fast first read and a single snapshot. For recurring, refreshable reporting, open the Power BI template that matches your goal &mdash; the two template families expect different inputs, so don't assume one set of CSVs works for both:</p>
+      <ul class="checklist">
+        <li><strong>Cowork Chargeback</strong> (<a href="https://github.com/microsoft/CreditUsage" target="_blank" rel="noopener">GitHub</a>) &mdash; use for departmental showback/chargeback: billing-model comparison (pay-as-you-go, prepaid, hybrid), prepaid pool allocation, per-user watchlist, row-level security, FOCUS cost view. Its <code>Cowork Chargeback - CSV.pbit</code> variant reads the same Entra + Copilot credit exports from Step 02; its <code>Cowork Chargeback - Direct Query.pbit</code> variant connects live to Viva Insights instead and needs no CSVs.</li>
+        <li><strong>Consumption Central</strong> (<a href="https://github.com/microsoft/ConsumptionCentral-for-Microsoft-Copilot" target="_blank" rel="noopener">GitHub</a>) &mdash; use for a cross-product view spanning Cowork/Work IQ, Copilot Studio, GitHub Copilot, and Azure AI Foundry. It uses its own data-source setup (local CSV, Fabric, or live Viva Direct Query, per its <code>1. Local CSV</code> / <code>2. Fabric</code> / <code>3. Viva Direct</code> folders) &mdash; follow that repo's own README/data-sources instructions rather than assuming the Step 02 exports are sufficient on their own; it ships with synthetic sample data so you can review the full report before pointing it at a tenant.</li>
       </ul>
     </section>
 
     <section>
       <h2>Notes &amp; methodology</h2>
       <ul class="checklist">
-        <li>FOCUS-aligned: List / Contracted / Effective / Billed cost, same vocabulary as the sibling Chargeback tool.</li>
-        <li>Showback = full effective cost of consumption per unit; Chargeback = over-allowance credits &times; contracted rate.</li>
-        <li>Single-month snapshot &mdash; no amortization, forecasting, or anomaly detection in the browser tool (that's what the Power BI templates add).</li>
+        <li>FOCUS-aligned terminology: List / Contracted / Effective / Billed cost labels, same vocabulary as the sibling Chargeback tool &mdash; see "How to read the numbers" above before treating any of these as invoice-grade.</li>
+        <li><strong>Showback</strong>, as this tool implements it: the full effective cost of consumption attributed to a unit, with no financial transfer. <strong>Chargeback</strong>, as this tool implements it: over-allowance credits &times; contracted rate &mdash; one possible organizational allocation policy, not a Microsoft billing definition or the only valid chargeback method. Other models (full consumption, fixed allocation, blended) are equally valid; this tool only computes the overage-basis one.</li>
+        <li>Single-period snapshot &mdash; no amortization, forecasting, or anomaly detection in the browser tool (that's what the Power BI templates add).</li>
         <li>Both CSV exports are required; the tool will not generate a report from Entra data alone or credit data alone.</li>
-        <li>Questions or feedback on the methodology: <a href="mailto:copilot-roi-advisory-team-gh@microsoft.com">copilot-roi-advisory-team-gh@microsoft.com</a>.</li>
+        <li>Questions or feedback on the methodology: <a href="mailto:copilot-roi-advisory-team-gh@microsoft.com">copilot-roi-advisory-team-gh@microsoft.com</a> (Microsoft's Copilot ROI Advisory team, who own the upstream Analytics Hub tool &mdash; not the author of this companion page).</li>
       </ul>
-      <p class="meta">Runbook written by Scout from a live run against a Microsoft test tenant, October 28, 2026.</p>
+      <p class="meta">Validated through a live run in a Microsoft test tenant using synthetic identities, October 28, 2026; revised after independent technical review the same day.</p>
     </section>
   </main>
 </body>
