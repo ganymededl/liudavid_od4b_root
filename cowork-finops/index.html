@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cowork FinOps Quickstart</title>
+  <script>
+    (() => {
+      const query = new URLSearchParams(window.location.search);
+      const param = query.get("scoutTheme") || query.get("theme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f5f8f6;
+      --cp-bg-elevated: #fbfdfc;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #eef5f1;
+      --cp-border: #dde6e1;
+      --cp-border-strong: #8fa89d;
+      --cp-text: #1b2420;
+      --cp-text-muted: #4c5a53;
+      --cp-text-soft: #627066;
+      --cp-accent: #0e7c66;
+      --cp-accent-hover: #0b6652;
+      --cp-accent-soft: rgba(14, 124, 102, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #b4720a;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(14, 124, 102, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #10201a;
+      --cp-bg-elevated: #0f1e18;
+      --cp-surface: #16271f;
+      --cp-surface-soft: #1a2d24;
+      --cp-border: #2a4036;
+      --cp-border-strong: #3e5a4d;
+      --cp-text: #dfeee7;
+      --cp-text-muted: #9ab5a9;
+      --cp-text-soft: #85a397;
+      --cp-accent: #4fd8b5;
+      --cp-accent-hover: #38c7a2;
+      --cp-accent-soft: rgba(79, 216, 181, 0.14);
+      --cp-accent-fg: #082019;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(16, 32, 26, 0.88);
+      --cp-panel: rgba(16, 39, 31, 0.72);
+      --cp-panel-strong: rgba(16, 39, 31, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(79, 216, 181, 0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.45;
+    }
+    main {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+    }
+    header, section {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
+      margin-bottom: 16px;
+      padding: 20px;
+    }
+    h1, h2, h3 { margin: 0 0 8px; }
+    h1 { font-size: 1.85rem; }
+    h2 { font-size: 1.25rem; color: var(--cp-accent); }
+    p { margin: 0 0 12px; }
+    code, pre {
+      font-family: Consolas, "Courier New", Courier, monospace;
+      font-size: 0.95rem;
+    }
+    pre {
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      overflow-x: auto;
+      padding: 14px;
+      white-space: pre-wrap;
+    }
+    .meta {
+      color: var(--cp-text-muted);
+      font-size: 0.95rem;
+    }
+    .warning {
+      background: color-mix(in srgb, var(--cp-warning) 20%, var(--cp-surface));
+      border: 2px solid var(--cp-warning);
+      border-radius: 0.625rem;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+    .warning.success {
+      background: color-mix(in srgb, var(--cp-success) 16%, var(--cp-surface));
+      border-color: var(--cp-success);
+    }
+    .step {
+      border-left: 6px solid var(--cp-accent);
+    }
+    .checklist {
+      display: grid;
+      gap: 8px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .checklist li {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      padding: 10px 12px;
+      background: var(--cp-surface-soft);
+    }
+    .badge {
+      display: inline-block;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      border-radius: 0.625rem;
+      padding: 2px 8px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+    table { border-collapse: collapse; margin: 0.5rem 0 1rem; width: 100%; }
+    th, td { border: 1px solid var(--cp-border); padding: 6px 8px; text-align: left; vertical-align: top; overflow-wrap: anywhere; }
+    p code, li code, td code { overflow-wrap: anywhere; word-break: break-word; }
+    .visual-note {
+      background: var(--cp-surface-soft);
+      border-left: 4px solid var(--cp-accent);
+      border-radius: 0.625rem;
+      margin: 16px 0;
+      padding: 12px 14px;
+    }
+    .screenshot {
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      margin: 20px 0;
+      overflow: hidden;
+    }
+    .screenshot img {
+      display: block;
+      width: 100%;
+      height: auto;
+      background: var(--cp-surface);
+    }
+    .screenshot figcaption {
+      border-top: 1px solid var(--cp-border);
+      font-size: 0.95rem;
+      padding: 12px 14px;
+    }
+    .screenshot figcaption p:last-child, .visual-note p:last-child { margin-bottom: 0; }
+    .screenshot code { overflow-wrap: anywhere; }
+    a { color: var(--cp-link); }
+    .back-link { display: inline-block; margin-bottom: 4px; font-weight: 600; text-decoration: none; }
+    .back-link:hover { text-decoration: underline; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      border: 1px solid var(--cp-border-strong); border-radius: 999px;
+      padding: 4px 10px; font-size: 0.82rem; font-weight: 600;
+      color: var(--cp-text); background: var(--cp-accent-soft);
+      text-decoration: none;
+    }
+    .pill:hover { background: var(--cp-highlight); }
+    @media (max-width: 680px) {
+      main { padding: 20px 10px 36px; }
+      header, section { padding: 16px; }
+      table { display: block; overflow-x: auto; }
+    }
+</style>
+</head>
+<body>
+  <main>
+    <a class="back-link" href="../index.html">&larr; Back to hub</a>
+    <header>
+      <h1>Cowork FinOps Quickstart</h1>
+      <p class="meta"><strong>Generating a Copilot Cowork credit cost report, end to end, against a live tenant.</strong> Written up October 28, 2026 using Microsoft's public <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Analytics Hub &mdash; Cowork Billing</a> templates and browser tools.</p>
+      <p>This walks through pulling the two tenant exports, running the free FinOps browser report (no install), reading the output, and &mdash; if you want the deeper departmental view &mdash; opening the companion Power BI templates. Every screenshot below is from a real run against a Microsoft test/lab tenant with synthetic users; no customer data is shown.</p>
+      <div class="warning success">
+        <p><strong>Nothing you upload leaves your browser.</strong> The FinOps report and the Cowork Billing browser tools run 100% client-side &mdash; no server, no upload, no telemetry of file contents. You can verify this yourself: open DevTools &rarr; Network tab while using the tool and watch that your CSVs never appear in a request.</p>
+      </div>
+      <div class="pill-row">
+        <a class="pill" href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Cowork Billing hub &#8599;</a>
+        <a class="pill" href="https://microsoft.github.io/Analytics-Hub/FinOps-Cowork/app/finops.html" target="_blank" rel="noopener">FinOps report tool &#8599;</a>
+        <a class="pill" href="https://github.com/microsoft/ConsumptionCentral-for-Microsoft-Copilot" target="_blank" rel="noopener">Consumption Central (GitHub) &#8599;</a>
+        <a class="pill" href="https://github.com/microsoft/CreditUsage" target="_blank" rel="noopener">Cowork Chargeback (GitHub) &#8599;</a>
+      </div>
+    </header>
+
+    <section class="step" id="command-map">
+      <h2>What you end up with</h2>
+      <table>
+        <tr><th>Artifact</th><th>Where it comes from</th><th>Use it for</th></tr>
+        <tr><td>FinOps Cost Report (on-screen)</td><td>Browser tool, generated live from your two CSVs</td><td>FOCUS-aligned List / Contracted / Effective / Billed cost, allocation by department/cost center</td></tr>
+        <tr><td><code>cowork-finops-by-usertype-&lt;date&gt;.csv</code></td><td>"Export by unit" button</td><td>Cost rolled up by your chosen allocation dimension</td></tr>
+        <tr><td><code>cowork-finops-by-user-&lt;date&gt;.csv</code></td><td>"Export by user" button</td><td>Per-person detail for chargeback or audit</td></tr>
+        <tr><td><code>Cowork_FinOps_Report.pptx</code></td><td>"Export deck" button</td><td>Five-slide leadership summary (KPI, chargeback chart, allocation table, methodology)</td></tr>
+        <tr><td><code>Cowork_FinOps_Report.pdf</code></td><td>"PDF" button</td><td>Full-page print capture of the on-screen report</td></tr>
+        <tr><td>Three <code>.pbit</code> Power BI templates</td><td>GitHub repos linked above</td><td>Deeper, refreshable chargeback/consumption modelling beyond a single CSV snapshot</td></tr>
+      </table>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">01</span>Start at the Cowork Billing hub</h2>
+      <p>Everything lives off one page: <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">microsoft.github.io/Analytics-Hub/cowork-billing</a>. It lists the Power BI templates (Consumption Central, Cowork Chargeback) and the no-install browser tools (Chargeback, FinOps &amp; FOCUS, ROI Model, Policy Helper).</p>
+      <figure class="screenshot">
+        <img src="images/01-billing-hub.png" loading="lazy" alt="Analytics Hub Cowork Billing landing page listing the Consumption Central and Cowork Chargeback Power BI templates plus the browser tools grid">
+        <figcaption>The hub page. <strong>Chargeback</strong> answers "bill this department"; <strong>FinOps</strong> (used in this walkthrough) answers "show Cowork spend next to our other cloud spend" in FOCUS terms.</figcaption>
+      </figure>
+      <p>If you only need the Power BI templates, grab them directly from GitHub &mdash; no sign-in required:</p>
+      <ul class="checklist">
+        <li><code>Consumption Central - Local CSV.pbit</code> &mdash; <a href="https://github.com/microsoft/ConsumptionCentral-for-Microsoft-Copilot/blob/main/1.%20Local%20CSV/Consumption%20Central%20-%20Local%20CSV.pbit" target="_blank" rel="noopener">download</a> (also has Fabric and live Viva Direct Query variants in the same repo)</li>
+        <li><code>Cowork Chargeback - CSV.pbit</code> and <code>Cowork Chargeback - Direct Query.pbit</code> &mdash; <a href="https://github.com/microsoft/CreditUsage" target="_blank" rel="noopener">download</a></li>
+      </ul>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">02</span>Export your two tenant files</h2>
+      <p>The FinOps report (and the Chargeback tool) both read the same two exports:</p>
+      <table>
+        <tr><th>Export</th><th>Where</th><th>Gives you</th></tr>
+        <tr><td>Entra users</td><td><a href="https://entra.microsoft.com" target="_blank" rel="noopener">Entra admin center</a> &rarr; <em>Identity &rarr; Users &rarr; All users</em> &rarr; <strong>Download users</strong></td><td>Department, Cost Center, Business Unit, Job Title, Country, Manager &mdash; the allocation dimensions</td></tr>
+        <tr><td>Copilot credit usage</td><td><em>Microsoft 365 admin center</em> &rarr; <em>Copilot &rarr; Cost management &rarr; Consumption</em> &rarr; <strong>Export CSV</strong></td><td>One row per user: credits used, credit limit, license status, last activity, session count</td></tr>
+      </table>
+      <div class="visual-note">
+        <p>Column names are auto-detected by the tool, so most export layouts work unmodified. Both files are plain CSV &mdash; open them in Excel first if you want to sanity-check row counts before loading.</p>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">03</span>Load both files into the FinOps report</h2>
+      <p>Open the tool and drop each file in its own zone &mdash; Entra export on the left, Copilot credit export on the right. The <strong>Generate FinOps Report</strong> button stays disabled until both are loaded.</p>
+      <figure class="screenshot">
+        <img src="images/02-finops-landing.png" loading="lazy" alt="FinOps Cowork tool landing page before any files are loaded, showing the three-step explainer and two upload dropzones">
+        <figcaption>Landing state. The privacy banner at the top is accurate: this is a static page with no backend &mdash; check your browser's Network tab if you want to confirm it yourself.</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="images/03-finops-files-loaded.png" loading="lazy" alt="FinOps tool with the Entra export (78 rows) and Copilot credit export loaded, Generate FinOps Report button now enabled">
+        <figcaption>Both files loaded &mdash; the dropzones confirm row counts and the Generate button is now live. (This particular run used Microsoft's internal DIAx lab tenant, which seeds synthetic users like Ada Lovelace and Elon Musk for testing &mdash; no real customer data.)</figcaption>
+      </figure>
+      <p>There's also a <strong>Fallback credit limit</strong> field, used only if your credit export is missing a per-user limit column &mdash; leave the default unless you know your tenant's policy limit differs.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">04</span>Click Generate and read the report</h2>
+      <p>The two files join on User Principal Name and the page renders a full FOCUS-aligned cost view: scope strip, live rate controls (List vs. Contracted unit price), KPI band, cost-allocation cut (department / cost center / business unit, searchable and filterable), rate-comparison bars, and a methodology/glossary section.</p>
+      <figure class="screenshot">
+        <img src="images/04-finops-report-top.png" loading="lazy" alt="Top of the generated FinOps report, showing the hero, FOCUS/FinOps Framework badges, and the overage notice banner">
+        <figcaption>Report header. The badges confirm what you're looking at: FOCUS v1.2 columns and FinOps Framework capabilities, computed live from your uploaded files (not demo data, once you've loaded your own exports).</figcaption>
+      </figure>
+      <figure class="screenshot">
+        <img src="images/06-finops-report-kpis.png" loading="lazy" alt="FinOps report KPI band and rate controls further down the page">
+        <figcaption>Scroll down for the live rate controls and KPI cards &mdash; List cost, Effective cost, Billed cost, Effective Savings Rate, allocation coverage, and users in scope. Adjust the rate fields and every number on the page recomputes instantly.</figcaption>
+      </figure>
+      <div class="warning">
+        <p><strong>Read the overage notice on the page.</strong> Per-user spending-limit overage is, at Microsoft's sole discretion, not billed and does not appear as consumed credits &mdash; so any "overage" figure here is a planning estimate, not a reconciled bill. The policy-level budget is the real hard stop. Always reconcile the Billed cost figure against your actual Microsoft invoice.</p>
+      </div>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">05</span>Export the artifacts you need</h2>
+      <p>Four buttons sit above the report body:</p>
+      <figure class="screenshot">
+        <img src="images/05-finops-export-buttons.png" loading="lazy" alt="Export actions toolbar: Load different data, Export by unit CSV, Export by user CSV, Export deck, PDF">
+        <figcaption>Everything downloads straight to your browser's download folder &mdash; <code>Export by unit</code> and <code>Export by user</code> are CSV, <code>Export deck</code> is a five-slide <code>.pptx</code> built with PptxGenJS, and <code>PDF</code> is a full-resolution page capture via <code>html2canvas</code> + <code>jsPDF</code>.</figcaption>
+      </figure>
+      <p>One thing worth knowing before you click <strong>PDF</strong>: because it captures the live report at 2x scale, the resulting file can be large (tens to 100+ MB for a report with a long allocation table) &mdash; if you only need the numbers, the two CSV exports are far smaller and easier to route into Excel or Power BI.</p>
+    </section>
+
+    <section class="step">
+      <h2><span class="badge">06</span>Optional: go deeper in Power BI</h2>
+      <p>The browser tool is a fast first read. For recurring, refreshable reporting &mdash; departmental chargeback with billing-model comparison, prepaid pool allocation, per-user watchlists, row-level security, or a cross-product view spanning Cowork + Copilot Studio + GitHub Copilot + Azure AI Foundry &mdash; open the matching <code>.pbit</code> template in Power BI Desktop and point it at the same two CSVs (or Fabric / live Viva Direct Query, depending on the template).</p>
+      <ul class="checklist">
+        <li><strong>Consumption Central</strong> &mdash; one model across four products, synthetic sample data ships with it so you can see the whole report before touching a tenant.</li>
+        <li><strong>Cowork Chargeback</strong> &mdash; three billing models priced side by side (pay-as-you-go, prepaid, hybrid), prepaid pool allocation, per-user watchlist, row-level security, FOCUS cost view.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Notes &amp; methodology</h2>
+      <ul class="checklist">
+        <li>FOCUS-aligned: List / Contracted / Effective / Billed cost, same vocabulary as the sibling Chargeback tool.</li>
+        <li>Showback = full effective cost of consumption per unit; Chargeback = over-allowance credits &times; contracted rate.</li>
+        <li>Single-month snapshot &mdash; no amortization, forecasting, or anomaly detection in the browser tool (that's what the Power BI templates add).</li>
+        <li>Both CSV exports are required; the tool will not generate a report from Entra data alone or credit data alone.</li>
+        <li>Questions or feedback on the methodology: <a href="mailto:copilot-roi-advisory-team-gh@microsoft.com">copilot-roi-advisory-team-gh@microsoft.com</a>.</li>
+      </ul>
+      <p class="meta">Runbook written by Scout from a live run against a Microsoft test tenant, October 28, 2026.</p>
+    </section>
+  </main>
+</body>
+</html>
