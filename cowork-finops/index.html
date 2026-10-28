@@ -199,7 +199,7 @@
       <h1>Cowork FinOps Quickstart</h1>
       <p class="meta">Generate a rate-based, FOCUS-aligned view of Microsoft 365 Copilot Credit consumption (branded "Cowork" in these community templates) from two tenant exports, using Microsoft's public <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Analytics Hub &mdash; Cowork Billing</a> browser tool. Originally written October 28, 2026; revised after independent technical review on the same day.</p>
       <p><strong>Audience:</strong> Microsoft 365 administrators, FinOps practitioners, and finance analysts who already have (or can request) Copilot Cost Management and Entra export access.<br>
-      <strong>Prerequisites:</strong> a supported admin role for each export (see Step 02), an agreed reporting period, and an agreed allocation rule before you circulate any output as a real chargeback.</p>
+      <strong>Prerequisites:</strong> permission to obtain each export (see Step 02), an agreed reporting period, and an agreed allocation rule before you circulate any output as a real chargeback.</p>
       <div class="warning">
         <p><strong>Scope &amp; limitations:</strong></p>
         <ul class="checklist">
@@ -209,7 +209,9 @@
         </ul>
       </div>
       <div class="warning success">
-        <p><strong>Privacy:</strong> the tool is designed to process your CSVs entirely in the browser &mdash; no upload, no backend. In the run documented here, the CSV contents were not transmitted in observed network requests (verified via DevTools &rarr; Network). That is a spot-check, not a code audit: for sensitive or regulated data, review the <a href="https://github.com/microsoft/Analytics-Hub" target="_blank" rel="noopener">published source</a> yourself and confirm it meets your organization's data-handling requirements before loading identifiable production data. Prefer synthetic or approved data for evaluation runs.</p>
+        <p><strong>Privacy:</strong> CSV parsing and report calculations run locally in your browser. The hosted Analytics Hub tool also loads Microsoft Clarity analytics and records fixed-name usage events when data is loaded, reports are generated, and results are exported. Local processing does not mean the hosted page has no telemetry.</p>
+        <p>Generated reports render display names and organizational attributes into the page. Before using identifiable production data, review the <a href="https://microsoft.github.io/Analytics-Hub/FinOps-Cowork/app/finops.html" target="_blank" rel="noopener">deployed page</a>, its <a href="https://microsoft.github.io/Analytics-Hub/cowork-billing/cwk-events.js" target="_blank" rel="noopener">event instrumentation</a>, <a href="https://microsoft.github.io/Analytics-Hub/consent.js" target="_blank" rel="noopener">consent behavior</a>, and <a href="https://learn.microsoft.com/en-us/clarity/setup-and-installation/clarity-masking" target="_blank" rel="noopener">Clarity masking requirements</a>. Denying analytics cookie storage does not establish that all telemetry is disabled. This guide has not verified the project's masking settings or whether rendered identifiers reach analytics payloads.</p>
+        <p>Use synthetic or approved data for evaluation. For sensitive or regulated data, obtain your organization's approval for the hosted tool or use a reviewed local copy with analytics dependencies removed or blocked. Simply downloading the page does not disable its external scripts.</p>
       </div>
       <div class="pill-row">
         <a class="pill" href="https://microsoft.github.io/Analytics-Hub/cowork-billing/" target="_blank" rel="noopener">Cowork Billing hub &#8599;</a>
@@ -221,7 +223,7 @@
 
     <section class="step" id="read-the-numbers">
       <h2>How to read the numbers</h2>
-      <p>The report borrows FOCUS (FinOps Open Cost &amp; Usage Specification) vocabulary &mdash; List, Contracted, Effective, and Billed cost &mdash; but it computes those columns from credits &times; a rate you configure, not from your invoice. Keep these three concepts separate:</p>
+      <p>The report uses selected cost terms from the FinOps Open Cost &amp; Usage Specification (FOCUS) &mdash; List, Contracted, Effective, and Billed cost &mdash; but it computes those columns from credits &times; a rate you configure, not from your invoice. Keep these three concepts separate:</p>
       <table>
         <tr><th>Term</th><th>What it actually is</th><th>Safe to use for</th></tr>
         <tr><td>Consumed credits</td><td>Operational usage pulled straight from the Copilot Cost Management export</td><td>Adoption, policy, and usage trend analysis</td></tr>
@@ -229,7 +231,7 @@
         <tr><td>Estimated billed cost</td><td>The report's "Billed cost" figure &mdash; still a modeled estimate, not pulled from your invoice</td><td>Directional planning only; reconcile against your actual Microsoft invoice before using it financially</td></tr>
       </table>
       <div class="visual-note">
-        <p>The "FOCUS v1.2 columns" badge on the report means the column <em>labels</em> follow FOCUS terminology, not that the dataset is a certified, fully conformant FOCUS export (it doesn't model prepaid-commitment amortization or shared-cost allocation). Treat every dollar figure on the page as a planning estimate until reconciled against your bill.</p>
+        <p>The "FOCUS v1.2 columns" badge is the upstream tool's stated terminology target, not a claim that v1.2 is the latest specification or that the dataset is a certified, fully conformant FOCUS export. The browser tool doesn't model prepaid-commitment amortization or shared-cost allocation. Treat every dollar figure on the page as a planning estimate until reconciled against your bill.</p>
       </div>
     </section>
 
@@ -238,11 +240,11 @@
       <table>
         <tr><th>Artifact</th><th>Where it comes from</th><th>Use it for</th></tr>
         <tr><td>FinOps Cost Report (on-screen)</td><td>Browser tool, generated live from your two CSVs</td><td>FOCUS-aligned modeled cost view, allocation by department/cost center (see "How to read the numbers" above)</td></tr>
-        <tr><td><code>cowork-finops-by-usertype-&lt;date&gt;.csv</code></td><td>"Export by unit" button</td><td>Cost rolled up by your chosen allocation dimension</td></tr>
+        <tr><td><code>cowork-finops-by-&lt;dimension&gt;-&lt;date&gt;.csv</code></td><td>"Export by unit" button</td><td>Cost rolled up by your chosen allocation dimension; the filename follows its label, for example <code>cowork-finops-by-department-&lt;date&gt;.csv</code></td></tr>
         <tr><td><code>cowork-finops-by-user-&lt;date&gt;.csv</code></td><td>"Export by user" button</td><td>Per-person detail for showback, illustrative chargeback, or audit</td></tr>
         <tr><td><code>Cowork_FinOps_Report.pptx</code></td><td>"Export deck" button</td><td>Five-slide leadership summary (KPI, chargeback chart, allocation table, methodology)</td></tr>
         <tr><td><code>Cowork_FinOps_Report.pdf</code></td><td>"PDF" button</td><td>Image-based snapshot of the on-screen report (see Step 06 for a lighter-weight alternative)</td></tr>
-        <tr><td>Three <code>.pbit</code> Power BI templates</td><td>GitHub repos, see Step 07</td><td>Recurring, refreshable chargeback/consumption modelling beyond a single CSV snapshot</td></tr>
+        <tr><td>Power BI templates (<code>.pbit</code>, two template families)</td><td>GitHub repos, see Step 07</td><td>Chargeback/consumption modelling using the selected variant's inputs and refresh method</td></tr>
       </table>
     </section>
 
@@ -260,9 +262,9 @@
       <h2><span class="badge">02</span>Confirm your export format, then pull your two files</h2>
       <p>The FinOps tool expects exactly these two exports &mdash; and specifically the Copilot <em>Cost Management</em> consumption export, not a different Copilot usage report (Microsoft also ships other Copilot usage views, such as the Viva Insights consumption/AI cost dashboard, with their own schemas; don't substitute one for the other without checking column names first).</p>
       <table>
-        <tr><th>Export</th><th>Where</th><th>Typical role required</th><th>Gives you</th></tr>
-        <tr><td>Entra users</td><td><a href="https://entra.microsoft.com" target="_blank" rel="noopener">Entra admin center</a> &rarr; <em>Identity &rarr; Users &rarr; All users</em> &rarr; <strong>Download users</strong></td><td>A directory role with user read access, e.g. <strong>User Administrator</strong>, <strong>Reports Reader</strong>, or <strong>Global Reader</strong> &mdash; confirm with your Entra admin if the download option isn't available to you</td><td>Display name and UPN plus whichever organizational attributes your tenant's export includes</td></tr>
-        <tr><td>Copilot credit usage</td><td><em>Microsoft 365 admin center</em> &rarr; <em>Copilot &rarr; Cost management &rarr; Consumption</em> &rarr; <strong>Export CSV</strong></td><td>A reader-based role such as <strong>AI Reader</strong>, <strong>Global Reader</strong>, or <strong>License Administrator</strong> (per Microsoft's current Cost Management role guidance)</td><td>One row per user: credits used, credit limit, license status, last activity, session count</td></tr>
+        <tr><th>Export</th><th>Where</th><th>Access guidance</th><th>Gives you</th></tr>
+        <tr><td>Entra users</td><td><a href="https://entra.microsoft.com" target="_blank" rel="noopener">Entra admin center</a> &rarr; <em>Identity &rarr; Users &rarr; All users</em> &rarr; <strong>Download users</strong></td><td>Microsoft documents downloads for <a href="https://learn.microsoft.com/en-us/entra/identity/users/users-bulk-download#required-permissions" target="_blank" rel="noopener">both standard and administrative users</a>. Confirm the access available in your tenant before requesting additional privileges.</td><td>Display name and UPN plus whichever organizational attributes your tenant's export includes</td></tr>
+        <tr><td>Copilot credit usage</td><td><em>Microsoft 365 admin center</em> &rarr; <em>Copilot &rarr; Cost management &rarr; Consumption</em> &rarr; <strong>Users</strong> view &rarr; <strong>Export CSV</strong></td><td><a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/usage-based-billing-copilot-credits-setup#roles-and-requirements" target="_blank" rel="noopener">Current Cost Management guidance</a> lists AI Reader, Global Reader, License Administrator, and other supported reader-based roles for viewing consumption dashboards and reports. Use the least-privileged supported access and confirm export availability in your tenant.</td><td>The supported layout has one row per user, with credits used, credit limit, license status, last activity, and session count. Confirm these columns before loading; don't use the default Policies view export.</td></tr>
       </table>
       <div class="visual-note">
         <p><strong>Not every organizational attribute is guaranteed.</strong> Display name, UPN, job title, department, and country are typically present in a standard Entra users export. <strong>Cost Center</strong>, <strong>Business Unit</strong>, <strong>Job Family</strong>, and <strong>Manager</strong> may need additional attribute selection in the export experience or enrichment from an HR/org system &mdash; verify those columns exist and are populated before you rely on them for allocation.</p>
@@ -281,22 +283,27 @@
         <img src="images/03-finops-files-loaded.png" loading="lazy" alt="FinOps tool with the Entra export (78 rows) and Copilot credit export loaded, Generate FinOps Report button now enabled">
         <figcaption>Both files loaded &mdash; the dropzones confirm row counts and the Generate button is now live. This run used a Microsoft test tenant with synthetic, fictional identities; no customer data is shown anywhere on this page.</figcaption>
       </figure>
-      <p>There's also a <strong>Fallback credit limit</strong> field. It only applies when your credit export has no per-user limit column &mdash; which happens with older export layouts or tenants still on earlier consumption-reporting formats that predate the per-user limit column. Leave the default unless you know your tenant's actual policy limit differs; if your export does include a limit column, this field is ignored.</p>
+      <p>The <strong>Fallback credit limit</strong> applies only when the tool finds no recognized per-user limit column. If you need it, enter an approved <strong>per-user allowance</strong>, not the overall spending-policy budget. The default 400 is a tool setting, not evidence of your tenant's configured allowance. If a recognized limit column exists, the fallback is ignored: blank or zero cells are treated as zero allowances and can inflate illustrative overage. Review those rows before using the results.</p>
       <div class="visual-note">
-        <p><strong>Large tenants:</strong> this tool parses both CSVs entirely in your browser's memory. For tenants in the tens of thousands of users (a rough guide, not a hard cutoff), the page may become slow or unresponsive. If that happens, skip ahead to the Power BI templates in Step 07, which are built for larger, refreshable datasets.</p>
+        <p><strong>Large exports:</strong> browser performance depends on file size, row count, browser, and device resources; this guide establishes no tested capacity threshold. Evaluate representative approved data before adopting the workflow. For recurring reporting, consider a Power BI variant in Step 07 and confirm its own prerequisites and dataset limits.</p>
       </div>
     </section>
 
     <section class="step">
       <h2><span class="badge">04</span>Click Generate and read the report</h2>
-      <p>The tool joins the two files locally using the User Principal Name (UPN) column &mdash; that's this specific tool's matching key, not a platform-wide identity standard. Make sure the UPN format matches exactly between your Entra and Cost Management exports (same casing/domain), or those rows will fail to allocate and silently drop out of the allocation cut. The page then renders a FOCUS-aligned modeled cost view: scope strip, live rate controls (List vs. Contracted unit price), KPI band, cost-allocation cut (department / cost center / business unit, searchable and filterable), rate-comparison bars, and a methodology/glossary section.</p>
+      <p>The tool matches User Principal Names (UPNs) locally after trimming leading/trailing whitespace and ignoring letter casing. Domain changes, email aliases used instead of UPNs, and missing Entra records can still prevent a match. This is the tool's matching key, not a platform-wide identity standard.</p>
+      <div class="visual-note">
+        <p><strong>Allocation behavior:</strong> credit rows with a nonempty UPN but no Entra match remain in the unfiltered report; missing organizational attributes are grouped as <strong>Unknown</strong>, not silently removed from totals. Entra users without credit rows are omitted, and credit rows without a UPN are skipped. Review Unknown groups and compare source credits to the unfiltered report total before applying any entity filter.</p>
+        <p><strong>Coverage KPI:</strong> the current implementation calculates allocation coverage from users with a populated Department value other than Unknown, even when another allocation dimension is selected. Check blanks and Unknown groups in your chosen dimension separately; a populated Cost Center alone does not establish department coverage.</p>
+      </div>
+      <p>The page then renders a FOCUS-aligned modeled cost view: scope strip, live list/contracted rate controls, KPI cards, allocation dimensions and filters, rate comparisons, and methodology notes. These matching and coverage details were checked against the <a href="https://microsoft.github.io/Analytics-Hub/FinOps-Cowork/app/finops.js" target="_blank" rel="noopener">deployed JavaScript</a> on October 28, 2026; recheck them if the upstream tool changes.</p>
       <figure class="screenshot">
         <img src="images/04-finops-report-top.png" loading="lazy" alt="Top of the generated FinOps report, showing the hero, FOCUS/FinOps Framework badges, and the overage notice banner">
         <figcaption>Report header, computed live from your uploaded files (not demo data, once you've loaded your own exports). Read the badges as "FOCUS-aligned terminology," per the caveat in "How to read the numbers" above.</figcaption>
       </figure>
       <figure class="screenshot">
         <img src="images/06-finops-report-kpis.png" loading="lazy" alt="FinOps report KPI band and rate controls further down the page">
-        <figcaption>Scroll down for the live rate controls and KPI cards. The <strong>Billing period</strong> selector here is specifically about how Microsoft counts credits when a user changes spending-policy tier mid-month (a Sept 2026 billing-mechanics change) &mdash; it does not change the report into a multi-month view; the report itself is always a single-period snapshot of whatever your credit export covers. Treat <strong>Effective Savings Rate</strong> and every other KPI as a modeled estimate, adjustable by the rate fields, not an audited figure.</figcaption>
+        <figcaption>Scroll down for the live rate controls and KPI cards. The upstream tool labels its policy-change interpretation modes <strong>September 2026 onward</strong> and <strong>August 2026 or earlier</strong>. These are tool modes, not a date-range filter; the report processes the rows you provide. This guide has not independently established the September effective date. Confirm the export's actual period and the applicable policy behavior before selecting a mode. Read the upstream <strong>Effective Savings Rate</strong> label as a modeled savings rate, not an audited figure.</figcaption>
       </figure>
       <div class="warning">
         <p><strong>Read the overage notice on the page.</strong> Microsoft's current documentation states that qualifying per-user overage from a running task can, at Microsoft's sole discretion, be excluded from policy-limit consumption, not billed, and not shown as consumed credits in Cost Management &mdash; this is current behavior, not a contractual guarantee, and the report cannot reconstruct unrecorded overage from a credit export. The <strong>policy-level spending limit</strong> is the governing budget control for a given spending policy, but don't present it to Finance as an invoice-grade hard ceiling &mdash; in-flight work and enforcement timing mean dashboard consumption doesn't map 1:1 to billed usage. Always reconcile the report's "Billed cost" figure against your actual Microsoft invoice before treating it as a financial number.</p>
@@ -309,13 +316,15 @@
       <ul class="checklist">
         <li>Confirm the reporting period the credit export actually covers &mdash; in the Microsoft 365 admin center's Cost Management &gt; Consumption tab, exported reports are a <strong>point-in-time snapshot</strong> while the on-screen dashboard keeps retrieving live data, so exported and dashboard counts can temporarily differ. Know which one you pulled.</li>
         <li>Record total usage rows and distinct people in the source export before comparing to what the tool shows.</li>
-        <li>Look for unmatched identities &mdash; UPNs present in one file but not the other (including casing/domain mismatches) won't be allocated correctly.</li>
-        <li>Check for blank Department / Cost Center / Business Unit values; those rows fall outside your allocation cut.</li>
+        <li>Check unmatched credit UPNs, including domain/alias mismatches or missing directory records. Letter casing and leading/trailing whitespace are normalized. Unmatched usage remains under Unknown; Entra-only users are omitted. Separately count credit rows with no UPN, which the tool skips.</li>
+        <li>Review blank Department / Cost Center / Business Unit values as Unknown groups in the selected allocation dimension. The coverage KPI uses Department, not the active dimension, so verify your chosen cut independently.</li>
         <li>Watch for duplicate rows if your credit export spans multiple services or dates.</li>
         <li>If anyone changed security groups or spending policy mid-period, confirm their usage is still attributed the way you expect.</li>
+        <li>For historical reporting, Microsoft documents that the policy view shows the <strong>current</strong> configured spending limit, even when historical usage is selected. Confirm the limit applicable to your analysis rather than assuming today's setting applied throughout the period.</li>
         <li>Reconcile total imported credits in the tool against the total in your source CSV before trusting any allocation.</li>
-        <li>Don't post a chargeback until unmatched and unallocated usage has an agreed treatment (exclude, re-assign, or flag).</li>
+        <li>Don't post a chargeback until unmatched and unallocated usage has an approved treatment. Retain Unknown usage as a separate reconciliation category if it cannot be assigned; document any approved reassignment or exclusion rather than silently dropping it.</li>
       </ul>
+      <p class="meta">Microsoft's <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/usage-based-billing-copilot-credits-monitor-spending#consumption-tab" target="_blank" rel="noopener">Consumption tab guidance</a> explains snapshot timing and historical-limit interpretation. Its <a href="https://learn.microsoft.com/en-us/microsoft-365/copilot/usage-based-billing-manage-copilot-credits#users-who-move-between-microsoft-entra-id-groups" target="_blank" rel="noopener">policy-change guidance</a> describes how prior consumption carries forward when a user changes groups.</p>
     </section>
 
     <section class="step">
@@ -326,6 +335,7 @@
         <figcaption><code>Export by unit</code> and <code>Export by user</code> are CSV, <code>Export deck</code> is a five-slide <code>.pptx</code> built with PptxGenJS, and <code>PDF</code> is an image-based snapshot of the live page via <code>html2canvas</code> + <code>jsPDF</code> (not a conventional, text-searchable PDF).</figcaption>
       </figure>
       <p>Because the PDF captures the live report at 2x scale as an image, the resulting file can be large (tens to 100+ MB for a report with a long allocation table) and its text isn't selectable. If you need numbers for analysis, use the two CSV exports instead; if you need a smaller, text-searchable PDF for sharing, your browser's own Print &rarr; Save as PDF on this page will generally produce a much lighter file.</p>
+      <p><strong>Keep the qualifications with the exports:</strong> upstream files can retain labels such as Billed cost, Chargeback $ (overage), and Budget cap. This guide does not rename those fields or change the tool's calculations. Explain them as modeled cost, illustrative over-allowance allocation, and a configured modeling allowance &mdash; not an invoice amount or an enforced spending control &mdash; when sharing an output.</p>
     </section>
 
     <section class="step">
@@ -342,11 +352,11 @@
       <ul class="checklist">
         <li>FOCUS-aligned terminology: List / Contracted / Effective / Billed cost labels, same vocabulary as the sibling Chargeback tool &mdash; see "How to read the numbers" above before treating any of these as invoice-grade.</li>
         <li><strong>Showback</strong>, as this tool implements it: the full effective cost of consumption attributed to a unit, with no financial transfer. <strong>Chargeback</strong>, as this tool implements it: over-allowance credits &times; contracted rate &mdash; one possible organizational allocation policy, not a Microsoft billing definition or the only valid chargeback method. Other models (full consumption, fixed allocation, blended) are equally valid; this tool only computes the overage-basis one.</li>
-        <li>Single-period snapshot &mdash; no amortization, forecasting, or anomaly detection in the browser tool (that's what the Power BI templates add).</li>
+        <li>The browser tool analyzes the supplied snapshot without amortization, forecasting, or anomaly detection. Check the selected Power BI variant's documentation for its supported forecasting, allocation, and cost-modeling features; don't assume every variant adds each capability.</li>
         <li>Both CSV exports are required; the tool will not generate a report from Entra data alone or credit data alone.</li>
         <li>Questions or feedback on the methodology: <a href="mailto:copilot-roi-advisory-team-gh@microsoft.com">copilot-roi-advisory-team-gh@microsoft.com</a> (Microsoft's Copilot ROI Advisory team, who own the upstream Analytics Hub tool &mdash; not the author of this companion page).</li>
       </ul>
-      <p class="meta">Validated through a live run in a Microsoft test tenant using synthetic identities, October 28, 2026; revised after independent technical review the same day.</p>
+      <p class="meta"><strong>Revision 2026-10-28-r3.</strong> Workflow illustrated with synthetic identities in a Microsoft test tenant on October 28, 2026. Matching, fallback, coverage, and analytics descriptions were revised after source review the same day; this is not a new tenant run or a telemetry-payload audit.</p>
     </section>
   </main>
 </body>
