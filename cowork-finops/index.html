@@ -201,11 +201,12 @@
       <p><strong>Audience:</strong> Microsoft 365 administrators, FinOps practitioners, and finance analysts who already have (or can request) Copilot Cost Management and Entra export access.<br>
       <strong>Prerequisites:</strong> a supported admin role for each export (see Step 02), an agreed reporting period, and an agreed allocation rule before you circulate any output as a real chargeback.</p>
       <div class="warning">
-        <p><strong>This is an independent companion walkthrough, not official Microsoft documentation.</strong> It documents a specific community-built browser tool and two public GitHub Power BI templates linked from Microsoft's Analytics Hub page; it is not a Microsoft support article and carries no Microsoft endorsement of accuracy.</p>
-      </div>
-      <div class="warning">
-        <p><strong>Suitable for:</strong> consumption analysis, showback, allocation modeling, and pilot/internal review.<br>
-        <strong>Not sufficient by itself for:</strong> invoice reconciliation, general-ledger posting, or a disputed chargeback &mdash; those require your actual Microsoft billing record.</p>
+        <p><strong>Scope &amp; limitations:</strong></p>
+        <ul class="checklist">
+          <li>This is an independent companion walkthrough, not official Microsoft documentation &mdash; it covers a community-built browser tool and two public GitHub Power BI templates linked from Microsoft's Analytics Hub page, with no Microsoft endorsement of accuracy.</li>
+          <li><strong>Suitable for:</strong> consumption analysis, showback, allocation modeling, and pilot/internal review.</li>
+          <li><strong>Not sufficient by itself for:</strong> invoice reconciliation, general-ledger posting, or a disputed chargeback &mdash; those require your actual Microsoft billing record.</li>
+        </ul>
       </div>
       <div class="warning success">
         <p><strong>Privacy:</strong> the tool is designed to process your CSVs entirely in the browser &mdash; no upload, no backend. In the run documented here, the CSV contents were not transmitted in observed network requests (verified via DevTools &rarr; Network). That is a spot-check, not a code audit: for sensitive or regulated data, review the <a href="https://github.com/microsoft/Analytics-Hub" target="_blank" rel="noopener">published source</a> yourself and confirm it meets your organization's data-handling requirements before loading identifiable production data. Prefer synthetic or approved data for evaluation runs.</p>
@@ -288,7 +289,7 @@
 
     <section class="step">
       <h2><span class="badge">04</span>Click Generate and read the report</h2>
-      <p>The two files join on User Principal Name &mdash; that's how <em>this tool</em> matches records, not a platform-wide identity standard &mdash; and the page renders a FOCUS-aligned modeled cost view: scope strip, live rate controls (List vs. Contracted unit price), KPI band, cost-allocation cut (department / cost center / business unit, searchable and filterable), rate-comparison bars, and a methodology/glossary section.</p>
+      <p>The tool joins the two files locally using the User Principal Name (UPN) column &mdash; that's this specific tool's matching key, not a platform-wide identity standard. Make sure the UPN format matches exactly between your Entra and Cost Management exports (same casing/domain), or those rows will fail to allocate and silently drop out of the allocation cut. The page then renders a FOCUS-aligned modeled cost view: scope strip, live rate controls (List vs. Contracted unit price), KPI band, cost-allocation cut (department / cost center / business unit, searchable and filterable), rate-comparison bars, and a methodology/glossary section.</p>
       <figure class="screenshot">
         <img src="images/04-finops-report-top.png" loading="lazy" alt="Top of the generated FinOps report, showing the hero, FOCUS/FinOps Framework badges, and the overage notice banner">
         <figcaption>Report header, computed live from your uploaded files (not demo data, once you've loaded your own exports). Read the badges as "FOCUS-aligned terminology," per the caveat in "How to read the numbers" above.</figcaption>
@@ -306,9 +307,9 @@
       <h2><span class="badge">05</span>Validate before you trust the report</h2>
       <p>Before you circulate any allocation or chargeback figure, check these in the on-screen report and your source files:</p>
       <ul class="checklist">
-        <li>Confirm the reporting period the credit export actually covers, and whether your read of it is monthly or cumulative.</li>
+        <li>Confirm the reporting period the credit export actually covers &mdash; in the Microsoft 365 admin center's Cost Management &gt; Consumption tab, exported reports are a <strong>point-in-time snapshot</strong> while the on-screen dashboard keeps retrieving live data, so exported and dashboard counts can temporarily differ. Know which one you pulled.</li>
         <li>Record total usage rows and distinct people in the source export before comparing to what the tool shows.</li>
-        <li>Look for unmatched identities &mdash; UPNs present in one file but not the other won't be allocated correctly.</li>
+        <li>Look for unmatched identities &mdash; UPNs present in one file but not the other (including casing/domain mismatches) won't be allocated correctly.</li>
         <li>Check for blank Department / Cost Center / Business Unit values; those rows fall outside your allocation cut.</li>
         <li>Watch for duplicate rows if your credit export spans multiple services or dates.</li>
         <li>If anyone changed security groups or spending policy mid-period, confirm their usage is still attributed the way you expect.</li>
