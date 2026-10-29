@@ -57,7 +57,7 @@ $privateUrlChecks = foreach ($card in $privateCards) {
 }
 
 # 2. Mojibake & BOM scan across public repo HTML and private card HTML
-$mojibakePattern = [regex]'(?:Ã.|â€.|Â.|ðŸ.|ï¿½)'
+$mojibakePattern = [regex]'(?:\u00C3.|\u00E2\u20AC.|\u00C2.|\u00F0\u0178.|\u00EF\u00BF\u00BD)'
 $htmlFiles = @(Get-ChildItem -LiteralPath $RepoRoot -Filter *.html -File) +
              @(Get-ChildItem -LiteralPath $PrivateRoot -Filter *.html -File)
 $encodingChecks = foreach ($file in $htmlFiles) {
