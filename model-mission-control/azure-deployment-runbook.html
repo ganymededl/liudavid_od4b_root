@@ -163,26 +163,16 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
     <p class="lede">Model Mission Control recommends a model from a platform catalog for a given prompt. This runbook deploys the backend for its optional <code>Assess with Azure AI</code> feature.</p>
   </section>
 
-  <p>Users sign in through Microsoft Entra ID. The API validates their access tokens and checks whether they are allowed to use the service. The Function then calls the deployed model in an Azure OpenAI resource using its managed identity.</p>
+  <p>Users sign in through Microsoft Entra ID. The API validates their access tokens and checks whether they are allowed to use the service. The API then calls the deployed model in an Azure OpenAI account using the Function App's managed identity.</p>
   <div class="callout"><strong>Cloud scope:</strong> this runbook targets an Azure commercial subscription and Microsoft Entra workforce tenant. It has not been validated for Azure Government, GCC High, DoD, or GCC Moderate data-handling requirements; commands, endpoint suffixes, and model availability can differ.</div>
-  <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer. This does not mean the API accepts unauthenticated requests: the function code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI resource.</div>
-  <div class="callout"><strong>Product names:</strong> <code>Assess with Azure AI</code> is the feature label in Model Mission Control. The backend resource and API used by this runbook are Azure OpenAI, managed in Microsoft Foundry. Existing <code>foundry_*</code> error codes are application contracts, not separate Azure resources.</div>
-  <div class="callout">
-    <strong>Function source package:</strong> includes <code>host.json</code>, package manifests, locked dependencies, Function source, authorization and routing libraries, tests, and the source runbook. It excludes <code>node_modules</code>, local settings, credentials, and deployment artifacts.
-    <div class="download-row">
-      <a class="download-button" href="downloads/model-mission-control-api-source.zip" download>Download Function source ZIP</a>
-      <a href="downloads/model-mission-control-api-source.sha256.txt">SHA-256 checksum</a>
-    </div>
-  </div>
-
-  <p>At each checkpoint, record the result and capture screenshots if required by your deployment process. Redact identifiers before sharing evidence, and never include tokens or credentials.</p>
+  <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The platform storage connection strings are the exception; see Section 8. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer, but the API code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI account.</div>
 
   <nav class="toc">
     <strong>Build sequence</strong>
     <ol>
       <li><a href="#prerequisites">Prerequisites and variables</a></li>
       <li><a href="#architecture">Architecture</a></li>
-      <li><a href="#azure-ai">Azure OpenAI resource and model deployment</a></li>
+      <li><a href="#azure-ai">Azure OpenAI account and model deployment</a></li>
       <li><a href="#entra-api">Entra API registration</a></li>
       <li><a href="#entra-web">Entra single-page application (SPA) registration</a></li>
       <li><a href="#function">Function App</a></li>
@@ -197,11 +187,20 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
   <h2 id="prerequisites">1. Prerequisites and variables</h2>
   <section class="step">
     <p>Prepare the workstation, clone the source, set the target names and origins, and confirm the selected model and quota before creating resources.</p>
+    <p><code>Assess with Azure AI</code> is the feature label in Model Mission Control. The backend resource and API in this runbook are Azure OpenAI, managed in Microsoft Foundry.</p>
+    <div class="callout">
+      <strong>Choose a source path:</strong> clone the repository when deploying both the website and API; Section 9 expects that full repository layout. The downloadable ZIP contains only the Function API source and supplements, rather than replaces, the repository.
+      <div class="download-row">
+        <a class="download-button" href="downloads/model-mission-control-api-source.zip" download>Download Function API source ZIP</a>
+        <a href="downloads/model-mission-control-api-source.sha256.txt">SHA-256 checksum</a>
+      </div>
+    </div>
+    <p>At each checkpoint, record the result if required by your deployment process. Redact identifiers before sharing evidence, and never include tokens or credentials.</p>
     <h3>Prepare an administrator workstation</h3>
     <ul class="checklist">
       <li>Contributor on the subscription, or on a pre-created resource group if you skip <code>az group create</code>.</li>
       <li>User Access Administrator or Owner to assign the Azure OpenAI inference role.</li>
-      <li>Permission to create Entra app registrations and grant delegated consent.</li>
+      <li>Permission to create Entra app registrations and edit <strong>Authorized client applications</strong> on the API registration.</li>
       <li>Azure CLI, Node.js 22, npm, and Azure Functions Core Tools 4.</li>
       <li>Git, with permission to clone the Model Mission Control source repository.</li>
       <li>A globally unique suffix for public Azure resource names.</li>
@@ -217,27 +216,29 @@ $STORAGE = "stmmc$SUFFIX"
 $FUNCTION_APP = "func-model-mission-control-$SUFFIX"
 $AI_ACCOUNT = "mmc-openai-$SUFFIX"
 $AI_DEPLOYMENT = "mmc-gpt-5-mini"
+$AI_SKU = "GlobalStandard" # Or DataZoneStandard
 $WEB_ORIGIN = "https://&lt;github-user&gt;.github.io"
 $WEB_REDIRECT = "$WEB_ORIGIN/&lt;repository&gt;/model-mission-control/"
 $LOCAL_ORIGIN = "http://localhost:8765"
 $LOCAL_REDIRECT = "$LOCAL_ORIGIN/model-mission-control/"</code></pre>
     <p class="small">Use your own tenant, subscription, object IDs, names, and origins. Do not copy IDs from the reference deployment.</p>
+    <p><strong>Deployment type decision:</strong> choose <code>GlobalStandard</code> or <code>DataZoneStandard</code> in <code>$AI_SKU</code>. This variable controls the availability check, quota lookup, deployment command, and checkpoint in Sections 1 and 3.</p>
     <h3>Confirm model availability and quota</h3>
-    <p>The first query must return <code>gpt-5-mini</code> version <code>2025-08-07</code> with a <code>GlobalStandard</code> SKU. The second must show at least 10 units available in the selected subscription and region.</p>
+    <p>The first query must return <code>gpt-5-mini</code> version <code>2025-08-07</code> with the selected SKU. The second must show at least 10 units available in the selected subscription and region.</p>
 <pre><code>$Models = @(az cognitiveservices model list `
   --location $LOCATION `
-  --query "[?model.name=='gpt-5-mini' &amp;&amp; model.version=='2025-08-07' &amp;&amp; contains(model.skus[].name, 'GlobalStandard')]" `
+  --query "[?model.name=='gpt-5-mini' &amp;&amp; model.version=='2025-08-07' &amp;&amp; contains(model.skus[].name, '$AI_SKU')]" `
   -o json | ConvertFrom-Json)
 if ($Models.Count -eq 0) {
-  throw "gpt-5-mini 2025-08-07 with GlobalStandard is not offered in $LOCATION."
+  throw "gpt-5-mini 2025-08-07 with $AI_SKU is not offered in $LOCATION."
 }
 
 $Quota = az cognitiveservices usage list `
   --location $LOCATION `
-  --query "[?name.value=='OpenAI.GlobalStandard.gpt-5-mini'] | [0]" `
+  --query "[?name.value=='OpenAI.$AI_SKU.gpt-5-mini'] | [0]" `
   -o json | ConvertFrom-Json
 if (-not $Quota) {
-  throw "No GlobalStandard quota record was returned for gpt-5-mini in $LOCATION."
+  throw "No $AI_SKU quota record was returned for gpt-5-mini in $LOCATION."
 }
 
 $AvailableCapacity = [double]$Quota.limit - [double]$Quota.currentValue
@@ -260,7 +261,7 @@ $Quota | Select-Object @{n="Available";e={$AvailableCapacity}}, currentValue, li
       <div class="flow-box"><strong>Function API</strong>Validates origin, tenant, audience, user, and delegated scope.</div>
       <div class="flow-box"><strong>Azure OpenAI</strong>The Function App's managed identity invokes the deployed model.</div>
     </div>
-    <p class="small">Trust boundaries: browser token to Function; managed identity token from Function to the Azure OpenAI resource. The browser has no Azure OpenAI credential.</p>
+    <p class="small">Trust boundaries: browser token to API; managed identity token from the Function App to the Azure OpenAI account. The browser has no Azure OpenAI credential.</p>
     <h3>Components and responsibilities</h3>
     <table class="vars">
       <thead><tr><th>Component</th><th>What it does</th><th>Why it is needed</th></tr></thead>
@@ -268,14 +269,14 @@ $Quota | Select-Object @{n="Available";e={$AvailableCapacity}}, currentValue, li
         <tr><td>Resource group</td><td>Groups the backend resources under one cost and lifecycle scope.</td><td>Use it to filter costs, assign access, and remove resources together.</td></tr>
         <tr><td>Static website and HTTPS origin</td><td>Serves Model Mission Control, the platform catalogs, MSAL, and <code>ai-config.js</code>.</td><td>The browser interface is separate from the API. Its exact origin is also used for redirects and CORS.</td></tr>
         <tr><td>Model Mission Control Web app registration</td><td>Represents the browser as a public single-page application client.</td><td>MSAL uses it to sign in the user and request the delegated API scope. It has no client secret.</td></tr>
-        <tr><td>Model Mission Control API app registration</td><td>Defines the API audience and exposes <code>access_as_user</code>.</td><td>The Function rejects tokens issued for another API or without the required delegated scope.</td></tr>
+        <tr><td>Model Mission Control API app registration</td><td>Defines the API audience and exposes <code>access_as_user</code>.</td><td>The API rejects tokens issued for another API or without the required delegated scope.</td></tr>
         <tr><td><code>access_as_user</code> scope</td><td>Allows the signed-in user to call the recommendation API through the SPA.</td><td>Separates user authentication from permission to invoke this API.</td></tr>
         <tr><td>Storage account</td><td>Stores Function host state and deployment packages.</td><td>Azure Functions requires it. The application does not use it to store prompts.</td></tr>
         <tr><td>Flex Consumption plan</td><td>Allocates Linux compute when requests arrive.</td><td>Runs the low-volume API without a continuously running server.</td></tr>
         <tr><td>Function App</td><td>Hosts <code>/api/recommend</code> and performs CORS, token, input, and response validation.</td><td>Keeps authorization and Azure OpenAI access out of the public website.</td></tr>
         <tr><td>Application Insights</td><td>Collects Function request, failure, and host diagnostics.</td><td>Supports operations without putting tokens or prompt bodies in logs.</td></tr>
         <tr><td>Azure OpenAI account</td><td>Holds the model deployment and controls who can call it.</td><td>Places model access and token usage cost under Azure controls.</td></tr>
-        <tr><td><code>mmc-gpt-5-mini</code> deployment</td><td>Makes <code>gpt-5-mini</code> 2025-08-07 callable under a stable deployment name.</td><td>The Function calls a deployment name, not a catalog model name.</td></tr>
+        <tr><td><code>mmc-gpt-5-mini</code> deployment</td><td>Makes <code>gpt-5-mini</code> 2025-08-07 callable under a stable deployment name.</td><td>The API calls a deployment name, not a catalog model name.</td></tr>
         <tr><td>System-assigned managed identity</td><td>Gives the Function App its own Entra service principal.</td><td>Lets the API obtain a short-lived Azure OpenAI token instead of storing an API key.</td></tr>
         <tr><td>Cognitive Services OpenAI User role assignment</td><td>Grants the Function App identity inference access at the Azure OpenAI account scope.</td><td>Without it, token acquisition can succeed but model calls return HTTP 403.</td></tr>
         <tr><td>Function application settings</td><td>Supply tenant, audience, user, origin, endpoint, and deployment values.</td><td>The same source can be configured for a different tenant or resource names without code changes.</td></tr>
@@ -283,9 +284,10 @@ $Quota | Select-Object @{n="Available";e={$AvailableCapacity}}, currentValue, li
     </table>
   </section>
 
-  <h2 id="azure-ai">3. Create the Azure OpenAI resource and deploy the model</h2>
+  <h2 id="azure-ai">3. Create the Azure OpenAI account and deploy the model</h2>
   <section class="step">
     <p>Create the backend cost boundary and the model endpoint that the Function App will call. The custom subdomain is required for Microsoft Entra token authentication to Azure OpenAI.</p>
+    <div class="callout"><strong>Choose the deployment type before running the commands.</strong> With <code>GlobalStandard</code>, prompts and responses can be processed in any Azure region. If policy requires US-only processing, select <code>DataZoneStandard</code> in <code>$AI_SKU</code> and confirm that the Section 1 checks pass. Data stored at rest remains in the designated Azure geography. See <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types" target="_blank" rel="noopener noreferrer">Microsoft Foundry deployment types</a>.</div>
     <h3>Create the resource group, Azure OpenAI account, and model deployment</h3>
 <pre><code>az group create --name $RG --location $LOCATION
 
@@ -304,21 +306,20 @@ az cognitiveservices account deployment create `
   --model-format OpenAI `
   --model-name gpt-5-mini `
   --model-version 2025-08-07 `
-  --sku-name GlobalStandard `
+  --sku-name $AI_SKU `
   --sku-capacity 10</code></pre>
-    <div class="callout"><strong>Data processing:</strong> data stored at rest remains in the designated Azure geography. With <code>GlobalStandard</code>, prompts and responses can be processed in any Azure region. If policy requires US-only processing, use <code>DataZoneStandard</code> only where <code>gpt-5-mini</code> supports that deployment type and region. Verify current availability before deployment. See <a href="https://learn.microsoft.com/en-us/azure/foundry/foundry-models/concepts/deployment-types" target="_blank" rel="noopener noreferrer">Microsoft Foundry deployment types</a>.</div>
     <figure class="portal-shot">
-      <div class="portal-bar">Azure portal &gt; Azure OpenAI resource &gt; Model deployments</div>
+      <div class="portal-bar">Azure portal &gt; Azure OpenAI account &gt; Model deployments</div>
       <div class="portal-body">
         <div class="portal-panel">
           <h4>Expected deployment checkpoint</h4>
           <div class="portal-field"><span>Deployment name</span><strong>mmc-gpt-5-mini</strong></div>
           <div class="portal-field"><span>Model</span><span>gpt-5-mini</span></div>
           <div class="portal-field"><span>Version</span><span>2025-08-07</span></div>
-          <div class="portal-field"><span>Deployment type</span><span>Global Standard</span></div>
+          <div class="portal-field"><span>Deployment type</span><span>Value of <code>$AI_SKU</code></span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 1 - Confirm the model deployment.</strong> Verify that deployment status is Succeeded. Record the deployment name; you will use it in the Function settings.</figcaption>
+      <figcaption><strong>Checkpoint 1 - Confirm the model deployment against the table.</strong> Record the deployment name for the Function App settings.</figcaption>
     </figure>
   </section>
 
@@ -346,7 +347,7 @@ az cognitiveservices account deployment create `
           <div class="portal-field"><span>Status</span><span>Enabled</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 2 - Confirm the API scope.</strong> Verify that <code>access_as_user</code> is enabled before configuring the SPA.</figcaption>
+      <figcaption><strong>Checkpoint 2 - Confirm the API registration against the table before configuring the SPA.</strong></figcaption>
     </figure>
   </section>
 
@@ -419,7 +420,7 @@ az functionapp config set `
           <div class="portal-field"><span>HTTPS only</span><span>Enabled</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 4 - Confirm the Function runtime.</strong> Verify Linux, Flex Consumption, Node.js 22, Running status, and HTTPS only before deployment.</figcaption>
+      <figcaption><strong>Checkpoint 4 - Confirm the Function App against the table before deploying.</strong></figcaption>
     </figure>
   </section>
 
@@ -443,7 +444,7 @@ az role assignment create `
   --role "Cognitive Services OpenAI User" `
   --scope $AI_SCOPE</code></pre>
     <figure class="portal-shot">
-      <div class="portal-bar">Function App &gt; Identity and Azure OpenAI resource &gt; Access control (IAM)</div>
+      <div class="portal-bar">Function App &gt; Identity and Azure OpenAI account &gt; Access control (IAM)</div>
       <div class="portal-body">
         <div class="portal-panel">
           <h4>Expected identity checkpoint</h4>
@@ -453,13 +454,13 @@ az role assignment create `
           <div class="portal-field"><span>Role</span><strong>Cognitive Services OpenAI User</strong></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 5 - Confirm managed identity access.</strong> Verify the role at the Azure OpenAI account scope, not the entire subscription.</figcaption>
+      <figcaption><strong>Checkpoint 5 - Confirm the identity and role against the table.</strong> Keep the role at the Azure OpenAI account scope.</figcaption>
     </figure>
   </section>
 
   <h2 id="settings">8. Configure the Function App</h2>
   <section class="step">
-    <p>Set the environment-specific identity, authorization, origin, and Azure OpenAI values used by the same Function source package.</p>
+    <p>Set the environment-specific identity, authorization, origin, and Azure OpenAI values used by the same Function API source package.</p>
     <h3>Add six application settings</h3>
     <table class="vars">
       <thead><tr><th>Setting</th><th>Value</th><th>Purpose</th></tr></thead>
@@ -468,7 +469,7 @@ az role assignment create `
         <tr><td><code>ENTRA_API_CLIENT_ID</code></td><td>API app client ID</td><td>Valid token audience.</td></tr>
         <tr><td><code>ALLOWED_USER_OBJECT_ID</code></td><td>Authorized user's object ID</td><td>Restricts the endpoint to the user authorized to run assessments.</td></tr>
         <tr><td><code>ALLOWED_ORIGINS</code></td><td>Comma-separated exact origins</td><td>Application-level CORS allow-list.</td></tr>
-        <tr><td><code>AZURE_OPENAI_ENDPOINT</code></td><td><code>https://&lt;account&gt;.openai.azure.com/</code></td><td>Azure OpenAI resource endpoint.</td></tr>
+        <tr><td><code>AZURE_OPENAI_ENDPOINT</code></td><td><code>https://&lt;account&gt;.openai.azure.com/</code></td><td>Azure OpenAI account endpoint.</td></tr>
         <tr><td><code>AZURE_OPENAI_DEPLOYMENT</code></td><td>Your deployment name</td><td>Model deployment the Function calls.</td></tr>
       </tbody>
     </table>
@@ -503,7 +504,7 @@ az functionapp config appsettings set `
           <div class="portal-field"><span>Platform storage settings</span><span>Connection strings; treat as secrets</span></div>
         </div>
       </div>
-      <figcaption><strong>Checkpoint 6 - Confirm Function settings.</strong> Verify all six setting names and save the configuration.</figcaption>
+      <figcaption><strong>Checkpoint 6 - Confirm all six Function App settings against the table.</strong></figcaption>
     </figure>
     <div class="callout"><strong>Do not use a wildcard (<code>*</code>) in the allowed origins.</strong> The function code returns CORS headers only when the request Origin exactly matches <code>ALLOWED_ORIGINS</code>. Keep the platform CORS list empty or equally restrictive; do not weaken the code-level check.</div>
   </section>
@@ -552,6 +553,22 @@ $FUNC_HOST = az resource show `
   <h2 id="validate">10. Validate end to end</h2>
   <section class="step">
     <p>A successful deployment does not prove that token validation, CORS, authorization, managed identity, or catalog restrictions work. Test each boundary in order.</p>
+    <p>In a new PowerShell session, rerun the Section 1 variable block, then rebuild the values created in Sections 7 and 9:</p>
+<pre><code>$FUNC_HOST = az resource show `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --resource-type Microsoft.Web/sites `
+  --query properties.defaultHostName -o tsv
+
+$PRINCIPAL_ID = az functionapp identity show `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --query principalId -o tsv
+
+$AI_SCOPE = az cognitiveservices account show `
+  --resource-group $RG `
+  --name $AI_ACCOUNT `
+  --query id -o tsv</code></pre>
     <h3>Run the acceptance checks in order</h3>
     <ol>
       <li><strong>Deployment:</strong> Function App state is Running and <code>/api/recommend</code> exists.</li>
@@ -559,7 +576,7 @@ $FUNC_HOST = az resource show `
       <li><strong>CORS:</strong> OPTIONS from the production origin returns 204 and that exact <code>Access-Control-Allow-Origin</code>.</li>
       <li><strong>Authentication:</strong> selecting <code>Assess with Azure AI</code> redirects the current tab to Microsoft Entra ID. After sign-in, Model Mission Control restores the selected platform and prompt, then continues the assessment automatically.</li>
       <li><strong>Authorization:</strong> sign in with a same-tenant test user whose object ID is not configured in <code>ALLOWED_USER_OBJECT_ID</code>. Submit a synthetic assessment and confirm HTTP 403. A user from another tenant should be blocked during Entra sign-in because both registrations are single tenant.</li>
-      <li><strong>Managed identity:</strong> in a dedicated test environment, temporarily remove the managed identity's Azure OpenAI role assignment. Confirm that the response contains <code>foundry_authentication_failed</code>. Restore the assignment, allow time for role propagation, and retest.</li>
+      <li><strong>Managed identity:</strong> in a dedicated test environment, temporarily remove the Function App identity's Azure OpenAI role assignment. Confirm that the response contains <code>foundry_authentication_failed</code>. Restore the assignment, allow several minutes for role propagation, and retest.</li>
       <li><strong>Eligible models:</strong> verify that the response references only model IDs included in the assessment request from the selected platform's catalog.</li>
     </ol>
 <pre><code># Expected output: 401 in Windows PowerShell 5.1 and PowerShell 7
@@ -589,6 +606,25 @@ Invoke-WebRequest `
   } `
   -UseBasicParsing |
   Select-Object StatusCode, @{n="ACAO";e={$_.Headers["Access-Control-Allow-Origin"]}}</code></pre>
+    <h3>Test managed-identity denial in a dedicated environment</h3>
+    <p>List the exact assignment first, delete it, run acceptance check 6, and then restore it. Both deletion and restoration can take several minutes to propagate.</p>
+<pre><code>az role assignment list `
+  --assignee-object-id $PRINCIPAL_ID `
+  --role "Cognitive Services OpenAI User" `
+  --scope $AI_SCOPE -o table
+
+az role assignment delete `
+  --assignee-object-id $PRINCIPAL_ID `
+  --role "Cognitive Services OpenAI User" `
+  --scope $AI_SCOPE
+
+# Run the synthetic assessment and confirm foundry_authentication_failed.
+
+az role assignment create `
+  --assignee-object-id $PRINCIPAL_ID `
+  --assignee-principal-type ServicePrincipal `
+  --role "Cognitive Services OpenAI User" `
+  --scope $AI_SCOPE</code></pre>
     <figure class="portal-shot">
       <div class="portal-bar">Browser acceptance test &gt; Model Mission Control</div>
       <div class="portal-body">
@@ -606,7 +642,17 @@ Invoke-WebRequest `
 
   <h2 id="troubleshoot">11. Troubleshooting and rollback</h2>
   <section class="step">
-    <p>Start with the symptom below. Error codes retain the <code>foundry_</code> prefix for compatibility while the Function calls the Azure OpenAI resource.</p>
+    <p>Start with the symptom below. Error codes retain the <code>foundry_</code> prefix for compatibility while the API calls the Azure OpenAI account.</p>
+    <p>In a new PowerShell session, rerun the Section 1 variable block. Rebuild the Function App identity and Azure OpenAI account scope before changing backend access:</p>
+<pre><code>$PRINCIPAL_ID = az functionapp identity show `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --query principalId -o tsv
+
+$AI_SCOPE = az cognitiveservices account show `
+  --resource-group $RG `
+  --name $AI_ACCOUNT `
+  --query id -o tsv</code></pre>
     <table class="vars">
       <thead><tr><th>Symptom</th><th>Likely cause</th><th>Action</th></tr></thead>
       <tbody>
@@ -626,7 +672,21 @@ Invoke-WebRequest `
       <li>Confirm that <code>Assess with Azure AI</code> is hidden and the local advisor still works.</li>
     </ol>
     <h3>Block backend access</h3>
-    <p>Follow the approved access-revocation procedure. Depending on the incident, disable the delegated API scope, remove SPA preauthorization, or remove the Function managed identity's Azure OpenAI role assignment. Allow several minutes for an Azure role change to take effect.</p>
+    <ol>
+      <li>To block every browser client, open <strong>Microsoft Entra admin center &gt; App registrations &gt; Model Mission Control API &gt; Expose an API</strong>, select <code>access_as_user</code>, and disable the scope.</li>
+      <li>To block only the web client, open the same API registration, select <strong>Expose an API &gt; Authorized client applications</strong>, and remove the <strong>Model Mission Control Web</strong> client.</li>
+      <li>To stop model calls while leaving the API registrations intact, remove the Function App identity's inference role:</li>
+    </ol>
+<pre><code>az role assignment list `
+  --assignee-object-id $PRINCIPAL_ID `
+  --role "Cognitive Services OpenAI User" `
+  --scope $AI_SCOPE -o table
+
+az role assignment delete `
+  --assignee-object-id $PRINCIPAL_ID `
+  --role "Cognitive Services OpenAI User" `
+  --scope $AI_SCOPE</code></pre>
+    <p>Allow several minutes for the Azure role change to take effect.</p>
     <h3>Remove resources</h3>
     <p>Run these commands only after retention and change-control approval. In a new PowerShell session, rerun the Section 1 variable block and set the two app registration client IDs. Deleting the resource group removes the Function App, plan, storage, Application Insights, Azure OpenAI account, and model deployment. Purging the soft-deleted Azure OpenAI account allows its name to be reused.</p>
 <pre><code>$API_CLIENT_ID = "&lt;API-APPLICATION-CLIENT-ID&gt;"
