@@ -29,3 +29,9 @@ DemoIQ_Liudavid_Files/
 # Python bytecode cache
 __pycache__/
 *.pyc
+
+# Private PH cards, logs, and backup files (must never publish to GitHub Pages)
+/ph-private-cards/
+_logs/
+*.bak
+

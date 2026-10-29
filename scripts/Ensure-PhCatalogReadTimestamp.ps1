@@ -6,9 +6,9 @@
     as UTF-8 WITHOUT BOM on both PowerShell 5.1 and 7 (web-safe, no mojibake).
 
     PARAMETERS
-      -Root <path>          PH card folder. Default: GH-backed ph-private-cards folder
+      -Root <path>          PH card folder. Default: private OneDrive Hub\Private folder (outside public GitHub Pages)
       -StaleAfterDays <int> Age (days) before a marker is "stale". Default 8.
-      -LogFolder <path>     Run-log output folder. Default: <Root>\_logs
+      -LogFolder <path>     Run-log output folder. Default: <Root>\_logs (outside public GitHub Pages)
       -Backup               Write <card>.<stamp>.bak before overwriting.
       -Rollback             Restore newest .bak for each card, then exit.
       -WhatIf               Preview writes; change nothing.
@@ -17,9 +17,9 @@
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
 param(
-    [string]$Root = "C:\Users\liudavid\OneDrive - Microsoft\Documents\Microsoft Scout\liudavid_od4b_root\ph-private-cards",
+    [string]$Root = "C:\Users\liudavid\OneDrive - Microsoft\Hub\Private",
     [ValidateRange(1, 3650)][int]$StaleAfterDays = 8,
-    [string]$LogFolder = "C:\Users\liudavid\OneDrive - Microsoft\Documents\Microsoft Scout\liudavid_od4b_root\ph-private-cards\_logs",
+    [string]$LogFolder = "C:\Users\liudavid\OneDrive - Microsoft\Hub\Private\_logs",
     [switch]$Backup,
     [switch]$Rollback,
     [switch]$Force,
@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 if ($Help) {
 @"
 Ensure-PhCatalogReadTimestamp.ps1  (PH Weekly Card Timestamp Guard)
-  -Root <path>          PH card folder (default: ...\liudavid_od4b_root\ph-private-cards)
+  -Root <path>          PH card folder (default: C:\Users\liudavid\OneDrive - Microsoft\Hub\Private)
   -StaleAfterDays <int> Staleness threshold in days (default: 8)
   -LogFolder <path>     Run-log folder (default: <Root>\_logs)
   -Backup               Write <card>.<stamp>.bak before overwrite

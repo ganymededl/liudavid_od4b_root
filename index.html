@@ -35,6 +35,19 @@
       })(window, document, "clarity", "script", "yo4f54o07k");
     }
 
+    function unloadClarity() {
+      try {
+        if (typeof window.clarity === "function") window.clarity("consent", false);
+      } catch {}
+      document.querySelectorAll('script[src*="clarity.ms"]').forEach(el => el.remove());
+      try { delete window.clarity; } catch { window.clarity = undefined; }
+      const hadLoaded = loaded;
+      loaded = false;
+      if (hadLoaded) {
+        window.location.reload();
+      }
+    }
+
     if (consentParam === "on") writeConsent("granted");
     if (consentParam === "off") writeConsent("denied");
     if (consentParam !== null) {
@@ -49,7 +62,11 @@
       getConsent: () => consent,
       setConsent: (value) => {
         writeConsent(value);
-        if (consent === "granted") loadClarity();
+        if (consent === "granted") {
+          loadClarity();
+        } else {
+          unloadClarity();
+        }
       }
     };
   })();
@@ -102,33 +119,33 @@
     --c2:       #00ffa3;
     --c3:       #7b61ff;
     --t1:       #f4f4f8;
-    --t2:       rgba(244,244,248,0.50);
-    --t3:       rgba(244,244,248,0.25);
-    --glass:    rgba(6,6,9,0.68);
-    --card:     rgba(255,255,255,0.04);
-    --cardh:    rgba(255,255,255,0.08);
-    --tile:     rgba(10,10,16,0.58);
-    --tileh:    rgba(10,10,16,0.72);
-    --border:   rgba(255,255,255,0.07);
-    --border2:  rgba(0,217,255,0.22);
-    --ownerDim: rgba(244,244,248,0.65);
-    --navBorder: rgba(255,255,255,0.07);
+    --t2:       #b8c0cc;
+    --t3:       #8d97a8;
+    --glass:    rgba(6,6,9,0.78);
+    --card:     rgba(255,255,255,0.05);
+    --cardh:    rgba(255,255,255,0.09);
+    --tile:     rgba(10,10,16,0.72);
+    --tileh:    rgba(10,10,16,0.86);
+    --border:   rgba(255,255,255,0.10);
+    --border2:  rgba(0,217,255,0.28);
+    --ownerDim: rgba(244,244,248,0.78);
+    --navBorder: rgba(255,255,255,0.10);
   }
 
   [data-light="true"] {
     --bg:       #f0f2f8;
     --bg2:      #e4e7f0;
     --t1:       #0a0a14;
-    --t2:       rgba(10,10,20,0.55);
-    --t3:       rgba(10,10,20,0.30);
-    --glass:    rgba(240,242,248,0.85);
-    --card:     rgba(255,255,255,0.78);
-    --cardh:    rgba(255,255,255,0.95);
-    --tile:     rgba(255,255,255,0.80);
-    --tileh:    rgba(255,255,255,0.94);
-    --border:   rgba(0,0,0,0.08);
-    --border2:  rgba(0,180,210,0.35);
-    --ownerDim: rgba(10,10,20,0.65);
+    --t2:       #3d4454;
+    --t3:       #5a6376;
+    --glass:    rgba(240,242,248,0.88);
+    --card:     rgba(255,255,255,0.84);
+    --cardh:    rgba(255,255,255,0.96);
+    --tile:     rgba(255,255,255,0.86);
+    --tileh:    rgba(255,255,255,0.96);
+    --border:   rgba(0,0,0,0.10);
+    --border2:  rgba(0,150,185,0.40);
+    --ownerDim: rgba(10,10,20,0.78);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -206,14 +223,15 @@
   [data-light="true"] .noir-backdrop { opacity: .25; }
   .backdrop-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; align-items: center; }
   .backdrop-controls button {
-    padding: 8px 12px;
+    padding: 8px 13px;
     color: var(--t1);
     background: var(--glass);
     border: 1px solid var(--border);
     border-radius: 10px;
     cursor: pointer;
     font: inherit;
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 500;
   }
   .backdrop-controls button:focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; }
   .hero .backdrop-controls { margin-top: 20px; }
@@ -403,16 +421,16 @@
     line-height: 1.1;
   }
   .station .sn {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--t1);
-    max-width: 100px;
+    max-width: 110px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
   .station .sg {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--t2);
     display: flex;
     gap: 6px;
@@ -478,9 +496,10 @@
     gap: 16px;
   }
   .hero-ownerline {
-    font-size: 11px;
+    font-size: 13px;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     color: var(--t2);
   }
   .hero-title {
@@ -500,17 +519,17 @@
     border: none;
   }
   .tagline {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--t2);
     font-weight: 400;
-    max-width: 540px;
-    line-height: 1.5;
+    max-width: 660px;
+    line-height: 1.55;
   }
   .pathways {
     display: grid;
-    width: min(780px, 100%);
+    width: min(860px, 100%);
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    gap: 12px;
   }
   .pathcard {
     text-decoration: none;
@@ -518,7 +537,7 @@
     background: var(--tile);
     border: 0.5px solid var(--border);
     border-radius: 12px;
-    padding: 12px 14px;
+    padding: 14px 16px;
     transition: transform 0.15s, border-color 0.2s, background 0.18s;
   }
   .pathcard:hover {
@@ -528,24 +547,23 @@
   }
   .path-title {
     display: block;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
-    margin-bottom: 4px;
+    letter-spacing: 0.01em;
+    margin-bottom: 5px;
     color: var(--c1);
   }
   .path-desc {
     display: block;
-    font-size: 12px;
+    font-size: 14px;
     color: var(--t2);
-    line-height: 1.35;
+    line-height: 1.45;
   }
 
   .section-label {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--t2);
     margin: 0 0 12px 0;
@@ -576,8 +594,8 @@
   .libraries-wrap > * { position: relative; z-index: 1; }
   .libraries {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-    gap: 8px;
+    grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+    gap: 14px;
   }
   .lib {
     position: relative;
@@ -664,29 +682,33 @@
   .lib-icon svg { width: 15px; height: 15px; display: block; }
 
   .lib-name {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 700;
     letter-spacing: -0.1px;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
   }
   .lib-desc {
-    font-size: 12px;
+    font-size: 14px;
     color: var(--t2);
-    line-height: 1.4;
-    margin-bottom: 12px;
+    line-height: 1.45;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
   .lib-cta {
     display: flex;
     align-items: center;
-    gap: 4px;
-    font-size: 11px;
+    gap: 5px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--c1);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
+    text-transform: none;
+    letter-spacing: 0.01em;
   }
   .lib-cta svg {
-    width: 10px; height: 10px;
+    width: 11px; height: 11px;
     transition: transform 0.18s;
   }
   .lib:hover .lib-cta svg { transform: translateX(3px); }
@@ -695,11 +717,10 @@
   .lib-download {
     display: inline-block;
     margin-top: 8px;
-    padding: 5px 10px;
-    font-size: 11px;
+    padding: 6px 11px;
+    font-size: 12px;
     font-weight: 600;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    letter-spacing: 0.01em;
     color: var(--c1);
     border: 1px solid color-mix(in srgb, var(--c1) 45%, transparent);
     border-radius: 999px;
@@ -713,17 +734,35 @@
   }
   .lib-download svg { width: 10px; height: 10px; vertical-align: -1px; }
 
+  .lib-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
   .lib-public-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
     color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff);
-    padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .lib-featured-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+    color: var(--t1); background: rgba(123,97,255,0.22); border: 1px solid rgba(168,85,247,0.45);
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .lib-env-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.02em;
+    color: var(--t1); background: rgba(0,217,255,0.12); border: 1px solid rgba(0,217,255,0.32);
+    padding: 3px 8px; border-radius: 999px;
   }
   .lib-access-badge {
     display: inline-flex; align-items: center; gap: 4px;
-    font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
     white-space: nowrap;
-    padding: 3px 7px; border-radius: 999px; margin-bottom: 10px;
+    padding: 3px 8px; border-radius: 999px; margin-bottom: 10px;
   }
   .lib-access-badge.public { color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff); }
   /* Calm, neutral "internal" indicator — not an error/warning color, just a quiet lock. */
@@ -740,7 +779,7 @@
     background: var(--glass);
     border: 0.5px solid var(--border);
     border-radius: 14px;
-    padding: 12px 14px;
+    padding: 14px 16px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
@@ -751,8 +790,8 @@
     background: var(--card);
     color: var(--t1);
     font: inherit;
-    font-size: 12px;
-    padding: 9px 11px;
+    font-size: 14px;
+    padding: 10px 12px;
   }
   .resource-search::placeholder { color: var(--t2); }
   .resource-search:focus-visible {
@@ -768,15 +807,15 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
   }
   .resource-filter-label {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--t2);
-    margin-right: 2px;
+    margin-right: 4px;
   }
   .resource-filters {
     display: flex;
@@ -788,9 +827,9 @@
     background: var(--card);
     color: var(--t1);
     border-radius: 999px;
-    padding: 5px 10px;
+    padding: 6px 12px;
     font: inherit;
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
   }
@@ -801,15 +840,15 @@
     border-color: transparent;
   }
   .resource-scope-note {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--t2);
-    line-height: 1.4;
+    line-height: 1.45;
   }
   .resource-filter-status {
     margin-top: 4px;
-    font-size: 11px;
+    font-size: 13px;
     color: var(--t2);
-    line-height: 1.4;
+    line-height: 1.45;
   }
   .start-wrap {
     padding: 2px 32px 16px;
@@ -818,14 +857,14 @@
     background: var(--glass);
     border: 0.5px solid var(--border);
     border-radius: 14px;
-    padding: 14px;
+    padding: 16px;
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
   .start-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
-    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
+    gap: 12px;
   }
   .start-card {
     display: block;
@@ -834,8 +873,8 @@
     background: var(--tile);
     border: 0.5px solid var(--border);
     border-radius: 12px;
-    padding: 12px;
-    min-height: 110px;
+    padding: 14px;
+    min-height: 118px;
   }
   .start-card:hover {
     background: var(--tileh);
@@ -843,15 +882,15 @@
   }
   .start-card-title {
     display: block;
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 700;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
   }
   .start-card-desc {
     display: block;
-    font-size: 11px;
+    font-size: 14px;
     color: var(--t2);
-    line-height: 1.4;
+    line-height: 1.45;
   }
   .lib-primary-link {
     text-decoration: none;
@@ -905,11 +944,10 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 8px;
-    padding: 8px 24px 20px;
-    font-size: 10px;
+    gap: 10px;
+    padding: 12px 24px 24px;
+    font-size: 13px;
     color: var(--t2);
-    letter-spacing: 0.05em;
   }
   .footer-text {
     text-align: center;
@@ -919,14 +957,42 @@
     border-radius: 999px;
     background: var(--card);
     color: var(--t1);
-    padding: 4px 8px;
+    padding: 6px 12px;
     font: inherit;
-    font-size: 10px;
-    letter-spacing: 0.04em;
+    font-size: 13px;
+    font-weight: 600;
     cursor: pointer;
   }
   .footer-link:hover {
     background: var(--cardh);
+  }
+  .podcasts-details {
+    background: var(--glass);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .podcasts-summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--t1);
+  }
+  .podcasts-summary::-webkit-details-marker { display: none; }
+  .podcasts-summary-hint {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c1);
+  }
+  .podcasts-details[open] .podcasts {
+    margin-top: 12px;
   }
 
   /* ── Modal ──────────────────────────────────────────── */
@@ -1013,13 +1079,16 @@
   /* ── Podcasts ───────────────────────────────────────── */
   .podcasts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(224px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 10px;
   }
   .pod {
     position: relative;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
     background: var(--tile);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
@@ -1035,32 +1104,34 @@
     box-shadow: 0 6px 18px rgba(0,0,0,0.10);
   }
   .pod:hover {
-    transform: translateY(-3px);
+    transform: translateY(-2px);
     border-color: rgba(0,217,255,0.22);
     background: var(--tileh);
     box-shadow: 0 10px 26px rgba(0,0,0,0.32);
   }
   .pod-thumb {
-    width: 100%;
-    aspect-ratio: 16 / 9;
+    width: 96px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: 8px;
     object-fit: cover;
     display: block;
     background: var(--bg2);
-    border-bottom: 0.5px solid var(--border);
+    border: 0.5px solid var(--border);
   }
-  .pod-body { padding: 13px 15px 15px; display: flex; flex-direction: column; flex: 1; }
-  .pod-head { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+  .pod-body { padding: 0; display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .pod-head { display: flex; align-items: center; gap: 7px; margin-bottom: 2px; }
   .pod-badge { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-  .pod-name { font-size: 13px; font-weight: 700; letter-spacing: -0.1px; }
+  .pod-name { font-size: 14px; font-weight: 700; letter-spacing: -0.1px; }
   .pod-host {
-    font-size: 10px; font-weight: 700; color: var(--t2);
-    text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 11px;
+    font-size: 12px; font-weight: 600; color: var(--t2);
+    margin-bottom: 8px;
   }
   .pod-latest {
-    display: flex; align-items: center; gap: 9px; text-decoration: none;
+    display: flex; align-items: center; gap: 8px; text-decoration: none;
     background: rgba(0,217,255,0.06);
     border: 0.5px solid var(--border2);
-    border-radius: 10px; padding: 9px 10px; margin-bottom: 11px;
+    border-radius: 9px; padding: 7px 9px; margin-bottom: 8px;
     transition: background 0.18s, border-color 0.2s;
   }
   .pod-latest:hover { background: rgba(0,217,255,0.12); border-color: rgba(0,217,255,0.40); }
@@ -1071,34 +1142,30 @@
   .pod-play svg { width: 10px; height: 10px; display: block; }
   .pod-latest-txt { min-width: 0; }
   .pod-latest-label {
-    display: block; font-size: 10px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.08em; color: var(--c1);
+    display: block; font-size: 12px; font-weight: 700;
+    color: var(--c1);
   }
   .pod-latest-title {
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-    overflow: hidden; font-size: 12px; font-weight: 500; color: var(--t1);
-    line-height: 1.3; margin-top: 2px;
+    overflow: hidden; font-size: 13px; font-weight: 500; color: var(--t1);
+    line-height: 1.35; margin-top: 2px;
   }
   .pod-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
   .pod-sub {
     display: flex; align-items: center; gap: 5px; text-decoration: none;
-    font-size: 11px; font-weight: 600; color: var(--c1);
-    text-transform: uppercase; letter-spacing: 0.03em;
+    font-size: 13px; font-weight: 600; color: var(--c1);
   }
   .pod-sub svg { width: 10px; height: 10px; transition: transform 0.18s; }
   .pod:hover .pod-sub svg { transform: translateX(3px); }
-  .pod-date { font-size: 10.5px; color: var(--t2); white-space: nowrap; }
+  .pod-date { font-size: 12px; color: var(--t2); white-space: nowrap; }
   .pod-date:empty { display: none; }
 
   /* ── Live TV picture-in-picture ─────────────────────── */
-  .tv-pip,
-  .tv-launcher {
+  .tv-pip {
     position: fixed;
     right: 18px;
     bottom: 18px;
     z-index: 20;
-  }
-  .tv-pip {
     width: 395px;
     max-width: calc(100% - 36px);
     overflow: hidden;
@@ -1131,7 +1198,7 @@
     display: flex;
     align-items: center;
     gap: 7px;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.02em;
   }
@@ -1146,9 +1213,8 @@
     display: block;
     margin: 2px 0 0 14px;
     color: var(--t2);
-    font-size: 9px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    font-size: 12px;
+    letter-spacing: 0.04em;
   }
   .tv-pip-close {
     display: grid;
@@ -1171,22 +1237,19 @@
     border: 0;
   }
   .tv-launcher {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
-    min-height: 40px;
-    padding: 9px 13px;
+    gap: 7px;
+    min-height: 32px;
+    padding: 6px 12px;
     color: var(--t1);
-    background: var(--glass);
+    background: var(--card);
     border: 0.5px solid var(--border2);
-    border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(0,0,0,0.34);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    border-radius: 999px;
     cursor: pointer;
     font: inherit;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 13px;
+    font-weight: 600;
   }
   .tv-launcher:hover { background: var(--cardh); }
   .tv-pip-link:focus-visible,
@@ -1209,9 +1272,7 @@
     .station .sn, #stationGenre { display: none; }
     .station .sg .change { padding: 4px 6px; margin: -4px -6px; }
     .now-playing:not([hidden]) { display: block; }
-    .tv-pip,
-    .tv-launcher { right: 12px; bottom: 12px; }
-    .tv-pip { width: calc(100% - 24px); max-width: none; }
+    .tv-pip { right: 12px; bottom: 12px; width: calc(100% - 24px); max-width: none; }
   }
 </style>
 </head>
@@ -1323,7 +1384,13 @@
     <!-- PODCASTS -->
     <section class="podcasts-wrap">
       <h2 class="section-label">AI and technology podcasts · external links</h2>
-      <div class="podcasts" id="podcasts"></div>
+      <details class="podcasts-details" id="podcastsDetails">
+        <summary class="podcasts-summary">
+          <span>Show 4 curated AI &amp; technology podcasts</span>
+          <span class="podcasts-summary-hint">Click to expand / collapse</span>
+        </summary>
+        <div class="podcasts" id="podcasts"></div>
+      </details>
     </section>
 
     <!-- DOTS -->
@@ -1334,6 +1401,10 @@
 
     <footer class="footer">
       <span class="footer-text" id="backgroundCredit">Background artwork controls · Optional Microsoft Clarity behavioral analytics</span>
+      <button class="tv-launcher" id="tvLauncher" type="button" aria-controls="tvPip" aria-expanded="false" hidden>
+        <span class="tv-live-dot" aria-hidden="true"></span>
+        Watch Bloomberg
+      </button>
       <button class="footer-link" id="analyticsSettingsBtn" type="button">Privacy and analytics settings</button>
     </footer>
   </div>
@@ -1371,10 +1442,6 @@
       allow="autoplay; encrypted-media; picture-in-picture; fullscreen">
     </iframe>
   </aside>
-  <button class="tv-launcher" id="tvLauncher" type="button" aria-controls="tvPip" aria-expanded="false" hidden>
-    <span class="tv-live-dot" aria-hidden="true"></span>
-    Watch Bloomberg
-  </button>
 </div>
 
 <script>
@@ -1401,10 +1468,11 @@ const CONFIG = {
       name:  "ARTificial Gallery",
       desc:  "Four interactive studies and an unofficial Pet Shop Boys / Alan Turing fan film",
       href:  "artificial-gallery.html?scoutTheme=dark",
-      cta:   "Enter the gallery",
+      cta:   "Enter gallery",
       newTab: true,
-      icon:  "star",
+      icon:  "palette",
       color: ["#00d9ff", "#00ffa3"],
+      env:   "Web · All clouds",
       public: true
     },
     {
@@ -1414,6 +1482,8 @@ const CONFIG = {
       cta:   "Start adoption work",
       icon:  "hub",
       color: ["#ff6bb5", "#ff3d81"],
+      env:   "Commercial + GCC-Mod",
+      featured: true,
       public: true
     },
     {
@@ -1421,26 +1491,30 @@ const CONFIG = {
       desc:  "Quickstart for the Copilot Cowork credit FinOps report, with Power BI templates and screenshots from a real run",
       href:  "cowork-finops/index.html",
       cta:   "Compare credit spend",
-      icon:  "list",
+      icon:  "chart",
       color: ["#0e7c66", "#4fd8b5"],
+      env:   "Commercial",
       public: true
     },
     {
       name:  "Demos & Artifacts",
       desc:  "Cowork outputs, dashboards, HTML tools",
       href:  "demos-public/index.html",
-      cta:   "Build a demo",
+      cta:   "Explore demos",
       icon:  "list",
       color: ["#00ffa3", "#00b377"],
+      env:   "Commercial + GCC-Mod",
+      featured: true,
       public: true
     },
     {
       name:  "Fieldforge",
       desc:  "Connect existing assets into a public-sector mission, stress-test the plan, and export a synthetic engagement brief.",
       href:  "fieldforge.html",
-      cta:   "Generate engagement brief",
-      icon:  "star",
+      cta:   "Open mission planner",
+      icon:  "compass",
       color: ["#14b8a6", "#0f766e"],
+      env:   "SLED + GCC-Mod",
       public: true
     },
     {
@@ -1450,6 +1524,7 @@ const CONFIG = {
       cta:   "Play interactive tools",
       icon:  "games",
       color: ["#00d9ff", "#0099cc"],
+      env:   "Web · All clouds",
       public: true
     },
     {
@@ -1457,8 +1532,9 @@ const CONFIG = {
       desc:  "Paste a prompt, compare Scout models, and get a task-specific route with tradeoffs",
       href:  "model-mission-control/index.html?v=20261025-4&platform=scout",
       cta:   "Compare models",
-      icon:  "code",
+      icon:  "sliders",
       color: ["#ff6bb5", "#b11f4b"],
+      env:   "Commercial + GCC-Mod",
       public: true
     },
     {
@@ -1468,15 +1544,18 @@ const CONFIG = {
       cta:   "Explore prompts",
       icon:  "star",
       color: ["#7b61ff", "#a855f7"],
+      env:   "Commercial + GCC-Mod",
       public: true
     },
     {
       name:  "Purview Controls",
       desc:  "Governance and controls for Copilot, Cowork, and agent scenarios",
       href:  "purview-controls/index.html",
-      cta:   "Review governance controls",
-      icon:  "lock",
+      cta:   "Review controls",
+      icon:  "shield",
       color: ["#0078d4", "#b11f4b"],
+      env:   "Commercial + GCC-Mod",
+      featured: true,
       public: true
     },
     {
@@ -1486,6 +1565,8 @@ const CONFIG = {
       cta:   "Run automations",
       icon:  "code",
       color: ["#ff6b35", "#f59e0b"],
+      env:   "Commercial + GCC-Mod",
+      featured: true,
       public: true
     }
   ],
@@ -1604,16 +1685,21 @@ const CONFIG = {
 
 // ── ICONS ───────────────────────────────────────────────────
 const ICONS = {
-  play:  '<svg viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>',
-  games: '<svg viewBox="0 0 16 16" fill="#000"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>',
-  star:  '<svg viewBox="0 0 16 16" fill="#000"><path d="M8 1 L10 6 L15 6.2 L11 9.5 L12.3 14.5 L8 11.8 L3.7 14.5 L5 9.5 L1 6.2 L6 6 Z"/></svg>',
-  list:  '<svg viewBox="0 0 16 16" fill="#000"><rect x="1" y="3" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="11" width="14" height="2" rx="1"/></svg>',
-  code:  '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 4 1 8 5 12"/><polyline points="11 4 15 8 11 12"/></svg>',
-  hub:   '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.2"/><circle cx="8" cy="2.4" r="1.4"/><circle cx="13" cy="11.2" r="1.4"/><circle cx="3" cy="11.2" r="1.4"/><path d="M8 5.8V3.8M9.9 9.2L11.8 10.4M6.1 9.2L4.2 10.4"/></svg>',
-  arrow: '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="5" x2="9" y2="5"/><polyline points="6 2 9 5 6 8"/></svg>',
-  sun:   '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="2.6"/><line x1="7" y1="0.8" x2="7" y2="2.3"/><line x1="7" y1="11.7" x2="7" y2="13.2"/><line x1="0.8" y1="7" x2="2.3" y2="7"/><line x1="11.7" y1="7" x2="13.2" y2="7"/><line x1="2.4" y1="2.4" x2="3.5" y2="3.5"/><line x1="10.5" y1="10.5" x2="11.6" y2="11.6"/><line x1="2.4" y1="11.6" x2="3.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="11.6" y2="2.4"/></svg>',
-  moon:  '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 8.5 A4.5 4.5 0 1 1 5.5 2.5 A3.5 3.5 0 0 0 11.5 8.5 Z"/></svg>',
-  lock:  '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><rect x="2.5" y="5.3" width="7" height="5.2" rx="1"/><path d="M4 5.3V3.6a2 2 0 0 1 4 0v1.7"/></svg>'
+  play:    '<svg viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>',
+  games:   '<svg viewBox="0 0 16 16" fill="#000"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>',
+  star:    '<svg viewBox="0 0 16 16" fill="#000"><path d="M8 1 L10 6 L15 6.2 L11 9.5 L12.3 14.5 L8 11.8 L3.7 14.5 L5 9.5 L1 6.2 L6 6 Z"/></svg>',
+  list:    '<svg viewBox="0 0 16 16" fill="#000"><rect x="1" y="3" width="14" height="2" rx="1"/><rect x="1" y="7" width="14" height="2" rx="1"/><rect x="1" y="11" width="14" height="2" rx="1"/></svg>',
+  code:    '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 4 1 8 5 12"/><polyline points="11 4 15 8 11 12"/></svg>',
+  hub:     '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2.2"/><circle cx="8" cy="2.4" r="1.4"/><circle cx="13" cy="11.2" r="1.4"/><circle cx="3" cy="11.2" r="1.4"/><path d="M8 5.8V3.8M9.9 9.2L11.8 10.4M6.1 9.2L4.2 10.4"/></svg>',
+  palette: '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><circle cx="6" cy="6.2" r="1" fill="#000"/><circle cx="9.8" cy="5.8" r="1" fill="#000"/><circle cx="10.4" cy="9.2" r="1" fill="#000"/></svg>',
+  chart:   '<svg viewBox="0 0 16 16" fill="#000"><rect x="2" y="9" width="2.8" height="5" rx="0.8"/><rect x="6.6" y="5.5" width="2.8" height="8.5" rx="0.8"/><rect x="11.2" y="2.5" width="2.8" height="11.5" rx="0.8"/></svg>',
+  compass: '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polygon points="6.5 9.5 7.4 6.6 10.3 5.7 9.4 8.6" fill="#000"/></svg>',
+  sliders: '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round"><line x1="2" y1="4" x2="14" y2="4"/><circle cx="6" cy="4" r="1.7" fill="#000"/><line x1="2" y1="8" x2="14" y2="8"/><circle cx="10.5" cy="8" r="1.7" fill="#000"/><line x1="2" y1="12" x2="14" y2="12"/><circle cx="5" cy="12" r="1.7" fill="#000"/></svg>',
+  shield:  '<svg viewBox="0 0 16 16" fill="none" stroke="#000" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.8 L13 3.8 V7.8 C13 11 10.8 13.3 8 14.3 C5.2 13.3 3 11 3 7.8 V3.8 Z"/></svg>',
+  arrow:   '<svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="1" y1="5" x2="9" y2="5"/><polyline points="6 2 9 5 6 8"/></svg>',
+  sun:     '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><circle cx="7" cy="7" r="2.6"/><line x1="7" y1="0.8" x2="7" y2="2.3"/><line x1="7" y1="11.7" x2="7" y2="13.2"/><line x1="0.8" y1="7" x2="2.3" y2="7"/><line x1="11.7" y1="7" x2="13.2" y2="7"/><line x1="2.4" y1="2.4" x2="3.5" y2="3.5"/><line x1="10.5" y1="10.5" x2="11.6" y2="11.6"/><line x1="2.4" y1="11.6" x2="3.5" y2="10.5"/><line x1="10.5" y1="3.5" x2="11.6" y2="2.4"/></svg>',
+  moon:    '<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 8.5 A4.5 4.5 0 1 1 5.5 2.5 A3.5 3.5 0 0 0 11.5 8.5 Z"/></svg>',
+  lock:    '<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" width="9" height="9"><rect x="2.5" y="5.3" width="7" height="5.2" rx="1"/><path d="M4 5.3V3.6a2 2 0 0 1 4 0v1.7"/></svg>'
 };
 
 // ── THEME ───────────────────────────────────────────────────
@@ -1790,7 +1876,11 @@ CONFIG.libraries.forEach(lib => {
   a.className = "lib";
   if (lib.newTab) { a.target = "_blank"; a.rel = "noopener"; }
   a.innerHTML = `
-    ${lib.public ? '<div class="lib-public-badge">Public</div>' : ''}
+    <div class="lib-badges">
+      ${lib.public ? '<span class="lib-public-badge">Public</span>' : ''}
+      ${lib.featured ? '<span class="lib-featured-badge">Featured</span>' : ''}
+      ${lib.env ? `<span class="lib-env-badge">${lib.env}</span>` : ''}
+    </div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${lib.color[0]}, ${lib.color[1]});">
       ${ICONS[lib.icon] || ICONS.list}
     </div>
@@ -1953,7 +2043,7 @@ const backgroundSwitch = document.getElementById("backgroundSwitch");
 const backgroundCredit = document.getElementById("backgroundCredit");
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
 const artworks = CONFIG.artworkBackground.artworks;
-let artworkIndex = Math.floor(Math.random() * artworks.length);
+let artworkIndex = 0;
 let artworkReady = false, artworkTimer = null, artworkTimerStarted = 0;
 let artworkRemaining = CONFIG.artworkBackground.rotateSecs * 1000, artworkLoadTimer = null;
 const failedArtworks = new Set();
