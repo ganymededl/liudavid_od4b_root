@@ -412,35 +412,43 @@
     flex-shrink: 0;
   }
   .theme:hover { background: var(--cardh); transform: scale(1.05); }
+  .mode-switch {
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 0.5px solid var(--border2);
+    background: var(--card);
+    color: var(--t1);
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  .mode-switch:hover { background: var(--cardh); }
 
   /* ── Hero ───────────────────────────────────────────── */
   .hero {
-    padding: 60px 32px 40px;
+    padding: 46px 32px 28px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
-  .owner {
-    font-size: clamp(40px, 7vw, 76px);
-    font-weight: 300;
-    line-height: 1;
-    letter-spacing: -0.02em;
-    color: var(--ownerDim);
-    text-shadow: 0 2px 18px rgba(0,0,0,0.55);
+  .hero-ownerline {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--t2);
   }
-  .owner .first, .owner .last {
-    font-weight: 300;
-    color: var(--ownerDim);
-  }
-  .owner .middle {
+  .hero-title {
+    font-size: clamp(28px, 4.2vw, 46px);
     font-weight: 700;
-    background: linear-gradient(90deg, var(--c1), var(--c2));
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    color: transparent;
-    padding: 0 0.15em;
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    max-width: 900px;
+    text-wrap: balance;
+    text-shadow: 0 2px 18px rgba(0,0,0,0.42);
   }
 
   .hero-rule {
@@ -455,6 +463,41 @@
     font-weight: 400;
     max-width: 540px;
     line-height: 1.5;
+  }
+  .pathways {
+    display: grid;
+    width: min(780px, 100%);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .pathcard {
+    text-decoration: none;
+    color: var(--t1);
+    background: var(--tile);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    transition: transform 0.15s, border-color 0.2s, background 0.18s;
+  }
+  .pathcard:hover {
+    transform: translateY(-2px);
+    background: var(--tileh);
+    border-color: rgba(0,217,255,0.24);
+  }
+  .path-title {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    color: var(--c1);
+  }
+  .path-desc {
+    display: block;
+    font-size: 12px;
+    color: var(--t2);
+    line-height: 1.35;
   }
 
   .section-label {
@@ -651,6 +694,125 @@
   .lib-access-badge.public { color: #00160f; background: linear-gradient(135deg, #00ffa3, #00d9ff); }
   /* Calm, neutral "internal" indicator — not an error/warning color, just a quiet lock. */
   .lib-access-badge.gated { color: var(--t1); background: rgba(0,217,255,0.10); border: 0.5px solid rgba(0,217,255,0.25); }
+
+  .resource-controls-wrap {
+    padding: 2px 32px 12px;
+  }
+  .resource-controls {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 10px;
+    background: var(--glass);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 14px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .resource-search {
+    width: 100%;
+    border: 0.5px solid var(--border2);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--t1);
+    font: inherit;
+    font-size: 12px;
+    padding: 9px 11px;
+  }
+  .resource-search::placeholder { color: var(--t2); }
+  .resource-search:focus-visible {
+    outline: 2px solid var(--c1);
+    outline-offset: 2px;
+  }
+  .resource-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .resource-filter {
+    border: 0.5px solid var(--border);
+    background: var(--card);
+    color: var(--t1);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .resource-filter:hover { border-color: var(--border2); }
+  .resource-filter[aria-pressed="true"] {
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    color: #041016;
+    border-color: transparent;
+  }
+  .start-wrap,
+  .toolkit-entry-wrap {
+    padding: 2px 32px 16px;
+  }
+  .start-panel,
+  .toolkit-entry-panel {
+    background: var(--glass);
+    border: 0.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  .start-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+  }
+  .start-card {
+    display: block;
+    text-decoration: none;
+    color: var(--t1);
+    background: var(--tile);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    min-height: 110px;
+  }
+  .start-card:hover {
+    background: var(--tileh);
+    border-color: rgba(0,217,255,0.24);
+  }
+  .start-card-title {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .start-card-desc {
+    display: block;
+    font-size: 11px;
+    color: var(--t2);
+    line-height: 1.4;
+  }
+  .toolkit-entry-copy {
+    font-size: 12px;
+    color: var(--t2);
+    margin-bottom: 10px;
+    max-width: 760px;
+  }
+  .toolkit-entry-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    color: #041016;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  [data-hub-mode="workspace"] .toolkit-entry-wrap { display: none; }
+  [data-hub-mode="visitor"] .tools-wrap { display: none; }
 
   /* ── Dots ───────────────────────────────────────────── */
   .dots-wrap {
@@ -958,6 +1120,10 @@
 
   @media (max-width: 560px) {
     .hero { padding: 40px 20px 24px; }
+    .pathways { grid-template-columns: 1fr; }
+    .resource-controls-wrap { padding: 2px 20px 12px; }
+    .start-wrap,
+    .toolkit-entry-wrap { padding: 2px 20px 14px; }
     .libraries-wrap, .tools-wrap, .podcasts-wrap { padding: 16px 20px; }
     .nav { padding: 12px 16px; }
     .music { max-width: 200px; }
@@ -995,6 +1161,7 @@
         </div>
       </div>
       <div class="nav-right">
+        <button class="mode-switch" id="modeBtn" type="button" aria-pressed="false">My workspace</button>
         <div class="music" id="music">
           <button class="play" id="playBtn" aria-label="Play / Pause">
             <svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>
@@ -1019,13 +1186,20 @@
 
     <!-- HERO -->
     <section class="hero">
-      <h1 class="owner" id="ownerName">
-        <span class="first">David</span>
-        <span class="middle">Shih Chun</span>
-        <span class="last">Liu</span>
-      </h1>
+      <p class="hero-ownerline" id="heroOwnerLine">Personal environment by David Shih Chun Liu</p>
+      <h1 class="hero-title" id="heroHeadline">Copilot field playbooks, demos, and experiments.</h1>
       <hr class="hero-rule">
-      <p class="tagline" id="tagline">Microsoft SLED · Copilot Customer Success Architect</p>
+      <p class="tagline" id="tagline">Explore public resources quickly, or open the personal toolkit for internal workflows.</p>
+      <div class="pathways" role="navigation" aria-label="Hub pathways">
+        <a class="pathcard" href="#start-here">
+          <span class="path-title">Explore public work</span>
+          <span class="path-desc">Browse public projects for Copilot adoption, demos, automation, and governance.</span>
+        </a>
+        <a class="pathcard" href="#toolkit-entry">
+          <span class="path-title">Open my toolkit</span>
+          <span class="path-desc">Launch the private workspace entry point for Microsoft sign-in protected tools.</span>
+        </a>
+      </div>
       <div class="backdrop-controls">
         <button id="backgroundPause" type="button" aria-pressed="false">Pause artworks</button>
         <button id="backgroundNext" type="button">Next artwork</button>
@@ -1033,13 +1207,43 @@
       </div>
     </section>
 
+    <section class="start-wrap" id="start-here">
+      <div class="start-panel">
+        <p class="section-label">Start here · featured public resources</p>
+        <div class="start-grid" id="startGrid"></div>
+      </div>
+    </section>
+
+    <section class="resource-controls-wrap" aria-label="Search and filter resources">
+      <div class="resource-controls">
+        <input
+          class="resource-search"
+          id="resourceSearch"
+          type="search"
+          autocomplete="off"
+          placeholder="Search libraries and toolkit cards" />
+        <div class="resource-filters" id="resourceFilters"></div>
+      </div>
+    </section>
+
+    <section class="toolkit-entry-wrap" id="toolkit-entry">
+      <div class="toolkit-entry-panel">
+        <p class="section-label">Personal toolkit entry</p>
+        <p class="toolkit-entry-copy">Owner-only and internal inventory stays off the public landing page. Use this single entry point to open the authenticated personal workspace.</p>
+        <a class="toolkit-entry-link" id="toolkitEntryLink" target="_blank" rel="noopener">
+          Open personal toolkit
+          <span aria-hidden="true">→</span>
+        </a>
+      </div>
+    </section>
+
     <!-- LIBRARIES -->
-    <section class="libraries-wrap">
+    <section class="libraries-wrap" id="public-library">
       <p class="section-label">Libraries &middot; public, no sign-in</p>
       <div class="libraries" id="libs"></div>
     </section>
 
-    <section class="tools-wrap">
+    <section class="tools-wrap" id="toolkit">
       <p class="section-label">Personal toolkit &middot; Microsoft sign-in required</p>
       <div class="libraries" id="tools"></div>
     </section>
@@ -1105,12 +1309,17 @@ const CONFIG = {
 
   owner: {
     name:     "David Shih Chun Liu",
+    heroHeadline: "Copilot field playbooks, demos, and experiments.",
+    heroTagline: "Explore public resources quickly, or open the personal toolkit for internal workflows.",
     nameDisplay: {
       first:  "David",
       middle: "Shih Chun",
       last:   "Liu"
     },
     role: "Microsoft SLED · Copilot Customer Success Architect"
+  },
+  toolkitEntry: {
+    href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html"
   },
 
   // ── LIBRARY CARDS ────────────────────────────────────────────
@@ -1189,6 +1398,32 @@ const CONFIG = {
       icon:  "code",
       color: ["#ff6b35", "#f59e0b"],
       public: true
+    }
+  ],
+  startHere: [
+    {
+      name: "Copilot Center of Excellence",
+      desc: "Copilot adoption playbooks, setup guidance, and admin FAQ.",
+      href: "copilot-center-of-excellence/index.html",
+      cta: "Start adoption work"
+    },
+    {
+      name: "Demos & Artifacts",
+      desc: "Customer-ready demos and curated artifacts to accelerate storytelling.",
+      href: "demos-public/index.html",
+      cta: "Explore demos"
+    },
+    {
+      name: "Scripts & Automation",
+      desc: "Operational scripts, automation patterns, and packaging guidance.",
+      href: "scripts-public/index.html?v=packages",
+      cta: "Launch automation assets"
+    },
+    {
+      name: "Purview Controls",
+      desc: "Governance and controls for Copilot, Cowork, and agent scenarios.",
+      href: "purview-controls/index.html",
+      cta: "Review governance controls"
     }
   ],
 
@@ -1459,14 +1694,130 @@ themeBtn.addEventListener("click", () => {
 // The role appears once, in the hero tagline — the nav shows only the name
 // (it also has less room, and used to truncate the role on phones).
 document.getElementById("navName").textContent = CONFIG.owner.name;
-document.getElementById("tagline").textContent = CONFIG.owner.role;
-const own = CONFIG.owner.nameDisplay;
-document.querySelector(".owner .first").textContent = own.first + " ";
-document.querySelector(".owner .middle").textContent = own.middle;
-document.querySelector(".owner .last").textContent = " " + own.last;
+document.getElementById("heroOwnerLine").textContent = "Personal environment by " + CONFIG.owner.name;
+document.getElementById("heroHeadline").textContent = CONFIG.owner.heroHeadline;
+document.getElementById("tagline").textContent = CONFIG.owner.heroTagline;
+document.getElementById("toolkitEntryLink").href = CONFIG.toolkitEntry.href;
+
+const modeBtn = document.getElementById("modeBtn");
+const modeParam = new URLSearchParams(location.search).get("workspace");
+const savedHubMode = localStorage.getItem("dsc-hub-mode");
+let hubMode = modeParam === "1" ? "workspace" : modeParam === "0" ? "visitor" : (savedHubMode || "visitor");
+function applyHubMode(mode, persist = true) {
+  hubMode = mode === "workspace" ? "workspace" : "visitor";
+  root.setAttribute("data-hub-mode", hubMode);
+  modeBtn.textContent = hubMode === "workspace" ? "Visitor mode" : "My workspace";
+  modeBtn.setAttribute("aria-pressed", String(hubMode === "workspace"));
+  if (persist) localStorage.setItem("dsc-hub-mode", hubMode);
+}
+modeBtn.addEventListener("click", () => applyHubMode(hubMode === "workspace" ? "visitor" : "workspace"));
+applyHubMode(hubMode, false);
+
+const startGrid = document.getElementById("startGrid");
+(CONFIG.startHere || []).forEach(item => {
+  const card = document.createElement("a");
+  card.href = item.href;
+  card.className = "start-card";
+  card.innerHTML = `
+    <span class="start-card-title">${item.name}</span>
+    <span class="start-card-desc">${item.desc}</span>
+    <span class="lib-cta" style="margin-top:10px;">${item.cta || "Open"} ${ICONS.arrow}</span>
+  `;
+  startGrid.appendChild(card);
+});
 
 // ── RENDER: libraries ───────────────────────────────────────
 const libsEl = document.getElementById("libs");
+const toolsEl = document.getElementById("tools");
+const resourceSearch = document.getElementById("resourceSearch");
+const resourceFilters = document.getElementById("resourceFilters");
+const RESOURCE_CATEGORIES = [
+  { id: "all", label: "All resources" },
+  { id: "adoption", label: "Copilot adoption" },
+  { id: "demos", label: "Demos" },
+  { id: "automation", label: "Automation" },
+  { id: "governance", label: "Governance" },
+  { id: "creative", label: "Creative" }
+];
+let activeResourceCategory = "all";
+
+function inferResourceTags(item) {
+  const text = [
+    item.name || "",
+    item.desc || "",
+    item.note || "",
+    ...(item.actions || []).map(action => action.label || ""),
+    ...(item.groupItems || []).flatMap(groupItem => [
+      groupItem.name || "",
+      groupItem.desc || "",
+      groupItem.cta || "",
+      ...(groupItem.actions || []).map(action => action.label || "")
+    ])
+  ].join(" ").toLowerCase();
+  const tags = [];
+  if (/(copilot|cowork|agent|prompt|studio|foundry|model|gcc|adoption|center of excellence)/.test(text)) tags.push("adoption");
+  if (/(demo|showcase|artifact|gallery|game|pilot)/.test(text)) tags.push("demos");
+  if (/(script|automation|builder|tracker|ledger|utility|playbook|dashboard|config)/.test(text)) tags.push("automation");
+  if (/(purview|governance|security|compliance|controls|parity|risk)/.test(text)) tags.push("governance");
+  if (/(art|creative|gallery|podcast|music|newsletter)/.test(text)) tags.push("creative");
+  if (!tags.length) tags.push(item.public ? "demos" : "adoption");
+  return [...new Set(tags)];
+}
+
+function buildSearchText(item) {
+  return [
+    item.name || "",
+    item.desc || "",
+    item.note || "",
+    item.cta || "",
+    ...(item.actions || []).map(action => `${action.label || ""} ${action.href || ""}`),
+    ...(item.groupItems || []).flatMap(groupItem => [
+      groupItem.name || "",
+      groupItem.desc || "",
+      groupItem.cta || "",
+      groupItem.href || "",
+      ...(groupItem.actions || []).map(action => `${action.label || ""} ${action.href || ""}`)
+    ])
+  ].join(" ").toLowerCase();
+}
+
+function registerResourceCard(card, item) {
+  card.classList.add("resource-card");
+  card.dataset.tags = inferResourceTags(item).join(" ");
+  card.dataset.search = buildSearchText(item);
+}
+
+function applyResourceFilters() {
+  const query = (resourceSearch.value || "").trim().toLowerCase();
+  document.querySelectorAll(".resource-card").forEach(card => {
+    const tags = (card.dataset.tags || "").split(/\s+/).filter(Boolean);
+    const haystack = card.dataset.search || "";
+    const matchesCategory = activeResourceCategory === "all" || tags.includes(activeResourceCategory);
+    const matchesQuery = !query || haystack.includes(query);
+    card.hidden = !(matchesCategory && matchesQuery);
+  });
+}
+
+resourceFilters.innerHTML = RESOURCE_CATEGORIES.map(category => `
+  <button
+    class="resource-filter"
+    type="button"
+    data-filter="${category.id}"
+    aria-pressed="${category.id === "all" ? "true" : "false"}">${category.label}</button>
+`).join("");
+
+resourceFilters.addEventListener("click", event => {
+  const button = event.target.closest(".resource-filter");
+  if (!button) return;
+  activeResourceCategory = button.dataset.filter || "all";
+  resourceFilters.querySelectorAll(".resource-filter").forEach(filter => {
+    filter.setAttribute("aria-pressed", String(filter === button));
+  });
+  applyResourceFilters();
+});
+
+resourceSearch.addEventListener("input", applyResourceFilters);
+
 CONFIG.libraries.forEach(lib => {
   const a = document.createElement("a");
   a.href = lib.href;
@@ -1479,13 +1830,13 @@ CONFIG.libraries.forEach(lib => {
     </div>
     <div class="lib-name">${lib.name}</div>
     <div class="lib-desc">${lib.desc}</div>
-    <div class="lib-cta">${lib.cta || "Browse"} ${ICONS.arrow}</div>
+    <div class="lib-cta">${lib.cta || "Open public page"} ${ICONS.arrow}</div>
   `;
+  registerResourceCard(a, lib);
   libsEl.appendChild(a);
 });
 
 // ── RENDER: tools / quick access ────────────────────────────
-const toolsEl = document.getElementById("tools");
 (CONFIG.tools || []).forEach(t => {
   const card = document.createElement(t.groupItems ? "div" : "a");
   card.className = `lib${t.groupItems ? " lib-collection" : ""}`;
@@ -1496,6 +1847,7 @@ const toolsEl = document.getElementById("tools");
   }
   const accessLabel = t.public ? "Public" : `${ICONS.lock} ${t.privateOnly ? "Private" : "Internal"}`;
   const accessTip = t.public ? "" : t.privateOnly ? "Only the owner's Microsoft sign-in works" : "Microsoft sign-in required";
+  const primaryActionLabel = t.public ? "Open public page" : (t.privateOnly ? "Owner access only" : "Microsoft sign-in required");
   card.innerHTML = `
     <div class="lib-access-badge ${t.public ? "public" : "gated"}"${accessTip ? ` title="${accessTip}"` : ""}>${accessLabel}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
@@ -1516,12 +1868,13 @@ const toolsEl = document.getElementById("tools");
           </section>
         `).join("")}
       </div>
-    ` : `<div class="lib-cta">Open ${ICONS.arrow}</div>`}
+    ` : `<div class="lib-cta">${primaryActionLabel} ${ICONS.arrow}</div>`}
     ${[
       ...(t.actions || []),
       ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
     ].map((action, index) => `<span class="lib-download" role="link" tabindex="0" data-action-index="${index}"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</span>`).join("")}
   `;
+  registerResourceCard(card, t);
   if (!t.groupItems) {
   // The card itself is an anchor, so nested actions are spans that open their own URLs.
   const actions = [
@@ -1541,6 +1894,7 @@ const toolsEl = document.getElementById("tools");
   }
   toolsEl.appendChild(card);
 });
+applyResourceFilters();
 
 // ── RENDER: podcasts ────────────────────────────────────────
 const podEl = document.getElementById("podcasts");
@@ -2126,11 +2480,13 @@ const tvPip = document.getElementById("tvPip");
 const tvPipFrame = document.getElementById("tvPipFrame");
 const tvPipClose = document.getElementById("tvPipClose");
 const tvLauncher = document.getElementById("tvLauncher");
+const tvPipPrefKey = "dsc-tv-pip-open";
 
-function setTvPipOpen(open) {
+function setTvPipOpen(open, persist = true) {
   tvPip.hidden = !open;
   tvLauncher.hidden = open;
   tvLauncher.setAttribute("aria-expanded", String(open));
+  if (persist) localStorage.setItem(tvPipPrefKey, open ? "1" : "0");
   if (open) {
     if (!tvPipFrame.hasAttribute("src")) tvPipFrame.src = tvPipFrame.dataset.src;
   } else {
@@ -2140,7 +2496,9 @@ function setTvPipOpen(open) {
 
 tvPipClose.addEventListener("click", () => setTvPipOpen(false));
 tvLauncher.addEventListener("click", () => setTvPipOpen(true));
-setTvPipOpen(!matchMedia("(max-width: 560px)").matches);
+const savedTvPipState = localStorage.getItem(tvPipPrefKey);
+const startTvOpen = savedTvPipState === null ? false : savedTvPipState === "1";
+setTvPipOpen(startTvOpen && !matchMedia("(max-width: 560px)").matches, false);
 </script>
 </body>
 </html>
