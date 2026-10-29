@@ -834,8 +834,6 @@
     line-height: 1.5;
     max-width: 760px;
   }
-  [data-hub-mode="workspace"] .toolkit-entry-wrap { display: none; }
-  [data-hub-mode="visitor"] .tools-wrap { display: none; }
   .tools-toggle {
     display: none;
     margin-top: 10px;
@@ -1204,7 +1202,6 @@
         </div>
       </div>
       <div class="nav-right">
-        <button class="mode-switch" id="modeBtn" type="button" aria-pressed="false">Switch to workspace view</button>
         <div class="music" id="music">
           <button class="play" id="playBtn" aria-label="Play / Pause">
             <svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>
@@ -1238,9 +1235,9 @@
           <span class="path-title">Explore public work</span>
           <span class="path-desc">Browse public projects for Copilot adoption, demos, automation, and governance.</span>
         </a>
-        <a class="pathcard" href="#toolkit">
+        <a class="pathcard" href="https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html" target="_blank" rel="noopener">
           <span class="path-title">Open my toolkit</span>
-          <span class="path-desc">Jump to Microsoft sign-in protected tools and internal workflows.</span>
+          <span class="path-desc">Open the Microsoft sign-in protected toolkit for internal workflows.</span>
         </a>
       </div>
       <div class="backdrop-controls">
@@ -1264,18 +1261,15 @@
           id="resourceSearch"
           type="search"
           autocomplete="off"
-          placeholder="Search libraries and toolkit cards" />
+          placeholder="Search public resources" />
         <div class="resource-filter-groups">
-          <div class="resource-filter-group">
-            <span class="resource-filter-label">Access</span>
-            <div class="resource-filters" id="resourceAccessFilters"></div>
-          </div>
           <div class="resource-filter-group">
             <span class="resource-filter-label">Category</span>
             <div class="resource-filters" id="resourceTopicFilters"></div>
+            <button class="resource-filter" id="resourceFiltersReset" type="button" hidden>Clear filters</button>
           </div>
         </div>
-        <p class="resource-scope-note">Search and filters apply to library + toolkit cards (not podcast cards).</p>
+        <p class="resource-scope-note">Search and filters apply to the public resource library below (not featured or podcast cards).</p>
         <p class="resource-filter-status" id="resourceFilterStatus" aria-live="polite"></p>
       </div>
     </section>
@@ -1283,10 +1277,10 @@
     <section class="toolkit-entry-wrap" id="toolkit-entry">
       <div class="toolkit-entry-panel">
         <p class="section-label">Toolkit access notes</p>
-        <p class="toolkit-entry-copy">Toolkit cards below require Microsoft sign-in. Private cards are owner-only and may show limited access outside that account.</p>
+        <p class="toolkit-entry-copy">The personal toolkit is stored separately from this public page and requires Microsoft sign-in.</p>
         <ul class="toolkit-entry-points">
-          <li>Use <strong>Open my toolkit</strong> above for the fastest path to internal tools.</li>
-          <li>Access labels on each card show <strong>Public</strong>, <strong>Internal</strong>, or <strong>Private</strong>.</li>
+          <li>Use <strong>Open my toolkit</strong> above to launch the authenticated workspace.</li>
+          <li>No internal or owner-only inventory is embedded in this public page.</li>
         </ul>
       </div>
     </section>
@@ -1295,12 +1289,6 @@
     <section class="libraries-wrap" id="public-library">
       <h2 class="section-label">Libraries &middot; public, no sign-in</h2>
       <div class="libraries" id="libs"></div>
-    </section>
-
-    <section class="tools-wrap" id="toolkit">
-      <h2 class="section-label">Personal toolkit &middot; Microsoft sign-in required</h2>
-      <div class="libraries" id="tools"></div>
-      <button class="tools-toggle" id="toolsToggle" type="button" hidden aria-expanded="false">Show all tools</button>
     </section>
 
     <!-- PODCASTS -->
@@ -1373,10 +1361,6 @@ const CONFIG = {
     },
     role: "Microsoft SLED · Copilot Customer Success Architect"
   },
-  toolkitEntry: {
-    href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html"
-  },
-
   // ── LIBRARY CARDS ────────────────────────────────────────────
   // Public library cards, kept in alphabetical order by name.
   libraries: [
@@ -1454,6 +1438,15 @@ const CONFIG = {
       public: true
     },
     {
+      name:  "Purview Controls",
+      desc:  "Governance and controls for Copilot, Cowork, and agent scenarios",
+      href:  "purview-controls/index.html",
+      cta:   "Review governance controls",
+      icon:  "lock",
+      color: ["#0078d4", "#b11f4b"],
+      public: true
+    },
+    {
       name:  "Scripts & Automation",
       desc:  "PowerShell, Power Automate, PnP flows",
       href:  "scripts-public/index.html?v=packages",
@@ -1487,20 +1480,6 @@ const CONFIG = {
       desc: "Governance and controls for Copilot, Cowork, and agent scenarios.",
       href: "purview-controls/index.html",
       cta: "Review governance controls"
-    }
-  ],
-
-  // ── TOOLS / QUICK ACCESS ──────────────────────────────────
-  // Public page intentionally carries only a single toolkit entry point.
-  // Internal/private inventory is kept in the authenticated workspace file.
-  tools: [
-    {
-      name:  "Personal Toolkit",
-      desc:  "Open the authenticated personal workspace for internal and private tools.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html",
-      primaryAction: "Open toolkit entry point",
-      icon:  "lock",
-      color: ["#0078d4", "#00d9ff"]
     }
   ],
 
@@ -1634,19 +1613,6 @@ document.getElementById("navName").textContent = CONFIG.owner.name;
 document.getElementById("heroOwnerLine").textContent = "Personal environment by " + CONFIG.owner.name;
 document.getElementById("heroHeadline").textContent = CONFIG.owner.heroHeadline;
 document.getElementById("tagline").textContent = CONFIG.owner.heroTagline;
-const modeBtn = document.getElementById("modeBtn");
-const modeParam = new URLSearchParams(location.search).get("workspace");
-const savedHubMode = localStorage.getItem("dsc-hub-mode");
-let hubMode = modeParam === "1" ? "workspace" : modeParam === "0" ? "visitor" : (savedHubMode || "visitor");
-function applyHubMode(mode, persist = true) {
-  hubMode = mode === "workspace" ? "workspace" : "visitor";
-  root.setAttribute("data-hub-mode", hubMode);
-  modeBtn.textContent = hubMode === "workspace" ? "Switch to public view" : "Switch to workspace view";
-  modeBtn.setAttribute("aria-pressed", String(hubMode === "workspace"));
-  if (persist) localStorage.setItem("dsc-hub-mode", hubMode);
-}
-modeBtn.addEventListener("click", () => applyHubMode(hubMode === "workspace" ? "visitor" : "workspace"));
-applyHubMode(hubMode, false);
 
 const startGrid = document.getElementById("startGrid");
 (CONFIG.startHere || []).forEach(item => {
@@ -1663,18 +1629,10 @@ const startGrid = document.getElementById("startGrid");
 
 // ── RENDER: libraries ───────────────────────────────────────
 const libsEl = document.getElementById("libs");
-const toolsEl = document.getElementById("tools");
 const resourceSearch = document.getElementById("resourceSearch");
-const resourceAccessFilters = document.getElementById("resourceAccessFilters");
 const resourceTopicFilters = document.getElementById("resourceTopicFilters");
+const resourceFiltersReset = document.getElementById("resourceFiltersReset");
 const resourceFilterStatus = document.getElementById("resourceFilterStatus");
-const toolsToggle = document.getElementById("toolsToggle");
-const RESOURCE_ACCESS = [
-  { id: "all", label: "All access" },
-  { id: "public", label: "Public" },
-  { id: "internal", label: "Internal" },
-  { id: "private", label: "Private" }
-];
 const RESOURCE_TOPICS = [
   { id: "all", label: "All resources" },
   { id: "adoption", label: "Copilot adoption" },
@@ -1683,7 +1641,6 @@ const RESOURCE_TOPICS = [
   { id: "governance", label: "Governance" },
   { id: "creative", label: "Creative" }
 ];
-let activeResourceAccess = "all";
 let activeResourceTopic = "all";
 
 function inferResourceTags(item) {
@@ -1708,12 +1665,6 @@ function inferResourceTags(item) {
   if (!tags.length) tags.push(item.public ? "demos" : "adoption");
   return [...new Set(tags)];
 }
-function inferAccessTag(item) {
-  if (item.public) return "public";
-  if (item.privateOnly) return "private";
-  return "internal";
-}
-
 function buildSearchText(item) {
   return [
     item.name || "",
@@ -1734,7 +1685,6 @@ function buildSearchText(item) {
 function registerResourceCard(card, item) {
   card.classList.add("resource-card");
   card.dataset.tags = inferResourceTags(item).join(" ");
-  card.dataset.access = inferAccessTag(item);
   card.dataset.search = buildSearchText(item);
 }
 
@@ -1745,13 +1695,13 @@ function applyResourceFilters() {
   cards.forEach(card => {
     const tags = (card.dataset.tags || "").split(/\s+/).filter(Boolean);
     const haystack = card.dataset.search || "";
-    const matchesAccess = activeResourceAccess === "all" || card.dataset.access === activeResourceAccess;
     const matchesCategory = activeResourceTopic === "all" || tags.includes(activeResourceTopic);
     const matchesQuery = !query || haystack.includes(query);
-    const isVisible = matchesAccess && matchesCategory && matchesQuery;
+    const isVisible = matchesCategory && matchesQuery;
     card.hidden = !isVisible;
     if (isVisible) visibleCount += 1;
   });
+  resourceFiltersReset.hidden = activeResourceTopic === "all" && !query;
   if (!resourceFilterStatus) return;
   if (!cards.length) {
     resourceFilterStatus.textContent = "";
@@ -1761,44 +1711,39 @@ function applyResourceFilters() {
     resourceFilterStatus.textContent = "No resources match the current filters.";
     return;
   }
-  const accessLabel = (RESOURCE_ACCESS.find(access => access.id === activeResourceAccess) || RESOURCE_ACCESS[0]).label;
   const topicLabel = (RESOURCE_TOPICS.find(topic => topic.id === activeResourceTopic) || RESOURCE_TOPICS[0]).label;
   const searchLabel = query ? ` · Search: "${query}"` : "";
-  resourceFilterStatus.textContent = `Showing ${visibleCount} of ${cards.length} resources · ${accessLabel} · ${topicLabel}${searchLabel}`;
+  resourceFilterStatus.textContent = `Showing ${visibleCount} of ${cards.length} public resources · ${topicLabel}${searchLabel}`;
 }
 
-resourceAccessFilters.innerHTML = RESOURCE_ACCESS.map(access => `
-  <button
-    class="resource-filter"
-    type="button"
-    data-filter-group="access"
-    data-filter="${access.id}"
-    aria-pressed="${access.id === "all" ? "true" : "false"}">${access.label}</button>
-`).join("");
 resourceTopicFilters.innerHTML = RESOURCE_TOPICS.map(topic => `
   <button
     class="resource-filter"
     type="button"
-    data-filter-group="topic"
     data-filter="${topic.id}"
     aria-pressed="${topic.id === "all" ? "true" : "false"}">${topic.label}</button>
 `).join("");
 
-[resourceAccessFilters, resourceTopicFilters].forEach(filterRoot => {
-  filterRoot.addEventListener("click", event => {
-    const button = event.target.closest(".resource-filter");
-    if (!button) return;
-    const group = button.dataset.filterGroup;
-    if (group === "access") activeResourceAccess = button.dataset.filter || "all";
-    if (group === "topic") activeResourceTopic = button.dataset.filter || "all";
-    filterRoot.querySelectorAll(".resource-filter").forEach(filter => {
-      filter.setAttribute("aria-pressed", String(filter === button));
-    });
-    applyResourceFilters();
+resourceTopicFilters.addEventListener("click", event => {
+  const button = event.target.closest(".resource-filter");
+  if (!button) return;
+  activeResourceTopic = button.dataset.filter || "all";
+  resourceTopicFilters.querySelectorAll(".resource-filter").forEach(filter => {
+    filter.setAttribute("aria-pressed", String(filter === button));
   });
+  applyResourceFilters();
 });
 
 resourceSearch.addEventListener("input", applyResourceFilters);
+resourceFiltersReset.addEventListener("click", () => {
+  activeResourceTopic = "all";
+  resourceSearch.value = "";
+  resourceTopicFilters.querySelectorAll(".resource-filter").forEach(filter => {
+    filter.setAttribute("aria-pressed", String(filter.dataset.filter === "all"));
+  });
+  applyResourceFilters();
+  resourceSearch.focus();
+});
 
 CONFIG.libraries.forEach(lib => {
   const a = document.createElement("a");
@@ -1818,68 +1763,7 @@ CONFIG.libraries.forEach(lib => {
   libsEl.appendChild(a);
 });
 
-// ── RENDER: tools / quick access ────────────────────────────
-(CONFIG.tools || []).forEach(t => {
-  const card = document.createElement("div");
-  card.className = `lib${t.groupItems ? " lib-collection" : ""}`;
-  const accessLabel = t.public ? "Public" : `${ICONS.lock} ${t.privateOnly ? "Private" : "Internal"}`;
-  const accessTip = t.public ? "" : t.privateOnly ? "Only the owner's Microsoft sign-in works" : "Microsoft sign-in required";
-  const primaryActionLabel = t.primaryAction || (t.public ? "Open public page" : (t.privateOnly ? "Owner access only" : "Microsoft sign-in required"));
-  card.innerHTML = `
-    <div class="lib-access-badge ${t.public ? "public" : "gated"}"${accessTip ? ` title="${accessTip}"` : ""}>${accessLabel}</div>
-    <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
-      ${ICONS[t.icon] || ICONS.star}
-    </div>
-    <div class="lib-name">${t.name}</div>
-    <div class="lib-desc">${t.desc}</div>
-    ${t.groupItems ? `
-      <div class="lib-group-items">
-        ${t.groupItems.map(item => `
-          <section class="lib-group-item">
-            <div class="lib-group-item-name">${item.name}</div>
-            <div class="lib-group-item-desc">${item.desc}</div>
-            <div class="lib-group-links">
-              <a class="lib-download" href="${item.href}" target="_blank" rel="noopener">${item.cta || "Open"} ${ICONS.arrow}</a>
-              ${(item.actions || []).map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener">${action.label}</a>`).join("")}
-            </div>
-          </section>
-        `).join("")}
-      </div>
-    ` : `<a class="lib-cta lib-primary-link" href="${t.href}" target="_blank" rel="noopener">${primaryActionLabel} ${ICONS.arrow}</a>`}
-    ${[
-      ...(t.actions || []),
-      ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
-    ].map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</a>`).join("")}
-  `;
-  registerResourceCard(card, t);
-  toolsEl.appendChild(card);
-});
 applyResourceFilters();
-
-function refreshToolsCollapse() {
-  const toolCards = toolsEl.querySelectorAll(".lib").length;
-  const canCollapse = toolCards > 4;
-  const mobile = matchMedia("(max-width: 560px)").matches;
-  if (!mobile || !canCollapse) {
-    toolsEl.classList.remove("collapsed");
-    toolsToggle.hidden = true;
-    toolsToggle.setAttribute("aria-expanded", "true");
-    toolsToggle.textContent = "Show all tools";
-    return;
-  }
-  toolsToggle.hidden = false;
-  if (!toolsToggle.dataset.state) toolsToggle.dataset.state = "collapsed";
-  const collapsed = toolsToggle.dataset.state === "collapsed";
-  toolsEl.classList.toggle("collapsed", collapsed);
-  toolsToggle.textContent = collapsed ? "Show all tools" : "Show fewer tools";
-  toolsToggle.setAttribute("aria-expanded", String(!collapsed));
-}
-toolsToggle.addEventListener("click", () => {
-  toolsToggle.dataset.state = toolsToggle.dataset.state === "collapsed" ? "expanded" : "collapsed";
-  refreshToolsCollapse();
-});
-addEventListener("resize", refreshToolsCollapse, { passive: true });
-refreshToolsCollapse();
 
 // ── RENDER: podcasts ────────────────────────────────────────
 const podEl = document.getElementById("podcasts");
