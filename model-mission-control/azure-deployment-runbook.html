@@ -75,6 +75,7 @@ body {
 }
 a { color: var(--cp-link); }
 code, pre { font-family: Consolas, "Courier New", Courier, monospace; }
+code { overflow-wrap: anywhere; }
 .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 72px; }
 .topbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 32px; }
 .back { color: var(--cp-text); text-decoration: none; font-weight: 700; }
@@ -94,7 +95,7 @@ h1 { margin: 8px 0 12px; font-size: clamp(36px, 6vw, 68px); line-height: 1; lett
 }
 .toc, .step, .architecture {
   background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px;
-  padding: 22px; margin: 18px 0; box-shadow: 0 0 2px rgba(0,0,0,.12), 0 1px 2px rgba(0,0,0,.14);
+  padding: 22px; margin: 18px 0; box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
 }
 .toc ol { columns: 2; margin: 12px 0 0; padding-left: 22px; }
 .toc li { margin: 7px 0; }
@@ -105,11 +106,19 @@ p, li { line-height: 1.55; }
 .checklist li { margin: 8px 0; padding-left: 26px; position: relative; }
 .checklist li::before { content: "[ ]"; position: absolute; left: 0; color: var(--cp-text-muted); font-size: 12px; font-weight: 700; }
 pre {
-  overflow-x: auto; padding: 16px; border: 1px solid var(--cp-border);
+  overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere; padding: 44px 16px 16px; border: 1px solid var(--cp-border);
   border-radius: 0.625rem; background: var(--cp-bg-elevated); line-height: 1.45; font-size: 13px;
 }
-.vars { width: 100%; border-collapse: collapse; }
-.vars th, .vars td { padding: 10px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; }
+.code-wrap { position: relative; margin: 14px 0; }
+.copy {
+  position: absolute; top: 8px; right: 8px; z-index: 1;
+  border: 1px solid var(--cp-border); border-radius: 0.625rem;
+  background: var(--cp-surface); color: var(--cp-text);
+  padding: 6px 10px; cursor: pointer; font-weight: 700;
+}
+.copy:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+.vars { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.vars th, .vars td { padding: 10px; border-bottom: 1px solid var(--cp-border); text-align: left; vertical-align: top; overflow-wrap: anywhere; }
 .vars th { color: var(--cp-text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
 .portal-shot {
   margin: 18px 0 8px; border: 1px solid var(--cp-border-strong); border-radius: 0.625rem;
@@ -126,7 +135,12 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
 .flow-box { padding: 14px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
 .flow-box strong { color: var(--cp-accent); display: block; margin-bottom: 5px; }
 .arrow { color: var(--cp-text-muted); text-align: center; display: none; }
-.danger { color: var(--cp-danger); font-weight: 700; }
+.warning-box, .danger-box {
+  color: var(--cp-text); background: var(--cp-surface-soft);
+  padding: 14px 16px; margin: 18px 0; line-height: 1.55;
+}
+.warning-box { border-left: 4px solid var(--cp-warning); }
+.danger-box { border-left: 4px solid var(--cp-danger); }
 .small { color: var(--cp-text-muted); font-size: 13px; }
 @media (max-width: 760px) {
   .toc ol { columns: 1; }
@@ -140,7 +154,7 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
 <main class="shell">
   <header class="topbar">
     <a class="back" href="index.html?v=20261024-3">&larr; Model Mission Control</a>
-    <div class="verified">Validated against checkpoints 1-7<br><strong>October 25, 2026</strong></div>
+    <div class="verified">Validated against checkpoints 1-7<br><strong>October 29, 2026</strong></div>
   </header>
 
   <section class="hero">
@@ -150,8 +164,9 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
   </section>
 
   <p>Users sign in through Microsoft Entra ID. The API validates their access tokens and checks whether they are allowed to use the service. The Function then calls the deployed model in an Azure OpenAI resource using its managed identity.</p>
-  <div class="callout"><strong>Cloud scope:</strong> this runbook targets an Azure commercial subscription and commercial Microsoft Entra ID tenant. Azure Government has not been tested; commands, endpoint suffixes, and model availability can differ.</div>
+  <div class="callout"><strong>Cloud scope:</strong> this runbook targets an Azure commercial subscription and Microsoft Entra workforce tenant. It has not been validated for Azure Government, GCC High, DoD, or GCC Moderate data-handling requirements; commands, endpoint suffixes, and model availability can differ.</div>
   <div class="callout"><strong>Security model:</strong> no Azure OpenAI API key or application client secret is stored in the website or Function App. The HTTP trigger uses <code>Anonymous</code> authorization at the Functions host layer. This does not mean the API accepts unauthenticated requests: the function code validates the token's tenant, audience, delegated scope, and authorized user object ID before calling the Azure OpenAI resource.</div>
+  <div class="callout"><strong>Product names:</strong> <code>Assess with Azure AI</code> is the feature label in Model Mission Control. The backend resource and API used by this runbook are Azure OpenAI, managed in Microsoft Foundry. Existing <code>foundry_*</code> error codes are application contracts, not separate Azure resources.</div>
   <div class="callout">
     <strong>Function source package:</strong> includes <code>host.json</code>, package manifests, locked dependencies, Function source, authorization and routing libraries, tests, and the source runbook. It excludes <code>node_modules</code>, local settings, credentials, and deployment artifacts.
     <div class="download-row">
@@ -181,9 +196,11 @@ figcaption { padding: 9px 14px; color: var(--cp-text-muted); font-size: 12px; bo
 
   <h2 id="prerequisites">1. Prerequisites and variables</h2>
   <section class="step">
+    <p>Prepare the workstation, clone the source, set the target names and origins, and confirm the selected model and quota before creating resources.</p>
     <h3>Prepare an administrator workstation</h3>
     <ul class="checklist">
-      <li>Azure subscription Contributor or Owner for the target resource group.</li>
+      <li>Contributor on the subscription, or on a pre-created resource group if you skip <code>az group create</code>.</li>
+      <li>User Access Administrator or Owner to assign the Azure OpenAI inference role.</li>
       <li>Permission to create Entra app registrations and grant delegated consent.</li>
       <li>Azure CLI, Node.js 22, npm, and Azure Functions Core Tools 4.</li>
       <li>Git, with permission to clone the Model Mission Control source repository.</li>
@@ -205,21 +222,70 @@ $WEB_REDIRECT = "$WEB_ORIGIN/&lt;repository&gt;/model-mission-control/"
 $LOCAL_ORIGIN = "http://localhost:8765"
 $LOCAL_REDIRECT = "$LOCAL_ORIGIN/model-mission-control/"</code></pre>
     <p class="small">Use your own tenant, subscription, object IDs, names, and origins. Do not copy IDs from the reference deployment.</p>
+    <h3>Confirm model availability and quota</h3>
+    <p>The first query must return <code>gpt-5-mini</code> version <code>2025-08-07</code> with a <code>GlobalStandard</code> SKU. The second must show at least 10 units available in the selected subscription and region.</p>
+<pre><code>$Models = @(az cognitiveservices model list `
+  --location $LOCATION `
+  --query "[?model.name=='gpt-5-mini' &amp;&amp; model.version=='2025-08-07' &amp;&amp; contains(model.skus[].name, 'GlobalStandard')]" `
+  -o json | ConvertFrom-Json)
+if ($Models.Count -eq 0) {
+  throw "gpt-5-mini 2025-08-07 with GlobalStandard is not offered in $LOCATION."
+}
+
+$Quota = az cognitiveservices usage list `
+  --location $LOCATION `
+  --query "[?name.value=='OpenAI.GlobalStandard.gpt-5-mini'] | [0]" `
+  -o json | ConvertFrom-Json
+if (-not $Quota) {
+  throw "No GlobalStandard quota record was returned for gpt-5-mini in $LOCATION."
+}
+
+$AvailableCapacity = [double]$Quota.limit - [double]$Quota.currentValue
+if ($AvailableCapacity -lt 10) {
+  throw "10 capacity units are required; $AvailableCapacity are available."
+}
+
+$Models | Select-Object -ExpandProperty model |
+  Select-Object name, version, lifecycleStatus
+$Quota | Select-Object @{n="Available";e={$AvailableCapacity}}, currentValue, limit, unit</code></pre>
+    <p class="warning-box"><strong>Do not continue unless both checks pass.</strong> The Function App can deploy even when the requested model or capacity is unavailable.</p>
   </section>
 
   <h2 id="architecture">2. Architecture</h2>
   <section class="architecture">
+    <p>The browser obtains a delegated access token for the protected API. The Function API validates that token and uses a separate managed-identity token to call Azure OpenAI.</p>
     <div class="flow">
       <div class="flow-box"><strong>Static website</strong>Microsoft Authentication Library (MSAL) redirect sign-in and a defined catalog of eligible models.</div>
       <div class="flow-box"><strong>Entra ID</strong>Single-tenant single-page application (SPA) token with <code>access_as_user</code>.</div>
-      <div class="flow-box"><strong>Azure Function</strong>Validates origin, tenant, audience, user, and scope.</div>
-      <div class="flow-box"><strong>Azure OpenAI</strong>Function managed identity invokes the deployed model.</div>
+      <div class="flow-box"><strong>Function API</strong>Validates origin, tenant, audience, user, and delegated scope.</div>
+      <div class="flow-box"><strong>Azure OpenAI</strong>The Function App's managed identity invokes the deployed model.</div>
     </div>
     <p class="small">Trust boundaries: browser token to Function; managed identity token from Function to the Azure OpenAI resource. The browser has no Azure OpenAI credential.</p>
+    <h3>Components and responsibilities</h3>
+    <table class="vars">
+      <thead><tr><th>Component</th><th>What it does</th><th>Why it is needed</th></tr></thead>
+      <tbody>
+        <tr><td>Resource group</td><td>Groups the backend resources under one cost and lifecycle scope.</td><td>Use it to filter costs, assign access, and remove resources together.</td></tr>
+        <tr><td>Static website and HTTPS origin</td><td>Serves Model Mission Control, the platform catalogs, MSAL, and <code>ai-config.js</code>.</td><td>The browser interface is separate from the API. Its exact origin is also used for redirects and CORS.</td></tr>
+        <tr><td>Model Mission Control Web app registration</td><td>Represents the browser as a public single-page application client.</td><td>MSAL uses it to sign in the user and request the delegated API scope. It has no client secret.</td></tr>
+        <tr><td>Model Mission Control API app registration</td><td>Defines the API audience and exposes <code>access_as_user</code>.</td><td>The Function rejects tokens issued for another API or without the required delegated scope.</td></tr>
+        <tr><td><code>access_as_user</code> scope</td><td>Allows the signed-in user to call the recommendation API through the SPA.</td><td>Separates user authentication from permission to invoke this API.</td></tr>
+        <tr><td>Storage account</td><td>Stores Function host state and deployment packages.</td><td>Azure Functions requires it. The application does not use it to store prompts.</td></tr>
+        <tr><td>Flex Consumption plan</td><td>Allocates Linux compute when requests arrive.</td><td>Runs the low-volume API without a continuously running server.</td></tr>
+        <tr><td>Function App</td><td>Hosts <code>/api/recommend</code> and performs CORS, token, input, and response validation.</td><td>Keeps authorization and Azure OpenAI access out of the public website.</td></tr>
+        <tr><td>Application Insights</td><td>Collects Function request, failure, and host diagnostics.</td><td>Supports operations without putting tokens or prompt bodies in logs.</td></tr>
+        <tr><td>Azure OpenAI account</td><td>Holds the model deployment and controls who can call it.</td><td>Places model access and token usage cost under Azure controls.</td></tr>
+        <tr><td><code>mmc-gpt-5-mini</code> deployment</td><td>Makes <code>gpt-5-mini</code> 2025-08-07 callable under a stable deployment name.</td><td>The Function calls a deployment name, not a catalog model name.</td></tr>
+        <tr><td>System-assigned managed identity</td><td>Gives the Function App its own Entra service principal.</td><td>Lets the API obtain a short-lived Azure OpenAI token instead of storing an API key.</td></tr>
+        <tr><td>Cognitive Services OpenAI User role assignment</td><td>Grants the Function App identity inference access at the Azure OpenAI account scope.</td><td>Without it, token acquisition can succeed but model calls return HTTP 403.</td></tr>
+        <tr><td>Function application settings</td><td>Supply tenant, audience, user, origin, endpoint, and deployment values.</td><td>The same source can be configured for a different tenant or resource names without code changes.</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <h2 id="azure-ai">3. Create the Azure OpenAI resource and deploy the model</h2>
   <section class="step">
+    <p>Create the backend cost boundary and the model endpoint that the Function App will call. The custom subdomain is required for Microsoft Entra token authentication to Azure OpenAI.</p>
     <h3>Create the resource group, Azure OpenAI account, and model deployment</h3>
 <pre><code>az group create --name $RG --location $LOCATION
 
@@ -258,6 +324,7 @@ az cognitiveservices account deployment create `
 
   <h2 id="entra-api">4. Register the protected API</h2>
   <section class="step">
+    <p>Register the Function API as a single-tenant resource, define its token audience, and expose the delegated permission the browser must request.</p>
     <h3>Create the API registration and delegated scope</h3>
     <ol>
       <li>Open <strong>Microsoft Entra admin center &gt; Identity &gt; Applications &gt; App registrations &gt; New registration</strong>.</li>
@@ -285,6 +352,7 @@ az cognitiveservices account deployment create `
 
   <h2 id="entra-web">5. Register the single-page application</h2>
   <section class="step">
+    <p>Register the static website as a public browser client, add its exact redirect URIs, and authorize it to request <code>access_as_user</code> for the protected API.</p>
     <h3>Create the web registration, redirects, permission, and preauthorization</h3>
     <ol>
       <li>Create a second single-tenant app registration named <strong>Model Mission Control Web</strong>.</li>
@@ -312,12 +380,15 @@ az cognitiveservices account deployment create `
 
   <h2 id="function">6. Create the Function App</h2>
   <section class="step">
+    <p>Create the storage and serverless Linux compute that host the protected API. The storage account supports the Function runtime and deployment; it is not prompt storage.</p>
     <h3>Create Node.js 22 on Linux Flex Consumption</h3>
 <pre><code>az storage account create `
   --name $STORAGE `
   --resource-group $RG `
   --location $LOCATION `
-  --sku Standard_LRS
+  --sku Standard_LRS `
+  --min-tls-version TLS1_2 `
+  --allow-blob-public-access false
 
 az functionapp create `
   --resource-group $RG `
@@ -330,7 +401,12 @@ az functionapp create `
 az functionapp update `
   --resource-group $RG `
   --name $FUNCTION_APP `
-  --set httpsOnly=true</code></pre>
+  --set httpsOnly=true
+
+az functionapp config set `
+  --resource-group $RG `
+  --name $FUNCTION_APP `
+  --min-tls-version 1.2</code></pre>
     <figure class="portal-shot">
       <div class="portal-bar">Azure portal &gt; Function App &gt; Overview</div>
       <div class="portal-body">
@@ -349,6 +425,7 @@ az functionapp update `
 
   <h2 id="identity">7. Enable managed identity and grant Azure OpenAI access</h2>
   <section class="step">
+    <p>Give the Function App keyless model access. The identity proves which Azure resource is calling; the role grants that identity inference access on this Azure OpenAI account.</p>
     <h3>Assign the system identity and least-privilege role</h3>
 <pre><code>$PRINCIPAL_ID = az functionapp identity assign `
   --resource-group $RG `
@@ -382,6 +459,7 @@ az role assignment create `
 
   <h2 id="settings">8. Configure the Function App</h2>
   <section class="step">
+    <p>Set the environment-specific identity, authorization, origin, and Azure OpenAI values used by the same Function source package.</p>
     <h3>Add six application settings</h3>
     <table class="vars">
       <thead><tr><th>Setting</th><th>Value</th><th>Purpose</th></tr></thead>
@@ -432,6 +510,7 @@ az functionapp config appsettings set `
 
   <h2 id="deploy">9. Deploy the Function and connect the website</h2>
   <section class="step">
+    <p>Restore locked dependencies, run the API tests, publish the Function, and point the static website at the deployed API and Entra registrations.</p>
     <h3>Validate and publish the Node.js project</h3>
 <pre><code>cd model-mission-control-api
 npm ci
@@ -472,6 +551,7 @@ $FUNC_HOST = az resource show `
 
   <h2 id="validate">10. Validate end to end</h2>
   <section class="step">
+    <p>A successful deployment does not prove that token validation, CORS, authorization, managed identity, or catalog restrictions work. Test each boundary in order.</p>
     <h3>Run the acceptance checks in order</h3>
     <ol>
       <li><strong>Deployment:</strong> Function App state is Running and <code>/api/recommend</code> exists.</li>
@@ -526,7 +606,7 @@ Invoke-WebRequest `
 
   <h2 id="troubleshoot">11. Troubleshooting and rollback</h2>
   <section class="step">
-    <p>Error codes use the <code>foundry_</code> prefix for failures while the Function calls the Azure OpenAI resource.</p>
+    <p>Start with the symptom below. Error codes retain the <code>foundry_</code> prefix for compatibility while the Function calls the Azure OpenAI resource.</p>
     <table class="vars">
       <thead><tr><th>Symptom</th><th>Likely cause</th><th>Action</th></tr></thead>
       <tbody>
@@ -546,11 +626,46 @@ Invoke-WebRequest `
       <li>Confirm that <code>Assess with Azure AI</code> is hidden and the local advisor still works.</li>
     </ol>
     <h3>Block backend access</h3>
-    <p>Follow the approved access-revocation procedure. Depending on the incident, disable the delegated API scope, remove SPA preauthorization, or remove the Function managed identity's Azure OpenAI role assignment.</p>
+    <p>Follow the approved access-revocation procedure. Depending on the incident, disable the delegated API scope, remove SPA preauthorization, or remove the Function managed identity's Azure OpenAI role assignment. Allow several minutes for an Azure role change to take effect.</p>
     <h3>Remove resources</h3>
-    <p>Stop or delete the Function App only when decommissioning is intended. Remove the Azure OpenAI deployment, account, storage account, and app registrations according to the organization's retention and change-control requirements.</p>
-    <p class="danger">Never troubleshoot by adding a browser-visible Azure OpenAI API key, wildcard CORS, a client secret to the static site, or subscription-wide Owner permissions.</p>
+    <p>Run these commands only after retention and change-control approval. In a new PowerShell session, rerun the Section 1 variable block and set the two app registration client IDs. Deleting the resource group removes the Function App, plan, storage, Application Insights, Azure OpenAI account, and model deployment. Purging the soft-deleted Azure OpenAI account allows its name to be reused.</p>
+<pre><code>$API_CLIENT_ID = "&lt;API-APPLICATION-CLIENT-ID&gt;"
+$WEB_CLIENT_ID = "&lt;WEB-APPLICATION-CLIENT-ID&gt;"
+
+az group delete --name $RG --yes
+
+az cognitiveservices account purge `
+  --location $LOCATION `
+  --resource-group $RG `
+  --name $AI_ACCOUNT
+
+az ad app delete --id $WEB_CLIENT_ID
+az ad app delete --id $API_CLIENT_ID</code></pre>
+    <p class="danger-box"><strong>Do not weaken the trust boundaries to troubleshoot.</strong> Never add a browser-visible Azure OpenAI API key, wildcard CORS, a client secret to the static site, or subscription-wide Owner permissions.</p>
   </section>
 </main>
+<script>
+  document.querySelectorAll("pre").forEach(pre => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "code-wrap";
+    pre.parentNode.insertBefore(wrapper, pre);
+    wrapper.appendChild(pre);
+
+    const button = document.createElement("button");
+    button.className = "copy";
+    button.type = "button";
+    button.textContent = "Copy";
+    button.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(pre.textContent || "");
+        button.textContent = "Copied";
+        setTimeout(() => { button.textContent = "Copy"; }, 1400);
+      } catch {
+        button.textContent = "Select text";
+      }
+    });
+    wrapper.insertBefore(button, pre);
+  });
+</script>
 </body>
 </html>
