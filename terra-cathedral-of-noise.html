@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terra Cathedral of Noise</title>
+<style>
+:root {
+  --bg: #09090b;
+  --fg: #e8e7f1;
+  --muted: #a2a0b7;
+  --accent: #fca311;
+  --panel: rgba(20, 20, 24, 0.68);
+}
+html[data-theme="light"] {
+  --bg: #f8f8fb;
+  --fg: #1f2025;
+  --muted: #5f6272;
+  --accent: #b45309;
+  --panel: rgba(255, 255, 255, 0.78);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); overflow: hidden; font-family: "Segoe UI", Aptos, sans-serif; }
+a { color: inherit; text-decoration: none; }
+.hud {
+  position: fixed; z-index: 2; inset: 16px 16px auto 16px;
+  display: flex; justify-content: space-between; align-items: center; gap: 14px;
+  padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.14);
+  background: var(--panel); backdrop-filter: blur(8px);
+}
+.meta { font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.meta strong { color: var(--accent); font-weight: 600; }
+button {
+  border: 1px solid rgba(252, 163, 17, .45); color: var(--fg); background: transparent;
+  border-radius: 999px; padding: 8px 14px; cursor: pointer;
+}
+button:hover { background: rgba(252, 163, 17, .13); }
+canvas { width: 100vw; height: 100vh; display: block; }
+</style>
+</head>
+<body>
+<div class="hud">
+  <div class="meta"><a href="artificial-gallery.html">Back to gallery</a> · <strong>GPT-6 Terra</strong> · built 2026-10-29</div>
+  <button id="mode" type="button">Mode: cathedral</button>
+</div>
+<canvas id="c"></canvas>
+<script>
+(() => {
+  "use strict";
+  const t = new URLSearchParams(location.search).get("scoutTheme");
+  document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  let w = 0, h = 0, tm = 0, mode = 0;
+  const modeNames = ["cathedral", "thunderglass", "tectonic calm"];
+  const btn = document.getElementById("mode");
+
+  function resize() {
+    const dpr = devicePixelRatio || 1;
+    canvas.width = Math.floor(innerWidth * dpr);
+    canvas.height = Math.floor(innerHeight * dpr);
+    canvas.style.width = innerWidth + "px";
+    canvas.style.height = innerHeight + "px";
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    w = innerWidth;
+    h = innerHeight;
+  }
+
+  function tone(x, y, t) {
+    const nx = (x - w * 0.5) / Math.max(1, w);
+    const ny = (y - h * 0.5) / Math.max(1, h);
+    const a = Math.sin(nx * (17 + mode * 5) + t * (0.8 + mode * 0.4));
+    const b = Math.cos(ny * (21 - mode * 3) - t * (0.65 + mode * 0.28));
+    const c = Math.sin((nx + ny) * 28 + t * 0.33) * Math.cos((nx - ny) * 24 - t * 0.27);
+    return a + b + c;
+  }
+
+  function render() {
+    tm += 0.016;
+    ctx.fillStyle = document.documentElement.dataset.theme === "light" ? "#f8f8fb" : "#09090b";
+    ctx.fillRect(0, 0, w, h);
+    const rows = 92;
+    const stepY = h / rows;
+    for (let j = 0; j < rows; j++) {
+      const y = j * stepY;
+      ctx.beginPath();
+      for (let x = -20; x <= w + 20; x += 7) {
+        const n = tone(x, y, tm);
+        const warp = (mode === 0 ? 42 : mode === 1 ? 68 : 24) * Math.sin(n * 1.2 + j * 0.08);
+        const yy = y + warp;
+        if (x < 0) ctx.moveTo(x, yy); else ctx.lineTo(x, yy);
+      }
+      const hue = (mode === 0 ? 32 : mode === 1 ? 286 : 176) + j * (mode === 1 ? 1.9 : 0.9);
+      const alpha = mode === 1 ? 0.2 : 0.14;
+      ctx.strokeStyle = `hsla(${hue % 360}, 82%, ${mode === 2 ? 57 : 64}%, ${alpha})`;
+      ctx.lineWidth = mode === 1 ? 1.3 : 1.05;
+      ctx.stroke();
+    }
+    requestAnimationFrame(render);
+  }
+
+  btn.addEventListener("click", () => {
+    mode = (mode + 1) % 3;
+    btn.textContent = "Mode: " + modeNames[mode];
+  });
+  addEventListener("resize", resize);
+  resize();
+  render();
+})();
+</script>
+</body>
+</html>

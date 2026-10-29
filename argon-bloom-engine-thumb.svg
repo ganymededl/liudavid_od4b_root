@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1152" height="800" viewBox="0 0 1152 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#090718"/>
+      <stop offset="100%" stop-color="#071f2e"/>
+    </linearGradient>
+    <radialGradient id="petal" cx="50%" cy="50%" r="60%">
+      <stop offset="0%" stop-color="#8cf3ff" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#6f67ff" stop-opacity="0.56"/>
+      <stop offset="100%" stop-color="#1f1440" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1152" height="800" fill="url(#bg)"/>
+  <g opacity="0.9">
+    <circle cx="332" cy="412" r="178" fill="url(#petal)"/>
+    <circle cx="562" cy="286" r="158" fill="url(#petal)"/>
+    <circle cx="744" cy="470" r="216" fill="url(#petal)"/>
+    <circle cx="928" cy="324" r="130" fill="url(#petal)"/>
+  </g>
+  <path d="M116 642C312 498 446 768 642 622C778 520 876 456 1038 630" stroke="#9bf8ff" stroke-opacity=".54" stroke-width="3" fill="none"/>
+  <path d="M94 540C318 390 452 674 644 522C820 430 916 350 1072 512" stroke="#ff67ec" stroke-opacity=".44" stroke-width="2" fill="none"/>
+</svg>

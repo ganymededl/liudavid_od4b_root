@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1152" height="800" viewBox="0 0 1152 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b0b12"/>
+      <stop offset="100%" stop-color="#1e1032"/>
+    </linearGradient>
+  </defs>
+  <rect width="1152" height="800" fill="url(#bg)"/>
+  <g fill="none" stroke-linecap="round">
+    <path d="M40 170C182 120 286 248 436 184C592 116 738 246 898 174C988 140 1066 162 1122 206" stroke="#ffd166" stroke-opacity=".58" stroke-width="2.4"/>
+    <path d="M20 248C164 200 288 332 456 262C614 198 734 338 910 264C1038 214 1092 254 1136 286" stroke="#ef476f" stroke-opacity=".42" stroke-width="2.1"/>
+    <path d="M34 332C200 286 314 408 486 336C640 268 770 422 954 346C1028 318 1090 334 1134 360" stroke="#fca311" stroke-opacity=".5" stroke-width="1.9"/>
+    <path d="M28 420C194 378 332 492 506 422C678 352 792 516 960 438C1052 392 1102 408 1138 436" stroke="#9d4edd" stroke-opacity=".52" stroke-width="1.8"/>
+    <path d="M16 516C198 470 338 592 526 514C688 446 822 608 992 530C1062 500 1118 506 1142 536" stroke="#06d6a0" stroke-opacity=".42" stroke-width="1.6"/>
+    <path d="M22 612C202 570 354 682 552 610C726 544 848 698 1022 628C1086 602 1132 602 1146 626" stroke="#4cc9f0" stroke-opacity=".36" stroke-width="1.4"/>
+  </g>
+</svg>

@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Argon Bloom Engine</title>
+<style>
+:root {
+  --bg: #0d0b18;
+  --fg: #f2efff;
+  --muted: #b0a9cf;
+  --accent: #7ae6ff;
+  --panel: rgba(10, 9, 20, 0.66);
+}
+html[data-theme="light"] {
+  --bg: #f5f3ff;
+  --fg: #161225;
+  --muted: #5f5879;
+  --accent: #0e7490;
+  --panel: rgba(255, 255, 255, 0.74);
+}
+* { box-sizing: border-box; }
+body { margin: 0; overflow: hidden; background: var(--bg); color: var(--fg); font-family: "Segoe UI", Aptos, sans-serif; }
+a { color: inherit; text-decoration: none; }
+.hud {
+  position: fixed; top: 16px; left: 16px; right: 16px; z-index: 2;
+  display: flex; justify-content: space-between; gap: 14px; align-items: center;
+  padding: 10px 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(10px);
+  background: var(--panel);
+}
+.meta { font-size: 12px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.meta strong { color: var(--accent); font-weight: 600; }
+button {
+  border: 1px solid rgba(122, 230, 255, 0.45); background: transparent; color: var(--fg);
+  border-radius: 999px; padding: 8px 14px; font: inherit; cursor: pointer;
+}
+button:hover { background: rgba(122, 230, 255, 0.12); }
+canvas { width: 100vw; height: 100vh; display: block; }
+</style>
+</head>
+<body>
+  <div class="hud">
+    <div class="meta"><a href="artificial-gallery.html">Back to gallery</a> · <strong>Gemini 4 Argon</strong> · built 2026-10-29</div>
+    <button id="reseed" type="button">Reseed bloom</button>
+  </div>
+  <canvas id="c"></canvas>
+<script>
+(() => {
+  "use strict";
+  const t = new URLSearchParams(location.search).get("scoutTheme");
+  document.documentElement.dataset.theme = t === "light" ? "light" : "dark";
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const pts = [];
+  const petalSeeds = [];
+  let w = 0, h = 0, cx = 0, cy = 0, tick = 0, hueBias = 190, swirl = 1.4;
+
+  function rng(seed) {
+    return () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  }
+
+  function reset(seed = (Math.random() * 1e9) | 0) {
+    const r = rng(seed);
+    hueBias = 150 + r() * 170;
+    swirl = 0.9 + r() * 2.1;
+    pts.length = 0;
+    petalSeeds.length = 0;
+    for (let i = 0; i < 5200; i++) {
+      pts.push({
+        x: r() * w,
+        y: r() * h,
+        life: 120 + r() * 220,
+        speed: 0.5 + r() * 1.3
+      });
+    }
+    for (let i = 0; i < 8; i++) {
+      petalSeeds.push({
+        x: w * (0.2 + r() * 0.6),
+        y: h * (0.2 + r() * 0.6),
+        base: 40 + r() * 130,
+        phase: r() * Math.PI * 2
+      });
+    }
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--bg");
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function resize() {
+    w = canvas.width = Math.floor(innerWidth * devicePixelRatio);
+    h = canvas.height = Math.floor(innerHeight * devicePixelRatio);
+    canvas.style.width = innerWidth + "px";
+    canvas.style.height = innerHeight + "px";
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    w = innerWidth;
+    h = innerHeight;
+    cx = w * 0.5;
+    cy = h * 0.5;
+    reset();
+  }
+
+  function field(x, y) {
+    const dx = x - cx;
+    const dy = y - cy;
+    const a = Math.atan2(dy, dx);
+    const d = Math.hypot(dx, dy) * 0.004 + 0.0001;
+    return a * swirl + Math.sin(d * 9 - tick * 0.011) * 2.0 + Math.cos((dx - dy) * 0.009 + tick * 0.007);
+  }
+
+  function drawPetals() {
+    for (const p of petalSeeds) {
+      const pulse = 0.65 + 0.35 * Math.sin(tick * 0.017 + p.phase);
+      const R = p.base * pulse;
+      ctx.beginPath();
+      for (let a = 0; a < Math.PI * 2.02; a += 0.065) {
+        const rr = R + Math.sin(a * 6 + tick * 0.02 + p.phase) * R * 0.32;
+        const x = p.x + Math.cos(a) * rr;
+        const y = p.y + Math.sin(a) * rr;
+        if (a < 0.07) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      const hue = (hueBias + p.base * 0.8 + tick * 0.15) % 360;
+      ctx.fillStyle = `hsla(${hue}, 92%, 62%, 0.04)`;
+      ctx.fill();
+    }
+  }
+
+  function frame() {
+    tick++;
+    ctx.fillStyle = document.documentElement.dataset.theme === "light"
+      ? "rgba(245,243,255,0.06)"
+      : "rgba(13,11,24,0.07)";
+    ctx.fillRect(0, 0, w, h);
+    drawPetals();
+    for (const p of pts) {
+      const ang = field(p.x, p.y);
+      p.x += Math.cos(ang) * p.speed;
+      p.y += Math.sin(ang) * p.speed;
+      p.life -= 0.45;
+      if (p.x < -4 || p.x > w + 4 || p.y < -4 || p.y > h + 4 || p.life <= 0) {
+        p.x = Math.random() * w;
+        p.y = Math.random() * h;
+        p.life = 150 + Math.random() * 250;
+      }
+      const hue = (hueBias + p.x * 0.08 + p.y * 0.04 + tick * 0.18) % 360;
+      ctx.fillStyle = `hsla(${hue}, 98%, 68%, 0.28)`;
+      ctx.fillRect(p.x, p.y, 1.1, 1.1);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  addEventListener("resize", resize);
+  document.getElementById("reseed").addEventListener("click", () => reset((Math.random() * 1e9) | 0));
+  canvas.addEventListener("click", () => reset((Math.random() * 1e9) | 0));
+  resize();
+  frame();
+})();
+</script>
+</body>
+</html>

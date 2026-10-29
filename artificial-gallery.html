@@ -100,8 +100,17 @@ h1 em { font-style: normal; color: var(--cp-accent); }
 .plate:hover .shot { transform: translateY(-4px); box-shadow: var(--cp-shadow); }
 .plate:hover .enter { color: var(--cp-accent); }
 .plate:hover .enter span { transform: translateX(5px); }
+.plate-media { display: grid; gap: 10px; align-content: start; }
 .shot { width: 100%; aspect-ratio: 576 / 400; object-fit: cover; display: block; border: 1px solid var(--cp-border);
   border-radius: 16px; background: var(--cp-surface-soft); transition: transform .25s ease, box-shadow .25s ease; }
+.build-label {
+  color: var(--cp-text-soft);
+  font-family: Consolas, "Courier New", Courier, monospace;
+  font-size: 10px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.build-label strong { color: var(--cp-accent); font-weight: 600; }
 .body .index { color: var(--cp-accent); display: flex; align-items: center; gap: 10px; }
 .body .index::after { content: ""; height: 1px; width: 26px; background: var(--cp-accent); }
 .body h2 { margin: 16px 0 0; font-size: 27px; font-weight: 350; letter-spacing: -.035em; }
@@ -165,11 +174,11 @@ footer p { margin: 0; max-width: 620px; }
 
   <section class="lede">
     <div>
-      <div class="mono" style="color: var(--cp-text-soft)">Five studies &nbsp;/&nbsp; 2026</div>
-      <h1>Five works<br>you can <em>play</em>.</h1>
+      <div class="mono" style="color: var(--cp-text-soft)">Eight studies &nbsp;/&nbsp; 2026</div>
+      <h1>Eight works<br>you can <em>play</em>.</h1>
       <p>
-        Three interactive studies and an original short film explore generated geometry and
-        synthesized sound. Shape the live sculptures and scores, or watch
+        Seven interactive studies and an original short film explore generated geometry,
+        synthetic ecologies, and generated sound. Shape the live sculptures and scores, or watch
         <em>The Imitation of Light</em>, a 64-second unofficial fan tribute.
       </p>
     </div>
@@ -221,6 +230,7 @@ footer p { margin: 0; max-width: 620px; }
         "An independent fan work: no copied video, album artwork, song samples, lyrics, or cloned voices."
       ],
       model: "GPT-6 Astra",
+      builtOn: "2026-10-24",
       tags: ["64 seconds", "1080p MP4", "Unofficial fan film"],
       cta: "Watch the film"
     },
@@ -235,6 +245,7 @@ footer p { margin: 0; max-width: 620px; }
         "The same tension detunes a six-voice drone, so what you see and what you hear come from one number."
       ],
       model: "GPT-6 Astra",
+      builtOn: "2026-10-20",
       tags: ["Real-time WebGL", "Drag to orbit", "Optional sound"]
     },
     {
@@ -248,6 +259,7 @@ footer p { margin: 0; max-width: 620px; }
         "The route trails burn in permanently, so the finished cover art is a record of that specific day. Shuffle for a different one."
       ],
       model: "Claude Opus 5",
+      builtOn: "2026-10-21",
       tags: ["Generated score", "Exports cover art", "Sound recommended"]
     },
     {
@@ -261,6 +273,7 @@ footer p { margin: 0; max-width: 620px; }
         "The score crossfades from irregular hammer strikes into a resolving progression, losing its detune and jitter exactly as the surfaces gain polish."
       ],
       model: "Claude Opus 5",
+      builtOn: "2026-10-22",
       tags: ["Raymarched room", "Timeline scrubber", "Sound recommended"]
     },
     {
@@ -274,7 +287,50 @@ footer p { margin: 0; max-width: 620px; }
         "Cover art is generated from the same parameters driving the score, so the image and the sound always match."
       ],
       model: "GPT-6 Astra",
+      builtOn: "2026-10-26",
       tags: ["Original browser synth", "Generative cover art", "Sound recommended"]
+    },
+    {
+      index: "Study 006",
+      title: "Argon Bloom Engine",
+      href: "argon-bloom-engine.html?scoutTheme=dark",
+      image: "argon-bloom-engine-thumb.svg",
+      what: "A synthetic reef where glass petals unfurl in fluid light. Click anywhere to spawn a new bloom and push the field into a fresh phase portrait.",
+      how: [
+        "A vector flow field advects thousands of particles while recursive petals pulse from a harmonic stack.",
+        "Each click reseeds pigment chemistry and bloom topology, so every run forms a different neon ecology."
+      ],
+      model: "Gemini 4 Argon",
+      builtOn: "2026-10-29",
+      tags: ["Particle ecology", "Click to reseed", "Live canvas"]
+    },
+    {
+      index: "Study 007",
+      title: "Terra Cathedral of Noise",
+      href: "terra-cathedral-of-noise.html?scoutTheme=dark",
+      image: "terra-cathedral-of-noise-thumb.svg",
+      what: "A wobbled cathedral lattice grows and collapses in slow seismic breaths. Switch modes to jump from tectonic calm to chaotic thunderglass.",
+      how: [
+        "A layered trigonometric distance field is sampled as contour strips, then phase-shifted to simulate structural resonance.",
+        "Palette and deformation modes are coupled, producing architectural states that feel engineered and unstable at once."
+      ],
+      model: "GPT-6 Terra",
+      builtOn: "2026-10-29",
+      tags: ["Contour synthesis", "Mode switch", "Generative architecture"]
+    },
+    {
+      index: "Study 008",
+      title: "Sonnet Chroma Zoo",
+      href: "sonnet-chroma-zoo.html?scoutTheme=dark",
+      image: "sonnet-chroma-zoo-thumb.svg",
+      what: "A colony of spectral creatures sketches impossible orbits. They braid, split, and rejoin while leaving a calligraphic trail that never repeats.",
+      how: [
+        "Autonomous agents follow coupled oscillators with soft collision logic and hue inheritance.",
+        "Trails are composited with differential alpha decay, creating luminous glyphs that mutate continuously."
+      ],
+      model: "Claude Sonnet 5.5",
+      builtOn: "2026-10-29",
+      tags: ["Autonomous agents", "Never-repeating trails", "Wacky mode"]
     }
   ];
 
@@ -293,6 +349,14 @@ footer p { margin: 0; max-width: 620px; }
     shot.alt = work.title + " preview";
     shot.loading = "lazy";
     shot.decoding = "async";
+
+    const media = document.createElement("div");
+    media.className = "plate-media";
+    const build = document.createElement("div");
+    build.className = "build-label";
+    const builtOn = work.builtOn || "2026-10-29";
+    build.innerHTML = "<strong>" + work.model + "</strong> · built " + builtOn;
+    media.append(shot, build);
 
     const body = document.createElement("div");
     body.className = "body";
@@ -337,7 +401,7 @@ footer p { margin: 0; max-width: 620px; }
     enter.appendChild(chevron);
 
     body.append(index, title, what, how, meta, enter);
-    plate.append(shot, body);
+    plate.append(media, body);
     container.appendChild(plate);
   });
 
