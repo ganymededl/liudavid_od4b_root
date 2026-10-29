@@ -5,27 +5,53 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <script>
   (() => {
-    const optOutKey = "liudavid-clarity-opt-out";
+    const consentKey = "liudavid-clarity-consent-v1";
     const url = new URL(window.location.href);
-    const ownerMode = url.searchParams.get("owner");
+    const consentParam = url.searchParams.get("analytics");
+    let consent = "denied";
+    let loaded = false;
 
-    try {
-      if (ownerMode === "1") localStorage.setItem(optOutKey, "1");
-      if (ownerMode === "0") localStorage.removeItem(optOutKey);
-      if (ownerMode !== null) {
-        url.searchParams.delete("owner");
-        history.replaceState(null, "", url.pathname + url.search + url.hash);
+    function readConsent() {
+      try {
+        const saved = localStorage.getItem(consentKey);
+        return saved === "granted" ? "granted" : "denied";
+      } catch {
+        return "denied";
       }
-      if (localStorage.getItem(optOutKey) === "1") return;
-    } catch {
-      // If storage is unavailable, keep analytics functional for ordinary visitors.
     }
 
-    (function(c,l,a,r,i,t,y){
-      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-    })(window, document, "clarity", "script", "yo4f54o07k");
+    function writeConsent(value) {
+      consent = value === "granted" ? "granted" : "denied";
+      try { localStorage.setItem(consentKey, consent); } catch {}
+    }
+
+    function loadClarity() {
+      if (loaded || consent !== "granted") return;
+      loaded = true;
+      (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+      })(window, document, "clarity", "script", "yo4f54o07k");
+    }
+
+    if (consentParam === "on") writeConsent("granted");
+    if (consentParam === "off") writeConsent("denied");
+    if (consentParam !== null) {
+      url.searchParams.delete("analytics");
+      history.replaceState(null, "", url.pathname + url.search + url.hash);
+    } else {
+      consent = readConsent();
+    }
+    if (consent === "granted") loadClarity();
+
+    window.__dscAnalytics = {
+      getConsent: () => consent,
+      setConsent: (value) => {
+        writeConsent(value);
+        if (consent === "granted") loadClarity();
+      }
+    };
   })();
 </script>
 <title>David Shih Chun Liu — Hub</title>
@@ -106,9 +132,26 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  :where(a, button, input, select, textarea):focus-visible {
+  :where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
     outline: 2px solid var(--c1);
     outline-offset: 3px;
+  }
+  .skip-link {
+    position: absolute;
+    left: 16px;
+    top: -40px;
+    z-index: 20;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    color: var(--t1);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .skip-link:focus {
+    top: 12px;
   }
   .sr-only {
     position: absolute;
@@ -392,7 +435,6 @@
     height: 3px;
     background: var(--border);
     border-radius: 2px;
-    outline: none;
     accent-color: var(--c1);
     flex-shrink: 0;
   }
@@ -427,21 +469,6 @@
     flex-shrink: 0;
   }
   .theme:hover { background: var(--cardh); transform: scale(1.05); }
-  .mode-switch {
-    min-height: 28px;
-    padding: 0 10px;
-    border-radius: 999px;
-    border: 0.5px solid var(--border2);
-    background: var(--card);
-    color: var(--t1);
-    font: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-  }
-  .mode-switch:hover { background: var(--cardh); }
-
   /* ── Hero ───────────────────────────────────────────── */
   .hero {
     padding: 46px 32px 28px;
@@ -525,15 +552,15 @@
   }
 
   /* ── Libraries ──────────────────────────────────────── */
-  .libraries-wrap, .tools-wrap, .podcasts-wrap {
+  .libraries-wrap, .podcasts-wrap {
     padding: 20px 32px;
   }
   /* Shared frosted backdrop behind the tile grids: each .lib/.pod card
      already blurs the photo independently, which left visible seams in
      the gaps between cards on high-contrast photos (e.g. striped towers).
      One panel behind the whole grid removes that patchwork. */
-  .libraries-wrap, .tools-wrap { position: relative; }
-  .libraries-wrap::before, .tools-wrap::before {
+  .libraries-wrap { position: relative; }
+  .libraries-wrap::before {
     content: "";
     position: absolute;
     inset: 6px 16px;
@@ -543,22 +570,14 @@
     border-radius: 22px;
     z-index: 0;
   }
-  [data-light="true"] .libraries-wrap::before,
-  [data-light="true"] .tools-wrap::before {
+  [data-light="true"] .libraries-wrap::before {
     background: rgba(255,255,255,0.55);
   }
-  .libraries-wrap > *, .tools-wrap > * { position: relative; z-index: 1; }
+  .libraries-wrap > * { position: relative; z-index: 1; }
   .libraries {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
     gap: 8px;
-  }
-  /* Toolkit tiles carry more text than the library tiles: use wider columns (five
-     across at most; the calc caps the count) and let each tile keep its own height. */
-  #tools {
-    grid-template-columns: repeat(auto-fill, minmax(max(220px, calc((100% - 48px) / 5)), 1fr));
-    gap: 12px;
-    align-items: start;
   }
   .lib {
     position: relative;
@@ -792,12 +811,10 @@
     color: var(--t2);
     line-height: 1.4;
   }
-  .start-wrap,
-  .toolkit-entry-wrap {
+  .start-wrap {
     padding: 2px 32px 16px;
   }
-  .start-panel,
-  .toolkit-entry-panel {
+  .start-panel {
     background: var(--glass);
     border: 0.5px solid var(--border);
     border-radius: 14px;
@@ -836,34 +853,6 @@
     color: var(--t2);
     line-height: 1.4;
   }
-  .toolkit-entry-copy {
-    font-size: 12px;
-    color: var(--t2);
-    margin-bottom: 8px;
-    max-width: 760px;
-  }
-  .toolkit-entry-points {
-    margin-left: 16px;
-    color: var(--t2);
-    font-size: 11px;
-    line-height: 1.5;
-    max-width: 760px;
-  }
-  .tools-toggle {
-    display: none;
-    margin-top: 10px;
-    border: 0.5px solid var(--border2);
-    border-radius: 999px;
-    background: var(--card);
-    color: var(--t1);
-    padding: 7px 11px;
-    font: inherit;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-  }
-  .tools-toggle:hover { background: var(--cardh); }
   .lib-primary-link {
     text-decoration: none;
   }
@@ -880,29 +869,64 @@
     align-items: center;
   }
   .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.22);
+    position: relative;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: transparent;
     border: none;
     cursor: pointer;
     padding: 0;
+    transition: background 0.2s ease;
+  }
+  .dot::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: rgba(255,255,255,0.22);
     transition: all 0.28s ease;
   }
-  [data-light="true"] .dot { background: rgba(10,10,20,0.22); }
-  .dot.active {
+  [data-light="true"] .dot::before { background: rgba(10,10,20,0.22); }
+  .dot.active::before {
     width: 16px;
-    border-radius: 2px;
+    height: 6px;
+    border-radius: 3px;
     background: var(--c1);
     box-shadow: 0 0 6px rgba(0,217,255,0.4);
   }
 
   .footer {
-    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
     padding: 8px 24px 20px;
     font-size: 10px;
     color: var(--t2);
     letter-spacing: 0.05em;
+  }
+  .footer-text {
+    text-align: center;
+  }
+  .footer-link {
+    border: 0.5px solid var(--border2);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--t1);
+    padding: 4px 8px;
+    font: inherit;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+  }
+  .footer-link:hover {
+    background: var(--cardh);
   }
 
   /* ── Modal ──────────────────────────────────────────── */
@@ -1177,10 +1201,7 @@
     .pathways { grid-template-columns: 1fr; }
     .resource-controls-wrap { padding: 2px 20px 12px; }
     .start-wrap,
-    .toolkit-entry-wrap { padding: 2px 20px 14px; }
-    .libraries-wrap, .tools-wrap, .podcasts-wrap { padding: 16px 20px; }
-    #tools.collapsed .lib:nth-child(n + 5) { display: none; }
-    .tools-toggle { display: inline-flex; }
+    .libraries-wrap, .podcasts-wrap { padding: 16px 20px; }
     .nav { padding: 12px 16px; }
     .music { max-width: 200px; }
     .station .sn { max-width: 70px; }
@@ -1195,6 +1216,7 @@
 </style>
 </head>
 <body>
+<a class="skip-link" href="#main-content">Skip to main content</a>
 <div class="app" id="app">
   <iframe class="noir-backdrop" id="noirBackdrop" title="Decorative generative artwork" aria-hidden="true" tabindex="-1" inert></iframe>
   <div class="slides" id="slides" hidden></div>
@@ -1202,7 +1224,7 @@
 
   <div class="content">
     <!-- NAV -->
-    <nav class="nav">
+    <nav class="nav" aria-label="Personal hub utilities">
       <div class="nav-left">
         <div class="logo" aria-hidden="true">
           <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
@@ -1213,12 +1235,12 @@
         </div>
         <div class="nav-name">
           <span class="nm" id="navName">David Shih Chun Liu</span>
-          <span class="now-playing" id="navNowPlaying" hidden></span>
+          <span class="now-playing" id="navNowPlaying" aria-live="polite" aria-atomic="true" hidden></span>
         </div>
       </div>
       <div class="nav-right">
         <div class="music" id="music">
-          <button class="play" id="playBtn" aria-label="Play / Pause">
+          <button class="play" id="playBtn" aria-label="Play focus soundtrack" aria-pressed="false">
             <svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>
           </button>
           <div class="viz" aria-hidden="true"><span></span><span></span><span></span></div>
@@ -1239,20 +1261,21 @@
       </div>
     </nav>
 
+    <main id="main-content">
     <!-- HERO -->
     <section class="hero">
-      <p class="hero-ownerline" id="heroOwnerLine">Personal environment by David Shih Chun Liu</p>
-      <h1 class="hero-title" id="heroHeadline">Copilot field playbooks, demos, and experiments.</h1>
+      <p class="hero-ownerline" id="heroOwnerLine">Microsoft SLED and Higher Education</p>
+      <h1 class="hero-title" id="heroHeadline">Copilot playbooks, demos, and controls for SLED and Higher Ed.</h1>
       <hr class="hero-rule">
-      <p class="tagline" id="tagline">Explore public resources quickly, or open the personal toolkit for internal workflows.</p>
+      <p class="tagline" id="tagline">Find practical resources for adoption, governance, automation, and customer demonstrations. Protected internal workflows require Microsoft sign-in.</p>
       <div class="pathways" role="navigation" aria-label="Hub pathways">
         <a class="pathcard" href="#start-here">
-          <span class="path-title">Explore public work</span>
-          <span class="path-desc">Browse public projects for Copilot adoption, demos, automation, and governance.</span>
+          <span class="path-title">Browse public resources</span>
+          <span class="path-desc">Open field playbooks, demos, scripts, and governance guidance. No sign-in required.</span>
         </a>
         <a class="pathcard" href="https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html" target="_blank" rel="noopener">
-          <span class="path-title">Open my toolkit</span>
-          <span class="path-desc">Open the Microsoft sign-in protected toolkit for internal workflows.</span>
+          <span class="path-title">Open protected toolkit</span>
+          <span class="path-desc">Internal workflows in David&apos;s Microsoft workspace. Microsoft sign-in and access are required. Opens in a new tab.</span>
         </a>
       </div>
       <div class="backdrop-controls">
@@ -1264,13 +1287,14 @@
 
     <section class="start-wrap" id="start-here">
       <div class="start-panel">
-        <h2 class="section-label">Start here · featured public resources</h2>
+        <h2 class="section-label">Featured resources</h2>
         <div class="start-grid" id="startGrid"></div>
       </div>
     </section>
 
     <section class="resource-controls-wrap" aria-label="Search and filter resources">
       <div class="resource-controls">
+        <h2 class="section-label">Search public resources</h2>
         <label class="sr-only" for="resourceSearch">Search public resources</label>
         <input
           class="resource-search"
@@ -1285,31 +1309,20 @@
             <button class="resource-filter" id="resourceFiltersReset" type="button" hidden>Clear filters</button>
           </div>
         </div>
-        <p class="resource-scope-note">Search and filters apply to the public resource library below (not featured or podcast cards).</p>
+        <p class="resource-scope-note">Search and filters apply to the public resource library below.</p>
         <p class="resource-filter-status" id="resourceFilterStatus" aria-live="polite"></p>
-      </div>
-    </section>
-
-    <section class="toolkit-entry-wrap" id="toolkit-entry">
-      <div class="toolkit-entry-panel">
-        <h2 class="section-label">Toolkit access notes</h2>
-        <p class="toolkit-entry-copy">The personal toolkit is stored separately from this public page and requires Microsoft sign-in.</p>
-        <ul class="toolkit-entry-points">
-          <li>Use <strong>Open my toolkit</strong> above to launch the authenticated workspace.</li>
-          <li>No internal or owner-only inventory is embedded in this public page.</li>
-        </ul>
       </div>
     </section>
 
     <!-- LIBRARIES -->
     <section class="libraries-wrap" id="public-library">
-      <h2 class="section-label">Libraries &middot; public, no sign-in</h2>
+      <h2 class="section-label">Browse all public resources</h2>
       <div class="libraries" id="libs"></div>
     </section>
 
     <!-- PODCASTS -->
     <section class="podcasts-wrap">
-      <h2 class="section-label">Podcasts &middot; latest episodes</h2>
+      <h2 class="section-label">AI and technology podcasts · external links</h2>
       <div class="podcasts" id="podcasts"></div>
     </section>
 
@@ -1317,8 +1330,12 @@
     <div class="dots-wrap">
       <div class="dots" id="dots" hidden></div>
     </div>
+    </main>
 
-    <footer class="footer" id="backgroundCredit">Background: Volatility Noir (built with GPT-6 Astra) · Analytics: Microsoft Clarity (anonymous traffic)</footer>
+    <footer class="footer">
+      <span class="footer-text" id="backgroundCredit">Background artwork controls · Optional Microsoft Clarity behavioral analytics</span>
+      <button class="footer-link" id="analyticsSettingsBtn" type="button">Privacy and analytics settings</button>
+    </footer>
   </div>
 
   <!-- GENRE MODAL -->
@@ -1326,7 +1343,7 @@
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
       <h3 id="mTitle">Focus soundtrack</h3>
       <p class="sub">Pick a vibe</p>
-      <div class="genres" id="genreGrid"></div>
+      <div class="genres" id="genreGrid" role="radiogroup" aria-label="Focus soundtrack genre"></div>
       <button class="done" id="modalDone">Done</button>
     </div>
   </div>
@@ -1368,14 +1385,14 @@ const CONFIG = {
 
   owner: {
     name:     "David Shih Chun Liu",
-    heroHeadline: "Copilot field playbooks, demos, and experiments.",
-    heroTagline: "Explore public resources quickly, or open the personal toolkit for internal workflows.",
+    heroHeadline: "Copilot playbooks, demos, and controls for SLED and Higher Ed.",
+    heroTagline: "Find practical resources for adoption, governance, automation, and customer demonstrations. Protected internal workflows require Microsoft sign-in.",
     nameDisplay: {
       first:  "David",
       middle: "Shih Chun",
       last:   "Liu"
     },
-    role: "Microsoft SLED · Copilot Customer Success Architect"
+    role: "Microsoft SLED and Higher Education"
   },
   // ── LIBRARY CARDS ────────────────────────────────────────────
   // Public library cards, kept in alphabetical order by name.
@@ -1626,7 +1643,7 @@ themeBtn.addEventListener("click", () => {
 // The role appears once, in the hero tagline — the nav shows only the name
 // (it also has less room, and used to truncate the role on phones).
 document.getElementById("navName").textContent = CONFIG.owner.name;
-document.getElementById("heroOwnerLine").textContent = "Personal environment by " + CONFIG.owner.name;
+document.getElementById("heroOwnerLine").textContent = CONFIG.owner.role;
 document.getElementById("heroHeadline").textContent = CONFIG.owner.heroHeadline;
 document.getElementById("tagline").textContent = CONFIG.owner.heroTagline;
 
@@ -1645,6 +1662,7 @@ const startGrid = document.getElementById("startGrid");
 
 // ── RENDER: libraries ───────────────────────────────────────
 const libsEl = document.getElementById("libs");
+const startHereSection = document.getElementById("start-here");
 const resourceSearch = document.getElementById("resourceSearch");
 const resourceTopicFilters = document.getElementById("resourceTopicFilters");
 const resourceFiltersReset = document.getElementById("resourceFiltersReset");
@@ -1660,6 +1678,9 @@ const RESOURCE_TOPICS = [
 let activeResourceTopic = "all";
 
 function inferResourceTags(item) {
+  if (Array.isArray(item.tags) && item.tags.length) {
+    return [...new Set(item.tags.map(tag => String(tag).toLowerCase().trim()).filter(Boolean))];
+  }
   const text = [
     item.name || "",
     item.desc || "",
@@ -1708,6 +1729,8 @@ function applyResourceFilters() {
   const query = (resourceSearch.value || "").trim().toLowerCase();
   const cards = [...document.querySelectorAll(".resource-card")];
   let visibleCount = 0;
+  const hasActiveFilters = activeResourceTopic !== "all" || !!query;
+  if (startHereSection) startHereSection.hidden = hasActiveFilters;
   cards.forEach(card => {
     const tags = (card.dataset.tags || "").split(/\s+/).filter(Boolean);
     const haystack = card.dataset.search || "";
@@ -1717,7 +1740,7 @@ function applyResourceFilters() {
     card.hidden = !isVisible;
     if (isVisible) visibleCount += 1;
   });
-  resourceFiltersReset.hidden = activeResourceTopic === "all" && !query;
+  resourceFiltersReset.hidden = !hasActiveFilters;
   if (!resourceFilterStatus) return;
   if (!cards.length) {
     resourceFilterStatus.textContent = "";
@@ -1856,6 +1879,7 @@ function renderDots() {
     const b = document.createElement("button");
     b.className = "dot" + (i === currentSlide ? " active" : "");
     b.setAttribute("aria-label", "Slide " + (i + 1));
+    b.setAttribute("aria-current", String(i === currentSlide));
     b.addEventListener("click", () => goToSlide(i));
     dotsEl.appendChild(b);
   });
@@ -1883,7 +1907,11 @@ function showSlide(i) {
       s.classList.remove("active");
     }
   });
-  [...dotsEl.children].forEach((d, idx) => d.classList.toggle("active", idx === i));
+  [...dotsEl.children].forEach((d, idx) => {
+    const active = idx === i;
+    d.classList.toggle("active", active);
+    d.setAttribute("aria-current", String(active));
+  });
 }
 
 function goToSlide(i) {
@@ -1942,8 +1970,8 @@ function syncArtworkBackground() {
 function updateArtworkCredit() {
   const item = artworks[artworkIndex];
   backgroundCredit.textContent = photosActive
-    ? "Background: photos via Unsplash · Analytics: Microsoft Clarity (anonymous traffic)"
-    : "Background: " + item.name + " (" + item.credit + ") · Analytics: Microsoft Clarity (anonymous traffic)";
+    ? "Background artwork controls · Photo mode via Unsplash · Optional Microsoft Clarity behavioral analytics"
+    : "Background artwork controls · " + item.name + " (" + item.credit + ") · Optional Microsoft Clarity behavioral analytics";
 }
 function syncArtworkTimer() {
   const held = artworkPaused || photosActive || document.hidden || motionPreference.matches || !artworkReady;
@@ -2108,6 +2136,8 @@ function setPlayIcon(playing) {
 function setPlayingState(on) {
   isPlaying = on;
   musicEl.classList.toggle("playing", on);
+  playBtn.setAttribute("aria-pressed", String(on));
+  playBtn.setAttribute("aria-label", on ? "Pause focus soundtrack" : "Play focus soundtrack");
   updateNavNowPlaying();
   setPlayIcon(on);
 }
@@ -2120,10 +2150,17 @@ function buildGenreGrid() {
     b.className = "gbtn" + (g.cls ? " " + g.cls : "") + (g.id === currentGenre ? " selected" : "");
     b.dataset.id = g.id;
     b.innerHTML = g.label;
+    b.setAttribute("role", "radio");
+    b.setAttribute("aria-checked", String(g.id === currentGenre));
+    b.tabIndex = g.id === currentGenre ? 0 : -1;
     b.addEventListener("click", () => {
       currentGenre = g.id;
-      [...genreGrid.children].forEach(c => c.classList.remove("selected"));
-      b.classList.add("selected");
+      [...genreGrid.children].forEach(c => {
+        const selected = c === b;
+        c.classList.toggle("selected", selected);
+        c.setAttribute("aria-checked", String(selected));
+        c.tabIndex = selected ? 0 : -1;
+      });
     });
     genreGrid.appendChild(b);
   });
@@ -2133,8 +2170,8 @@ function openModal() {
   buildGenreGrid();
   modalBg.classList.add("open");
   document.addEventListener("keydown", handleModalKeydown);
-  // Move focus inside the dialog so screen-reader/keyboard users land in it immediately.
-  (modalDone || modalBg).focus();
+  const selectedGenre = genreGrid.querySelector("[role='radio'][aria-checked='true']");
+  (selectedGenre || modalDone || modalBg).focus();
 }
 function closeModal() {
   modalBg.classList.remove("open");
@@ -2143,6 +2180,17 @@ function closeModal() {
 }
 
 function handleModalKeydown(e) {
+  if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowUp") {
+    const radios = [...genreGrid.querySelectorAll("[role='radio']")];
+    if (!radios.length) return;
+    const currentIndex = Math.max(0, radios.findIndex(radio => radio.getAttribute("aria-checked") === "true"));
+    const step = (e.key === "ArrowRight" || e.key === "ArrowDown") ? 1 : -1;
+    const nextIndex = (currentIndex + step + radios.length) % radios.length;
+    e.preventDefault();
+    radios[nextIndex].click();
+    radios[nextIndex].focus();
+    return;
+  }
   if (e.key === "Escape") {
     e.preventDefault();
     closeModal();
@@ -2384,6 +2432,25 @@ tvLauncher.addEventListener("click", () => setTvPipOpen(true));
 const savedTvPipState = localStorage.getItem(tvPipPrefKey);
 const startTvOpen = savedTvPipState === null ? false : savedTvPipState === "1";
 setTvPipOpen(startTvOpen && !matchMedia("(max-width: 560px)").matches, false);
+
+// ── PRIVACY / ANALYTICS SETTINGS ───────────────────────────────
+const analyticsSettingsBtn = document.getElementById("analyticsSettingsBtn");
+function updateAnalyticsSettingsLabel() {
+  if (!analyticsSettingsBtn || !window.__dscAnalytics) return;
+  const consent = window.__dscAnalytics.getConsent();
+  analyticsSettingsBtn.textContent = consent === "granted"
+    ? "Privacy and analytics settings (analytics on)"
+    : "Privacy and analytics settings (analytics off)";
+}
+if (analyticsSettingsBtn && window.__dscAnalytics) {
+  updateAnalyticsSettingsLabel();
+  analyticsSettingsBtn.addEventListener("click", () => {
+    const current = window.__dscAnalytics.getConsent();
+    const next = current === "granted" ? "denied" : "granted";
+    window.__dscAnalytics.setConsent(next);
+    updateAnalyticsSettingsLabel();
+  });
+}
 </script>
 </body>
 </html>
