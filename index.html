@@ -725,6 +725,25 @@
     outline: 2px solid var(--c1);
     outline-offset: 2px;
   }
+  .resource-filter-groups {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .resource-filter-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 7px;
+  }
+  .resource-filter-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--t2);
+    margin-right: 2px;
+  }
   .resource-filters {
     display: flex;
     flex-wrap: wrap;
@@ -813,6 +832,24 @@
   }
   [data-hub-mode="workspace"] .toolkit-entry-wrap { display: none; }
   [data-hub-mode="visitor"] .tools-wrap { display: none; }
+  .tools-toggle {
+    display: none;
+    margin-top: 10px;
+    border: 0.5px solid var(--border2);
+    border-radius: 999px;
+    background: var(--card);
+    color: var(--t1);
+    padding: 7px 11px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+  }
+  .tools-toggle:hover { background: var(--cardh); }
+  .lib-primary-link {
+    text-decoration: none;
+  }
 
   /* ── Dots ───────────────────────────────────────────── */
   .dots-wrap {
@@ -1125,6 +1162,8 @@
     .start-wrap,
     .toolkit-entry-wrap { padding: 2px 20px 14px; }
     .libraries-wrap, .tools-wrap, .podcasts-wrap { padding: 16px 20px; }
+    #tools.collapsed .lib:nth-child(n + 5) { display: none; }
+    .tools-toggle { display: inline-flex; }
     .nav { padding: 12px 16px; }
     .music { max-width: 200px; }
     .station .sn { max-width: 70px; }
@@ -1222,7 +1261,16 @@
           type="search"
           autocomplete="off"
           placeholder="Search libraries and toolkit cards" />
-        <div class="resource-filters" id="resourceFilters"></div>
+        <div class="resource-filter-groups">
+          <div class="resource-filter-group">
+            <span class="resource-filter-label">Access</span>
+            <div class="resource-filters" id="resourceAccessFilters"></div>
+          </div>
+          <div class="resource-filter-group">
+            <span class="resource-filter-label">Category</span>
+            <div class="resource-filters" id="resourceTopicFilters"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1239,18 +1287,19 @@
 
     <!-- LIBRARIES -->
     <section class="libraries-wrap" id="public-library">
-      <p class="section-label">Libraries &middot; public, no sign-in</p>
+      <h2 class="section-label">Libraries &middot; public, no sign-in</h2>
       <div class="libraries" id="libs"></div>
     </section>
 
     <section class="tools-wrap" id="toolkit">
-      <p class="section-label">Personal toolkit &middot; Microsoft sign-in required</p>
+      <h2 class="section-label">Personal toolkit &middot; Microsoft sign-in required</h2>
       <div class="libraries" id="tools"></div>
+      <button class="tools-toggle" id="toolsToggle" type="button" hidden aria-expanded="false">Show all tools</button>
     </section>
 
     <!-- PODCASTS -->
     <section class="podcasts-wrap">
-      <p class="section-label">Podcasts &middot; latest episodes</p>
+      <h2 class="section-label">Podcasts &middot; latest episodes</h2>
       <div class="podcasts" id="podcasts"></div>
     </section>
 
@@ -1339,6 +1388,7 @@ const CONFIG = {
       name:  "Copilot Center of Excellence",
       desc:  "Release 3.8.22 setup steps, video walkthrough, admin FAQ, and external-sharing addendum",
       href:  "copilot-center-of-excellence/index.html",
+      cta:   "Start adoption work",
       icon:  "hub",
       color: ["#ff6bb5", "#ff3d81"],
       public: true
@@ -1347,6 +1397,7 @@ const CONFIG = {
       name:  "Cowork FinOps",
       desc:  "Quickstart for the Copilot Cowork credit FinOps report, with Power BI templates and screenshots from a real run",
       href:  "cowork-finops/index.html",
+      cta:   "Compare credit spend",
       icon:  "list",
       color: ["#0e7c66", "#4fd8b5"],
       public: true
@@ -1355,6 +1406,7 @@ const CONFIG = {
       name:  "Demos & Artifacts",
       desc:  "Cowork outputs, dashboards, HTML tools",
       href:  "demos-public/index.html",
+      cta:   "Build a demo",
       icon:  "list",
       color: ["#00ffa3", "#00b377"],
       public: true
@@ -1363,6 +1415,7 @@ const CONFIG = {
       name:  "Fieldforge",
       desc:  "Connect existing assets into a public-sector mission, stress-test the plan, and export a synthetic engagement brief.",
       href:  "fieldforge.html",
+      cta:   "Generate engagement brief",
       icon:  "star",
       color: ["#14b8a6", "#0f766e"],
       public: true
@@ -1371,6 +1424,7 @@ const CONFIG = {
       name:  "Games",
       desc:  "Browser games, Copilot Arcade, interactive tools",
       href:  "games-public/index.html",
+      cta:   "Play interactive tools",
       icon:  "games",
       color: ["#00d9ff", "#0099cc"],
       public: true
@@ -1379,6 +1433,7 @@ const CONFIG = {
       name:  "Model Mission Control",
       desc:  "Paste a prompt, compare Scout models, and get a task-specific route with tradeoffs",
       href:  "model-mission-control/index.html?v=20261025-4&platform=scout",
+      cta:   "Compare models",
       icon:  "code",
       color: ["#ff6bb5", "#b11f4b"],
       public: true
@@ -1387,6 +1442,7 @@ const CONFIG = {
       name:  "Prompt Engineering",
       desc:  "Agent specs, prompt libraries, templates",
       href:  "prompt-engineering-public/index.html",
+      cta:   "Explore prompts",
       icon:  "star",
       color: ["#7b61ff", "#a855f7"],
       public: true
@@ -1395,6 +1451,7 @@ const CONFIG = {
       name:  "Scripts & Automation",
       desc:  "PowerShell, Power Automate, PnP flows",
       href:  "scripts-public/index.html?v=packages",
+      cta:   "Run automations",
       icon:  "code",
       color: ["#ff6b35", "#f59e0b"],
       public: true
@@ -1730,8 +1787,16 @@ const startGrid = document.getElementById("startGrid");
 const libsEl = document.getElementById("libs");
 const toolsEl = document.getElementById("tools");
 const resourceSearch = document.getElementById("resourceSearch");
-const resourceFilters = document.getElementById("resourceFilters");
-const RESOURCE_CATEGORIES = [
+const resourceAccessFilters = document.getElementById("resourceAccessFilters");
+const resourceTopicFilters = document.getElementById("resourceTopicFilters");
+const toolsToggle = document.getElementById("toolsToggle");
+const RESOURCE_ACCESS = [
+  { id: "all", label: "All access" },
+  { id: "public", label: "Public" },
+  { id: "internal", label: "Internal" },
+  { id: "private", label: "Private" }
+];
+const RESOURCE_TOPICS = [
   { id: "all", label: "All resources" },
   { id: "adoption", label: "Copilot adoption" },
   { id: "demos", label: "Demos" },
@@ -1739,7 +1804,8 @@ const RESOURCE_CATEGORIES = [
   { id: "governance", label: "Governance" },
   { id: "creative", label: "Creative" }
 ];
-let activeResourceCategory = "all";
+let activeResourceAccess = "all";
+let activeResourceTopic = "all";
 
 function inferResourceTags(item) {
   const text = [
@@ -1763,6 +1829,11 @@ function inferResourceTags(item) {
   if (!tags.length) tags.push(item.public ? "demos" : "adoption");
   return [...new Set(tags)];
 }
+function inferAccessTag(item) {
+  if (item.public) return "public";
+  if (item.privateOnly) return "private";
+  return "internal";
+}
 
 function buildSearchText(item) {
   return [
@@ -1784,6 +1855,7 @@ function buildSearchText(item) {
 function registerResourceCard(card, item) {
   card.classList.add("resource-card");
   card.dataset.tags = inferResourceTags(item).join(" ");
+  card.dataset.access = inferAccessTag(item);
   card.dataset.search = buildSearchText(item);
 }
 
@@ -1792,28 +1864,42 @@ function applyResourceFilters() {
   document.querySelectorAll(".resource-card").forEach(card => {
     const tags = (card.dataset.tags || "").split(/\s+/).filter(Boolean);
     const haystack = card.dataset.search || "";
-    const matchesCategory = activeResourceCategory === "all" || tags.includes(activeResourceCategory);
+    const matchesAccess = activeResourceAccess === "all" || card.dataset.access === activeResourceAccess;
+    const matchesCategory = activeResourceTopic === "all" || tags.includes(activeResourceTopic);
     const matchesQuery = !query || haystack.includes(query);
-    card.hidden = !(matchesCategory && matchesQuery);
+    card.hidden = !(matchesAccess && matchesCategory && matchesQuery);
   });
 }
 
-resourceFilters.innerHTML = RESOURCE_CATEGORIES.map(category => `
+resourceAccessFilters.innerHTML = RESOURCE_ACCESS.map(access => `
   <button
     class="resource-filter"
     type="button"
-    data-filter="${category.id}"
-    aria-pressed="${category.id === "all" ? "true" : "false"}">${category.label}</button>
+    data-filter-group="access"
+    data-filter="${access.id}"
+    aria-pressed="${access.id === "all" ? "true" : "false"}">${access.label}</button>
+`).join("");
+resourceTopicFilters.innerHTML = RESOURCE_TOPICS.map(topic => `
+  <button
+    class="resource-filter"
+    type="button"
+    data-filter-group="topic"
+    data-filter="${topic.id}"
+    aria-pressed="${topic.id === "all" ? "true" : "false"}">${topic.label}</button>
 `).join("");
 
-resourceFilters.addEventListener("click", event => {
-  const button = event.target.closest(".resource-filter");
-  if (!button) return;
-  activeResourceCategory = button.dataset.filter || "all";
-  resourceFilters.querySelectorAll(".resource-filter").forEach(filter => {
-    filter.setAttribute("aria-pressed", String(filter === button));
+[resourceAccessFilters, resourceTopicFilters].forEach(filterRoot => {
+  filterRoot.addEventListener("click", event => {
+    const button = event.target.closest(".resource-filter");
+    if (!button) return;
+    const group = button.dataset.filterGroup;
+    if (group === "access") activeResourceAccess = button.dataset.filter || "all";
+    if (group === "topic") activeResourceTopic = button.dataset.filter || "all";
+    filterRoot.querySelectorAll(".resource-filter").forEach(filter => {
+      filter.setAttribute("aria-pressed", String(filter === button));
+    });
+    applyResourceFilters();
   });
-  applyResourceFilters();
 });
 
 resourceSearch.addEventListener("input", applyResourceFilters);
@@ -1830,7 +1916,7 @@ CONFIG.libraries.forEach(lib => {
     </div>
     <div class="lib-name">${lib.name}</div>
     <div class="lib-desc">${lib.desc}</div>
-    <div class="lib-cta">${lib.cta || "Open public page"} ${ICONS.arrow}</div>
+    <div class="lib-cta">${lib.cta || "Explore resource"} ${ICONS.arrow}</div>
   `;
   registerResourceCard(a, lib);
   libsEl.appendChild(a);
@@ -1838,16 +1924,11 @@ CONFIG.libraries.forEach(lib => {
 
 // ── RENDER: tools / quick access ────────────────────────────
 (CONFIG.tools || []).forEach(t => {
-  const card = document.createElement(t.groupItems ? "div" : "a");
+  const card = document.createElement("div");
   card.className = `lib${t.groupItems ? " lib-collection" : ""}`;
-  if (!t.groupItems) {
-    card.href = t.href;
-    card.target = "_blank";
-    card.rel = "noopener";
-  }
   const accessLabel = t.public ? "Public" : `${ICONS.lock} ${t.privateOnly ? "Private" : "Internal"}`;
   const accessTip = t.public ? "" : t.privateOnly ? "Only the owner's Microsoft sign-in works" : "Microsoft sign-in required";
-  const primaryActionLabel = t.public ? "Open public page" : (t.privateOnly ? "Owner access only" : "Microsoft sign-in required");
+  const primaryActionLabel = t.primaryAction || (t.public ? "Open public page" : (t.privateOnly ? "Owner access only" : "Microsoft sign-in required"));
   card.innerHTML = `
     <div class="lib-access-badge ${t.public ? "public" : "gated"}"${accessTip ? ` title="${accessTip}"` : ""}>${accessLabel}</div>
     <div class="lib-icon" style="background: linear-gradient(135deg, ${t.color[0]}, ${t.color[1]});">
@@ -1868,33 +1949,39 @@ CONFIG.libraries.forEach(lib => {
           </section>
         `).join("")}
       </div>
-    ` : `<div class="lib-cta">${primaryActionLabel} ${ICONS.arrow}</div>`}
+    ` : `<a class="lib-cta lib-primary-link" href="${t.href}" target="_blank" rel="noopener">${primaryActionLabel} ${ICONS.arrow}</a>`}
     ${[
       ...(t.actions || []),
       ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
-    ].map((action, index) => `<span class="lib-download" role="link" tabindex="0" data-action-index="${index}"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</span>`).join("")}
+    ].map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener"${t.note ? ` title="${t.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</a>`).join("")}
   `;
   registerResourceCard(card, t);
-  if (!t.groupItems) {
-  // The card itself is an anchor, so nested actions are spans that open their own URLs.
-  const actions = [
-    ...(t.actions || []),
-    ...(t.downloadHref ? [{ label: t.downloadLabel || "Download a copy", href: t.downloadHref }] : [])
-  ];
-  card.querySelectorAll(".lib-download").forEach(dl => {
-    const action = actions[Number(dl.dataset.actionIndex)];
-    const go = event => {
-      event.preventDefault();
-      event.stopPropagation();
-      window.open(action.href, "_blank", "noopener");
-    };
-    dl.addEventListener("click", go);
-    dl.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") go(e); });
-  });
-  }
   toolsEl.appendChild(card);
 });
 applyResourceFilters();
+
+function refreshToolsCollapse() {
+  const mobile = matchMedia("(max-width: 560px)").matches;
+  if (!mobile) {
+    toolsEl.classList.remove("collapsed");
+    toolsToggle.hidden = true;
+    toolsToggle.setAttribute("aria-expanded", "true");
+    toolsToggle.textContent = "Show all tools";
+    return;
+  }
+  toolsToggle.hidden = false;
+  if (!toolsToggle.dataset.state) toolsToggle.dataset.state = "collapsed";
+  const collapsed = toolsToggle.dataset.state === "collapsed";
+  toolsEl.classList.toggle("collapsed", collapsed);
+  toolsToggle.textContent = collapsed ? "Show all tools" : "Show fewer tools";
+  toolsToggle.setAttribute("aria-expanded", String(!collapsed));
+}
+toolsToggle.addEventListener("click", () => {
+  toolsToggle.dataset.state = toolsToggle.dataset.state === "collapsed" ? "expanded" : "collapsed";
+  refreshToolsCollapse();
+});
+addEventListener("resize", refreshToolsCollapse, { passive: true });
+refreshToolsCollapse();
 
 // ── RENDER: podcasts ────────────────────────────────────────
 const podEl = document.getElementById("podcasts");
