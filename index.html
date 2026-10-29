@@ -766,6 +766,17 @@
     color: #041016;
     border-color: transparent;
   }
+  .resource-scope-note {
+    font-size: 11px;
+    color: var(--t2);
+    line-height: 1.4;
+  }
+  .resource-filter-status {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--t2);
+    line-height: 1.4;
+  }
   .start-wrap,
   .toolkit-entry-wrap {
     padding: 2px 32px 16px;
@@ -813,22 +824,15 @@
   .toolkit-entry-copy {
     font-size: 12px;
     color: var(--t2);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     max-width: 760px;
   }
-  .toolkit-entry-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    text-decoration: none;
-    background: linear-gradient(135deg, var(--c1), var(--c2));
-    color: #041016;
-    border-radius: 999px;
-    padding: 8px 12px;
+  .toolkit-entry-points {
+    margin-left: 16px;
+    color: var(--t2);
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.03em;
-    text-transform: uppercase;
+    line-height: 1.5;
+    max-width: 760px;
   }
   [data-hub-mode="workspace"] .toolkit-entry-wrap { display: none; }
   [data-hub-mode="visitor"] .tools-wrap { display: none; }
@@ -1200,7 +1204,7 @@
         </div>
       </div>
       <div class="nav-right">
-        <button class="mode-switch" id="modeBtn" type="button" aria-pressed="false">My workspace</button>
+        <button class="mode-switch" id="modeBtn" type="button" aria-pressed="false">Switch to workspace view</button>
         <div class="music" id="music">
           <button class="play" id="playBtn" aria-label="Play / Pause">
             <svg id="playIcon" width="10" height="10" viewBox="0 0 10 10" fill="#000"><path d="M2 1 L9 5 L2 9 Z"/></svg>
@@ -1234,9 +1238,9 @@
           <span class="path-title">Explore public work</span>
           <span class="path-desc">Browse public projects for Copilot adoption, demos, automation, and governance.</span>
         </a>
-        <a class="pathcard" href="#toolkit-entry">
+        <a class="pathcard" href="#toolkit">
           <span class="path-title">Open my toolkit</span>
-          <span class="path-desc">Launch the private workspace entry point for Microsoft sign-in protected tools.</span>
+          <span class="path-desc">Jump to Microsoft sign-in protected tools and internal workflows.</span>
         </a>
       </div>
       <div class="backdrop-controls">
@@ -1271,17 +1275,19 @@
             <div class="resource-filters" id="resourceTopicFilters"></div>
           </div>
         </div>
+        <p class="resource-scope-note">Search and filters apply to library + toolkit cards (not podcast cards).</p>
+        <p class="resource-filter-status" id="resourceFilterStatus" aria-live="polite"></p>
       </div>
     </section>
 
     <section class="toolkit-entry-wrap" id="toolkit-entry">
       <div class="toolkit-entry-panel">
-        <p class="section-label">Personal toolkit entry</p>
-        <p class="toolkit-entry-copy">Owner-only and internal inventory stays off the public landing page. Use this single entry point to open the authenticated personal workspace.</p>
-        <a class="toolkit-entry-link" id="toolkitEntryLink" target="_blank" rel="noopener">
-          Open personal toolkit
-          <span aria-hidden="true">→</span>
-        </a>
+        <p class="section-label">Toolkit access notes</p>
+        <p class="toolkit-entry-copy">Toolkit cards below require Microsoft sign-in. Private cards are owner-only and may show limited access outside that account.</p>
+        <ul class="toolkit-entry-points">
+          <li>Use <strong>Open my toolkit</strong> above for the fastest path to internal tools.</li>
+          <li>Access labels on each card show <strong>Public</strong>, <strong>Internal</strong>, or <strong>Private</strong>.</li>
+        </ul>
       </div>
     </section>
 
@@ -1308,7 +1314,7 @@
       <div class="dots" id="dots" hidden></div>
     </div>
 
-    <footer class="footer" id="backgroundCredit">Volatility Noir &middot; Built with GPT-6 Astra &middot; Silent generative background &middot; Anonymous traffic measured with Microsoft Clarity</footer>
+    <footer class="footer" id="backgroundCredit">Background: Volatility Noir (built with GPT-6 Astra) · Analytics: Microsoft Clarity (anonymous traffic)</footer>
   </div>
 
   <!-- GENRE MODAL -->
@@ -1628,8 +1634,6 @@ document.getElementById("navName").textContent = CONFIG.owner.name;
 document.getElementById("heroOwnerLine").textContent = "Personal environment by " + CONFIG.owner.name;
 document.getElementById("heroHeadline").textContent = CONFIG.owner.heroHeadline;
 document.getElementById("tagline").textContent = CONFIG.owner.heroTagline;
-document.getElementById("toolkitEntryLink").href = CONFIG.toolkitEntry.href;
-
 const modeBtn = document.getElementById("modeBtn");
 const modeParam = new URLSearchParams(location.search).get("workspace");
 const savedHubMode = localStorage.getItem("dsc-hub-mode");
@@ -1637,7 +1641,7 @@ let hubMode = modeParam === "1" ? "workspace" : modeParam === "0" ? "visitor" : 
 function applyHubMode(mode, persist = true) {
   hubMode = mode === "workspace" ? "workspace" : "visitor";
   root.setAttribute("data-hub-mode", hubMode);
-  modeBtn.textContent = hubMode === "workspace" ? "Visitor mode" : "My workspace";
+  modeBtn.textContent = hubMode === "workspace" ? "Switch to public view" : "Switch to workspace view";
   modeBtn.setAttribute("aria-pressed", String(hubMode === "workspace"));
   if (persist) localStorage.setItem("dsc-hub-mode", hubMode);
 }
@@ -1663,6 +1667,7 @@ const toolsEl = document.getElementById("tools");
 const resourceSearch = document.getElementById("resourceSearch");
 const resourceAccessFilters = document.getElementById("resourceAccessFilters");
 const resourceTopicFilters = document.getElementById("resourceTopicFilters");
+const resourceFilterStatus = document.getElementById("resourceFilterStatus");
 const toolsToggle = document.getElementById("toolsToggle");
 const RESOURCE_ACCESS = [
   { id: "all", label: "All access" },
@@ -1735,14 +1740,31 @@ function registerResourceCard(card, item) {
 
 function applyResourceFilters() {
   const query = (resourceSearch.value || "").trim().toLowerCase();
-  document.querySelectorAll(".resource-card").forEach(card => {
+  const cards = [...document.querySelectorAll(".resource-card")];
+  let visibleCount = 0;
+  cards.forEach(card => {
     const tags = (card.dataset.tags || "").split(/\s+/).filter(Boolean);
     const haystack = card.dataset.search || "";
     const matchesAccess = activeResourceAccess === "all" || card.dataset.access === activeResourceAccess;
     const matchesCategory = activeResourceTopic === "all" || tags.includes(activeResourceTopic);
     const matchesQuery = !query || haystack.includes(query);
-    card.hidden = !(matchesAccess && matchesCategory && matchesQuery);
+    const isVisible = matchesAccess && matchesCategory && matchesQuery;
+    card.hidden = !isVisible;
+    if (isVisible) visibleCount += 1;
   });
+  if (!resourceFilterStatus) return;
+  if (!cards.length) {
+    resourceFilterStatus.textContent = "";
+    return;
+  }
+  if (!visibleCount) {
+    resourceFilterStatus.textContent = "No resources match the current filters.";
+    return;
+  }
+  const accessLabel = (RESOURCE_ACCESS.find(access => access.id === activeResourceAccess) || RESOURCE_ACCESS[0]).label;
+  const topicLabel = (RESOURCE_TOPICS.find(topic => topic.id === activeResourceTopic) || RESOURCE_TOPICS[0]).label;
+  const searchLabel = query ? ` · Search: "${query}"` : "";
+  resourceFilterStatus.textContent = `Showing ${visibleCount} of ${cards.length} resources · ${accessLabel} · ${topicLabel}${searchLabel}`;
 }
 
 resourceAccessFilters.innerHTML = RESOURCE_ACCESS.map(access => `
@@ -2019,9 +2041,9 @@ function syncArtworkBackground() {
 }
 function updateArtworkCredit() {
   const item = artworks[artworkIndex];
-  backgroundCredit.textContent = (photosActive ? "Photos via Unsplash"
-    : item.name + " / " + item.credit + " / Silent generative background")
-    + " / Anonymous traffic measured with Microsoft Clarity";
+  backgroundCredit.textContent = photosActive
+    ? "Background: photos via Unsplash · Analytics: Microsoft Clarity (anonymous traffic)"
+    : "Background: " + item.name + " (" + item.credit + ") · Analytics: Microsoft Clarity (anonymous traffic)";
 }
 function syncArtworkTimer() {
   const held = artworkPaused || photosActive || document.hidden || motionPreference.matches || !artworkReady;
