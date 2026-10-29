@@ -105,4 +105,8 @@ the schedule.
 - **Site Deployment Rollback / Disaster Recovery:**
   - Revert latest commit and redeploy Pages: `git revert --no-edit HEAD && git push origin main`
   - Verify live deployment and negative check on private paths: `powershell.exe -NoProfile -NonInteractive -File .\scripts\Verify-PhRelease.ps1`
+- **Public-Repository Secret Scan Disposition (2026-10-29):**
+  - `david-hub-cowork-prompt.md` (Pexels API key): Explicitly accepted design choice per owner disposition (2026-09-08); not used by live `index.html`.
+  - `model-mission-control-api/test/foundry.test.js` (`"managed-identity-token"`) & `scripts/tests/test_podcast_artifact.py` (`"test-only-not-a-real-token"`): Synthetic unit-test mock strings, not real credentials.
+
 

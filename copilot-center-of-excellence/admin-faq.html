@@ -392,7 +392,7 @@
           <div><span class="release-label">Implementation release asset</span><span class="release-value"><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip">Copilot-CoE-Implementation-Kit.zip</a></span></div>
         </div>
         <p class="integrity-note">Download the named implementation ZIP asset and its <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip.sha256">SHA256 receipt</a>. GitHub-generated source archives are not substitutes. Keep the receipt with the package.</p>
-        <p class="integrity-note"><strong>Cloud support:</strong> validated in commercial tenants only for this release. GCC Moderate is a design target but has not yet been validated; GCC High and DoD are not supported. See <a href="#faq-013-which-microsoft-365-environments-are-supported">Question 13</a>.</p>
+        <p class="integrity-note"><strong>Cloud support:</strong> Commercial and GCC Moderate tenants are supported (GCC High and DoD are unsupported). Release 3.8.21 completed end-to-end validation in both commercial and GCC Moderate; release 3.8.22 has partial GCC Moderate evidence (an internal fresh install and first checker run passed 268 checks with two WARNs, while the update, second checker, and manual WARN review are not independently evidenced). Repeat acceptance in each customer tenant. See <a href="#faq-013-which-microsoft-365-environments-are-supported">Question 13</a>.</p>
       </section>
     </div>
   </header>
@@ -564,7 +564,7 @@ if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
           <span>Which Microsoft 365 environments are supported?</span>
           <span class="tag">Environment &amp; prerequisites</span>
         </summary>
-        <div class="answer"><p>The scripts are designed for commercial and GCC Moderate tenants. This release has not been validated in a GCC Moderate tenant. GCC High and DoD are not supported.</p>
+        <div class="answer"><p>The scripts support commercial and GCC Moderate tenants. Release 3.8.21 completed end-to-end validation in commercial and GCC Moderate (270 automated checks passed and two documented manual-review warnings). Release 3.8.22 has partial GCC Moderate evidence&mdash;an internal fresh install and first checker passed 268 checks with two WARNs, while the update, second checker, and manual WARN review are not independently evidenced. Repeat full acceptance in each customer tenant. GCC High and DoD are not supported.</p>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>

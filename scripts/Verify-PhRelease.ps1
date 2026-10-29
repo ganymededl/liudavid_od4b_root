@@ -110,8 +110,18 @@ $publicUrlChecks = foreach ($rel in $publicPaths) {
 $vaultUrl = "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html"
 $vaultStatus = [int](& curl.exe -sS -L -o NUL -w "%{http_code}" $vaultUrl)
 
-# 5. Live homepage contract check
+# 5. Live homepage & Copilot CoE v3.8.22 parity/body contract check
 $liveHtml = (Invoke-WebRequest -Uri "$BaseUrl/?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+$coeIndexHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/index.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+$coeFaqHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/admin-faq.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+$coeGovHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/government-install.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+
+$stageFaq = "C:\Scout_Output\Hub-Guide-Parity-Stage\copilot-center-of-excellence\admin-faq.html"
+$cpFaq = "C:\Users\liudavid\OneDrive - Microsoft\CoworkPublic\DemosPublic\Personal Hub Page\liudavid_od4b_root\copilot-center-of-excellence\admin-faq.html"
+$ghFaq = Join-Path $RepoRoot "copilot-center-of-excellence\admin-faq.html"
+$coeParityMatch = ((Get-FileHash -LiteralPath $ghFaq).Hash -eq (Get-FileHash -LiteralPath $stageFaq).Hash) -and
+                  ((Get-FileHash -LiteralPath $ghFaq).Hash -eq (Get-FileHash -LiteralPath $cpFaq).Hash)
+
 $contractChecks = [pscustomobject]@{
     defaultAnalyticsDenied = ($liveHtml -match 'let consent = "denied"')
     hasUnloadClarity       = ($liveHtml -match 'function unloadClarity\(\)')
@@ -120,6 +130,9 @@ $contractChecks = [pscustomobject]@{
     hasCollapsiblePodcasts = ($liveHtml -match 'id="podcastsDetails"')
     hasFeaturedBadges      = ($liveHtml -match 'lib-featured-badge')
     hasCloudEnvBadges      = ($liveHtml -match 'lib-env-badge')
+    coeLiveHas3822Hash     = ($coeFaqHtml -match 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F') -and ($coeIndexHtml -match '3\.8\.22')
+    coeHarmonizedGcc       = ($coeFaqHtml -match 'partial GCC Moderate evidence') -and ($coeGovHtml -match 'Release 3\.8\.22: an internal fresh install and first checker passed 268 checks')
+    coeStagePublicParity   = $coeParityMatch
 }
 
 $allPassed = (-not $privateDirInRepo) -and
@@ -133,7 +146,10 @@ $allPassed = (-not $privateDirInRepo) -and
              $contractChecks.hasWideLibraryGrid -and
              $contractChecks.hasCollapsiblePodcasts -and
              $contractChecks.hasFeaturedBadges -and
-             $contractChecks.hasCloudEnvBadges
+             $contractChecks.hasCloudEnvBadges -and
+             $contractChecks.coeLiveHas3822Hash -and
+             $contractChecks.coeHarmonizedGcc -and
+             $contractChecks.coeStagePublicParity
 
 $bundle = [pscustomobject]@{
     verifiedAt         = (Get-Date).ToString("o")
