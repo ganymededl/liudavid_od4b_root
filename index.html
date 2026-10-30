@@ -1355,14 +1355,14 @@
 
     <section class="resource-controls-wrap" aria-label="Search and filter resources">
       <div class="resource-controls">
-        <h2 class="section-label">Search public resources</h2>
-        <label class="sr-only" for="resourceSearch">Search public resources</label>
+        <h2 class="section-label">Search resources</h2>
+        <label class="sr-only" for="resourceSearch">Search resources</label>
         <input
           class="resource-search"
           id="resourceSearch"
           type="search"
           autocomplete="off"
-          placeholder="Search public resources" />
+          placeholder="Search resources" />
         <div class="resource-filter-groups">
           <div class="resource-filter-group">
             <span class="resource-filter-label">Category</span>
@@ -1370,15 +1370,20 @@
             <button class="resource-filter" id="resourceFiltersReset" type="button" hidden>Clear filters</button>
           </div>
         </div>
-        <p class="resource-scope-note">Search and filters apply to the public resource library below.</p>
+        <p class="resource-scope-note">Search and filters apply to the resource libraries below.</p>
         <p class="resource-filter-status" id="resourceFilterStatus" aria-live="polite"></p>
       </div>
     </section>
 
     <!-- LIBRARIES -->
     <section class="libraries-wrap" id="public-library">
-      <h2 class="section-label">Browse all public resources</h2>
+      <h2 class="section-label">Browse public resources</h2>
       <div class="libraries" id="libs"></div>
+    </section>
+
+    <section class="libraries-wrap" id="internal-library">
+      <h2 class="section-label">Microsoft and private resources</h2>
+      <div class="libraries" id="tools"></div>
     </section>
 
     <!-- PODCASTS -->
@@ -1568,6 +1573,142 @@ const CONFIG = {
       env:   "Commercial + GCC-Mod",
       featured: true,
       public: true
+    }
+  ],
+  tools: [
+    {
+      name:  "Build Ledger",
+      desc:  "Dedicated artifact ledger with filters across Scout, Cowork, and Copilot outputs — Microsoft sign-in required.",
+      href:  "https://onedrive.cloud.microsoft/:u:/a@xu96zg3b/r/_layouts/15/onedrive.aspx?id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2Fbuild%2Dledger%2Ehtml&parent=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&share=cQqjWVapm5ByQ7xPM8pYIZgJEgUC%5Fbn6pxnp0P7IsgTuF0iokQ",
+      cta:   "Open build ledger",
+      icon:  "list",
+      color: ["#00d9ff", "#00ffa3"],
+      env:   "Microsoft sign-in required"
+    },
+    {
+      name:  "Copilot Q&A Hub",
+      desc:  "Search answered Q&A. The editable catalog is listed first; use the read-only hub to browse.",
+      icon:  "list",
+      color: ["#7b61ff", "#00d9ff"],
+      env:   "Commercial + GCC-Mod",
+      groupItems: [
+        {
+          name: "Editable Catalog",
+          desc: "Search answers and save Hide / Restore changes to Dataverse.",
+          href: "https://apps.powerapps.com/play/e/082fa88c-b03e-ef7d-b3d6-4ac681662603/a/7b52a126-a6d2-495a-ba75-5f9cde750c6b?tenantId=72f988bf-86f1-41af-91ab-2d7cd011db47",
+          cta: "Open editable catalog"
+        },
+        {
+          name: "Read-only Hub",
+          desc: "Browse answered Q&A across Copilot Teams channels and chats (Commercial + GCC).",
+          href: "https://onedrive.cloud.microsoft/my?viewid=d2d242d5%2Ded2d%2D46ef%2Db5a3%2Dd3339deee25e&id=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FMicrosoft%2DCopilot%2DQA%2DHub%2Ehtml&parent=%2Fa%40xu96zg3b%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot&routeid=a%40xu96zg3b&share=cQrYFZsSlCcuSKQqeALzfE52EgUCZGGSegg0wNJkxahsZBJrgA",
+          cta: "Open read-only hub"
+        }
+      ]
+    },
+    {
+      name:  "DemoIQ Backdated · Config Builder",
+      desc:  "Customer demos from the SLED use-case library, seeded before the demo date.",
+      note:  "Opening in OneDrive's viewer blocks downloads. Use Download setup to install and run locally.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/DemoIQ-Config-Builder.html",
+      cta:   "Open config builder",
+      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FDemoIQ%2DBackdated%2DSetup%2Ezip",
+      downloadLabel: "Download setup (skill + builder)",
+      icon:  "star",
+      color: ["#14b8a6", "#f59e0b"],
+      env:   "MSFT only"
+    },
+    {
+      name:  "NL Studios",
+      desc:  "Newsletter builder with SLED CSU house rules and preflight checks.",
+      note:  "OneDrive preview blocks save/download in-browser. Use Download a copy for full functionality.",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/NL-Studio.html",
+      cta:   "Open NL Studios",
+      downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FCoworkPublic%2FDemosPublic%2FPersonal%20Hub%20Page%2Fliudavid%5Fod4b%5Froot%2FNL%2DStudio%2Ehtml",
+      downloadLabel: "Download a copy",
+      icon:  "list",
+      color: ["#0078d4", "#7b61ff"],
+      env:   "MSFT only"
+    },
+    {
+      name:  "Purview Controls",
+      desc:  "Two Microsoft sign-in guides: Copilot & Cowork controls and Agent controls.",
+      icon:  "lock",
+      color: ["#0078d4", "#b11f4b"],
+      env:   "MSFT only",
+      groupItems: [
+        {
+          name: "Copilot & Cowork Controls",
+          desc: "11 guide cards for eDiscovery, Audit, DLP, Communication Compliance, Insider Risk, retention, and labels.",
+          href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQopq53KQHgwT4dGkVTy7cFOEgUCPbXeA7FOpWexAQbfYxcUVQ",
+          cta: "Open Copilot & Cowork guide",
+          actions: [
+            {
+              label: "Video walkthroughs",
+              href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQraeAxX8NTxSJ3DZvaI0RYOEgUC-bYsowaXDalDzL_pDDZrCQ"
+            },
+            {
+              label: "PDF",
+              href: "https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQqYy0WigY7WQ6k6fOabiJc2EgUCL0IWO-HFTmTkEQFPf5yQdA"
+            }
+          ]
+        },
+        {
+          name: "Agents Controls",
+          desc: "11 agent-specific control cards with roles, click paths, wait times, and result checks.",
+          href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQoy23ccartCQay4i09vMvHuEgUCAjpGOd7RomvPa0joNLrKFQ",
+          cta: "Open Agents guide",
+          actions: [
+            {
+              label: "Video walkthroughs",
+              href: "https://microsoft-my.sharepoint.com/:u:/p/liudavid/cQoezS9q4_IAQYQfQOWw_qENEgUCLLtQELX9AiYqxRNFlnjmSQ"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name:  "Utilities",
+      desc:  "Installable Windows utilities (Extract Transcript and Relabel Downloads).",
+      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/CoworkPublic/DemosPublic/Personal%20Hub%20Page/liudavid_od4b_root/useful-utilities.html",
+      cta:   "Open utilities",
+      icon:  "code",
+      color: ["#ff6b35", "#7b61ff"],
+      env:   "MSFT only"
+    },
+    {
+      name:  "liudavid's Personal Vault",
+      desc:  "Private resources that only work with David's own sign-in.",
+      icon:  "lock",
+      color: ["#b11f4b", "#f59e0b"],
+      env:   "David only",
+      privateOnly: true,
+      groupItems: [
+        {
+          name: "Open Personal Vault",
+          desc: "Private visitor analytics and Scout automation controls.",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html",
+          cta: "Open Personal Vault"
+        },
+        {
+          name: "GCC Copilot Parity Tracker",
+          desc: "Commercial feature differences, parity dates, exclusions, evidence links, and open GCC field questions.",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/gcc-copilot-parity-tracker.html",
+          cta: "Open GCC parity tracker"
+        },
+        {
+          name: "Copilot VBD Catalog",
+          desc: "Compare service variants, catalog prices, and estimated billable hours.",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/copilot-workshops-billable-hours.html",
+          cta: "Open VBD catalog"
+        },
+        {
+          name: "CW Skills",
+          desc: "Private guide to Copilot skills with readiness notes and trial prompts.",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/Skills/README.html",
+          cta: "Open CW Skills"
+        }
+      ]
     }
   ],
   startHere: [
@@ -1838,7 +1979,7 @@ function applyResourceFilters() {
   }
   const topicLabel = (RESOURCE_TOPICS.find(topic => topic.id === activeResourceTopic) || RESOURCE_TOPICS[0]).label;
   const searchLabel = query ? ` · Search: "${query}"` : "";
-  resourceFilterStatus.textContent = `Showing ${visibleCount} of ${cards.length} public resources · ${topicLabel}${searchLabel}`;
+  resourceFilterStatus.textContent = `Showing ${visibleCount} of ${cards.length} resources · ${topicLabel}${searchLabel}`;
 }
 
 resourceTopicFilters.innerHTML = RESOURCE_TOPICS.map(topic => `
@@ -1890,6 +2031,66 @@ CONFIG.libraries.forEach(lib => {
   `;
   registerResourceCard(a, lib);
   libsEl.appendChild(a);
+});
+
+const toolsEl = document.getElementById("tools");
+(CONFIG.tools || []).forEach(tool => {
+  const card = document.createElement(tool.groupItems ? "div" : "a");
+  card.className = `lib${tool.groupItems ? " lib-collection" : ""}`;
+  if (!tool.groupItems) {
+    card.href = tool.href;
+    card.target = "_blank";
+    card.rel = "noopener";
+  }
+  const accessLabel = tool.public ? "Public" : `${ICONS.lock} ${tool.privateOnly ? "Private" : "Internal"}`;
+  const accessTip = tool.public ? "" : tool.privateOnly ? "Only David's Microsoft sign-in works" : "Microsoft sign-in required";
+  card.innerHTML = `
+    <div class="lib-access-badge ${tool.public ? "public" : "gated"}"${accessTip ? ` title="${accessTip}"` : ""}>${accessLabel}</div>
+    ${tool.env ? `<div class="lib-badges"><span class="lib-env-badge">${tool.env}</span></div>` : ""}
+    <div class="lib-icon" style="background: linear-gradient(135deg, ${tool.color[0]}, ${tool.color[1]});">
+      ${ICONS[tool.icon] || ICONS.list}
+    </div>
+    <div class="lib-name">${tool.name}</div>
+    <div class="lib-desc">${tool.desc}</div>
+    ${tool.groupItems ? `
+      <div class="lib-group-items">
+        ${tool.groupItems.map(item => `
+          <section class="lib-group-item">
+            <div class="lib-group-item-name">${item.name}</div>
+            <div class="lib-group-item-desc">${item.desc}</div>
+            <div class="lib-group-links">
+              <a class="lib-download" href="${item.href}" target="_blank" rel="noopener">${item.cta || "Open"} ${ICONS.arrow}</a>
+              ${(item.actions || []).map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener">${action.label}</a>`).join("")}
+            </div>
+          </section>
+        `).join("")}
+      </div>
+    ` : `<div class="lib-cta">${tool.cta || "Open"} ${ICONS.arrow}</div>`}
+    ${[
+      ...(tool.actions || []),
+      ...(tool.downloadHref ? [{ label: tool.downloadLabel || "Download a copy", href: tool.downloadHref }] : [])
+    ].map((action, index) => `<span class="lib-download" role="link" tabindex="0" data-action-index="${index}"${tool.note ? ` title="${tool.note.replace(/"/g, "&quot;")}"` : ""}>${action.label}</span>`).join("")}
+  `;
+  if (!tool.groupItems) {
+    const actions = [
+      ...(tool.actions || []),
+      ...(tool.downloadHref ? [{ label: tool.downloadLabel || "Download a copy", href: tool.downloadHref }] : [])
+    ];
+    card.querySelectorAll(".lib-download").forEach(downloadLink => {
+      const action = actions[Number(downloadLink.dataset.actionIndex)];
+      const openAction = event => {
+        event.preventDefault();
+        event.stopPropagation();
+        window.open(action.href, "_blank", "noopener");
+      };
+      downloadLink.addEventListener("click", openAction);
+      downloadLink.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") openAction(event);
+      });
+    });
+  }
+  registerResourceCard(card, tool);
+  toolsEl.appendChild(card);
 });
 
 applyResourceFilters();
