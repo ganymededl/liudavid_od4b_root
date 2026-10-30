@@ -40,6 +40,7 @@ h1 { font-size: 26px; margin: 0; }
 .tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--cp-border); color: var(--cp-text-muted); background: var(--cp-surface); }
 .tag.audience { color: var(--cp-accent); border-color: var(--cp-accent); background: var(--cp-accent-soft); font-weight: 600; text-decoration: none; }
 .tag.audience:hover { background: var(--cp-accent); color: var(--cp-accent-fg); }
+.tag-btn { font: inherit; cursor: pointer; }
 .hub-back { display: inline-block; margin-bottom: 10px; padding: 5px 10px; border: 1px solid var(--cp-accent); border-radius: 999px; color: var(--cp-accent); background: var(--cp-accent-soft); text-decoration: none; font-size: 12px; font-weight: 600; }
 .hub-back:hover { background: var(--cp-accent); color: var(--cp-accent-fg); }
 .btn { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 0.625rem; border: 1px solid var(--cp-border-strong); background: var(--cp-surface); color: var(--cp-text); cursor: pointer; }
@@ -169,7 +170,7 @@ ul.links li { margin: 0 0 8px; }
       <h1>Protect sensitive information when people use Copilot and Cowork</h1>
       <p class="sub">See which Microsoft Purview controls can detect risky prompts, preserve conversations, support investigations, and limit how sensitive content is used. Start with the question you need to answer.</p>
     </div>
-    <div class="btns noprint"><a class="tag" href="index.html#home">Public guide</a> <a class="tag audience" href="#medical-centers">Medical Centers</a> <span class="tag">Video links require Microsoft sign-in</span> <a class="btn" href="agents.html">Open Agents Governance</a> <a class="btn" id="pdfAll" href="copilot-cowork-purview-quick-guide.pdf">Open PDF</a></div>
+    <div class="btns noprint"><a class="tag" href="index.html#home">Public guide</a> <a class="tag audience" href="#medical-centers">Medical Centers</a> <button class="tag tag-btn" id="openVideoWalkthroughs" type="button">Open video walkthroughs</button> <a class="btn" href="agents.html">Open Agents Governance</a> <a class="btn" id="pdfAll" href="copilot-cowork-purview-quick-guide.pdf">Open PDF</a></div>
   </header>
 
 
@@ -518,6 +519,23 @@ document.getElementById("medical-back").addEventListener("click", home);
 function zoom(src) { const lb = document.getElementById("lb"); lb.querySelector("img").src = src; lb.classList.add("on"); }
 document.getElementById("lb").addEventListener("click", e => e.currentTarget.classList.remove("on"));
 document.addEventListener("keydown", e => { if (e.key === "Escape") { document.getElementById("lb").classList.remove("on"); } });
+
+const openVideoWalkthroughsBtn = document.getElementById("openVideoWalkthroughs");
+if (openVideoWalkthroughsBtn) {
+  openVideoWalkthroughsBtn.addEventListener("click", () => {
+    show("ediscovery");
+    requestAnimationFrame(() => {
+      const evidenceDisclosure = [...document.querySelectorAll("#d-ediscovery details.disclosure")]
+        .find(d => (d.querySelector("summary")?.textContent || "").includes("See test evidence"));
+      if (evidenceDisclosure) evidenceDisclosure.open = true;
+      const videoLink = document.querySelector("#d-ediscovery .video-link");
+      if (videoLink) {
+        videoLink.focus();
+        videoLink.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+  });
+}
 
 const h = (location.hash || "").slice(1);
 if (h === "print-all") { document.body.classList.add("print-all"); document.querySelectorAll("img[loading]").forEach(i => i.removeAttribute("loading")); }
