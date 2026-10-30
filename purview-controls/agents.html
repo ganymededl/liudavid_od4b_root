@@ -25,6 +25,8 @@ header.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; j
 h1 { font-size: 26px; margin: 0; }
 .sub { color: var(--cp-text-muted); margin: 4px 0 0; }
 .tag { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--cp-border); color: var(--cp-text-muted); background: var(--cp-surface); }
+.hub-back { display:inline-block; margin-bottom:10px; padding:5px 10px; border:1px solid var(--cp-accent); border-radius:999px; color:var(--cp-accent); background:var(--cp-accent-soft); text-decoration:none; font-size:12px; font-weight:600; }
+.hub-back:hover { background:var(--cp-accent); color:var(--cp-accent-fg); }
 .btn { font: inherit; font-size: 14px; padding: 7px 14px; border-radius: 0.625rem; border: 1px solid var(--cp-border-strong); background: var(--cp-surface); color: var(--cp-text); cursor: pointer; }
 .btn:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
 .btn.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
@@ -129,8 +131,8 @@ ul.links li { margin: 0 0 8px; }
 
 .video-url { display:block; width:100%; max-width:100%; min-height:72px; margin-top:8px; padding:8px; font:12px Consolas,"Courier New",monospace; color:var(--cp-text); background:var(--cp-surface); border:1px solid var(--cp-border); border-radius:0.625rem; resize:vertical; }
 .vid { display:block; }
-</style></head><body><div class="wrap"><header class="top"><div><h1>Agents – Purview controls quick guide</h1><p class="sub">What to turn on, who can do it, where to click, what to expect, and what still needs proof. Public guidance checked 8 Oct 2026; no live agent validation claimed.</p></div>
-      <div class="btns noprint"><span class="tag">Public guide</span> <button class="btn" id="print-all" type="button" onclick="document.body.classList.add('print-all'); window.print();">Print or save as PDF</button></div></header>
+</style></head><body><div class="wrap"><a class="hub-back noprint" href="../index.html">&larr; Back to main hub</a><header class="top"><div><h1>Agents – Purview controls quick guide</h1><p class="sub">What to turn on, who can do it, where to click, what to expect, and what still needs proof. Public guidance checked 8 Oct 2026; no live agent validation claimed.</p></div>
+      <div class="btns noprint"><a class="tag" href="index.html#home">Public guide</a> <button class="btn" id="print-all" type="button" onclick="document.body.classList.add('print-all'); window.print();">Print or save as PDF</button></div></header>
       <div class="modebar noprint" id="modebar">Same numbered control-card format as the CP/CW guide. Videos: public-guidance reconstructions, not live recordings.</div>
       <p class="static-only">Scripts unavailable: the full eleven-card guide is readable below. Video captions/transcripts and procedures remain available as static content.</p>
       <section id="home"><div class="intro"><section class="panel"><h2>How to use this</h2><ul>
