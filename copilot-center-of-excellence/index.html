@@ -721,7 +721,12 @@ Set-Location -LiteralPath $kitRoot
     <section class="step" id="tour-07" data-tour="7">
       <h2><span class="badge">07</span>Start the clean installation</h2>
       <div class="command-head"><button type="button" data-copy="cmd-highered-install">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-install">Set-Location $kitRoot
+      <pre class="code-panel" id="cmd-highered-install">$ErrorActionPreference = 'Stop'
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'
+$contentMode = 'Customer'
+Set-Location -LiteralPath $kitRoot
+
 $settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
 if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
   throw 'Run script 01 and confirm admin consent before installation.'
@@ -732,15 +737,17 @@ try {
     -ContentMode $contentMode `
     -SeedDemoContent
 } catch {
-  throw 'Installation stopped. Inspect the saved transcript and existing Team/site; do not start clean or purge.'
+  Write-Host 'Installation stopped. Do not run the checker or start another clean install.' -ForegroundColor Red
+  throw
 }
-if (-not $?) { throw 'Installer did not complete; stop before reading the deployment report.' }
-# Read the actual site path after completion; it may be under /teams/ rather than /sites/.
-$siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site</pre>
+      </pre>
+      <p>Run this block by itself and wait for script 02 to print its completion message. Do not continue to the
+        report-reading or checker commands after a failed or partial installation.</p>
       <p><code>-SeedDemoContent</code> publishes the pages, catalogs, calendar, and governance content. Without it,
         the installer creates only the Team and an empty SharePoint site.</p>
-      <p>The command above uses the <code>$contentMode</code> selected in step 04. Set it to <code>Customer</code> for
-        an approved customer deployment. This recorded lab used <code>Demo</code> to retain demonstration notices.
+      <p>The command above explicitly sets <code>$contentMode</code> to <code>Customer</code> for an approved customer
+        deployment. Change it to <code>Demo</code> only for a labeled synthetic demonstration. This recorded lab used
+        <code>Demo</code> to retain demonstration notices.
         Review source files and existing site content yourself; changing the mode does not replace that review.</p>
       <p>This is a clean install, so <code>-ResumeExisting</code> is not used. If an earlier attempt already created a
         Team or site, investigate first. Then either resume that exact deployment or use
@@ -825,13 +832,26 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
     <section class="step" id="tour-11" data-tour="11">
       <h2><span class="badge">11</span>Run the read-only checker</h2>
       <div class="command-head"><button type="button" data-copy="cmd-highered-check">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-check">.\Test-CoEInstall.ps1 `
+      <pre class="code-panel" id="cmd-highered-check">$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'
+$contentMode = 'Customer'
+Set-Location -LiteralPath $kitRoot
+
+$reportPath = Join-Path $orgPath 'CoE-Revision-Report.json'
+if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+  throw 'No completed deployment report exists. Stop and investigate the installation.'
+}
+$siteUrl = (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json).Site
+if ([string]::IsNullOrWhiteSpace($siteUrl)) {
+  throw 'The completed deployment report has no site URL.'
+}
+
+.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
-      if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }
-
-      <span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
+if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
+      <p class="ok">Expected: <code>ALL CHECKS PASSED (...)</code>, with every WARN reviewed manually.</p>
       <figure>
         <img class="shot" src="Images/ps-checker-pass-rows.png" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
         <figcaption>Historical 3.8.21 Demo recording: 292 checks passed. Counts depend on release,

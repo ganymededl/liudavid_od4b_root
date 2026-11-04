@@ -683,15 +683,18 @@ Set-Location -LiteralPath $kitRoot
     </section>
 
     <section id="install">
-      <h2 class="step-title"><span class="step-number">06</span>Derive the target and run the clean Customer install</h2>
+      <h2 class="step-title"><span class="step-number">06</span>Run the clean Customer install</h2>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-install">Copy command</button></div>
-      <pre id="cmd-install">Set-Location $kitRoot
+      <pre id="cmd-install">$ErrorActionPreference = 'Stop'
+$kitRoot = 'C:\CoE-Install\GovernmentOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\GovernmentOrg'
+$contentMode = 'Customer'
+Set-Location -LiteralPath $kitRoot
+
 $settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
 if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
   throw 'Run script 01 and grant admin consent before installation.'
 }
-$contentMode = 'Customer'
-
 try {
   & .\02_Install-CopilotCoE.ps1 `
     -OrgPath $orgPath `
@@ -700,12 +703,9 @@ try {
 } catch {
   Write-Host 'Installer did not complete. Stop here: keep the transcript in RevisionAudit, do not start clean or purge, and see Failure and recovery below.' -ForegroundColor Red
   throw
-}
-if (-not $?) { throw 'Installer did not complete; stop before reading the deployment report.' }
-
-# Use the exact site address the installer recorded (it may be under /teams/ rather than /sites/).
-$siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site
-$siteUrl</pre>
+}</pre>
+      <p>Run this installation block by itself and wait for script 02 to print its completion message. Do not run the
+        report-reading or checker block after a failed or partial installation.</p>
       <p><code>MailNickname</code> chooses the Team alias and SharePoint site path. <code>$siteUrl</code> is read from
         the deployment report after a completed install and is used only by the checker; changing it does not change the
         install target.</p>
@@ -751,7 +751,21 @@ $siteUrl</pre>
     <section id="accept">
       <h2 class="step-title"><span class="step-number">07</span>Run the checker and complete manual acceptance</h2>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-check">Copy command</button></div>
-      <pre id="cmd-check">.\Test-CoEInstall.ps1 `
+      <pre id="cmd-check">$kitRoot = 'C:\CoE-Install\GovernmentOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\GovernmentOrg'
+$contentMode = 'Customer'
+Set-Location -LiteralPath $kitRoot
+
+$reportPath = Join-Path $orgPath 'CoE-Revision-Report.json'
+if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+  throw 'No completed deployment report exists. Stop and investigate the installation.'
+}
+$siteUrl = (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json).Site
+if ([string]::IsNullOrWhiteSpace($siteUrl)) {
+  throw 'The completed deployment report has no site URL.'
+}
+
+.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
