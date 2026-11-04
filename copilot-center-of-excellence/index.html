@@ -665,7 +665,10 @@ Write-Host 'Offline content preflight completed.'</pre>
       <p>Use the copy button for the command block below. Do not paste terminal prompt text such as
         <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
       <div class="command-head"><button type="button" data-copy="cmd-highered-pnp">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-pnp">Set-Location $kitRoot
+      <pre class="code-panel" id="cmd-highered-pnp"># Re-enter the actual paths if you opened a new PowerShell window.
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'
+Set-Location -LiteralPath $kitRoot
 if (-not (Get-Module PnP.PowerShell -ListAvailable |
     Where-Object Version -eq ([version]'3.2.0'))) {
   if (-not (Get-PSResourceRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
@@ -684,9 +687,16 @@ Get-Module PnP.PowerShell -ListAvailable |
 
       <h3>2. Register the tenant app</h3>
       <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-register">.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
+      <pre class="code-panel" id="cmd-highered-register"># Keep this block self-contained if it is run in another PowerShell window.
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'
+Set-Location -LiteralPath $kitRoot
+.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
 # Confirm script 01 saved a non-empty client ID before installation.
 (Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
+      <p class="meta">Running <code>pwsh</code> starts another PowerShell session and clears ordinary variables such
+        as <code>$kitRoot</code> and <code>$orgPath</code>. Re-enter the paths in that new session before using a
+        relative <code>.\</code> script path.</p>
       <p class="meta">This recording uses PowerShell 7.6.7. The kit requires PowerShell 7.4 or later and
         PnP.PowerShell 3.2.0.</p>
       <p class="meta">Someone authorized to grant the required app permissions runs the registration script once per
