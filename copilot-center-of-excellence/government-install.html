@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GCC Moderate Copilot CoE installation runbook - Release 3.8.22</title>
-  <meta name="description" content="GCC Moderate Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.22.">
+  <title>GCC Moderate Copilot CoE installation runbook - Release 3.8.23</title>
+  <meta name="description" content="GCC Moderate Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.23.">
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -253,7 +253,7 @@
   </div>
 
   <header class="shell">
-    <span class="eyebrow">Release 3.8.22 · GCC Moderate · Government-StateLocal · Customer mode</span>
+    <span class="eyebrow">Release 3.8.23 · GCC Moderate · Government-StateLocal · Customer mode</span>
     <h1>GCC Moderate installation runbook</h1>
     <p class="lede">Use this page to install the Government-StateLocal content pack in a GCC Moderate tenant. Follow
       the same eight installation phases as the <a href="index.html#eight-phase-runbook">higher-ed guide</a> and the
@@ -426,13 +426,21 @@ For recovery or removal, use the administrator guide included with release 3.8.2
       <table>
         <thead><tr><th scope="col">Cloud</th><th scope="col">Status</th></tr></thead>
         <tbody>
-          <tr><td>Commercial Microsoft 365</td><td>End-to-end validated with release 3.8.21. The 3.8.22 changes (listed below) have not been re-run end to end; run your own acceptance before relying on them.</td></tr>
-          <tr><td>GCC Moderate</td><td>Release 3.8.21: a production installation and Step 08 validation completed on October 22, 2026, with 270 automated checks passed and two documented manual-review warnings. Release 3.8.22: an internal fresh install and first checker passed 268 checks with two WARNs; the operator reports completing Step 08 elsewhere, but the update, second checker and manual WARN review are not independently evidenced. Repeat acceptance in each customer tenant.</td></tr>
+          <tr><td>Commercial Microsoft 365</td><td>End-to-end validated with release 3.8.21. Release 3.8.23 changes only setup documentation; its extracted-package offline gate passed 686 tests with 0 failures and 9 expected authoring-only skips, but it has not been re-run end to end in a tenant.</td></tr>
+          <tr><td>GCC Moderate</td><td>Release 3.8.21: a production installation and Step 08 validation completed on October 22, 2026, with 270 automated checks passed and two documented manual-review warnings. Release 3.8.22: an internal fresh install and first checker passed 268 checks with two WARNs; the operator reports completing Step 08 elsewhere, but the update, second checker and manual WARN review are not independently evidenced. Release 3.8.23 preserves that implementation and improves setup documentation; repeat acceptance in each customer tenant.</td></tr>
           <tr><td>GCC High and DoD</td><td>Unsupported.</td></tr>
         </tbody>
       </table>
       <div class="warning"><strong>Environment boundary:</strong> this walkthrough covers GCC Moderate only. It does
         not apply to GCC High or DoD, and one production result does not replace acceptance in another customer tenant.</div>
+      <h3>What changed in release 3.8.23</h3>
+      <ul>
+        <li>Package setup now separates hash verification, Windows unblocking, extraction, and organization-profile
+          creation into individual copy-ready steps.</li>
+        <li>The local preflight explains the required dot-space syntax and prints an explicit completion message.</li>
+        <li>The app step warns that script 01 always creates a new Entra app. Profiles for a tenant with an existing
+          approved app reuse its <code>PnPClientID</code> and skip script 01.</li>
+      </ul>
       <h3>What changed in release 3.8.22</h3>
       <ul>
         <li>Scripts 01, 02, 03, 04 and <code>Test-CoEInstall.ps1</code> check that the provisioning app has
@@ -451,42 +459,56 @@ For recovery or removal, use the administrator guide included with release 3.8.2
 
     <section id="package">
       <h2 class="step-title"><span class="step-number">01</span>Verify and extract the implementation package</h2>
-      <p>Run these steps in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen implementation ZIP and its matching release receipt. Release 3.8.22 SHA256:</p>
-      <p><code>D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F</code></p>
+      <p>Run each block separately in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen implementation ZIP and its matching release receipt. Release 3.8.23 SHA256:</p>
+      <p><code>0A3D70A545D87F4476E7547BF41F2BAFFF83ED28EC2EE05FE3682573F55378CC</code></p>
       <div class="warning"><strong>GitHub ZIP distinction:</strong> download the named
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.23/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
         release asset and verify it against the attached
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.22/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.23/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.
         GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository
         <em>Download ZIP</em> are source snapshots, not installation packages.</div>
-      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package">Copy command</button></div>
-      <pre id="cmd-package">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+      <h3>1. Set the paths</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package-paths">Copy command</button></div>
+      <pre id="cmd-package-paths">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
   throw 'Open PowerShell 7.4 or later (pwsh). The kit scripts require it.'
 }
-$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
-$expectedHash = 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F'
-$installRoot = 'C:\CoE-Install\GovernmentOrg'
+$zip = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip'
+$receipt = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip.sha256'
+$expectedHash = '0A3D70A545D87F4476E7547BF41F2BAFFF83ED28EC2EE05FE3682573F55378CC'
+$installRoot = 'C:\CoE-Install\GovernmentOrg-v3.8.23'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
-$orgPath = 'C:\CoE-Orgs\GovernmentOrg'
-
-if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
-  throw 'The chosen release ZIP does not match its receipt.'
+$orgPath = 'C:\CoE-Orgs\GovernmentOrg'</pre>
+      <h3>2. Verify the ZIP and receipt</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package-verify">Copy command</button></div>
+      <pre id="cmd-package-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
+$receiptHash = ((Get-Content -LiteralPath $receipt -Raw).Trim() -split '\s+')[0]
+if ($zipHash -ne $expectedHash -or $receiptHash -ne $expectedHash) {
+  throw 'The implementation ZIP or its receipt does not match release 3.8.23.'
 }
-if ((Get-Content -LiteralPath "$zip.sha256" -Raw).Trim() -cne
-    "$expectedHash  Copilot-CoE-Implementation-Kit.zip") {
-  throw 'The release receipt does not match the chosen ZIP.'
-}
-if (Test-Path -LiteralPath $installRoot) {
+Write-Host 'Release ZIP and receipt verified.'</pre>
+      <h3>3. Unblock the ZIP before extraction</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package-unblock">Copy command</button></div>
+      <pre id="cmd-package-unblock">Unblock-File -LiteralPath $zip
+Write-Host 'ZIP unblocked. It is now safe to extract.'</pre>
+      <p>GUI equivalent: right-click the ZIP, select <strong>Properties</strong>, select <strong>Unblock</strong> if
+        shown, and select <strong>OK</strong> before <strong>Extract All</strong>.</p>
+      <div class="warning"><strong>Already extracted while blocked?</strong> Delete that extraction and start again
+        from the unblocked ZIP (recommended), or run:
+        <code>Get-ChildItem -LiteralPath $installRoot -Recurse -File | Unblock-File</code>.</div>
+      <h3>4. Extract into a fresh kit folder</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package-extract">Copy command</button></div>
+      <pre id="cmd-package-extract">if (Test-Path -LiteralPath $installRoot) {
   throw "Use a new, empty install folder: $installRoot"
 }
-if (Test-Path -LiteralPath $orgPath) {
+Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
+Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
+      <h3>5. Create the separate Government organization folder</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-package-profile">Copy command</button></div>
+      <pre id="cmd-package-profile">if (Test-Path -LiteralPath $orgPath) {
   throw "Use a new organization folder: $orgPath"
 }
-
-Unblock-File -LiteralPath $zip
-Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
-Copy-Item (Join-Path $kitRoot 'ContentPacks\Government-StateLocal') $orgPath -Recurse
-Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
+Set-Location $kitRoot
+Copy-Item -LiteralPath '.\ContentPacks\Government-StateLocal' -Destination $orgPath -Recurse</pre>
       <p class="meta">Keep the organization folder outside the extracted kit. Future kit extraction must not overwrite
         settings, content, assets, transcripts, or deployment identity records.</p>
     </section>
@@ -501,7 +523,7 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
           <tr><td><code>Tenant</code></td><td>The primary <code>.onmicrosoft.com</code> domain</td><td>Confirm with the tenant administrator; never infer it from an agency web page.</td></tr>
           <tr><td><code>AdminFQDN</code></td><td>SharePoint admin host, no protocol/path</td><td>Copy the actual admin-center host from this tenant.</td></tr>
           <tr><td><code>SiteFQDN</code></td><td>SharePoint content host, no protocol/path</td><td>Copy the actual content host; the team site may use <code>/teams/</code>, not <code>/sites/</code>.</td></tr>
-          <tr><td><code>PnPClientID</code></td><td>Blank for the first approved app</td><td>Script 01 saves this tenant's client ID. Never reuse an app ID from another tenant.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Blank only when this tenant has no approved kit app</td><td>Reuse this tenant's approved app ID and skip script 01; never reuse an app ID from another tenant.</td></tr>
           <tr><td><code>SharedChannelOwnerUPN</code></td><td>Approved in-tenant Member</td><td>Obtain from the governance owner; a public agency mailbox is not sufficient.</td></tr>
           <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved agency name, <code>agency</code>, and abbreviation</td><td>Use the organization's actual name and reader-facing language; public branding needs owner review.</td></tr>
           <tr><td><code>MailNickname</code></td><td>Unique agency Team alias</td><td>Confirm it is unused, including deleted groups/sites. This field sets the Team alias and site path.</td></tr>
@@ -569,22 +591,37 @@ Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-preflight">Copy command</button></div>
       <pre id="cmd-preflight">Set-Location $kitRoot
 . .\Internal\ContentPreflight.ps1
-Assert-CoEStructuredOrganizationContent -OrgPath $orgPath</pre>
+Get-Command Assert-CoEStructuredOrganizationContent -ErrorAction Stop
+Assert-CoEStructuredOrganizationContent -OrgPath $orgPath
+Write-Host 'Offline content preflight completed.'</pre>
+      <div class="warning"><strong>The dot and space are required.</strong>
+        <code>. .\Internal\ContentPreflight.ps1</code> dot-sources the file into the current session. Running only
+        <code>.\Internal\ContentPreflight.ps1</code> can appear to do nothing and does not retain the assertion
+        function. The assertion can also finish silently when no organization training-calendar override exists;
+        <code>Get-Command</code> and the completion message make success explicit.</div>
       <p class="meta">This checks organization content locally. It does not validate tenant identity, permissions,
         URLs, support monitoring, policy approval, or reader experience.</p>
     </section>
 
     <section id="register">
       <h2 class="step-title"><span class="step-number">05</span>Install PnP.PowerShell and register the tenant app</h2>
-      <div class="command-head"><button class="copy" type="button" data-copy="cmd-register">Copy command</button></div>
-      <pre id="cmd-register">Set-Location $kitRoot
-$PSVersionTable.PSVersion
+      <div class="danger"><strong>Reuse an existing approved app; do not rerun script 01.</strong> Put its Application
+        (client) ID in <code>PnPClientID</code>, verify the permissions and public-client setting below, and continue
+        to Step 06. Script 01 creates a new app rather than updating the old one. Rerunning it creates a duplicate,
+        overwrites this profile's <code>PnPClientID</code>, and leaves the prior app in Entra.</div>
+      <h3>1. Install and verify the required local module</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-pnp">Copy command</button></div>
+      <pre id="cmd-pnp">Set-Location $kitRoot
 Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
-.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
-
+Get-Module PnP.PowerShell -ListAvailable |
+  Where-Object Version -eq ([version]'3.2.0') |
+  Select-Object Name, Version, Path</pre>
+      <h3>2. Only when this tenant has no approved kit app, register one</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-register">Copy command</button></div>
+      <pre id="cmd-register">.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
 # Confirm script 01 saved a non-empty client ID.
 (Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
-      <p>Run script 01 once per tenant as an approved consent approver. It creates the single-tenant
+      <p>When no approved app exists, run script 01 once as an approved consent approver. It creates the single-tenant
         <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings file.
         Never copy that ID to another tenant.</p>
       <p>In Microsoft Entra, grant tenant-wide admin consent and confirm these delegated permissions show
@@ -805,7 +842,7 @@ $missingWelcomeChannels = @()
 
   <footer>
     <div class="shell">
-      <p>Release 3.8.22 · GCC Moderate · Government-StateLocal content · Customer mode</p>
+      <p>Release 3.8.23 · GCC Moderate · Government-StateLocal content · Customer mode</p>
       <p>A prior acceptance result does not replace acceptance in another tenant. GCC High and DoD are unsupported.</p>
     </div>
   </footer>
