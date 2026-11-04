@@ -662,12 +662,25 @@ Write-Host 'Offline content preflight completed.'</pre>
           <code>PnPClientID</code>, and leaves the prior app in Entra.</p>
       </div>
       <h3>1. Install and verify the required local module</h3>
+      <p>Use the copy button for the command block below. Do not paste terminal prompt text such as
+        <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
       <div class="command-head"><button type="button" data-copy="cmd-highered-pnp">Copy command</button></div>
       <pre class="code-panel" id="cmd-highered-pnp">Set-Location $kitRoot
-Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
+if (-not (Get-Module PnP.PowerShell -ListAvailable |
+    Where-Object Version -eq ([version]'3.2.0'))) {
+  if (-not (Get-PSResourceRepository -Name PSGallery -ErrorAction SilentlyContinue)) {
+    Register-PSResourceRepository -PSGallery
+  }
+  Install-PSResource PnP.PowerShell -Version 3.2.0 -Scope CurrentUser `
+    -Repository PSGallery -TrustRepository
+}
+Import-Module PnP.PowerShell -RequiredVersion 3.2.0 -ErrorAction Stop
 Get-Module PnP.PowerShell -ListAvailable |
   Where-Object Version -eq ([version]'3.2.0') |
   Select-Object Name, Version, Path</pre>
+      <p class="meta">Use <code>Install-PSResource</code>, included with supported PowerShell 7 releases. The
+        repository check handles machines where PowerShell Gallery is not registered and avoids the legacy
+        <code>PowerShellGet</code> autoload failure associated with <code>Install-Module</code>.</p>
 
       <h3>2. Register the tenant app</h3>
       <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>

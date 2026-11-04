@@ -575,7 +575,7 @@ Unblock-File -LiteralPath $zip</code></pre><p>Stop if the hash differs. If it ma
           <span>Which PowerShell and PnP.PowerShell versions are required?</span>
           <span class="tag">Environment &amp; prerequisites</span>
         </summary>
-        <div class="answer"><p>Use exactly <code>PnP.PowerShell 3.2.0</code>: the scripts import it with <code>-RequiredVersion 3.2.0</code>, so a newer installed version is not used automatically. Run <code>Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser</code> first if you don't have that version.</p><p>The scripts require PowerShell 7.4 or later (each starts with <code>#Requires -Version 7.4</code>) and will refuse to start in Windows PowerShell 5.1.</p>
+        <div class="answer"><p>Use exactly <code>PnP.PowerShell 3.2.0</code>: the scripts import it with <code>-RequiredVersion 3.2.0</code>, so a newer installed version is not used automatically. Use the walkthrough's <code>Install-PSResource</code> block rather than the legacy <code>Install-Module</code> command. That block registers PowerShell Gallery when needed, installs the exact version, and imports it with a terminating error if it is unavailable.</p><p>The scripts require PowerShell 7.4 or later (each starts with <code>#Requires -Version 7.4</code>) and will refuse to start in Windows PowerShell 5.1.</p>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>
