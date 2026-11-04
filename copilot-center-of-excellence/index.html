@@ -382,7 +382,7 @@
       <table class="source-table">
         <thead><tr><th scope="col">Phase</th><th scope="col">Customer action</th><th scope="col">Detailed scene</th></tr></thead>
         <tbody>
-          <tr><td>01</td><td>Verify the named release ZIP and receipt; extract to an empty kit folder and create a separate organization folder.</td><td><a href="#tour-03">Package</a></td></tr>
+          <tr><td>01</td><td>Verify and unblock the named release ZIP before extraction; extract to an empty kit folder and create a separate organization folder.</td><td><a href="#tour-03">Package</a></td></tr>
           <tr><td>02</td><td>Edit the organization copy of <code>Deployment-Settings.json</code>; confirm tenant, owner, alias, profile, and sharing.</td><td><a href="#tour-04">Settings</a></td></tr>
           <tr><td>03</td><td>Review approved support and incident links, governance drafts, <code>Content</code>, and <code>Assets</code>.</td><td><a href="#tour-05">Content</a></td></tr>
           <tr><td>04</td><td>Run <code>Assert-CoEStructuredOrganizationContent</code> locally before tenant sign-in.</td><td><a href="#tour-05">Preflight</a></td></tr>
@@ -459,34 +459,66 @@
         <img class="shot" src="Images/ps-tenants.png" alt="PowerShell 7 terminal showing the known lab tenants and certificate status before starting work">
         <figcaption>PowerShell 7 terminal, confirming the correct lab tenant before any kit command runs.</figcaption>
       </figure>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-package">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-package">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+      <p><strong>Run each block below separately in PowerShell 7.4 or later.</strong> Do not extract the ZIP first
+        and return to the verification steps afterward. Windows can transfer the internet security mark from a
+        blocked ZIP to every PowerShell script inside it.</p>
+      <h3>1. Set the paths</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-paths">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-paths">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
   throw 'Open PowerShell 7.4 or later (pwsh).'
 }
-$zip = 'C:\path\to\Copilot-CoE-Implementation-Kit.zip'
+$zip = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip'
+$receipt = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip.sha256'
 $expectedHash = 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F'
-$installRoot = 'C:\CoE-Install\DemoOrg'
+$installRoot = 'C:\CoE-Install\DemoOrg-v3.8.22'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
-$orgPath = 'C:\CoE-Orgs\DemoOrg'
-$profileSource = Join-Path $kitRoot 'Org-Template' # Higher education
-# State/local government: $profileSource = Join-Path $kitRoot 'ContentPacks\Government-StateLocal'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'</pre>
 
-if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expectedHash) {
-  throw 'The chosen release ZIP does not match its receipt.'
+      <h3>2. Verify the ZIP and receipt</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-verify">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
+$receiptHash = ((Get-Content -LiteralPath $receipt -Raw).Trim() -split '\s+')[0]
+if ($zipHash -ne $expectedHash -or $receiptHash -ne $expectedHash) {
+  throw 'The implementation ZIP or its receipt does not match release 3.8.22.'
 }
-if ((Get-Content -LiteralPath "$zip.sha256" -Raw).Trim() -cne
-    "$expectedHash  Copilot-CoE-Implementation-Kit.zip") {
-  throw 'The release receipt does not match the chosen ZIP.'
+Write-Host 'Release ZIP and receipt verified.'</pre>
+
+      <h3>3. Unblock the ZIP before extraction</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-unblock">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-unblock">Unblock-File -LiteralPath $zip
+Write-Host 'ZIP unblocked. It is now safe to extract.'</pre>
+      <p>GUI equivalent: right-click the ZIP, select <strong>Properties</strong>, select <strong>Unblock</strong> if
+        shown, and select <strong>OK</strong>. Do this before selecting <strong>Extract All</strong>.</p>
+      <div class="boundary-card">
+        <h3>If you already extracted a blocked ZIP</h3>
+        <p>A message that a <code>.ps1</code> file is not digitally signed means Windows blocked the downloaded
+          content before PowerShell could load it. Delete the extraction and start again from the verified,
+          unblocked ZIP (recommended), or unblock every file in that existing extraction:</p>
+        <div class="command-head"><button type="button" data-copy="cmd-highered-unblock-existing">Copy command</button></div>
+        <pre class="code-panel" id="cmd-highered-unblock-existing">Get-ChildItem -LiteralPath $installRoot -Recurse -File | Unblock-File</pre>
+      </div>
+
+      <h3>4. Extract into a fresh kit folder</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-extract">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-extract">if (Test-Path -LiteralPath $installRoot) {
+  throw "Use a new install folder: $installRoot"
 }
-if (Test-Path -LiteralPath $installRoot) { throw "Use a new install folder: $installRoot" }
-if (Test-Path -LiteralPath $orgPath) { throw "Use a new organization folder: $orgPath" }
-Unblock-File -LiteralPath $zip
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
-Copy-Item $profileSource $orgPath -Recurse</pre>
-      <p class="meta">The release receipt supplied with the package records the expected SHA256 for that ZIP. Verify
-        the hash before extracting, and use a new, empty install folder for each clean run.</p>
-      <p class="meta">The separate organization folder holds settings, content overrides, and approved assets outside
-        the install folder, so extracting a newer release does not overwrite them.</p>
+Set-Location $kitRoot
+Write-Host "Kit extracted to $kitRoot"</pre>
+
+      <h3>5. Create the separate organization folder</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-profile">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-profile">if (Test-Path -LiteralPath $orgPath) {
+  throw "Review the existing organization folder first: $orgPath"
+}
+Copy-Item -LiteralPath '.\Org-Template' -Destination $orgPath -Recurse
+# State/local government instead:
+# Copy-Item -LiteralPath '.\ContentPacks\Government-StateLocal' -Destination $orgPath -Recurse
+Write-Host "Organization profile created at $orgPath"</pre>
+      <p><code>$kitRoot</code> contains the installer. <code>$orgPath</code> contains the organization's settings,
+        content overrides, and approved assets. Every script's <code>-OrgPath</code> argument must point to the
+        separate organization folder, not the extracted package root and not the <code>Internal</code> folder.</p>
       <div class="boundary-card">
         <h3>Which GitHub ZIP can I install?</h3>
         <p><strong>Download the named
@@ -600,19 +632,38 @@ $siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | C
       <div class="command-head"><button type="button" data-copy="cmd-highered-preflight">Copy command</button></div>
       <pre class="code-panel" id="cmd-highered-preflight">Set-Location $kitRoot
 . .\Internal\ContentPreflight.ps1
-Assert-CoEStructuredOrganizationContent -OrgPath $orgPath</pre>
+Get-Command Assert-CoEStructuredOrganizationContent -ErrorAction Stop
+Assert-CoEStructuredOrganizationContent -OrgPath $orgPath
+Write-Host 'Offline content preflight completed.'</pre>
+      <div class="boundary-card">
+        <h3>The dot and space are required</h3>
+        <p><code>. .\Internal\ContentPreflight.ps1</code> starts with a dot followed by a space. This
+          <em>dot-sources</em> the file and keeps its function in the current PowerShell session. Running only
+          <code>.\Internal\ContentPreflight.ps1</code> can appear to do nothing, then the assertion command is not
+          recognized because the function was not retained.</p>
+        <p>The assertion itself can also finish silently when the organization profile has no
+          <code>Content\Training-Calendar.csv</code> override. <code>Get-Command</code> confirms the function loaded,
+          and the final message confirms that the offline check completed.</p>
+      </div>
       <p class="meta">Local preflight catches malformed structured overrides before sign-in; it does not prove that
         the tenant, mailbox, public policy links, or reader-facing material is approved.</p>
     </section>
 
     <section class="step" id="tour-06" data-tour="6">
       <h2><span class="badge">06</span>Install PnP.PowerShell and register the app</h2>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-register">Set-Location $kitRoot
-$PSVersionTable.PSVersion
+      <p>These are separate actions. Installing and verifying the local module does not connect to Microsoft 365.
+        Script 01 is the first tenant operation.</p>
+      <h3>1. Install and verify the required local module</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-pnp">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-pnp">Set-Location $kitRoot
 Install-Module PnP.PowerShell -RequiredVersion 3.2.0 -Scope CurrentUser
-.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
+Get-Module PnP.PowerShell -ListAvailable |
+  Where-Object Version -eq ([version]'3.2.0') |
+  Select-Object Name, Version, Path</pre>
 
+      <h3>2. Register the tenant app</h3>
+      <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>
+      <pre class="code-panel" id="cmd-highered-register">.\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
 # Confirm script 01 saved a non-empty client ID before installation.
 (Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
       <p class="meta">This recording uses PowerShell 7.6.7. The kit requires PowerShell 7.4 or later and
