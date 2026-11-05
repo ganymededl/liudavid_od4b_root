@@ -406,7 +406,7 @@ For recovery or removal, use the administrator guide included with release 3.8.2
           Get those from an authorized administrator or route owner.</p></div>
       </div>
       <p class="meta">For higher-ed public-source examples and the same source-versus-settings boundary, see the
-        <a href="index.html#tour-01">commercial illustrated tour</a>. Use the government profile below for GCC Moderate.</p>
+        <a href="index.html#sources">commercial walkthrough</a>. Use the government profile below for GCC Moderate.</p>
     </section>
 
     <section id="cloud">
@@ -433,38 +433,8 @@ For recovery or removal, use the administrator guide included with release 3.8.2
       </table>
       <div class="warning"><strong>Environment boundary:</strong> this walkthrough covers GCC Moderate only. It does
         not apply to GCC High or DoD, and one production result does not replace acceptance in another customer tenant.</div>
-      <h3>What changed in release 3.8.24</h3>
-      <ul>
-        <li>Fixed a live defect that could silently leave the Microsoft Mechanics hub page with only its breadcrumb and no real body: the page write now goes through a dedicated function that never touches the vendor's real video embeds, and the checker independently verifies the page's real body text and links are present.</li>
-        <li>Added a per-channel welcome-post journal so a resumed install (<code>-ResumeExisting</code>) automatically (re)posts only the standard-channel welcome posts still verifiably pending, instead of requiring a manual check every time.</li>
-        <li>Clarified Learning Paths external training links: rows now carry a distinct link for an institution's own LMS, separate from the kit's own practice link, so the two are never confused or silently overwritten.</li>
-        <li>Documented the access model: Team membership (the kit's actual access control) versus SharePoint Visitors/reviewer groups, and the governance-channel allowlist workflow for adding a real leadership or governance reviewer.</li>
-        <li>The local content preflight now accepts an empty Agent Showcase seed list before any tenant write, instead of surfacing a late tenant-side error.</li>
-        <li>Fixed the release packager itself, which was omitting two required vendor source files from the built ZIP.</li>
-        <li>Added quickstart guidance for the most common first error when a step is run from a fresh window or Windows PowerShell 5.1 instead of PowerShell 7.4+.</li>
-      </ul>
-      <h3>What changed in release 3.8.23</h3>
-      <ul>
-        <li>Package setup now separates hash verification, Windows unblocking, extraction, and organization-profile
-          creation into individual copy-ready steps.</li>
-        <li>The local preflight explains the required dot-space syntax and prints an explicit completion message.</li>
-        <li>The app step warns that script 01 always creates a new Entra app. Profiles for a tenant with an existing
-          approved app reuse its <code>PnPClientID</code> and skip script 01.</li>
-      </ul>
-      <h3>What changed in release 3.8.22</h3>
-      <ul>
-        <li>Scripts 01, 02, 03, 04 and <code>Test-CoEInstall.ps1</code> check that the provisioning app has
-          <strong>Allow public client flows</strong> set to Yes before sign-in, and stop with the exact Entra path when it
-          is off. If the check itself cannot reach Entra or a tenant policy refuses it, the scripts warn and continue to
-          sign-in, which still happens before anything is created.</li>
-        <li>Script 03 checks the target before it changes anything: the alias must resolve to the recorded site and the
-          Team must match the <code>TeamId</code> saved in <code>CoE-Revision-Report.json</code>. If the alias or site was
-          reused, the update stops with nothing changed.</li>
-        <li><code>CoE-Revision-Report.json</code> now records <code>KitRelease</code> (the packaged release that ran).
-          The Government pack's content-schema version now matches the main kit.</li>
-        <li>GCC notes for Researcher, Analyst and SharePoint agents now tell readers to confirm current GCC availability
-          before announcing them.</li>
-      </ul>
+      <p class="meta">For what changed between releases, see the
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit#readme">release notes in the kit's README on GitHub</a>.</p>
     </section>
 
     <section id="package">

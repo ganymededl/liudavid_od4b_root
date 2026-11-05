@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Installing a Microsoft 365 Copilot Center of Excellence for Higher Education - Unofficial Demonstration</title>
-  <meta name="description" content="A demonstration of installing a Copilot Center of Excellence for a higher education organization, using public University of Illinois Urbana-Champaign information in a Microsoft lab. Not affiliated with the university.">
+  <title>Higher Education Copilot CoE installation runbook - Release 3.8.24</title>
+  <meta name="description" content="Higher education Customer-mode installation runbook for the Copilot CoE kit, release 3.8.24. Uses public University of Illinois Urbana-Champaign information in an unofficial Microsoft lab demonstration.">
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -67,243 +67,213 @@
       --cp-highlight: rgba(253, 142, 161, 0.12);
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       background: var(--cp-bg);
       color: var(--cp-text);
       font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
-      line-height: 1.45;
+      line-height: 1.5;
     }
-    main {
-      max-width: 1020px;
-      margin: 0 auto;
-      padding: 32px 20px 140px;
+    a { color: var(--cp-link); }
+    code, pre { font-family: Consolas, "Courier New", Courier, monospace; }
+    p code, li code, td code { overflow-wrap: anywhere; word-break: break-word; }
+    .shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; }
+    .topbar {
+      border-bottom: 1px solid var(--cp-border);
+      background: var(--cp-bg-elevated);
     }
-    header, section {
+    .topbar .shell {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      flex-wrap: wrap;
+    }
+    .topbar nav { display: flex; gap: 12px; flex-wrap: wrap; }
+    .topbar a { font-weight: 600; text-decoration: none; }
+    header { padding: 44px 0 24px; }
+    .eyebrow {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 0.625rem;
+      color: var(--cp-accent);
+      background: var(--cp-accent-soft);
+      font-weight: 700;
+      font-size: 0.84rem;
+      margin-bottom: 12px;
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.08; margin: 0 0 14px; }
+    h2 { color: var(--cp-accent); font-size: 1.35rem; margin: 0 0 12px; }
+    h3 { margin: 0 0 8px; font-size: 1rem; }
+    p { margin: 0 0 12px; }
+    .lede { max-width: 850px; color: var(--cp-text-muted); font-size: 1.08rem; }
+    .toc {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+    .toc a, .button {
+      display: inline-block;
+      padding: 7px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .toc a:hover, .button:hover { border-color: var(--cp-accent); }
+    main { padding-bottom: 80px; }
+    section, .callout {
       background: var(--cp-surface);
       border: 1px solid var(--cp-border);
       border-radius: 16px;
       box-shadow: 0 0 2px var(--cp-border), 0 1px 2px var(--cp-border);
-      margin-bottom: 16px;
       padding: 22px;
+      margin-bottom: 16px;
     }
-    h1, h2, h3 { margin: 0 0 10px; }
-    h1 { font-size: 1.8rem; }
-    h2 { font-size: 1.22rem; color: var(--cp-accent); }
-    p { margin: 0 0 12px; }
-    a { color: var(--cp-link); }
-    code, pre {
-      font-family: Consolas, "Courier New", Courier, monospace;
-      font-size: 0.88rem;
+    .warning {
+      border-left: 5px solid var(--cp-warning);
+      background: var(--cp-surface-soft);
+      padding: 14px 16px;
+      margin: 14px 0;
     }
-    p code, li code, td code {
-      overflow-wrap: anywhere;
-      word-break: break-word;
+    .danger {
+      border-left: 5px solid var(--cp-danger);
+      background: var(--cp-surface-soft);
+      padding: 14px 16px;
+      margin: 14px 0;
     }
-    .meta { color: var(--cp-text-muted); font-size: 0.93rem; }
-    .badge {
-      display: inline-block;
-      background: var(--cp-accent);
-      color: var(--cp-accent-fg);
-      border-radius: 0.625rem;
-      padding: 2px 9px;
-      font-weight: 700;
-      margin-right: 8px;
-      font-size: 0.85rem;
+    .success {
+      border-left: 5px solid var(--cp-success);
+      background: var(--cp-surface-soft);
+      padding: 14px 16px;
+      margin: 14px 0;
     }
     .disclaimer {
-      background: color-mix(in srgb, var(--cp-danger) 14%, var(--cp-surface));
       border: 2px solid var(--cp-danger);
-      border-radius: 0.75rem;
-      padding: 14px 16px;
+      background: color-mix(in srgb, var(--cp-danger) 12%, var(--cp-surface));
+      border-radius: 16px;
+      padding: 16px 20px;
       margin-bottom: 18px;
       font-weight: 600;
       position: sticky;
-      top: 10px;
+      top: 8px;
       z-index: 40;
     }
     .disclaimer strong { color: var(--cp-danger); }
-    figure { margin: 10px 0; }
-    .shot {
-      max-width: 100%;
+    .site-shot {
       width: 100%;
       height: auto;
       display: block;
       border: 1px solid var(--cp-border);
       border-radius: 0.625rem;
-      box-shadow: var(--cp-shadow);
-      background: #111;
-    }
-    figcaption {
-      color: var(--cp-text-soft);
-      font-size: 0.8rem;
-      margin-top: 6px;
-    }
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-    }
-    .boundary-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
-      gap: 14px;
-      margin: 10px 0;
-    }
-    .boundary-card {
-      overflow-wrap: anywhere;
-      border: 1px solid var(--cp-border);
-      border-radius: 0.625rem;
-      padding: 14px 16px;
       background: var(--cp-surface-soft);
     }
-    .boundary-card h3 { font-size: 1rem; margin-bottom: 8px; }
-    .boundary-card li { margin-bottom: 5px; }
-    .code-panel {
-      background: #1b1b1b;
-      color: #d8d8d8;
-      border-radius: 0.75rem;
-      padding: 14px 16px;
-      overflow-x: auto;
-      border: 1px solid var(--cp-border-strong);
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .code-panel .ok { color: #7ee787; }
-    .code-panel .warn { color: #e3b341; }
-    .code-panel .muted { color: #9aa0a6; }
-    .command-head { display: flex; justify-content: flex-end; margin: 6px 0 -4px; }
-    .command-head button {
-      background: var(--cp-surface);
-      border: 1px solid var(--cp-border-strong);
+    figcaption { color: var(--cp-text-muted); font-size: 0.9rem; margin-top: 6px; }
+    .step-title { display: flex; gap: 10px; align-items: center; }
+    .step-number {
+      display: inline-grid;
+      place-items: center;
+      min-width: 32px;
+      height: 32px;
       border-radius: 0.625rem;
-      color: var(--cp-text);
-      font: 600 0.8rem "Segoe UI", Aptos, Calibri, sans-serif;
-      padding: 6px 12px;
-      cursor: pointer;
-    }
-    .command-head button:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
-    table.source-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 8px 0 4px;
-    }
-    table.source-table th, table.source-table td {
-      border: 1px solid var(--cp-border);
-      padding: 7px 10px;
-      text-align: left;
-      vertical-align: top;
-      font-size: 0.92rem;
-      overflow-wrap: anywhere;
-    }
-    table.source-table th {
-      background: var(--cp-surface-soft);
-    }
-    .lab-tag {
-      display: inline-block;
-      background: var(--cp-warning);
-      color: #1a1a1a;
-      border-radius: 0.4rem;
-      padding: 1px 7px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      margin-left: 6px;
-    }
-    .step { border-left: 6px solid var(--cp-accent); }
-    .step.current { box-shadow: 0 0 0 3px var(--cp-highlight), var(--cp-shadow); }
-    .tour-bar {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 14px;
-      flex-wrap: wrap;
-    }
-    .tour-btn {
-      border: 1px solid var(--cp-accent);
       background: var(--cp-accent);
       color: var(--cp-accent-fg);
-      border-radius: 999px;
-      padding: 9px 18px;
-      font-weight: 600;
-      font-size: 0.92rem;
-      cursor: pointer;
-      font-family: inherit;
+      font-size: 0.86rem;
     }
-    .tour-btn:hover { background: var(--cp-accent-hover); }
-    .tour-hint { color: var(--cp-text-muted); font-size: 0.85rem; }
-    footer {
-      color: var(--cp-text-muted);
-      font-size: 0.85rem;
-      text-align: center;
-      padding: 8px 0 0;
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+      gap: 12px;
+      margin: 14px 0;
     }
-    .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-    .pill {
-      background: var(--cp-surface-soft);
+    .card {
       border: 1px solid var(--cp-border);
-      border-radius: 999px;
-      padding: 3px 10px;
-      font-size: 0.78rem;
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--cp-surface-soft);
+    }
+    .shots {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+    }
+    th, td {
+      border: 1px solid var(--cp-border);
+      padding: 8px 10px;
+      text-align: left;
+      vertical-align: top;
+      overflow-wrap: anywhere;
+    }
+    th { background: var(--cp-surface-soft); }
+    pre {
+      margin: 12px 0;
+      padding: 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-bg-elevated);
+      color: var(--cp-text);
+      overflow: auto;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    .ok { color: var(--cp-success); }
+    .warn { color: var(--cp-warning); }
+    .muted { color: var(--cp-text-soft); }
+    .command-head {
+      display: flex;
+      justify-content: flex-end;
+      margin: 4px 0 -6px;
+    }
+    button.copy {
+      border: 1px solid var(--cp-border-strong);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 6px 10px;
+      font: 600 0.8rem "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      cursor: pointer;
+    }
+    button.copy:hover { border-color: var(--cp-accent); color: var(--cp-accent); }
+    ol, ul { padding-left: 1.35rem; }
+    li { margin-bottom: 6px; }
+    .meta { color: var(--cp-text-muted); font-size: 0.9rem; }
+    footer {
+      border-top: 1px solid var(--cp-border);
       color: var(--cp-text-muted);
+      padding: 24px 0 40px;
     }
-    a.pill { text-decoration: none; }
-    a.pill:hover, a.pill:focus-visible { border-color: var(--cp-accent); color: var(--cp-accent); }
-    summary { cursor: pointer; color: var(--cp-accent); font-weight: 600; }
-    details[open] summary { margin-bottom: 12px; }
-    .disclaimer { font-size: 0.86rem; padding: 10px 14px; }
-    section, header, .step { scroll-margin-top: 150px; }
-    .current { box-shadow: 0 0 0 3px var(--cp-highlight), var(--cp-shadow); }
-    body.wide main { max-width: 1500px; }
-
-    .player-slot {
-      position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 16px 0 8px;
-      background: #000; border-radius: 12px; box-shadow: var(--cp-shadow);
-    }
-    .player-frame {
-      position: relative; width: 100%; height: 100%; border-radius: 12px; overflow: hidden; background: #000;
-    }
-    .player-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
-    .frame-tools {
-      position: absolute; top: 48px; right: 10px; display: flex; gap: 6px; z-index: 3;
-      opacity: 0; transition: opacity 0.2s;
-    }
-    .player-frame:hover .frame-tools, .player-frame:focus-within .frame-tools, .player-frame.mini .frame-tools { opacity: 1; }
-    @media (hover: none) { .frame-tools { opacity: 1; } }
-    .frame-btn {
-      border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.65); color: #fff;
-      border-radius: 999px; padding: 6px 12px; font: 600 0.78rem "Segoe UI", Aptos, Calibri, sans-serif; cursor: pointer;
-    }
-    .frame-btn:hover, .frame-btn:focus-visible { background: rgba(0, 0, 0, 0.9); border-color: #fff; outline: none; }
-    .player-frame:not(.mini) .btn-top { display: none; }
-    .player-frame.mini {
-      position: fixed; right: 18px; bottom: 18px; width: min(420px, 44vw); height: auto; aspect-ratio: 16 / 9;
-      z-index: 60; box-shadow: var(--cp-shadow); border: 1px solid var(--cp-border-strong);
-    }
-    .player-frame.mini #btnWide { display: none; }
-    .player-frame:fullscreen { border-radius: 0; border: 0; width: 100vw !important; height: 100vh !important; position: static; }
-    .player-frame:-webkit-full-screen { border-radius: 0; border: 0; width: 100vw !important; height: 100vh !important; position: static; }
-    .player-frame:fullscreen .frame-tools { top: 56px; }
-    .player-meta {
-      display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 6px 0 2px;
-      font-size: 0.88rem; color: var(--cp-text-muted);
-    }
-    .player-meta #nowPlaying { color: var(--cp-text); font-weight: 600; }
-    .player-meta label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-    h2.has-seek { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
-    .seek-btn {
-      margin-left: auto; border: 1px solid var(--cp-accent); background: transparent; color: var(--cp-accent);
-      border-radius: 999px; padding: 5px 14px; font: 600 0.8rem "Segoe UI", Aptos, Calibri, sans-serif; cursor: pointer;
-    }
-    .seek-btn:hover, .seek-btn:focus-visible { background: var(--cp-accent); color: var(--cp-accent-fg); outline: none; }
-    [hidden] { display: none !important; }
-    .video-fallback {
-      margin: 8px 0; padding: 10px 14px; border: 1px solid var(--cp-warning); border-radius: 10px; font-size: 0.9rem;
-      background: color-mix(in srgb, var(--cp-warning) 16%, var(--cp-surface));
+    @media (max-width: 680px) {
+      .shell { width: min(100% - 20px, 1120px); }
+      header { padding-top: 28px; }
+      section { padding: 16px; }
+      table { display: block; overflow-x: auto; }
     }
   </style>
 </head>
 <body>
-  <main>
+  <div class="topbar">
+    <div class="shell">
+      <strong>Copilot Center of Excellence</strong>
+      <nav aria-label="Related guides">
+        <a href="government-install.html">GCC Moderate walkthrough</a>
+        <a href="admin-quickstart.html">Admin quickstart</a>
+        <a href="admin-faq.html">Administrator FAQ</a>
+        <a href="external-sharing-addendum.html">External sharing</a>
+      </nav>
+    </div>
+  </div>
+
+  <header class="shell">
     <div class="disclaimer">
       <strong>UNOFFICIAL DEMONSTRATION &mdash; NOT A UNIVERSITY DEPLOYMENT.</strong>
       This walkthrough uses public University of Illinois Urbana-Champaign information to demonstrate configuration
@@ -311,161 +281,206 @@
       university tenant, systems, accounts, data, or internal resources are used. For your own deployment, replace
       all lab-specific settings with values approved by your organization.
     </div>
+    <span class="eyebrow">Release 3.8.24 &middot; Commercial Microsoft 365 &middot; Higher Education &middot; Customer mode</span>
+    <h1>Higher education installation runbook</h1>
+    <p class="lede">Use this page to install the kit's Higher Education profile (<code>Org-Template</code>) in a
+      commercial Microsoft 365 tenant. Follow the same eight installation phases as the
+      <a href="government-install.html">GCC Moderate guide</a> and the
+      <a href="admin-quickstart.html">canonical Admin Quickstart</a>. The profiles supply different content;
+      the installation and acceptance boundaries are the same.</p>
+    <nav class="toc" aria-label="Runbook sections">
+      <a href="#walkthrough">Video and chapters</a>
+      <a href="#sources">Public vs tenant data</a>
+      <a href="#profile">Content profile</a>
+      <a href="#package">01 Package</a>
+      <a href="#settings">02 Settings</a>
+      <a href="#content">03 Content</a>
+      <a href="#preflight">04 Preflight</a>
+      <a href="#register">05 App</a>
+      <a href="#install">06 Install</a>
+      <a href="#accept">07 Review</a>
+      <a href="#update">08 Update</a>
+      <a href="#site-tour-reference">What users get</a>
+      <a href="#recovery">Recovery</a>
+      <a href="#get-kit">Get the kit</a>
+      <a href="#admin-faq">Admin FAQ</a>
+      <a href="#external-sharing">External sharing</a>
+    </nav>
+  </header>
 
-    <header id="tour-00" data-tour="0">
-      <h1>Installing a Microsoft 365 Copilot Center of Excellence for Higher Education</h1>
-      <p class="meta" role="note"><strong>Public demonstration copy.</strong> Identifying lab values have been replaced or covered in the text, images, video, and narration. Displayed tenant addresses and folder names are illustrative placeholders, not deployment targets. Moving terminal captures are shown as sanitized still reference views. Use only values approved by your organization.</p>
-      <p class="meta">Follow a sample higher education deployment from gathering the university's public pages to
-        checking the finished site. See how to configure the kit, install it with PowerShell 7, review SharePoint and
-        Teams, publish a content update, and check the result.</p>
-      <p class="meta">This walkthrough uses
-        <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>
-        release 3.8.21. Use the current 3.8.24 kit for a new install. The 16 chapters below document the
-        recorded lab tour, while the <a href="#eight-phase-runbook">eight-phase installation path</a> matches
-        the GCC Moderate guide and calls out 3.8.24 safeguards the earlier recording does not show.</p>
-      <nav class="pill-row" aria-label="Written references">
-        <a class="pill" href="#eight-phase-runbook">Eight-phase install path</a>
-        <a class="pill" href="admin-quickstart.html">Admin quickstart</a>
-        <a class="pill" href="government-install.html">Government install runbook</a>
-        <a class="pill" href="#site-tour-reference">What users get</a>
-        <a class="pill" href="#get-kit">Get the kit</a>
-        <a class="pill" href="#admin-faq">Admin FAQ</a>
-        <a class="pill" href="#external-sharing">External-sharing addendum</a>
-      </nav>
-      <div class="boundary-grid" aria-label="Choose an installation path">
-        <div class="boundary-card">
-          <h3>Higher education</h3>
-          <p>This page and video use <code>Org-Template</code> with
-            <code>LearningEnvironment: HigherEducation</code>. Follow the
-            <a href="admin-quickstart.html">canonical Admin Quickstart</a> for the copy-ready commands.</p>
-        </div>
-        <div class="boundary-card">
-          <h3>State and local government</h3>
-          <p>Use the separate <a href="government-install.html">Government Customer-mode runbook</a>. It starts from
-            <code>ContentPacks\Government-StateLocal</code>, follows the same
-            <a href="admin-quickstart.html">canonical command sequence</a>, and keeps cloud support as a separate
-            decision.</p>
-        </div>
-      </div>
-      <div class="player-slot" id="playerSlot">
-        <div class="player-frame" id="playerFrame">
-          <video id="walkVideo" controls preload="metadata" playsinline poster="Images/video-poster.jpg"
-                 aria-label="Narrated walkthrough: installing a Copilot Center of Excellence for higher education">
-            <source src="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4" type="video/mp4">
-            <track kind="captions" src="walkthrough-captions.vtt" srclang="en" label="English">
-            Your browser can't play this video. <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4">Download the MP4</a>.
-          </video>
-          <div class="frame-tools">
-            <button class="frame-btn btn-top" id="btnTop" type="button">&#8593; Back to video</button>
-            <button class="frame-btn" id="btnWide" type="button" aria-pressed="false">Wide view</button>
-            <button class="frame-btn" id="btnFull" type="button">Full screen</button>
-          </div>
-        </div>
-      </div>
-      <div class="video-fallback" id="videoFallback" hidden>
-        <strong>The video didn't start.</strong> <span class="fb-msg"></span>
-        Try reloading the page, or <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4">download the MP4</a> and play it directly. The step-by-step details below
-        cover the same content.
-      </div>
-      <div class="player-meta">
-        <span id="nowPlaying">17 video scenes (introduction plus 16 chapters) &middot; about 13 minutes</span>
-        <label><input type="checkbox" id="followAlong" checked> Follow along below</label>
-        <span>The video scenes expand the shared eight-phase path. Use &ldquo;Play this section&rdquo; to jump to a scene; turn on captions with CC.</span>
-      </div>
-    </header>
+  <main class="shell">
+    <section id="walkthrough">
+      <h2>Higher education walkthrough video (eight phases)</h2>
+      <p>This narrated walkthrough follows the same eight phases as the
+        <a href="government-install.html">GCC Moderate guide</a>. The footage comes from an internal Microsoft lab
+        using public University of Illinois Urbana-Champaign pages, so the tenant, account and site names on screen
+        are lab values, not values to copy.</p>
+      <video controls preload="metadata" playsinline poster="Images/video-poster.jpg"
+             aria-label="Narrated eight-phase higher education Copilot Center of Excellence installation walkthrough"
+             style="width:100%; border:1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft);">
+        <source src="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4" type="video/mp4">
+        <track kind="captions" src="walkthrough-captions.vtt" srclang="en" label="English">
+        Your browser can't play this video. <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4">Download the MP4</a>.
+      </video>
+      <p class="meta">Ten narrated sections (introduction, eight phases, and closing) &middot; English captions included.</p>
+      <div class="warning"><strong>Recorded with release 3.8.21.</strong> The video is a summary, not a substitute for this page:
+        use the commands and cautions below, including the naming-policy gate, the STOP / PROCEED prompts, and no routine
+        <code>-RepairCapturedPages</code>. The footage is from a lab installation and is not a customer acceptance run.</div>
+      <p class="meta">Talk track: <a href="walkthrough-talktrack.txt">Download narration script</a>.</p>
+      <details>
+        <summary>Read the walkthrough talk track</summary>
+        <pre>INTRO
+In this walkthrough, we&#39;ll install release 3.8.21 using the Higher Education template in a commercial Microsoft 365 tenant. We&#39;ll follow the same eight phases as the GCC Moderate guide.
 
-    <section id="eight-phase-runbook">
-      <h2>The same eight installation phases in both guides</h2>
-      <p>Use the current 3.8.24 implementation ZIP and these eight phases for either profile. The 16 numbered
-        panels below are <strong>video scenes from an earlier higher-ed lab run</strong>, not extra installation
-        commands. The GCC guide uses the same phase order with government examples and a newly narrated video.</p>
-      <table class="source-table">
-        <thead><tr><th scope="col">Phase</th><th scope="col">Customer action</th><th scope="col">Detailed scene</th></tr></thead>
+This is an unofficial demonstration: the footage uses public University of Illinois Urbana-Champaign pages inside a Microsoft lab tenant, so the tenant, account, and site names you see on screen are lab values, not values to copy.
+
+We&#39;ll verify the package, configure the settings, install the site, and review the result. Passing the automated checks is only part of deciding whether a deployment is ready for production.
+
+PHASE 1 - Verify and extract the release package
+Download the release 3.8.24 implementation ZIP and its SHA256 receipt, not GitHub&#39;s automatically generated source archive.
+
+Run Get-FileHash on the ZIP and compare the result with the expected hash in the receipt. Continue only if they match.
+
+Use a new empty install folder. Copy the Org-Template content pack to a separate organization folder. Keep settings and records outside the extracted kit so a future release cannot overwrite them.
+
+PHASE 2 - Edit the organization settings
+Open Deployment-Settings.json in the organization folder, not the template inside the kit.
+
+Confirm the tenant, SharePoint hosts, unused group alias, and approved owner and reviewer accounts.
+
+Keep the Team private and external sharing disabled. Set the LearningEnvironment to Higher Education.
+
+If you&#39;re creating a new provisioning app, leave the PnP client ID blank. Don&#39;t copy another tenant&#39;s client ID or deployment report into this folder.
+
+PHASE 3 - Configure support links and reviewed content
+Compare each setting with its source. Public policy links can be researched, but private mailboxes, ticket queues, incident routes, and tenant identities must come from the people who own them.
+
+Configure a monitored support mailbox. Then set the links for general support, technology requests, incident reporting, and AI guidance.
+
+Review the governance and training links as well.
+
+Keep lasting changes to generated page text in the organization&#39;s Content folder, and approved reference files in Assets.
+
+PHASE 4 - Check the content before signing in
+From the extracted kit folder, run the local content preflight against the organization folder. The commands are shown on screen.
+
+This checks the structured content before sign-in, including the calendar columns and required fields. It does not approve the links, tenant settings, policy wording, or reader experience.
+
+Fix every reported issue before continuing.
+
+PHASE 5 - Install PnP.PowerShell and register the app
+Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
+
+If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
+
+In Entra, confirm that all required delegated permissions are granted, and that Allow public client flows is set to Yes.
+
+Review the group naming policy, and check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users.
+
+PHASE 6 - Run the customer installation
+Run script 02 with SeedDemoContent. That switch loads the site&#39;s pages, catalogs, calendar, and governance content.
+
+Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
+
+If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it. Choosing Proceed is a documented pilot decision, not production approval.
+
+After installation, use the actual site address recorded in the deployment report. If an earlier attempt already created resources for the alias, follow the recovery procedure instead of starting another clean installation.
+
+PHASE 7 - Run the checker and complete the manual review
+Run the read-only checker with the organization folder, the actual site address, and the same ContentMode. Resolve every failure, and read each warning.
+
+Review Home, the tool pages, navigation, and catalog views as a regular reader. Follow the support and governance links.
+
+Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post. Check posts visually; the app can&#39;t read them back without extra permission.
+
+Keep the checker output and the manual review record.
+
+PHASE 8 - Publish the reviewed update and test again
+Publish reviewed changes from the organization folder with script 03 and interactive sign-in. Then run the same read-only checker and repeat the relevant manual review.
+
+Do not add RepairCapturedPages for a routine update; it can replace managed parts of Home and the captured pages.
+
+Complete the handoff only when both checker runs have passed and the required manual reviews are documented for this tenant.
+
+OUTRO
+Passing the checker is not the same as production approval. The organization still needs to approve the content, security, accessibility, and operating arrangements.
+
+Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
+
+For recovery or removal, use the administrator guide included with release 3.8.24.</pre>
+      </details>
+    </section>
+
+    <section id="sources">
+      <h2>Separate public information from tenant settings</h2>
+      <p>Use only publicly published university material as research. An authorized tenant administrator and the
+        teams responsible for support and security must supply or confirm private settings. The internal lab footage
+        used to prepare the walkthrough is not a university deployment or an approval of university policy.</p>
+      <table>
+        <thead><tr><th scope="col">Purpose</th><th scope="col">Official public source</th></tr></thead>
         <tbody>
-          <tr><td>01</td><td>Verify and unblock the named release ZIP before extraction; extract to an empty kit folder and create a separate organization folder.</td><td><a href="#tour-03">Package</a></td></tr>
-          <tr><td>02</td><td>Edit the organization copy of <code>Deployment-Settings.json</code>; confirm tenant, owner, alias, profile, and sharing.</td><td><a href="#tour-04">Settings</a></td></tr>
-          <tr><td>03</td><td>Review approved support and incident links, governance drafts, <code>Content</code>, and <code>Assets</code>.</td><td><a href="#tour-05">Content</a></td></tr>
-          <tr><td>04</td><td>Run <code>Assert-CoEStructuredOrganizationContent</code> locally before tenant sign-in.</td><td><a href="#tour-05">Preflight</a></td></tr>
-          <tr><td>05</td><td>Register or reuse the approved tenant app; confirm consent, public-client flow, naming policy, and Teams tabs.</td><td><a href="#tour-06">App</a></td></tr>
-          <tr><td>06</td><td>Run one clean Customer install with <code>-SeedDemoContent</code>; use the actual site URL in the deployment report.</td><td><a href="#tour-07">Install</a> through <a href="#tour-10">completion</a></td></tr>
-          <tr><td>07</td><td>Run the read-only checker, resolve FAILs, and document every WARN and reader/manual check.</td><td><a href="#tour-11">Checker</a> through <a href="#tour-13">welcome posts</a></td></tr>
-          <tr><td>08</td><td>Publish reviewed changes with script 03, check again, and retain both results and manual acceptance.</td><td><a href="#tour-14">Update</a> and <a href="#tour-15">recheck</a></td></tr>
+          <tr><td>Responsible generative AI guidance</td><td><a href="https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/" target="_blank" rel="noopener">genai.illinois.edu/ethical-and-responsible-use-of-generative-ai</a></td></tr>
+          <tr><td>Data handling &amp; IP best practices</td><td><a href="https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/" target="_blank" rel="noopener">genai.illinois.edu/best-practice-data-handling-and-intellectual-property</a></td></tr>
+          <tr><td>Microsoft Copilot Chat guidance</td><td><a href="https://genai.illinois.edu/ai-apps-copilot-chat/" target="_blank" rel="noopener">genai.illinois.edu/ai-apps-copilot-chat</a></td></tr>
+          <tr><td>IT Service Desk</td><td><a href="https://www.techservices.illinois.edu/get-help/it-service-desk/" target="_blank" rel="noopener">techservices.illinois.edu/get-help/it-service-desk</a></td></tr>
+          <tr><td>Technology request catalog</td><td><a href="https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog" target="_blank" rel="noopener">help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog</a></td></tr>
+          <tr><td>Cybersecurity incident reporting</td><td><a href="https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/" target="_blank" rel="noopener">cybersecurity.illinois.edu/report-a-cybersecurity-incident</a></td></tr>
+          <tr><td>Teaching &amp; learning best practices</td><td><a href="https://genai.illinois.edu/best-practices-teaching-and-learning/" target="_blank" rel="noopener">genai.illinois.edu/best-practices-teaching-and-learning</a></td></tr>
         </tbody>
       </table>
-      <div class="boundary-grid">
-        <div class="boundary-card"><h3>Higher education</h3><p>Copy <code>Org-Template</code> and retain
-          <code>LearningEnvironment: HigherEducation</code>. The illustrated video uses a clearly labeled
-          synthetic Demo run; the copy-ready commands below use Customer mode.</p></div>
-        <div class="boundary-card"><h3>GCC Moderate government</h3><p>Copy
-          <code>ContentPacks\Government-StateLocal</code> and retain
-          <code>LearningEnvironment: Government</code>. The pack selects content, not a cloud.
-          <a href="government-install.html">Open the matching government phases</a>; GCC High and DoD are unsupported.</p></div>
+      <div class="cards">
+        <div class="card"><h3>Public research</h3><p>Published university name, AI guidance, public training and
+          records guidance may inform the starter content. The public support contact used in this demo is
+          <code>consult@illinois.edu</code>. These links are not proof of this kit's adoption or approved tenant
+          support routes.</p></div>
+        <div class="card"><h3>Tenant and operational values</h3><p>Do not infer
+          <code>Tenant</code>, SharePoint hosts, the installer/owner identity,
+          <code>PnPClientID</code>, support mailbox, incident route, or reader permissions from a public site.
+          Get those from an authorized administrator or route owner.</p></div>
       </div>
+      <p class="meta">For the equivalent government public-source boundary, see the
+        <a href="government-install.html#sources">GCC Moderate runbook</a>.</p>
     </section>
 
-    <section class="step" id="tour-01" data-tour="1">
-      <h2><span class="badge">01</span>Collect approved public sources first</h2>
-      <p>Before opening PowerShell, find the organization's own published pages: responsible-AI guidance, Copilot
-        guidance, the IT service desk, a technology-request catalog, security-incident reporting, and training
-        resources. The links below are official university pages reviewed for this demonstration on
-        October 20, 2026.</p>
-      <table class="source-table">
-        <tr><th>Purpose</th><th>Official public source</th></tr>
-        <tr><td>Responsible generative AI guidance</td><td><a href="https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/" target="_blank" rel="noopener">https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/</a></td></tr>
-        <tr><td>Data handling &amp; IP best practices</td><td><a href="https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/" target="_blank" rel="noopener">https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/</a></td></tr>
-        <tr><td>Microsoft Copilot Chat guidance</td><td><a href="https://genai.illinois.edu/ai-apps-copilot-chat/" target="_blank" rel="noopener">https://genai.illinois.edu/ai-apps-copilot-chat/</a></td></tr>
-        <tr><td>IT Service Desk</td><td><a href="https://www.techservices.illinois.edu/get-help/it-service-desk/" target="_blank" rel="noopener">https://www.techservices.illinois.edu/get-help/it-service-desk/</a></td></tr>
-        <tr><td>Technology request catalog</td><td><a href="https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog" target="_blank" rel="noopener">https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog</a></td></tr>
-        <tr><td>Cybersecurity incident reporting</td><td><a href="https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/" target="_blank" rel="noopener">https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/</a></td></tr>
-        <tr><td>Teaching &amp; learning best practices</td><td><a href="https://genai.illinois.edu/best-practices-teaching-and-learning/" target="_blank" rel="noopener">https://genai.illinois.edu/best-practices-teaching-and-learning/</a></td></tr>
-      </table>
-      <p class="meta">Public support contact used in this demo: <code>consult@illinois.edu</code>.</p>
-      <p class="meta">Don't infer private reporting routes, internal ticket links, or the Microsoft tenant name from
-        public pages. Ask an authorized administrator to supply or confirm those values.</p>
-    </section>
-
-    <section class="step" id="tour-02" data-tour="2">
-      <h2><span class="badge">02</span>Separate public information from deployment settings</h2>
-      <p>Keep two categories separate. Public information comes from the organization's published pages. Deployment
-        settings must be supplied or confirmed by an authorized administrator. The tenant-specific values shown here
-        belong to the Microsoft lab used for this recording.</p>
-      <div class="boundary-grid">
-        <div class="boundary-card">
-          <h3>Public information</h3>
-          <ul>
-            <li>University of Illinois Urbana-Champaign</li>
-            <li>Public AI guidance pages</li>
-            <li>Published service desk and support mailbox</li>
-            <li>Public security, privacy, and training resources</li>
-          </ul>
+    <section id="profile">
+      <h2>Choose content and environment separately</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>Content profile</h3>
+          <p>Higher education uses <code>Org-Template</code> and <code>LearningEnvironment: HigherEducation</code>.</p>
         </div>
-        <div class="boundary-card">
-          <h3>Deployment settings &mdash; Microsoft lab only</h3>
-          <ul>
-            <li>Tenant: <code>yourtenant.onmicrosoft.com</code></li>
-            <li>Admin host: <code>yourtenant-admin.sharepoint.com</code></li>
-            <li>Site host: <code>yourtenant.sharepoint.com</code></li>
-            <li>Administrator account and provisioning-app client ID</li>
-          </ul>
+        <div class="card">
+          <h3>Environment</h3>
+          <p>This walkthrough targets commercial Microsoft 365 only. GCC Moderate, GCC High, and DoD are out of
+            scope here; use the separate <a href="government-install.html">GCC Moderate runbook</a> for a
+            state or local government deployment in GCC Moderate.</p>
         </div>
       </div>
-      <p class="meta">For a real deployment, use the organization's authorized tenant, SharePoint hosts, administrator
-        account, and app registration.</p>
+      <div class="warning"><strong>Environment boundary:</strong> this walkthrough covers commercial Microsoft 365
+        only. A prior acceptance result does not replace acceptance in another customer tenant.</div>
+      <p class="meta">For what changed between releases, see the
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit#readme">release notes in the kit's README on GitHub</a>.</p>
     </section>
 
-    <section class="step" id="tour-03" data-tour="3">
-      <h2><span class="badge">03</span>Verify and extract the release package</h2>
+    <section id="package">
+      <h2 class="step-title"><span class="step-number">01</span>Verify and extract the implementation package</h2>
       <figure>
-        <img class="shot" src="Images/ps-tenants.png" alt="PowerShell 7 terminal showing the known lab tenants and certificate status before starting work">
+        <img class="site-shot" src="Images/ps-tenants.png" loading="lazy" alt="PowerShell 7 terminal showing the known lab tenants and certificate status before starting work">
         <figcaption>PowerShell 7 terminal, confirming the correct lab tenant before any kit command runs.</figcaption>
       </figure>
-      <p><strong>Run each block below separately in PowerShell 7.4 or later.</strong> Do not extract the ZIP first
-        and return to the verification steps afterward. Windows can transfer the internet security mark from a
-        blocked ZIP to every PowerShell script inside it.</p>
+      <p>Run each block separately in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen
+        implementation ZIP and its matching release receipt. Release 3.8.24 SHA256:</p>
+      <p><code>EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9D</code></p>
+      <div class="warning"><strong>GitHub ZIP distinction:</strong> download the named
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
+        release asset and verify it against the attached
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.
+        GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, and repository
+        <em>Download ZIP</em> are source snapshots, not installation packages.</div>
       <h3>1. Set the paths</h3>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-paths">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-paths">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
-  throw 'Open PowerShell 7.4 or later (pwsh).'
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-paths">Copy command</button></div>
+      <pre id="cmd-highered-paths">if ($PSVersionTable.PSVersion -lt [version]'7.4') {
+  throw 'Open PowerShell 7.4 or later (pwsh). The kit scripts require it.'
 }
 $zip = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip'
 $receipt = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip.sha256'
@@ -473,126 +488,97 @@ $expectedHash = 'EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9
 $installRoot = 'C:\CoE-Install\DemoOrg-v3.8.24'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'</pre>
-
       <h3>2. Verify the ZIP and receipt</h3>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-verify">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-verify">Copy command</button></div>
+      <pre id="cmd-highered-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
 $receiptHash = ((Get-Content -LiteralPath $receipt -Raw).Trim() -split '\s+')[0]
 if ($zipHash -ne $expectedHash -or $receiptHash -ne $expectedHash) {
   throw 'The implementation ZIP or its receipt does not match release 3.8.24.'
 }
 Write-Host 'Release ZIP and receipt verified.'</pre>
-
       <h3>3. Unblock the ZIP before extraction</h3>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-unblock">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-unblock">Unblock-File -LiteralPath $zip
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-unblock">Copy command</button></div>
+      <pre id="cmd-highered-unblock">Unblock-File -LiteralPath $zip
 Write-Host 'ZIP unblocked. It is now safe to extract.'</pre>
       <p>GUI equivalent: right-click the ZIP, select <strong>Properties</strong>, select <strong>Unblock</strong> if
-        shown, and select <strong>OK</strong>. Do this before selecting <strong>Extract All</strong>.</p>
-      <div class="boundary-card">
-        <h3>If you already extracted a blocked ZIP</h3>
-        <p>A message that a <code>.ps1</code> file is not digitally signed means Windows blocked the downloaded
-          content before PowerShell could load it. Delete the extraction and start again from the verified,
-          unblocked ZIP (recommended), or unblock every file in that existing extraction:</p>
-        <div class="command-head"><button type="button" data-copy="cmd-highered-unblock-existing">Copy command</button></div>
-        <pre class="code-panel" id="cmd-highered-unblock-existing">Get-ChildItem -LiteralPath $installRoot -Recurse -File | Unblock-File</pre>
-      </div>
-
+        shown, and select <strong>OK</strong> before <strong>Extract All</strong>.</p>
+      <div class="warning"><strong>Already extracted while blocked?</strong> A message that a <code>.ps1</code> file
+        is not digitally signed means Windows blocked the downloaded content before PowerShell could load it.
+        Delete that extraction and start again from the unblocked ZIP (recommended), or run:
+        <code>Get-ChildItem -LiteralPath $installRoot -Recurse -File | Unblock-File</code>.</div>
       <h3>4. Extract into a fresh kit folder</h3>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-extract">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-extract">if (Test-Path -LiteralPath $installRoot) {
-  throw "Use a new install folder: $installRoot"
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-extract">Copy command</button></div>
+      <pre id="cmd-highered-extract">if (Test-Path -LiteralPath $installRoot) {
+  throw "Use a new, empty install folder: $installRoot"
 }
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
 Set-Location $kitRoot
-Write-Host "Kit extracted to $kitRoot"</pre>
-
+Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
       <h3>5. Create the separate organization folder</h3>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-profile">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-profile">if (Test-Path -LiteralPath $orgPath) {
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-profile">Copy command</button></div>
+      <pre id="cmd-highered-profile">if (Test-Path -LiteralPath $orgPath) {
   throw "Review the existing organization folder first: $orgPath"
 }
 Copy-Item -LiteralPath '.\Org-Template' -Destination $orgPath -Recurse
 # State/local government instead:
-# Copy-Item -LiteralPath '.\ContentPacks\Government-StateLocal' -Destination $orgPath -Recurse
-Write-Host "Organization profile created at $orgPath"</pre>
-      <p><code>$kitRoot</code> contains the installer. <code>$orgPath</code> contains the organization's settings,
-        content overrides, and approved assets. Every script's <code>-OrgPath</code> argument must point to the
-        separate organization folder, not the extracted package root and not the <code>Internal</code> folder.</p>
-      <div class="boundary-card">
-        <h3>Which GitHub ZIP can I install?</h3>
-        <p><strong>Download the named
-          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
-          release asset</strong> and verify it against the attached
-          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.</p>
-        <p><strong>Do not substitute GitHub's generated source archives:</strong> <em>Source code (zip)</em>,
-          <em>Source code (tar.gz)</em>, or the repository's <em>Code &gt; Download ZIP</em>. Those files are source
-          snapshots, not the frozen implementation package.</p>
-        <p class="meta">The warning is about GitHub's automatic source snapshots, not the named, hash-matched
-          implementation asset attached to release 3.8.24.</p>
-      </div>
+# Copy-Item -LiteralPath '.\ContentPacks\Government-StateLocal' -Destination $orgPath -Recurse</pre>
+      <p class="meta"><code>$kitRoot</code> contains the installer. <code>$orgPath</code> contains the
+        organization's settings, content overrides, and approved assets. Keep the organization folder outside the
+        extracted kit. Future kit extraction must not overwrite settings, content, assets, transcripts, or
+        deployment identity records.</p>
     </section>
 
-    <section class="step" id="tour-04" data-tour="4">
-      <h2><span class="badge">04</span>Configure identity, security, and environment</h2>
+    <section id="settings">
+      <h2 class="step-title"><span class="step-number">02</span>Edit the organization settings file</h2>
       <figure>
-        <img class="shot" src="Images/ps-settings-json.png" alt="Deployment Settings JSON open in an editor showing tenant, identity, security and environment fields">
+        <img class="site-shot" src="Images/ps-settings-json.png" loading="lazy" alt="Deployment Settings JSON open in an editor showing tenant, identity, security and environment fields">
         <figcaption>Deployment settings used in the lab recording.</figcaption>
       </figure>
-      <p>Open <code>$orgPath\Deployment-Settings.json</code>. This is the organization copy created in step 03; do not
-        edit the generic file under <code>$kitRoot</code> or <code>$kitRoot\Org-Template</code>.</p>
-      <table class="source-table">
-        <thead><tr><th scope="col">JSON field</th><th scope="col">Value to enter</th><th scope="col">Where it comes from</th></tr></thead>
+      <p>Edit <code>$orgPath\Deployment-Settings.json</code>. Do not edit the copies under
+        <code>$kitRoot</code> or <code>$kitRoot\Org-Template</code>.</p>
+      <table>
+        <thead><tr><th scope="col">JSON field</th><th scope="col">Higher-ed value</th><th scope="col">Where the value comes from</th></tr></thead>
         <tbody>
-          <tr><td><code>Tenant</code></td><td><code>yourtenant.onmicrosoft.com</code></td><td>The tenant's primary <code>.onmicrosoft.com</code> domain.</td></tr>
-          <tr><td><code>AdminFQDN</code></td><td><code>yourtenant-admin.sharepoint.com</code></td><td>The SharePoint admin-center host, without <code>https://</code> or a path.</td></tr>
-          <tr><td><code>SiteFQDN</code></td><td><code>yourtenant.sharepoint.com</code></td><td>The SharePoint content host, without <code>https://</code> or a path.</td></tr>
-          <tr><td><code>PnPClientID</code></td><td>Blank for the tenant's first kit registration</td><td>Step 06 writes the new tenant-owned app ID. Never carry a client ID into another tenant.</td></tr>
-          <tr><td><code>SharedChannelOwnerUPN</code></td><td><code>coe-owner@your-domain</code></td><td>An existing in-tenant Member account approved to own the restricted governance channels.</td></tr>
-          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>The approved full name, reader-facing noun, and abbreviation</td><td>For a higher-ed profile: <code>Contoso University</code>, <code>university</code>, <code>CU</code>.</td></tr>
-          <tr><td><code>MailNickname</code></td><td>A unique Microsoft 365 group alias</td><td>This value chooses the Team alias and SharePoint site path. Changing only <code>$siteUrl</code> does not change the installation target.</td></tr>
-          <tr><td><code>DisplayName</code></td><td>The approved Team and hub title, ideally 30 characters or fewer</td><td>A longer title triggers a STOP / PROCEED advisory and requires a 1366px navigation review. Do not put lab wording in a customer profile.</td></tr>
+          <tr><td><code>Tenant</code></td><td>The primary <code>.onmicrosoft.com</code> domain</td><td>Confirm with the tenant administrator; never infer it from a university web page.</td></tr>
+          <tr><td><code>AdminFQDN</code></td><td>SharePoint admin host, no protocol/path</td><td>Copy the actual admin-center host from this tenant.</td></tr>
+          <tr><td><code>SiteFQDN</code></td><td>SharePoint content host, no protocol/path</td><td>Copy the actual content host; the team site may use <code>/teams/</code>, not <code>/sites/</code>.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Blank only when this tenant has no approved kit app</td><td>Reuse this tenant's approved app ID and skip script 01; never reuse an app ID from another tenant.</td></tr>
+          <tr><td><code>SharedChannelOwnerUPN</code></td><td>Approved in-tenant Member</td><td>Obtain from the governance owner; a public university mailbox is not sufficient.</td></tr>
+          <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved university name, <code>university</code>, and abbreviation</td><td>Use the organization's actual name and reader-facing language; public branding needs owner review.</td></tr>
+          <tr><td><code>MailNickname</code></td><td>Unique Microsoft 365 group alias</td><td>Confirm it is unused, including deleted groups/sites. This field sets the Team alias and site path.</td></tr>
+          <tr><td><code>DisplayName</code></td><td>Approved Team/hub title, ideally 30 characters or fewer</td><td>Longer names trigger an advisory and require a 1366px navigation review.</td></tr>
           <tr><td><code>TeamVisibility</code></td><td><code>Private</code></td><td>Required by the installer.</td></tr>
-          <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code></td><td>Customer default. External preview is a separate, approved lab decision.</td></tr>
-          <tr><td><code>OrganizationEmailDomains</code></td><td>Approved UPN domains for this tenant</td><td>Used to flag out-of-domain Team members; do not copy domains from another deployment.</td></tr>
-          <tr><td><code>GovernanceAdditionalAllowedMembers</code></td><td>Approved in-tenant UPNs, or <code>[]</code></td><td>Additional people allowed in the restricted governance shared channels.</td></tr>
-          <tr><td><code>CatalogReviewerUPNs</code></td><td>Approved in-tenant reviewer UPNs, or <code>[]</code></td><td>Reviewers receive the catalog approval role; no guests are invited.</td></tr>
-          <tr><td><code>EnvironmentLabel</code></td><td><code>Production</code>, <code>Pilot</code>, or another approved label</td><td>Reader-facing environment name.</td></tr>
-          <tr><td><code>SampleNotice</code></td><td><code>none</code> for approved Customer content</td><td>Use a visible disclaimer for Demo mode. Blank does not mean no notice; <code>none</code> does.</td></tr>
-          <tr><td><code>SupportEmail</code></td><td>An approved, monitored mailbox</td><td>Used by generated support mail links. A public contact is not automatically an approved support route.</td></tr>
-          <tr><td><code>LearningEnvironment</code></td><td><code>HigherEducation</code> or <code>Government</code></td><td>Selects the supported learning and tool experience.</td></tr>
-          <tr><td><code>GuidesIntro</code>, <code>StoryAudiences</code>, <code>ScenarioLibraryUrl</code></td><td>Use the values supplied by the selected content pack, then review them</td><td>The Government pack supplies government audiences and scenario links; do not leave education defaults in a government profile.</td></tr>
-          <tr><td><code>TimeZone</code></td><td>A Windows time-zone ID</td><td>For example, <code>Eastern Standard Time</code> or <code>Central Standard Time</code>.</td></tr>
+          <tr><td><code>CoESiteSharingCapability</code></td><td><code>Disabled</code></td><td>Customer default; external preview needs separate approval.</td></tr>
+          <tr><td><code>OrganizationEmailDomains</code></td><td>Approved in-tenant UPN domains</td><td>Get from the identity/security owner, not another deployment.</td></tr>
+          <tr><td><code>GovernanceAdditionalAllowedMembers</code></td><td>Approved UPNs or <code>[]</code></td><td>Only in-tenant Members approved for restricted channels.</td></tr>
+          <tr><td><code>CatalogReviewerUPNs</code></td><td>Approved UPNs or <code>[]</code></td><td>Catalog approval reviewers; do not copy a lab account.</td></tr>
+          <tr><td><code>EnvironmentLabel</code></td><td><code>Production</code>, <code>Pilot</code>, or approved label</td><td>Reader-facing operational owner decision.</td></tr>
+          <tr><td><code>SampleNotice</code></td><td><code>none</code> after Customer content approval</td><td>Demo mode requires a visible disclaimer. Blank does not mean no notice.</td></tr>
+          <tr><td><code>SupportEmail</code></td><td>Approved, monitored support mailbox</td><td>Confirm owner and monitoring; an admin lab address triggers a WARN, not production approval.</td></tr>
+          <tr><td><code>TimeZone</code></td><td>Windows time-zone ID</td><td>Confirm regional schedule, for example <code>Eastern Standard Time</code>.</td></tr>
+          <tr><td><code>LearningEnvironment</code></td><td><code>HigherEducation</code></td><td>Selects the supported learning and tool experience.</td></tr>
+          <tr><td><code>GuidesIntro</code>, <code>StoryAudiences</code></td><td>Reviewed higher-ed wording, faculty/staff/students/IT</td><td>Start with the pack's values; replace only with approved university language.</td></tr>
+          <tr><td><code>ScenarioLibraryUrl</code></td><td>Higher-ed scenario library URL</td><td>Retain the pack's public Microsoft adoption link or use an approved alternative.</td></tr>
         </tbody>
       </table>
-      <p>Every row above is edited in <code>$orgPath\Deployment-Settings.json</code>; the table says
-        <em>where to obtain its value</em>, not where to edit it. Do not modify the kit copy. Never copy
-        another tenant's <code>PnPClientID</code>, deployment report, advisory decisions, or
-        <code>RevisionAudit</code> into a fresh organization folder.</p>
-      <p>If this is the tenant's first installation, leave <code>PnPClientID</code> blank for now. Step 06 registers
-        the provisioning app and saves its client ID. An additional organization profile in the same tenant may use
-        the client ID of a kit-created app that is already approved there. Do not reuse that ID across tenants.</p>
-      <p>For this higher-education walkthrough, set <code>LearningEnvironment</code> to
-        <code>HigherEducation</code>. State and local government administrators should copy
-        <code>ContentPacks\Government-StateLocal</code> in step 03 and retain its
-        <code>LearningEnvironment: Government</code> setting. Keep
-        <code>TeamVisibility</code> set to <code>Private</code> and <code>CoESiteSharingCapability</code> set to
-        <code>Disabled</code>, unless the organization has explicitly approved a different configuration.</p>
-      <p>Choose the alias carefully: it becomes the Team and site path and must meet Microsoft 365 naming
-        requirements. Keep the content mode the same for install, update, and both checker runs. Do not assume
-        that a new site will use <code>/sites/</code>; after a completed install, read its URL from the report:</p>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-settings">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-settings">$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+      <p>All fields in this comparison are edited in <code>$orgPath\Deployment-Settings.json</code>. The
+        third column describes where to <em>obtain</em> each value, not another file to modify.</p>
+      <div class="danger"><strong>New tenant:</strong> do not copy <code>PnPClientID</code>,
+        <code>CoE-Revision-Report.json</code>, <code>CoE-Removal-Manifest.json</code>,
+        <code>CoE-Purge-Receipt.json</code>, advisory decisions, wrapper state, or
+        <code>RevisionAudit</code> from another deployment.</div>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-settings">Copy command</button></div>
+      <pre id="cmd-highered-settings">$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
 $contentMode = 'Customer' # Demo requires a clearly labeled synthetic demonstration.
 # After script 02 completes:
 $siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | ConvertFrom-Json).Site</pre>
     </section>
 
-    <section class="step" id="tour-05" data-tour="5">
-      <h2><span class="badge">05</span>Configure support, governance, and content</h2>
-      <p>Continue editing <code>$orgPath\Deployment-Settings.json</code>. Use routes approved by the teams that own
-        them; do not infer internal mailboxes, ticket queues, or incident endpoints from a public website.</p>
-      <pre class="code-panel">"Links": {
+    <section id="content">
+      <h2 class="step-title"><span class="step-number">03</span>Configure support, governance, and reviewed content</h2>
+      <p>Use routes supplied or approved by their owners. Do not infer private mailboxes, ticket queues, incident
+        endpoints, or tenant values from a public website.</p>
+      <pre>"Links": {
   "ServiceDesk": "https://www.techservices.illinois.edu/get-help/it-service-desk/",
   "TechnologyRequest": "https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog",
   "DataSafetyIncident": "https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/",
@@ -603,69 +589,63 @@ $siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | C
   { "label": "Data handling and intellectual property best practices", "url": "https://genai.illinois.edu/best-practice-data-handling-and-intellectual-property/" },
   { "label": "Microsoft Copilot Chat guidance", "url": "https://genai.illinois.edu/ai-apps-copilot-chat/" }
 ]</pre>
-      <table class="source-table">
-        <thead><tr><th scope="col">Field</th><th scope="col">What it must contain</th></tr></thead>
+      <table>
+        <thead><tr><th scope="col">Field or folder</th><th scope="col">Required review</th></tr></thead>
         <tbody>
-          <tr><td><code>SupportEmail</code></td><td>A monitored mailbox approved for the generated CoE support links.</td></tr>
-          <tr><td><code>Links.ServiceDesk</code></td><td>The general IT support or service-center route.</td></tr>
-          <tr><td><code>Links.TechnologyRequest</code></td><td>The approved service, software, or AI-technology request process.</td></tr>
-          <tr><td><code>Links.DataSafetyIncident</code></td><td>The approved security or data-incident reporting route; keep it separate from ordinary feedback.</td></tr>
-          <tr><td><code>Links.AIGuidelines</code></td><td>The organization's current AI or responsible-use guidance.</td></tr>
-          <tr><td><code>Links.AboutOrg</code></td><td>The organization's official public page.</td></tr>
-          <tr><td><code>Links.PromptLibrary</code>, <code>Links.LearningSystem</code></td><td>Optional approved existing destinations; blank is allowed.</td></tr>
-          <tr><td><code>GovernanceLinks</code>, <code>TrainingLinks</code></td><td>Reviewed label-and-URL entries shown on generated pages.</td></tr>
-          <tr><td><code>ChampionDepartments</code>, <code>Agents</code></td><td>Real approved units and agent entries. Remove template examples you are not adopting.</td></tr>
+          <tr><td><code>SupportEmail</code></td><td>Monitored mailbox behind generated CoE mail links.</td></tr>
+          <tr><td><code>Links.ServiceDesk</code></td><td>General technical-support route.</td></tr>
+          <tr><td><code>Links.TechnologyRequest</code></td><td>Approved software, service, or AI request process.</td></tr>
+          <tr><td><code>Links.DataSafetyIncident</code></td><td>Approved security/data incident route, separate from ordinary feedback.</td></tr>
+          <tr><td><code>Links.AIGuidelines</code></td><td>Current responsible-AI or acceptable-use guidance.</td></tr>
+          <tr><td><code>Links.AboutOrg</code></td><td>Official public organization page, if applicable.</td></tr>
+          <tr><td><code>Links.PromptLibrary</code>, <code>Links.LearningSystem</code></td><td>Optional approved destinations; blank is allowed.</td></tr>
+          <tr><td><code>GovernanceLinks</code>, <code>TrainingLinks</code></td><td>Reviewed labels and URLs shown on generated pages.</td></tr>
+          <tr><td><code>ChampionDepartments</code>, <code>Agents</code></td><td>Real reviewed units and agent records; remove sample proposals.</td></tr>
+          <tr><td><code>$orgPath\Content</code></td><td>Organization text overrides. Review every illustrative governance draft.</td></tr>
+          <tr><td><code>$orgPath\Assets</code></td><td>Approved files only. Review before using <code>-AcceptOrgAssets</code>.</td></tr>
         </tbody>
       </table>
-      <p>Put organization text overrides under <code>$orgPath\Content</code> and approved hosted files under
-        <code>$orgPath\Assets</code>. Do not edit <code>$kitRoot\SeedContent</code>. Run the local structured-content
-        check before authentication:</p>
-      <table class="source-table">
+      <p>If any of the four <code>Links</code> routes is empty, script 02 asks STOP / PROCEED before it creates anything
+        (see Step 06). PROCEED publishes a visible &ldquo;route not configured&rdquo; notice, not a working endpoint.</p>
+      <table>
         <thead><tr><th scope="col">Change</th><th scope="col">Edit here</th><th scope="col">What happens on script 03</th></tr></thead>
         <tbody>
-          <tr><td>Tenant, identity, approved routes, profile and title</td><td><code>$orgPath\Deployment-Settings.json</code></td><td>Most content settings republish; tenant, alias and governance owner are fixed at installation.</td></tr>
-          <tr><td>Guides, sections, policies, calendar and catalog seeds</td><td><code>$orgPath\Content</code></td><td>Kit-managed pages can be replaced. Changed governance drafts require deliberate <code>-ReplaceFiles</code>.</td></tr>
-          <tr><td>Reviewed documents, images and videos</td><td><code>$orgPath\Assets</code></td><td>Script 03 asks before hosting new files; review each asset first.</td></tr>
-          <tr><td>Observed site, Team ID and run evidence</td><td><code>$orgPath\CoE-Revision-Report.json</code> and <code>RevisionAudit</code></td><td>Generated records. Preserve them; never edit them to force a different deployment.</td></tr>
+          <tr><td>Tenant, identity, profile, approved routes and title</td><td><code>$orgPath\Deployment-Settings.json</code></td><td>Most content values republish; tenant, alias and governance owner are fixed at install.</td></tr>
+          <tr><td>Guides, policies, catalog seeds and training calendar</td><td><code>$orgPath\Content</code></td><td>Managed pages can be replaced. Changed governance drafts require deliberate <code>-ReplaceFiles</code>.</td></tr>
+          <tr><td>Reviewed documents, images and videos</td><td><code>$orgPath\Assets</code></td><td>New files require an explicit hosting decision; review every asset.</td></tr>
+          <tr><td>Observed site, Team ID and run evidence</td><td><code>$orgPath\CoE-Revision-Report.json</code> and <code>RevisionAudit</code></td><td>Generated records. Preserve them; never edit them to force another deployment.</td></tr>
         </tbody>
       </table>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-preflight">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-preflight">Set-Location $kitRoot
+    </section>
+
+    <section id="preflight">
+      <h2 class="step-title"><span class="step-number">04</span>Run local preflight before authentication</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-preflight">Copy command</button></div>
+      <pre id="cmd-preflight">Set-Location $kitRoot
 . .\Internal\ContentPreflight.ps1
 Get-Command Assert-CoEStructuredOrganizationContent -ErrorAction Stop
 Assert-CoEStructuredOrganizationContent -OrgPath $orgPath
 Write-Host 'Offline content preflight completed.'</pre>
-      <div class="boundary-card">
-        <h3>The dot and space are required</h3>
-        <p><code>. .\Internal\ContentPreflight.ps1</code> starts with a dot followed by a space. This
-          <em>dot-sources</em> the file and keeps its function in the current PowerShell session. Running only
-          <code>.\Internal\ContentPreflight.ps1</code> can appear to do nothing, then the assertion command is not
-          recognized because the function was not retained.</p>
-        <p>The assertion itself can also finish silently when the organization profile has no
-          <code>Content\Training-Calendar.csv</code> override. <code>Get-Command</code> confirms the function loaded,
-          and the final message confirms that the offline check completed.</p>
-      </div>
-      <p class="meta">Local preflight catches malformed structured overrides before sign-in; it does not prove that
-        the tenant, mailbox, public policy links, or reader-facing material is approved.</p>
+      <div class="warning"><strong>The dot and space are required.</strong>
+        <code>. .\Internal\ContentPreflight.ps1</code> dot-sources the file into the current session. Running only
+        <code>.\Internal\ContentPreflight.ps1</code> can appear to do nothing and does not retain the assertion
+        function. The assertion can also finish silently when no organization training-calendar override exists;
+        <code>Get-Command</code> and the completion message make success explicit.</div>
+      <p class="meta">This checks organization content locally. It does not validate tenant identity, permissions,
+        URLs, support monitoring, policy approval, or reader experience.</p>
     </section>
 
-    <section class="step" id="tour-06" data-tour="6">
-      <h2><span class="badge">06</span>Install PnP.PowerShell and register the app</h2>
-      <p>These are separate actions. Installing and verifying the local module does not connect to Microsoft 365.
-        Script 01 is the first tenant operation.</p>
-      <div class="boundary-card">
-        <h3>Already have the approved app in this tenant?</h3>
-        <p>Put its Application (client) ID in <code>$orgPath\Deployment-Settings.json</code> as
-          <code>PnPClientID</code>, verify the five delegated permissions and
-          <strong>Allow public client flows = Yes</strong>, and skip script 01. Script 01 creates a new app rather
-          than updating the existing one. Rerunning it creates a duplicate, overwrites this profile&rsquo;s
-          <code>PnPClientID</code>, and leaves the prior app in Entra.</p>
-      </div>
+    <section id="register">
+      <h2 class="step-title"><span class="step-number">05</span>Install PnP.PowerShell and register the tenant app</h2>
+      <div class="danger"><strong>Reuse an existing approved app; do not rerun script 01.</strong> Put its Application
+        (client) ID in <code>PnPClientID</code>, verify the permissions and public-client setting below, and continue
+        to Step 06. Script 01 creates a new app rather than updating the old one. Rerunning it creates a duplicate,
+        overwrites this profile's <code>PnPClientID</code>, and leaves the prior app in Entra.</div>
       <h3>1. Install and verify the required local module</h3>
       <p>Use the copy button for the command block below. Do not paste terminal prompt text such as
         <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-pnp">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-pnp"># Re-enter the actual paths if you opened a new PowerShell window.
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-pnp">Copy command</button></div>
+      <pre id="cmd-highered-pnp"># Re-enter the actual paths if you opened a new PowerShell window.
 $kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 Set-Location -LiteralPath $kitRoot
@@ -681,47 +661,63 @@ Import-Module PnP.PowerShell -RequiredVersion 3.2.0 -ErrorAction Stop
 Get-Module PnP.PowerShell -ListAvailable |
   Where-Object Version -eq ([version]'3.2.0') |
   Select-Object Name, Version, Path</pre>
-      <p class="meta">Use <code>Install-PSResource</code>, included with supported PowerShell 7 releases. The
-        repository check handles machines where PowerShell Gallery is not registered and avoids the legacy
+      <p>Use <code>Install-PSResource</code>, included with supported PowerShell 7 releases. The repository check
+        handles machines where PowerShell Gallery is not registered and avoids the legacy
         <code>PowerShellGet</code> autoload failure associated with <code>Install-Module</code>.</p>
-
-      <h3>2. Register the tenant app</h3>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-register"># Keep this block self-contained if it is run in another PowerShell window.
+      <h3>2. Only when this tenant has no approved kit app, register one</h3>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-register">Copy command</button></div>
+      <pre id="cmd-highered-register"># Keep this block self-contained if it is run in another PowerShell window.
 $kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 Set-Location -LiteralPath $kitRoot
 .\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
-# Confirm script 01 saved a non-empty client ID before installation.
+# Confirm script 01 saved a non-empty client ID.
 (Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
-      <p class="meta">Running <code>pwsh</code> starts another PowerShell session and clears ordinary variables such
-        as <code>$kitRoot</code> and <code>$orgPath</code>. Re-enter the paths in that new session before using a
+      <p>Running <code>pwsh</code> starts another PowerShell session and clears ordinary variables such as
+        <code>$kitRoot</code> and <code>$orgPath</code>. Re-enter the paths in that new session before using a
         relative <code>.\</code> script path.</p>
-      <p class="meta">This recording uses PowerShell 7.6.7. The kit requires PowerShell 7.4 or later and
-        PnP.PowerShell 3.2.0.</p>
-      <p class="meta">Someone authorized to grant the required app permissions runs the registration script once per
-        tenant, then confirms in Entra that every required delegated permission shows Granted. The script saves the
-        new client ID to the organization settings file.</p>
-      <div class="boundary-card">
-        <h3>Same approval gate as the GCC runbook</h3>
-        <p>Confirm the four Microsoft Graph delegated permissions <code>Group.ReadWrite.All</code>,
-          <code>ChannelMember.ReadWrite.All</code>, <code>User.Read</code>, and <code>User.Read.All</code>,
-          plus SharePoint <code>AllSites.FullControl</code>, show <strong>Granted</strong>. On that app,
-          <strong>Authentication &gt; Settings &gt; Allow public client flows</strong> must be <strong>Yes</strong>.
-          Script 01 saves the client ID before this check, so if it stops, fix the same registration instead of
-          creating a duplicate.</p>
-        <p>Before script 02, review <strong>Entra &gt; Groups &gt; Naming policy</strong>. If a prefix or suffix
-          would rewrite the Team alias, use an exempt Global or User Administrator or resolve the policy.
-          Sign in as the shared-channel owner or a Global Administrator. In Teams admin center, make the
-          Website, PDF, PowerPoint, and SharePoint page/list tab apps available to the installer and readers;
-          <em>Unblocked</em> with <em>Available to: No one</em> is not available.</p>
-      </div>
+      <p>When no approved app exists, run script 01 once as an approved consent approver. It creates the single-tenant
+        <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings file.
+        Never copy that ID to another tenant.</p>
+      <p>In Microsoft Entra, grant tenant-wide admin consent and confirm these delegated permissions show
+        <strong>Granted</strong>:</p>
+      <ul>
+        <li>Microsoft Graph: <code>Group.ReadWrite.All</code>, <code>ChannelMember.ReadWrite.All</code>,
+          <code>User.Read</code>, and <code>User.Read.All</code></li>
+        <li>SharePoint: <code>AllSites.FullControl</code></li>
+      </ul>
+      <p>On the same app, open <strong>Authentication &gt; Settings</strong> and confirm <strong>Allow public client
+        flows</strong> is <strong>Yes</strong>. Script 01 does not change this setting; it checks it and, if it is off,
+        stops after saving <code>PnPClientID</code> with the exact Entra path. Turn it on, save, and continue. Scripts
+        02, 03, 04 and the checker run the same check before sign-in.</p>
+      <div class="danger"><strong>Gate before Step 06: group naming policy and installer identity.</strong> Open
+        <strong>Entra admin center &gt; Groups &gt; Naming policy</strong>. If a prefix or suffix is configured, it is
+        applied to the CoE alias too; script 02 would then create the Team and site but fail to find them, and a second
+        run would create another. Run Step 06 as a Global Administrator or User Administrator (activate the role
+        first if it is eligible through Privileged Identity Management), which are exempt, or have the policy changed for
+        the install. Script 02 tries to read the policy, but this app's least-privilege permissions often cannot, so do
+        not rely on its warning. Also run Step 06 as the <code>SharedChannelOwnerUPN</code> account or as a Global
+        Administrator; other operators are untested for writing the governance documents.</div>
+      <p>Before installation, confirm in Teams admin center that the installer and intended CoE users can use these
+        built-in tab providers:</p>
+      <ul>
+        <li>Website: <code>com.microsoft.teamspace.tab.web</code></li>
+        <li>PDF: <code>com.microsoft.teamspace.tab.file.staticviewer.pdf</code></li>
+        <li>PowerPoint: <code>com.microsoft.teamspace.tab.file.staticviewer.powerpoint</code></li>
+        <li>SharePoint pages/lists: <code>2a527703-1f6f-4559-a332-d8a7d288cd88</code></li>
+      </ul>
+      <p>Use <strong>Teams apps &gt; Manage apps</strong>. Under app-centric management, <strong>App status:
+        Unblocked</strong> is not sufficient when <strong>Available to</strong> says <strong>No one</strong>; that
+        still denies every user. Select the Microsoft app row and choose <strong>Edit availability</strong> (or
+        <strong>Users and groups &gt; Availability</strong>) for the approved users/groups. Do not use
+        <strong>Add to team</strong> as a substitute. Under legacy app permission policies, verify the policy assigned
+        to the installer and intended users. Policy changes can take hours and up to 24 hours.</p>
     </section>
 
-    <section class="step" id="tour-07" data-tour="7">
-      <h2><span class="badge">07</span>Start the clean installation</h2>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-install">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-install">$ErrorActionPreference = 'Stop'
+    <section id="install">
+      <h2 class="step-title"><span class="step-number">06</span>Run the clean Customer install</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-install">Copy command</button></div>
+      <pre id="cmd-install">$ErrorActionPreference = 'Stop'
 $kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 $contentMode = 'Customer'
@@ -729,40 +725,61 @@ Set-Location -LiteralPath $kitRoot
 
 $settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
 if ([string]::IsNullOrWhiteSpace($settings.PnPClientID)) {
-  throw 'Run script 01 and confirm admin consent before installation.'
+  throw 'Run script 01 and grant admin consent before installation.'
 }
 try {
-  &amp; .\02_Install-CopilotCoE.ps1 `
+  & .\02_Install-CopilotCoE.ps1 `
     -OrgPath $orgPath `
     -ContentMode $contentMode `
     -SeedDemoContent
 } catch {
-  Write-Host 'Installation stopped. Do not run the checker or start another clean install.' -ForegroundColor Red
+  Write-Host 'Installer did not complete. Stop here: keep the transcript in RevisionAudit, do not start clean or purge, and see Failure and recovery below.' -ForegroundColor Red
   throw
-}
-      </pre>
-      <p>Run this block by itself and wait for script 02 to print its completion message. Do not continue to the
-        report-reading or checker commands after a failed or partial installation.</p>
-      <p><code>-SeedDemoContent</code> publishes the pages, catalogs, calendar, and governance content. Without it,
-        the installer creates only the Team and an empty SharePoint site.</p>
-      <p>The command above explicitly sets <code>$contentMode</code> to <code>Customer</code> for an approved customer
-        deployment. Change it to <code>Demo</code> only for a labeled synthetic demonstration. This recorded lab used
-        <code>Demo</code> to retain demonstration notices.
-        Review source files and existing site content yourself; changing the mode does not replace that review.</p>
-      <p>This is a clean install, so <code>-ResumeExisting</code> is not used. If an earlier attempt already created a
-        Team or site, investigate first. Then either resume that exact deployment or use
-        <code>04_Remove-CopilotCoE.ps1</code> before starting again. Deleting only the SharePoint site leaves the Team
-        and Microsoft 365 group behind, so the next installation can conflict with them.</p>
-      <p>Script 02 prompts <strong>STOP</strong> or <strong>PROCEED</strong> for a long title, lab support
-        mailbox, missing support routes, naming policy, a different owner/operator, or a fallback header.
-        STOP is the default. PROCEED acknowledges that one fact for a reviewed pilot; it does not verify a
-        mailbox, make an incident route work, or waive manual acceptance. Prompts that arise after the
-        Team/site exists require investigation and <code>-ResumeExisting</code>, not another clean run.</p>
-    </section>
-
-    <section class="step" id="tour-08" data-tour="8">
-      <h2><span class="badge">08</span>Review the checks before creation</h2>
-      <pre class="code-panel"><span class="muted">Organization folder: C:\CoE-Orgs\DemoOrg
+}</pre>
+      <p>Run this installation block by itself and wait for script 02 to print its completion message. Do not run the
+        report-reading or checker block after a failed or partial installation.</p>
+      <p><code>MailNickname</code> chooses the Team alias and SharePoint site path. <code>$siteUrl</code> is read from
+        the deployment report after a completed install and is used only by the checker; changing it does not change the
+        install target.</p>
+      <p><code>-SeedDemoContent</code> is still required in Customer mode because it publishes the managed pages,
+        catalogs, calendar, and governance content. Customer mode filters generated demonstration notices and sample
+        rows. This recorded lab used Demo mode to retain demonstration notices; review source files and existing site
+        content yourself, since changing the mode does not replace that review.</p>
+      <div class="warning">Before creation, read the signed-in account, tenant, group-naming-policy warning, alias,
+        owner, and target URL printed by the script. Stop if any value is wrong.</div>
+      <h3>STOP / PROCEED prompts</h3>
+      <p>Script 02 pauses for some conditions and asks you to type <code>STOP</code> or <code>PROCEED</code>. Pressing
+        Enter means <strong>STOP</strong>, which ends the run. Prompts that appear before anything is created are safe to
+        stop at; correct the setting and run Step 06 again. <code>HeaderLayout</code> and
+        <code>ParentTeamExternalMembers</code> appear after the Team and site exist: if you stop there, fix the cause and
+        resume that deployment with <code>-ResumeExisting</code> (see Failure and recovery); do not start a clean
+        install.</p>
+      <table>
+        <thead><tr><th scope="col">Prompt</th><th scope="col">When it appears</th><th scope="col">What to do</th></tr></thead>
+        <tbody>
+          <tr><td><code>LongDisplayName</code></td><td>Title longer than 30 characters.</td><td>Shorten <code>DisplayName</code>, or PROCEED and capture a 1366px screenshot of the navigation.</td></tr>
+          <tr><td><code>UnconfiguredSupportRoutes</code></td><td>One or more of the four <code>Links</code> routes is empty.</td><td>Add the approved routes, or PROCEED for a reviewed pilot only.</td></tr>
+          <tr><td><code>LabSupportMailbox</code></td><td><code>SupportEmail</code> looks like a lab mailbox.</td><td>Replace it with the university's monitored mailbox.</td></tr>
+          <tr><td><code>GroupNamingPolicy</code></td><td>A naming policy was read and the operator is not exempt.</td><td>STOP and rerun as Global Administrator or User Administrator.</td></tr>
+          <tr><td><code>OwnerDiffersFromOperator</code></td><td>The signed-in account is not <code>SharedChannelOwnerUPN</code>.</td><td>STOP and sign in as the owner or a Global Administrator, unless tested.</td></tr>
+          <tr><td><code>HeaderLayout</code></td><td>The Extended site header is unavailable (after the site exists).</td><td>PROCEED and capture a 1366px screenshot.</td></tr>
+          <tr><td><code>ParentTeamExternalMembers</code></td><td>Guests or out-of-domain members are on the parent Team (after the site exists).</td><td>Review membership with the security owner.</td></tr>
+        </tbody>
+      </table>
+      <p class="meta">Decisions are saved in <code>$orgPath\CoE-Advisory-Decisions.json</code>, tied to this tenant, host
+        and alias, and reused on the next run. A saved STOP stays a stop until you fix the setting or remove that entry.
+        PROCEED does not approve content or replace manual acceptance.</p>
+      <div class="warning"><strong>Expected optional naming-policy warning:</strong>
+        <code>The group naming policy could not be read (Insufficient privileges...)</code>. The delegated CoE app
+        intentionally does not request broad <code>Directory.Read.All</code>, so this optional
+        <code>groupSettings</code> read can fail even when the signed-in person is Global Administrator. The warning
+        is non-blocking and does not mean the administrator lacks the roles needed for installation. Do not grant
+        <code>Directory.Read.All</code> solely to remove it. It also does not prove that no naming policy exists, which
+        is why the Step 05 gate checks <strong>Entra admin center &gt; Groups &gt; Naming policy</strong> before this
+        step. If the run creates and finds the exact configured alias and proceeds to template application, the alias
+        was not rewritten for that run.</div>
+      <h3>What the installer does</h3>
+      <pre><span class="muted">Organization folder: C:\CoE-Orgs\DemoOrg
 Using settings from C:\CoE-Orgs\DemoOrg\Deployment-Settings.json (command-line values override it).
 Connecting to the specified tenant administrator endpoint using Interactive sign-in.</span>
 <span class="warn">WARNING: The group naming policy could not be read (Insufficient privileges to complete the operation.).</span>
@@ -772,27 +789,9 @@ Title                        Url
 -----                        ---
 Illinois Copilot Center Demo https://yourtenant.sharepoint.com/sites/CopilotCoEDemo
 Applying site sharing 'Disabled' (owners only)
-Disabling non-owner sharing</pre>
-      <p class="meta">Console output from the recorded lab installation. Before it creates anything, the installer
-        checks the organization's content files locally, signs in, and runs read-only checks. The delegated CoE app
-        intentionally omits broad <code>Directory.Read.All</code>, so its optional group-naming-policy read can return
-        <code>Insufficient privileges</code> even for a Global Administrator. This warning is non-blocking and does
-        not indicate that the administrator lacks installation roles. Do not grant broad directory-read consent only
-        to remove it. The warning also does not prove that no policy exists: confirm the policy manually. If the run
-        creates and finds the exact configured alias and proceeds to template application, the alias was not rewritten
-        for that run.</p>
-      <p class="meta">Before a customer run, Teams must also allow the built-in Website
-        (<code>com.microsoft.teamspace.tab.web</code>), PDF, PowerPoint and SharePoint page/list tab providers for the
-        installer and intended CoE users. If Teams blocks one after the Team/site is created, correct the app policy
-        and use <code>-ResumeExisting</code>; do not start clean or purge.</p>
-      <p class="meta">A warning that the optional naming-policy read lacked
-        <code>Directory.Read.All</code> is not proof the policy is absent. Confirm the policy directly in Entra;
-        do not grant broad directory-read permission just to silence that warning.</p>
-    </section>
+Disabling non-owner sharing
 
-    <section class="step" id="tour-09" data-tour="9">
-      <h2><span class="badge">09</span>Watch the content load</h2>
-      <pre class="code-panel">[11:19:04] START Success Stories catalog
+[11:19:04] START Success Stories catalog
 [11:19:31] DONE Success Stories catalog - added 4, preserved 0
 [11:19:31] START Learning Paths catalog
 [11:20:31] DONE Learning Paths catalog - added 18, preserved 0
@@ -806,14 +805,9 @@ Disabling non-owner sharing</pre>
 [11:24:18] START Home page and hub repair
 [11:25:49] DONE Home page and hub repair
 [11:26:10] START horizontal mega-menu navigation
-[11:27:37] DONE horizontal mega-menu navigation - 6 top-level link(s)</pre>
-      <p class="meta">Installation log showing progress through the catalogs and navigation. The higher education
-        prompt library contains 230 prompts and took the longest of the catalog steps shown here.</p>
-    </section>
+[11:27:37] DONE horizontal mega-menu navigation - 6 top-level link(s)
 
-    <section class="step" id="tour-10" data-tour="10">
-      <h2><span class="badge">10</span>Confirm the installation finished</h2>
-      <pre class="code-panel">COE SECURITY POSTURE (live checks; not a substitute for your organization's security approval)
+COE SECURITY POSTURE (live checks; not a substitute for your organization's security approval)
   Team visibility: Private <span class="ok">[PASS]</span> (required: Private)
   Parent site external sharing: OFF (Disabled) <span class="ok">[PASS]</span>
   Leadership Governance external sharing: OFF (Disabled) <span class="ok">[PASS]</span>
@@ -824,15 +818,16 @@ Submitted the prepared welcome post to 'Ask Us Anything'. Verify it in Teams.
 Submitted the prepared welcome post to 'General'. Verify it in Teams.</span>
 Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization folder&gt; -SiteUrl $siteUrl -ContentMode $contentMode
 <span class="ok">02_Install-CopilotCoE finished in 2143s (about 36 minutes).</span></pre>
-      <p class="meta">Save the site address exactly as printed. The installer saves
-        <code>CoE-Revision-Report.json</code> beside <code>Deployment-Settings.json</code> in the organization folder.
-        It saves the run transcripts in the <code>RevisionAudit</code> subfolder.</p>
+      <p class="meta">Historical 3.8.21 Demo console output. The higher-ed prompt library contains 230 prompts and
+        takes the longest of the catalog steps shown. Save the site address exactly as printed. The installer saves
+        <code>CoE-Revision-Report.json</code> beside <code>Deployment-Settings.json</code> in the organization folder,
+        and the run transcripts in the <code>RevisionAudit</code> subfolder.</p>
     </section>
 
-    <section class="step" id="tour-11" data-tour="11">
-      <h2><span class="badge">11</span>Run the read-only checker</h2>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-check">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-check">$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
+    <section id="accept">
+      <h2 class="step-title"><span class="step-number">07</span>Run the checker and complete manual acceptance</h2>
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-check">Copy command</button></div>
+      <pre id="cmd-check">$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 $contentMode = 'Customer'
 Set-Location -LiteralPath $kitRoot
@@ -853,55 +848,57 @@ if ([string]::IsNullOrWhiteSpace($siteUrl)) {
 if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
       <p class="ok">Expected: <code>ALL CHECKS PASSED (...)</code>, with every WARN reviewed manually.</p>
       <figure>
-        <img class="shot" src="Images/ps-checker-pass-rows.png" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
-        <figcaption>Historical 3.8.21 Demo recording: 292 checks passed. Counts depend on release,
-          content mode, and applicable checks; do not require that count for another tenant.</figcaption>
+        <img class="site-shot" src="Images/ps-checker-pass-rows.png" loading="lazy" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
+        <figcaption>Historical 3.8.21 Demo recording: 292 checks passed. Counts depend on release, content mode, and
+          applicable checks; do not require that count for another tenant.</figcaption>
       </figure>
-      <p class="meta">The checker does not change the site. Passing it is only part of the review: read every
-        <code>WARN</code> message and complete the manual checks it identifies. A warning that welcome
-        posts could not be read without <code>ChannelMessage.Read.All</code> calls for visual inspection of
-        General, Share Your Prompt, and Ask Us Anything; do not add that permission just to silence a WARN.</p>
-    </section>
-
-    <section class="step" id="tour-12" data-tour="12">
-      <h2><span class="badge">12</span>Review SharePoint as an administrator</h2>
-      <div class="gallery">
+      <p>Fix every FAIL. Read every WARN and retain evidence for each manual check. At minimum:</p>
+      <ol>
+        <li>Confirm the Home page, navigation, tools, learning paths, support, governance, and catalog views.</li>
+        <li>Confirm exactly one welcome post in General, Share Your Prompt, and Ask Us Anything.</li>
+        <li>Confirm no demo notice or sample row remains in Customer mode.</li>
+        <li>Confirm Team visibility is Private and all three SharePoint sites have external sharing disabled.</li>
+        <li>Confirm support, technology-request, AI-guidance, and incident links reach approved destinations.</li>
+        <li>Review as a regular reader, not only as an owner.</li>
+        <li>Obtain required security, privacy, records, accessibility, licensing, legal, and operational approval.</li>
+      </ol>
+      <div class="warning">The provisioning app can send welcome posts but normally cannot read them back without
+        <code>ChannelMessage.Read.All</code>. A checker WARN for that permission is resolved by visual review; do not
+        add the permission solely to eliminate the WARN.</div>
+      <h3>Review SharePoint as an administrator</h3>
+      <div class="shots">
         <figure>
-          <img class="shot" src="Images/site-home.png" alt="Copilot Center Demo Home page with task tiles and the unofficial demo notice">
+          <img class="site-shot" src="Images/site-home.png" loading="lazy" alt="Copilot Center Demo Home page with task tiles and the unofficial demo notice">
           <figcaption>Home &mdash; task tiles and the demonstration notice.</figcaption>
         </figure>
         <figure>
-          <img class="shot" src="Images/site-help.png" alt="Service Catalog and Support page listing separate routes for help, requests, and incidents">
+          <img class="site-shot" src="Images/site-help.png" loading="lazy" alt="Service Catalog and Support page listing separate routes for help, requests, and incidents">
           <figcaption>Service Catalog and Support &mdash; support, request, and incident links.</figcaption>
         </figure>
         <figure>
-          <img class="shot" src="Images/site-governance.png" alt="Governance and Responsible AI page with AI guidance links">
+          <img class="site-shot" src="Images/site-governance.png" loading="lazy" alt="Governance and Responsible AI page with AI guidance links">
           <figcaption>Governance &mdash; links to the university's public AI guidance pages.</figcaption>
         </figure>
         <figure>
-          <img class="shot" src="Images/site-prompts.png" alt="Prompt library page listing prompts organized by role and task">
+          <img class="site-shot" src="Images/site-prompts.png" loading="lazy" alt="Prompt library page listing prompts organized by role and task">
           <figcaption>Prompt library &mdash; 230 higher education prompts.</figcaption>
         </figure>
       </div>
       <p class="meta">Before opening the production site to users, repeat this review with an account that has reader
-        access, not owner access. Follow every support and incident link; check Private Team visibility and
-        Disabled external sharing on all three SharePoint sites. That reader-account review was not performed
-        in this historical recording. Replace every lab-specific value with one the organization has approved.</p>
-    </section>
-
-    <section class="step" id="tour-13" data-tour="13">
-      <h2><span class="badge">13</span>Check the welcome messages manually</h2>
-      <div class="gallery">
+        access, not owner access. That reader-account review was not performed in this historical recording. Replace
+        every lab-specific value with one the organization has approved.</p>
+      <h3>Check the welcome messages manually</h3>
+      <div class="shots">
         <figure>
-          <img class="shot" src="Images/teams-general.png" alt="Teams General channel showing exactly one welcome post">
+          <img class="site-shot" src="Images/teams-general.png" loading="lazy" alt="Teams General channel showing exactly one welcome post">
           <figcaption>General &mdash; one welcome post.</figcaption>
         </figure>
         <figure>
-          <img class="shot" src="Images/teams-aua.png" alt="Teams Ask Us Anything channel showing exactly one welcome post with working links">
+          <img class="site-shot" src="Images/teams-aua.png" loading="lazy" alt="Teams Ask Us Anything channel showing exactly one welcome post with working links">
           <figcaption>Ask Us Anything &mdash; one welcome post.</figcaption>
         </figure>
         <figure>
-          <img class="shot" src="Images/teams-syp.png" alt="Teams Share Your Prompt channel showing exactly one welcome post">
+          <img class="site-shot" src="Images/teams-syp.png" loading="lazy" alt="Teams Share Your Prompt channel showing exactly one welcome post">
           <figcaption>Share Your Prompt &mdash; one welcome post.</figcaption>
         </figure>
       </div>
@@ -910,113 +907,104 @@ if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
         demonstration notice.</p>
     </section>
 
-    <section class="step" id="tour-14" data-tour="14">
-      <h2><span class="badge">14</span>Publish a reviewed content update</h2>
+    <section id="update">
+      <h2 class="step-title"><span class="step-number">08</span>Publish the reviewed update and check again</h2>
+      <p>Publish the content approved during Step 07 from the organization folder, then run the checker again.
+        Script 03 replaces the pages it manages, so make lasting changes in <code>$orgPath\Content</code>, not
+        directly in SharePoint.</p>
       <figure>
-        <img class="shot" src="Images/ps-update-progress.png" alt="PowerShell terminal showing the content update command publishing catalogs">
+        <img class="site-shot" src="Images/ps-update-progress.png" loading="lazy" alt="PowerShell terminal showing the content update command publishing catalogs">
         <figcaption>Recording of the update command republishing catalogs on the lab site.</figcaption>
       </figure>
-      <p>Use the update script to publish reviewed changes without rebuilding the Team.</p>
-      <p>The historical recording used <code>-RepairCapturedPages</code> on a fresh validation site.
-        <strong>Do not add it for a routine update.</strong> It can overwrite kit-managed parts of Home and
-        captured pages, including direct SharePoint edits. Use it only for a reviewed recovery or internal
-        test where replacement is intended; it has no <code>-WhatIf</code> preview.</p>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-update">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-update">.\03_Update-CoEContent.ps1 `
+      <div class="command-head"><button class="copy" type="button" data-copy="cmd-update">Copy command</button></div>
+      <pre id="cmd-update"># Add -ReplaceFiles only if governance drafts under $orgPath\Content\Governance changed during review,
+# or if reviewers edited the governance Word documents on the site. Without it, 03 stops at the first
+# governance document that differs from the organization's draft, after earlier content has been published.
+.\03_Update-CoEContent.ps1 `
   -OrgPath $orgPath `
   -Scope All `
   -AuthenticationMode Interactive `
-  -ContentMode $contentMode</pre>
-            <p class="meta">Stop if script 03 fails; do not treat the following checker as update acceptance until
-              the update actually completes.</p>
-      <p class="meta">If reviewed governance drafts changed, add <code>-ReplaceFiles</code> deliberately.
-        Keep lasting edits in <code>$orgPath\Content</code>; script 03 republishes managed pages.</p>
-      <p class="meta">In this recorded run, the update preserved existing catalog rows and checked the security
-        configuration again. Review the output for your own deployment rather than assuming every update will have
-        the same result.</p>
-    </section>
+  -ContentMode $contentMode
 
-    <section class="step" id="tour-15" data-tour="15">
-      <h2><span class="badge">15</span>Check the site again after the update</h2>
-      <figure>
-        <img class="shot" src="Images/ps-checker-command.png" alt="PowerShell terminal running the checker again after the content update">
-        <figcaption>Re-running the same read-only checker after the update.</figcaption>
-      </figure>
-      <div class="command-head"><button type="button" data-copy="cmd-highered-recheck">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-recheck">.\Test-CoEInstall.ps1 `
+if (-not $?) { throw 'Update did not complete; stop before the second checker.' }
+.\Test-CoEInstall.ps1 `
   -OrgPath $orgPath `
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
-      if ($LASTEXITCODE -ne 0) { throw 'Second checker failed; stop and investigate.' }
-
-      <span class="ok">Expected: ALL CHECKS PASSED (...), with every WARN reviewed manually.</span></pre>
+if ($LASTEXITCODE -ne 0) { throw 'Second checker failed; stop and investigate.' }</pre>
+      <div class="warning"><strong>Do not add <code>-RepairCapturedPages</code> here.</strong> It rebuilds Home and
+        the captured pages and replaces edits made directly in SharePoint after Step 07. Use it only on an internal
+        test site, or when recovery work or checker results show that those pages need repair, after reviewing what it
+        will replace.</div>
+      <figure>
+        <img class="site-shot" src="Images/ps-checker-command.png" loading="lazy" alt="PowerShell terminal running the checker again after the content update">
+        <figcaption>Re-running the same read-only checker after the update.</figcaption>
+      </figure>
       <p class="meta">Keep <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, the
-        <code>RevisionAudit</code> run transcripts, both checker outputs, and manual review records together
-        for the handoff. Repeat reader, support-route, security, and welcome-post checks after the update.</p>
-    </section>
-
-    <section id="tour-16" data-tour="16">
-      <h2><span class="badge">16</span>Installation complete</h2>
-      <p>The sample installation and update finished, and the automated checks passed. The administrator's SharePoint
-        review and the Teams welcome-post review were completed. The group naming policy and reader-account review
-        still require separate confirmation.</p>
-      <p>Keep the handoff records from step 15 together. For recovery or removal, use the administrator quickstart
-        included with the same release.</p>
-      <p class="meta"><strong>Historical video: release 3.8.21 &middot; 292 checks passed &middot; Content mode: Demo &middot;
-        Environment: HigherEducation</strong></p>
-      <p style="margin-top:12px;">
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
-      </p>
-    </section>
-
-    <section id="recovery">
-      <h2>Failure and recovery boundary</h2>
-      <p>The eight-phase workflow is the same for HigherEducation and Government content. Do not mistake an
-        interrupted install for a blank tenant: inspect the run transcript and intended Team/site before retrying.</p>
-      <ul>
-        <li>If the intended Team/site already exists, correct the blocker and resume that same deployment with
-          <code>-ResumeExisting</code>; never run a second clean install against the same alias.</li>
-        <li>Do not delete only the SharePoint site; the Team and Microsoft 365 group remain.</li>
-        <li>If a Teams tab says <em>App is blocked</em>, verify both <em>App status</em> and <em>Available
-          to</em>. Repair the approved policy, allow it to propagate, and resume; only republish welcome
-          posts whose channels are visually confirmed empty.</li>
-        <li>For a separately approved permanent removal, preview
-          <code>04_Remove-CopilotCoE.ps1 -Purge -WhatIf</code> first. Keep the provisioning app until
-          removal reports <code>AliasReusable : True</code>.</li>
-      </ul>
-      <p><a href="government-install.html#recovery">Compare the GCC Moderate recovery notes</a> and the
-        <a href="admin-faq.html">administrator FAQ</a>.</p>
+        <code>RevisionAudit</code> run transcripts, both checker outputs, and manual review records together for
+        the handoff. Repeat reader, support-route, security, and welcome-post checks after the update.</p>
+      <div class="success"><strong>Complete only after both checker runs and manual review.</strong> The sample
+        installation and update finished, and the automated checks passed. The administrator's SharePoint review and
+        the Teams welcome-post review were completed. The group naming policy and reader-account review still require
+        separate confirmation. Keep <code>Deployment-Settings.json</code>, <code>CoE-Revision-Report.json</code>, all
+        <code>RevisionAudit</code> transcripts, checker output, and manual acceptance evidence together.</div>
     </section>
 
     <section id="site-tour-reference">
       <h2>What users get after installation</h2>
-      <p class="meta">Written reference, not an additional video section. This expands the earlier screenshot-led
-        tour without changing the installation sequence. Review the installed content for your chosen template
-        and configuration; sample guidance is not the organization's official policy.</p>
-      <details>
-        <summary>Explore the site's main areas</summary>
-        <table class="source-table">
-          <thead><tr><th scope="col">Area</th><th scope="col">Purpose and review point</th></tr></thead>
-          <tbody>
-            <tr><td>Home and Start in 10 minutes</td><td>Give users a first task and routes to learning, prompts,
-              agents, and help. Confirm the first-use links work for a reader account.</td></tr>
-            <tr><td>Learning paths by role</td><td>Organize training resources and practice by role.
-              The site does not track course completion; keep that in the organization's learning system.</td></tr>
-            <tr><td>Prompt library by role</td><td>Provide examples users can adapt to their work. Organization
-              prompt CSV files can extend or replace supplied content; review those rows before deployment.</td></tr>
-            <tr><td>Agent Showcase</td><td>Help users find reviewed agents and understand their owner, data
-              sources, and access requirements. Review submissions before approving them for publication.</td></tr>
-            <tr><td>Get help</td><td>Keep general help, service requests, and security or privacy incident
-              reporting distinct. Use the organization's approved contact and submission routes.</td></tr>
-            <tr><td>Governance and Responsible AI</td><td>Provide guidance and example responsibilities.
-              Replace sample classifications, risk models, and roles with approved organizational material.</td></tr>
-            <tr><td>Success Stories</td><td>Collect reviewed examples of useful work. Exclude sensitive or
-              regulated information, obtain consent from people shown, and include captions for video.</td></tr>
-            <tr><td>Feedback and Roadmap</td><td>Connect product updates with local rollout plans and feedback.
-              Clearly distinguish Microsoft's published roadmap from the organization's own commitments.</td></tr>
-          </tbody>
-        </table>
-      </details>
+      <p>A written reference for the same areas shown in the walkthrough video. Review the installed content for your
+        chosen template and configuration; sample guidance is not the organization's official policy.</p>
+      <table>
+        <thead><tr><th scope="col">Area</th><th scope="col">Reader and administrator review</th></tr></thead>
+        <tbody>
+          <tr><td>Home and Start in 10 minutes</td><td>Confirm Hero links, tool cards and training-calendar fallback with an ordinary reader account.</td></tr>
+          <tr><td>Learning paths</td><td>Check role-based faculty, staff, student and IT routes; do not mistake site links for course-completion tracking.</td></tr>
+          <tr><td>Higher-ed prompt library</td><td>Review the 230 supplied prompts and organization CSV overrides for records, privacy and approved use before publishing.</td></tr>
+          <tr><td>Agent Showcase</td><td>Approve owner, access, and data sources before making a proposed agent discoverable.</td></tr>
+          <tr><td>Support and incident reporting</td><td>Keep general help, technology requests and security/data incident routes distinct and actually monitored.</td></tr>
+          <tr><td>Governance and Responsible AI</td><td>Replace illustrative governance drafts and policy links with university-approved standards.</td></tr>
+          <tr><td>Success Stories</td><td>Review consent, accessibility, captioned media and exclusion of sensitive or regulated details.</td></tr>
+          <tr><td>Feedback and Roadmap</td><td>Separate Microsoft's public feature availability from the university's own rollout commitments.</td></tr>
+        </tbody>
+      </table>
+      <p class="meta">For the equivalent eight government site areas, see the
+        <a href="government-install.html#site-tour-reference">GCC Moderate guide</a>.</p>
+    </section>
+
+    <section id="recovery">
+      <h2>Failure and recovery boundary</h2>
+      <ul>
+        <li>If the intended Team/site exists after an interrupted run, investigate and resume that exact deployment
+          with <code>-ResumeExisting</code>.</li>
+        <li>Do not start a second clean install against the same alias.</li>
+        <li>Do not delete only the SharePoint site; the Team and Microsoft 365 group remain.</li>
+        <li>Use <code>04_Remove-CopilotCoE.ps1 -Purge -WhatIf</code> before any reviewed permanent removal.</li>
+        <li>Keep the provisioning app until removal reports <code>AliasReusable : True</code>.</li>
+      </ul>
+      <div class="warning"><strong>If Teams reports &ldquo;App is blocked by app permission policy&rdquo; for
+        <code>com.microsoft.teamspace.tab.web</code>:</strong> a Website row showing <strong>Unblocked</strong> but
+        <strong>Available to: No one</strong> is still denied. Select the Microsoft Website row, use
+        <strong>Edit availability</strong>, and choose Everyone or an approved group containing the installer and
+        intended CoE audience. Do not use <strong>Add to team</strong>. Wait for policy propagation, then resume the existing deployment. Do not start clean
+        or purge. Inspect General, Share Your Prompt, and Ask Us Anything first; pass only confirmed missing welcome
+        posts:</div>
+      <pre># List ONLY the channels you confirmed have no welcome post. Names must match exactly, for example:
+# 'General', 'Share Your Prompt', 'Ask Us Anything 📢'
+# Leave out -PublishWelcomeToChannels entirely if every channel already has its post.
+$missingWelcomeChannels = @()
+.\02_Install-CopilotCoE.ps1 `
+  -OrgPath $orgPath `
+  -ContentMode $contentMode `
+  -SeedDemoContent `
+  -ResumeExisting `
+  -PublishWelcomeToChannels $missingWelcomeChannels `
+  -AuthenticationMode Interactive `
+  -ForceAuthentication</pre>
+      <p><code>CoE-Revision-Report.json</code> is written only after installation completes. Its absence after a
+        partial failure is expected; do not continue to report-reading or checker commands until resume succeeds.</p>
+      <p class="meta">For the equivalent government recovery notes, see the
+        <a href="government-install.html#recovery">GCC Moderate guide</a>.</p>
+      <p><a class="button" href="admin-faq.html">Open the full Administrator FAQ</a></p>
     </section>
 
     <section id="get-kit">
@@ -1058,114 +1046,17 @@ if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
         tenant-wide policy more permissive or enabling anonymous links. It is written reference material,
         not part of the narrated video.</p>
     </section>
-
-    <footer>Unofficial demonstration in a Microsoft lab. Not affiliated with, endorsed by, or deployed for the University of Illinois Urbana-Champaign.</footer>
   </main>
 
-  <script>
-    (() => {
-      const STARTS = [0.0, 48.9, 91.667, 132.867, 172.733, 226.2, 267.267, 311.167, 375.1, 429.867, 470.667, 515.567, 556.933, 603.7, 642.6, 701.067, 732.067];
-      const sections = STARTS.map((_, i) => document.getElementById('tour-' + String(i).padStart(2, '0')));
-      const titles = sections.map((el, i) => i === 0 ? 'Introduction'
-        : (el.querySelector('h2') ? el.querySelector('h2').textContent.replace(/^\d+/, '').trim() : ''));
-      const video = document.getElementById('walkVideo');
-      const frame = document.getElementById('playerFrame');
-      const slot = document.getElementById('playerSlot');
-      const nowPlaying = document.getElementById('nowPlaying');
-      const follow = document.getElementById('followAlong');
-      const btnFull = document.getElementById('btnFull');
-      const btnWide = document.getElementById('btnWide');
-      const btnTop = document.getElementById('btnTop');
-      const smooth = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-      let lastIndex = -1, slotVisible = true;
+  <footer>
+    <div class="shell">
+      <p>Release 3.8.24 &middot; Commercial Microsoft 365 &middot; Higher Education content &middot; Customer mode</p>
+      <p>Unofficial demonstration in a Microsoft lab. Not affiliated with, endorsed by, or deployed for the
+        University of Illinois Urbana-Champaign. A prior acceptance result does not replace acceptance in another
+        customer tenant.</p>
+    </div>
+  </footer>
 
-      function indexAt(t) {
-        for (let i = STARTS.length - 1; i >= 0; i--) if (t >= STARTS[i] - 0.05) return i;
-        return 0;
-      }
-      function setCurrent(i, scroll) {
-        sections.forEach(el => el.classList.remove('current'));
-        sections[i].classList.add('current');
-        nowPlaying.textContent = 'Now playing: ' + (i + 1) + ' of ' + STARTS.length + ' \u00B7 ' + titles[i];
-        if (scroll && follow.checked && i > 0) sections[i].scrollIntoView({ behavior: smooth, block: 'start' });
-      }
-      function seekTo(i) {
-        lastIndex = i;
-        video.currentTime = STARTS[i] + 0.05;
-        setCurrent(i, false);
-        video.play().catch(() => {});
-      }
-      function updateMini() {
-        const started = video.currentTime > 0.5 && !video.ended;
-        frame.classList.toggle('mini', started && !slotVisible && !document.fullscreenElement);
-      }
-
-      sections.forEach((el, i) => {
-        if (i === 0) return;
-        const h2 = el.querySelector('h2');
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'seek-btn';
-        b.textContent = '\u25B6 Play this section';
-        b.setAttribute('aria-label', 'Play section ' + i + ': ' + titles[i]);
-        b.addEventListener('click', () => seekTo(i));
-        h2.classList.add('has-seek');
-        h2.appendChild(b);
-      });
-
-      video.addEventListener('timeupdate', () => {
-        const i = indexAt(video.currentTime);
-        if (i !== lastIndex) { lastIndex = i; setCurrent(i, !video.paused); }
-        updateMini();
-      });
-      video.addEventListener('seeked', () => {
-        const i = indexAt(video.currentTime);
-        lastIndex = i; setCurrent(i, false); updateMini();
-      });
-      ['play', 'pause', 'ended'].forEach(ev => video.addEventListener(ev, updateMini));
-
-      new IntersectionObserver(entries => {
-        slotVisible = entries[0].isIntersecting;
-        updateMini();
-      }, { threshold: 0.15 }).observe(slot);
-
-      btnFull.addEventListener('click', () => {
-        if (document.fullscreenElement) document.exitFullscreen();
-        else if (frame.requestFullscreen) frame.requestFullscreen();
-        else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
-      });
-      document.addEventListener('fullscreenchange', () => {
-        btnFull.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
-        updateMini();
-      });
-      btnWide.addEventListener('click', () => {
-        const on = document.body.classList.toggle('wide');
-        btnWide.setAttribute('aria-pressed', String(on));
-        btnWide.textContent = on ? 'Standard view' : 'Wide view';
-      });
-      btnTop.addEventListener('click', () => slot.scrollIntoView({ behavior: smooth, block: 'start' }));
-
-      // If the video can't load or stalls after a click, say so instead of leaving a black frame.
-      const fallback = document.getElementById('videoFallback');
-      const fbMsg = fallback.querySelector('.fb-msg');
-      let watchdog;
-      function showFallback(msg) { fbMsg.textContent = msg; fallback.hidden = false; }
-      if (!video.canPlayType('video/mp4')) showFallback('This browser can\u2019t play MP4 video.');
-      // Load failures from <source> children fire on the source element and don't bubble, so listen in the capture phase.
-      video.addEventListener('error', () => showFallback('The browser couldn\u2019t load the video file.'), true);
-      setTimeout(() => {
-        if (video.readyState === 0 && video.networkState === 3) showFallback('The browser couldn\u2019t load the video file.');
-      }, 5000);
-      video.addEventListener('play', () => {
-        clearTimeout(watchdog);
-        const t0 = video.currentTime;
-        watchdog = setTimeout(() => {
-          if (!video.paused && video.currentTime === t0 && video.readyState < 3) showFallback('It is taking too long to start.');
-        }, 12000);
-      });
-      video.addEventListener('playing', () => { clearTimeout(watchdog); fallback.hidden = true; });
-    })();
-  </script>
   <script>
     document.querySelectorAll("[data-copy]").forEach((button) => {
       button.addEventListener("click", async () => {

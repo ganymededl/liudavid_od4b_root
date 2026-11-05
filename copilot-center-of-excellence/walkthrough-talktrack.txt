@@ -1,0 +1,81 @@
+Higher Education Copilot CoE 3.8.21 - Eight-Phase Walkthrough
+
+INTRO
+In this walkthrough, we'll install release 3.8.21 using the Higher Education template in a commercial Microsoft 365 tenant. We'll follow the same eight phases as the GCC Moderate guide.
+
+This is an unofficial demonstration: the footage uses public University of Illinois Urbana-Champaign pages inside a Microsoft lab tenant, so the tenant, account, and site names you see on screen are lab values, not values to copy.
+
+We'll verify the package, configure the settings, install the site, and review the result. Passing the automated checks is only part of deciding whether a deployment is ready for production.
+
+PHASE 1 - Verify and extract the release package
+Download the release 3.8.24 implementation ZIP and its SHA256 receipt, not GitHub's automatically generated source archive.
+
+Run Get-FileHash on the ZIP and compare the result with the expected hash in the receipt. Continue only if they match.
+
+Use a new empty install folder. Copy the Org-Template content pack to a separate organization folder. Keep settings and records outside the extracted kit so a future release cannot overwrite them.
+
+PHASE 2 - Edit the organization settings
+Open Deployment-Settings.json in the organization folder, not the template inside the kit.
+
+Confirm the tenant, SharePoint hosts, unused group alias, and approved owner and reviewer accounts.
+
+Keep the Team private and external sharing disabled. Set the LearningEnvironment to Higher Education.
+
+If you're creating a new provisioning app, leave the PnP client ID blank. Don't copy another tenant's client ID or deployment report into this folder.
+
+PHASE 3 - Configure support links and reviewed content
+Compare each setting with its source. Public policy links can be researched, but private mailboxes, ticket queues, incident routes, and tenant identities must come from the people who own them.
+
+Configure a monitored support mailbox. Then set the links for general support, technology requests, incident reporting, and AI guidance.
+
+Review the governance and training links as well.
+
+Keep lasting changes to generated page text in the organization's Content folder, and approved reference files in Assets.
+
+PHASE 4 - Check the content before signing in
+From the extracted kit folder, run the local content preflight against the organization folder. The commands are shown on screen.
+
+This checks the structured content before sign-in, including the calendar columns and required fields. It does not approve the links, tenant settings, policy wording, or reader experience.
+
+Fix every reported issue before continuing.
+
+PHASE 5 - Install PnP.PowerShell and register the app
+Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
+
+If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
+
+In Entra, confirm that all required delegated permissions are granted, and that Allow public client flows is set to Yes.
+
+Review the group naming policy, and check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users.
+
+PHASE 6 - Run the customer installation
+Run script 02 with SeedDemoContent. That switch loads the site's pages, catalogs, calendar, and governance content.
+
+Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
+
+If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it. Choosing Proceed is a documented pilot decision, not production approval.
+
+After installation, use the actual site address recorded in the deployment report. If an earlier attempt already created resources for the alias, follow the recovery procedure instead of starting another clean installation.
+
+PHASE 7 - Run the checker and complete the manual review
+Run the read-only checker with the organization folder, the actual site address, and the same ContentMode. Resolve every failure, and read each warning.
+
+Review Home, the tool pages, navigation, and catalog views as a regular reader. Follow the support and governance links.
+
+Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post. Check posts visually; the app can't read them back without extra permission.
+
+Keep the checker output and the manual review record.
+
+PHASE 8 - Publish the reviewed update and test again
+Publish reviewed changes from the organization folder with script 03 and interactive sign-in. Then run the same read-only checker and repeat the relevant manual review.
+
+Do not add RepairCapturedPages for a routine update; it can replace managed parts of Home and the captured pages.
+
+Complete the handoff only when both checker runs have passed and the required manual reviews are documented for this tenant.
+
+OUTRO
+Passing the checker is not the same as production approval. The organization still needs to approve the content, security, accessibility, and operating arrangements.
+
+Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
+
+For recovery or removal, use the administrator guide included with release 3.8.24.
