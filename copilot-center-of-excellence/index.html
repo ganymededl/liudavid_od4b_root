@@ -320,9 +320,9 @@
         Teams, publish a content update, and check the result.</p>
       <p class="meta">This walkthrough uses
         <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>
-        release 3.8.21. Use the current 3.8.23 kit for a new install. The 16 chapters below document the
+        release 3.8.21. Use the current 3.8.24 kit for a new install. The 16 chapters below document the
         recorded lab tour, while the <a href="#eight-phase-runbook">eight-phase installation path</a> matches
-        the GCC Moderate guide and calls out 3.8.23 safeguards the earlier recording does not show.</p>
+        the GCC Moderate guide and calls out 3.8.24 safeguards the earlier recording does not show.</p>
       <nav class="pill-row" aria-label="Written references">
         <a class="pill" href="#eight-phase-runbook">Eight-phase install path</a>
         <a class="pill" href="admin-quickstart.html">Admin quickstart</a>
@@ -376,7 +376,7 @@
 
     <section id="eight-phase-runbook">
       <h2>The same eight installation phases in both guides</h2>
-      <p>Use the current 3.8.23 implementation ZIP and these eight phases for either profile. The 16 numbered
+      <p>Use the current 3.8.24 implementation ZIP and these eight phases for either profile. The 16 numbered
         panels below are <strong>video scenes from an earlier higher-ed lab run</strong>, not extra installation
         commands. The GCC guide uses the same phase order with government examples and a newly narrated video.</p>
       <table class="source-table">
@@ -469,8 +469,8 @@
 }
 $zip = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip'
 $receipt = 'C:\CoE-Releases\Copilot-CoE-Implementation-Kit.zip.sha256'
-$expectedHash = '0A3D70A545D87F4476E7547BF41F2BAFFF83ED28EC2EE05FE3682573F55378CC'
-$installRoot = 'C:\CoE-Install\DemoOrg-v3.8.23'
+$expectedHash = 'EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9D'
+$installRoot = 'C:\CoE-Install\DemoOrg-v3.8.24'
 $kitRoot = Join-Path $installRoot '03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'</pre>
 
@@ -479,7 +479,7 @@ $orgPath = 'C:\CoE-Orgs\DemoOrg'</pre>
       <pre class="code-panel" id="cmd-highered-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
 $receiptHash = ((Get-Content -LiteralPath $receipt -Raw).Trim() -split '\s+')[0]
 if ($zipHash -ne $expectedHash -or $receiptHash -ne $expectedHash) {
-  throw 'The implementation ZIP or its receipt does not match release 3.8.23.'
+  throw 'The implementation ZIP or its receipt does not match release 3.8.24.'
 }
 Write-Host 'Release ZIP and receipt verified.'</pre>
 
@@ -522,14 +522,14 @@ Write-Host "Organization profile created at $orgPath"</pre>
       <div class="boundary-card">
         <h3>Which GitHub ZIP can I install?</h3>
         <p><strong>Download the named
-          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.23/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
+          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
           release asset</strong> and verify it against the attached
-          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.23/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.</p>
+          <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a>.</p>
         <p><strong>Do not substitute GitHub's generated source archives:</strong> <em>Source code (zip)</em>,
           <em>Source code (tar.gz)</em>, or the repository's <em>Code &gt; Download ZIP</em>. Those files are source
           snapshots, not the frozen implementation package.</p>
         <p class="meta">The warning is about GitHub's automatic source snapshots, not the named, hash-matched
-          implementation asset attached to release 3.8.23.</p>
+          implementation asset attached to release 3.8.24.</p>
       </div>
     </section>
 
@@ -666,7 +666,7 @@ Write-Host 'Offline content preflight completed.'</pre>
         <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
       <div class="command-head"><button type="button" data-copy="cmd-highered-pnp">Copy command</button></div>
       <pre class="code-panel" id="cmd-highered-pnp"># Re-enter the actual paths if you opened a new PowerShell window.
-$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 Set-Location -LiteralPath $kitRoot
 if (-not (Get-Module PnP.PowerShell -ListAvailable |
@@ -688,7 +688,7 @@ Get-Module PnP.PowerShell -ListAvailable |
       <h3>2. Register the tenant app</h3>
       <div class="command-head"><button type="button" data-copy="cmd-highered-register">Copy command</button></div>
       <pre class="code-panel" id="cmd-highered-register"># Keep this block self-contained if it is run in another PowerShell window.
-$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 Set-Location -LiteralPath $kitRoot
 .\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
@@ -722,7 +722,7 @@ Set-Location -LiteralPath $kitRoot
       <h2><span class="badge">07</span>Start the clean installation</h2>
       <div class="command-head"><button type="button" data-copy="cmd-highered-install">Copy command</button></div>
       <pre class="code-panel" id="cmd-highered-install">$ErrorActionPreference = 'Stop'
-$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 $contentMode = 'Customer'
 Set-Location -LiteralPath $kitRoot
@@ -832,7 +832,7 @@ Next: verify the site with .\Test-CoEInstall.ps1 -OrgPath &lt;your organization 
     <section class="step" id="tour-11" data-tour="11">
       <h2><span class="badge">11</span>Run the read-only checker</h2>
       <div class="command-head"><button type="button" data-copy="cmd-highered-check">Copy command</button></div>
-      <pre class="code-panel" id="cmd-highered-check">$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.23\03_Build\CopilotCoE-Kit'
+      <pre class="code-panel" id="cmd-highered-check">$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 $contentMode = 'Customer'
 Set-Location -LiteralPath $kitRoot
@@ -1021,13 +1021,13 @@ if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
 
     <section id="get-kit">
       <h2>Get the kit for this walkthrough</h2>
-      <p>Use the current release 3.8.23 implementation ZIP and its release receipt. The receipt identifies the
-        expected SHA256 hash: <code>0A3D70A545D87F4476E7547BF41F2BAFFF83ED28EC2EE05FE3682573F55378CC</code>.</p>
-      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.23/Copilot-CoE-Implementation-Kit.zip">Download the v3.8.23 implementation ZIP</a>
-        &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.23/Copilot-CoE-Implementation-Kit.zip.sha256">Download its SHA256 receipt</a></p>
+      <p>Use the current release 3.8.24 implementation ZIP and its release receipt. The receipt identifies the
+        expected SHA256 hash: <code>EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9D</code>.</p>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip">Download the v3.8.24 implementation ZIP</a>
+        &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256">Download its SHA256 receipt</a></p>
       <p>Do not choose GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository
         <em>Download ZIP</em>. Those are source snapshots and are not installation packages.</p>
-      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.23" target="_blank" rel="noopener">Release 3.8.23 notes and assets</a>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.24" target="_blank" rel="noopener">Release 3.8.24 notes and assets</a>
         &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">Kit repository and documentation</a></p>
       <p class="meta">Keep organization settings and approved overrides outside the extracted kit. This recording
         uses delegated interactive sign-in through a tenant-owned Entra app. Installation, content updates,
@@ -1043,7 +1043,7 @@ if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
         recovery, plus what installation creates in the tenant and what it deliberately leaves alone.</p>
       <p><a href="admin-quickstart.html">Open the canonical Administrator Quickstart &rarr;</a></p>
       <p><a href="admin-faq.html">Open the Administrator FAQ &rarr;</a></p>
-      <p class="meta">Release 3.8.23. Searchable and filterable by topic, with a direct link to any question. Written
+      <p class="meta">Release 3.8.24. Searchable and filterable by topic, with a direct link to any question. Written
         reference material, not part of the narrated video.</p>
     </section>
 
