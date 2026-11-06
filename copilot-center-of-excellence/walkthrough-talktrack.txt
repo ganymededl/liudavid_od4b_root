@@ -1,7 +1,7 @@
-Higher Education Copilot CoE 3.8.21 - Eight-Phase Walkthrough
+Higher Education Copilot CoE 3.8.24 Guide - Eight-Phase Walkthrough
 
 INTRO
-In this walkthrough, we'll install release 3.8.21 using the Higher Education template in a commercial Microsoft 365 tenant. We'll follow the same eight phases as the GCC Moderate guide.
+In this walkthrough, we'll use the Higher Education template in a commercial Microsoft 365 tenant. The footage was recorded with release 3.8.21, while the commands and guidance are updated for release 3.8.24. We'll follow the same eight phases as the GCC Moderate guide.
 
 This is an unofficial demonstration: the footage uses public University of Illinois Urbana-Champaign pages inside a Microsoft lab tenant, so the tenant, account, and site names you see on screen are lab values, not values to copy.
 
