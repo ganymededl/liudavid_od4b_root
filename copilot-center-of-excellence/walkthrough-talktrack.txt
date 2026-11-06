@@ -15,7 +15,7 @@ Run Get-FileHash on the ZIP and compare the result with the expected hash in the
 Use a new empty install folder. Copy the Org-Template content pack to a separate organization folder. Keep settings and records outside the extracted kit so a future release cannot overwrite them.
 
 PHASE 2 - Edit the organization settings
-Open Deployment-Settings.json in the organization folder, not the template inside the kit.
+Open the Deployment-Settings.json file in the organization folder, not the template inside the kit.
 
 Confirm the tenant, SharePoint hosts, unused group alias, and approved owner and reviewer accounts.
 

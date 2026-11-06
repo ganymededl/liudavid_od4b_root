@@ -1,229 +1,229 @@
 WEBVTT
 
 1
-00:00:00.250 --> 00:00:08.331
+00:00:00.100 --> 00:00:07.319
 In this walkthrough, we'll use the Higher Education template in a commercial Microsoft 365 tenant.
 
 2
-00:00:08.511 --> 00:00:18.495
+00:00:07.319 --> 00:00:15.348
 The footage was recorded with release 3.8.21, while the commands and guidance are updated for release 3.8.24.
 
 3
-00:00:18.675 --> 00:00:22.971
+00:00:15.348 --> 00:00:19.842
 We'll follow the same eight phases as the GCC Moderate guide.
 
 4
-00:00:23.421 --> 00:00:38.885
+00:00:20.892 --> 00:00:36.434
 This is an unofficial demonstration: the footage uses public University of Illinois Urbana-Champaign pages inside a Microsoft lab tenant, so the tenant, account, and site names you see on screen are lab values, not values to copy.
 
 5
-00:00:39.335 --> 00:00:45.071
+00:00:37.484 --> 00:00:43.068
 We'll verify the package, configure the settings, install the site, and review the result.
 
 6
-00:00:45.251 --> 00:00:51.566
+00:00:43.068 --> 00:00:49.210
 Passing the automated checks is only part of deciding whether a deployment is ready for production.
 
 7
-00:00:52.566 --> 00:01:04.374
+00:00:49.939 --> 00:01:00.345
 Download the release 3.8.24 implementation ZIP and its SHA256 receipt, not GitHub's automatically generated source archive.
 
 8
-00:01:04.824 --> 00:01:11.035
+00:01:01.395 --> 00:01:06.882
 Run Get-FileHash on the ZIP and compare the result with the expected hash in the receipt.
 
 9
-00:01:11.215 --> 00:01:13.305
+00:01:06.882 --> 00:01:08.609
 Continue only if they match.
 
 10
-00:01:13.755 --> 00:01:16.344
+00:01:09.659 --> 00:01:11.701
 Use a new empty install folder.
 
 11
-00:01:16.524 --> 00:01:21.319
+00:01:11.701 --> 00:01:16.247
 Copy the Org-Template content pack to a separate organization folder.
 
 12
-00:01:21.499 --> 00:01:27.548
+00:01:16.247 --> 00:01:22.441
 Keep settings and records outside the extracted kit so a future release cannot overwrite them.
 
 13
-00:01:28.548 --> 00:01:35.734
-Open Deployment-Settings.json in the organization folder, not the template inside the kit.
+00:01:23.169 --> 00:01:29.399
+Open the Deployment-Settings.json file in the organization folder, not the template inside the kit.
 
 14
-00:01:36.184 --> 00:01:43.348
+00:01:30.449 --> 00:01:37.351
 Confirm the tenant, SharePoint hosts, unused group alias, and approved owner and reviewer accounts.
 
 15
-00:01:43.798 --> 00:01:47.385
+00:01:38.401 --> 00:01:41.716
 Keep the Team private and external sharing disabled.
 
 16
-00:01:47.565 --> 00:01:50.688
+00:01:41.716 --> 00:01:44.775
 Set the LearningEnvironment to Higher Education.
 
 17
-00:01:51.138 --> 00:01:56.815
+00:01:45.825 --> 00:01:50.641
 If you're creating a new provisioning app, leave the PnP client ID blank.
 
 18
-00:01:56.995 --> 00:02:02.092
+00:01:50.641 --> 00:01:55.655
 Don't copy another tenant's client ID or deployment report into this folder.
 
 19
-00:02:03.092 --> 00:02:05.646
+00:01:56.373 --> 00:01:58.661
 Compare each setting with its source.
 
 20
-00:02:05.826 --> 00:02:15.916
+00:01:58.661 --> 00:02:08.243
 Public policy links can be researched, but private mailboxes, ticket queues, incident routes, and tenant identities must come from the people who own them.
 
 21
-00:02:16.366 --> 00:02:19.001
+00:02:09.293 --> 00:02:11.864
 Configure a monitored support mailbox.
 
 22
-00:02:19.181 --> 00:02:26.089
+00:02:11.864 --> 00:02:18.427
 Then set the links for general support, technology requests, incident reporting, and AI guidance.
 
 23
-00:02:26.539 --> 00:02:29.534
+00:02:19.477 --> 00:02:22.251
 Review the governance and training links as well.
 
 24
-00:02:29.984 --> 00:02:38.703
+00:02:23.301 --> 00:02:30.995
 Keep lasting changes to generated page text in the organization's Content folder, and approved reference files in Assets.
 
 25
-00:02:39.703 --> 00:02:46.309
+00:02:31.713 --> 00:02:37.637
 From the extracted kit folder, run the local content preflight against the organization folder.
 
 26
-00:02:46.489 --> 00:02:48.684
+00:02:37.637 --> 00:02:39.695
 The commands are shown on screen.
 
 27
-00:02:49.134 --> 00:02:55.775
+00:02:40.745 --> 00:02:47.468
 This checks the structured content before sign-in, including the calendar columns and required fields.
 
 28
-00:02:55.955 --> 00:03:01.899
+00:02:47.468 --> 00:02:53.071
 It does not approve the links, tenant settings, policy wording, or reader experience.
 
 29
-00:03:02.349 --> 00:03:05.449
+00:02:54.121 --> 00:02:57.111
 Fix every reported issue before continuing.
 
 30
-00:03:06.449 --> 00:03:13.008
+00:02:57.840 --> 00:03:03.710
 Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
 
 31
-00:03:13.458 --> 00:03:20.935
+00:03:04.760 --> 00:03:11.782
 If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
 
 32
-00:03:21.385 --> 00:03:29.640
+00:03:12.832 --> 00:03:20.574
 In Entra, confirm that all required delegated permissions are granted, and that Allow public client flows is set to Yes.
 
 33
-00:03:30.090 --> 00:03:42.687
+00:03:21.624 --> 00:03:33.950
 Review the group naming policy, and check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users.
 
 34
-00:03:43.687 --> 00:03:46.996
+00:03:34.667 --> 00:03:37.302
 Run script 02 with SeedDemoContent.
 
 35
-00:03:47.176 --> 00:03:52.783
+00:03:37.302 --> 00:03:43.249
 That switch loads the site's pages, catalogs, calendar, and governance content.
 
 36
-00:03:53.233 --> 00:04:00.385
+00:03:44.299 --> 00:03:51.369
 Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
 
 37
-00:04:00.835 --> 00:04:08.405
+00:03:52.419 --> 00:03:59.505
 If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it.
 
 38
-00:04:08.585 --> 00:04:13.484
+00:03:59.505 --> 00:04:04.385
 Choosing Proceed is a documented pilot decision, not production approval.
 
 39
-00:04:13.934 --> 00:04:19.565
+00:04:05.435 --> 00:04:10.565
 After installation, use the actual site address recorded in the deployment report.
 
 40
-00:04:19.745 --> 00:04:29.114
+00:04:10.565 --> 00:04:19.321
 If an earlier attempt already created resources for the alias, follow the recovery procedure instead of starting another clean installation.
 
 41
-00:04:30.114 --> 00:04:37.498
+00:04:20.039 --> 00:04:26.957
 Run the read-only checker with the organization folder, the actual site address, and the same ContentMode.
 
 42
-00:04:37.678 --> 00:04:40.894
+00:04:26.957 --> 00:04:29.893
 Resolve every failure, and read each warning.
 
 43
-00:04:41.344 --> 00:04:47.230
+00:04:30.943 --> 00:04:36.497
 Review Home, the tool pages, navigation, and catalog views as a regular reader.
 
 44
-00:04:47.410 --> 00:04:49.941
+00:04:36.497 --> 00:04:39.309
 Follow the support and governance links.
 
 45
-00:04:50.391 --> 00:05:00.794
+00:04:40.359 --> 00:04:50.206
 Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post.
 
 46
-00:05:00.974 --> 00:05:02.623
+00:04:50.206 --> 00:04:51.612
 Check posts visually;
 
 47
-00:05:02.803 --> 00:05:06.111
+00:04:51.612 --> 00:04:55.229
 the app can't read them back without extra permission.
 
 48
-00:05:06.561 --> 00:05:09.928
+00:04:56.279 --> 00:04:59.269
 Keep the checker output and the manual review record.
 
 49
-00:05:10.928 --> 00:05:17.732
+00:04:59.987 --> 00:05:06.223
 Publish reviewed changes from the organization folder with script 03 and interactive sign-in.
 
 50
-00:05:17.912 --> 00:05:22.869
+00:05:06.223 --> 00:05:11.185
 Then run the same read-only checker and repeat the relevant manual review.
 
 51
-00:05:23.319 --> 00:05:27.116
+00:05:12.235 --> 00:05:15.596
 Do not add RepairCapturedPages for a routine update;
 
 52
-00:05:27.296 --> 00:05:31.255
+00:05:15.596 --> 00:05:19.473
 it can replace managed parts of Home and the captured pages.
 
 53
-00:05:31.705 --> 00:05:39.344
+00:05:20.523 --> 00:05:28.193
 Complete the handoff only when both checker runs have passed and the required manual reviews are documented for this tenant.
 
 54
-00:05:40.344 --> 00:05:43.664
+00:05:28.922 --> 00:05:32.769
 Passing the checker is not the same as production approval.
 
 55
-00:05:43.844 --> 00:05:51.333
+00:05:32.769 --> 00:05:39.616
 The organization still needs to approve the content, security, accessibility, and operating arrangements.
 
 56
-00:05:51.783 --> 00:06:00.107
+00:05:40.666 --> 00:05:48.792
 Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
 
 57
-00:06:00.557 --> 00:06:07.779
+00:05:49.842 --> 00:05:56.768
 For recovery or removal, use the administrator guide included with release 3.8.24.
