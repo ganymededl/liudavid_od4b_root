@@ -237,6 +237,55 @@
       section { padding: 16px; }
       table { display: block; overflow-x: auto; }
     }
+    section, .step { scroll-margin-top: 110px; }
+    .current { box-shadow: 0 0 0 3px var(--cp-accent), 0 10px 30px rgba(0, 0, 0, 0.18); border-radius: 0.625rem; }
+    body.wide main.shell { width: min(1500px, calc(100% - 32px)); }
+    .player-slot {
+      position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 16px 0 8px;
+      background: #000; border-radius: 0.625rem; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+    .player-frame {
+      position: relative; width: 100%; height: 100%; border-radius: 0.625rem; overflow: hidden; background: #000;
+    }
+    .player-frame video { width: 100%; height: 100%; display: block; object-fit: contain; background: #000; }
+    .frame-tools {
+      position: absolute; top: 10px; right: 10px; display: flex; gap: 6px; z-index: 3;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .player-frame:hover .frame-tools, .player-frame:focus-within .frame-tools, .player-frame.mini .frame-tools { opacity: 1; }
+    @media (hover: none) { .frame-tools { opacity: 1; } }
+    .frame-btn {
+      border: 1px solid rgba(255, 255, 255, 0.6); background: rgba(0, 0, 0, 0.65); color: #fff;
+      border-radius: 999px; padding: 6px 12px; font: 600 0.78rem "Segoe UI", Aptos, Calibri, sans-serif; cursor: pointer;
+    }
+    .frame-btn:hover, .frame-btn:focus-visible { background: rgba(0, 0, 0, 0.9); border-color: #fff; outline: none; }
+    .player-frame:not(.mini) .btn-top { display: none; }
+    .player-frame.mini {
+      position: fixed; right: 18px; bottom: 18px; width: min(420px, 44vw); height: auto; aspect-ratio: 16 / 9;
+      z-index: 60; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35); border: 1px solid var(--cp-border-strong);
+    }
+    .player-frame.mini #btnWide { display: none; }
+    .player-frame:fullscreen, .player-frame:-webkit-full-screen {
+      border-radius: 0; border: 0; width: 100vw !important; height: 100vh !important; position: static;
+    }
+    .player-frame:fullscreen .frame-tools { top: 56px; }
+    .player-meta {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 6px 0 2px;
+      font-size: 0.88rem; color: var(--cp-text-muted);
+    }
+    .player-meta #nowPlaying { color: var(--cp-text); font-weight: 600; }
+    .player-meta label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+    h2.has-seek { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .seek-btn {
+      margin-left: auto; border: 1px solid var(--cp-accent); background: transparent; color: var(--cp-accent);
+      border-radius: 999px; padding: 5px 14px; font: 600 0.8rem "Segoe UI", Aptos, Calibri, sans-serif; cursor: pointer;
+    }
+    .seek-btn:hover, .seek-btn:focus-visible { background: var(--cp-accent); color: var(--cp-accent-fg); outline: none; }
+    [hidden] { display: none !important; }
+    .video-fallback {
+      margin: 8px 0; padding: 10px 14px; border: 1px solid var(--cp-warning); border-radius: 0.625rem; font-size: 0.9rem;
+      background: var(--cp-surface-soft);
+    }
   </style>
 </head>
 <body>
@@ -281,14 +330,30 @@
       <p>This narrated 3.8.22 walkthrough follows the same eight phases as the
         <a href="index.html#eight-phase-runbook">higher-ed guide</a>. The footage comes from an internal lab
         installation, so the tenant, agency and account names on screen are lab values, not values to copy.</p>
-      <video controls preload="metadata" playsinline poster="government-video-poster.jpg?v=20261023-3"
-             aria-label="Narrated eight-phase GCC Moderate Copilot Center of Excellence installation walkthrough"
-             style="width:100%; border:1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface-soft);">
-        <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3" type="video/mp4">
-        <track kind="captions" src="government-install-captions.vtt?v=20261023-3" srclang="en" label="English">
-        Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3">Download the MP4</a>.
-      </video>
-      <p class="meta">Ten narrated sections (introduction, eight phases, and closing) · about 7 minutes · English captions included.</p>
+      <div class="player-slot" id="playerSlot">
+        <div class="player-frame" id="playerFrame">
+          <video id="walkVideo" controls preload="metadata" playsinline poster="government-video-poster.jpg?v=20261023-3"
+                 aria-label="Narrated eight-phase GCC Moderate Copilot Center of Excellence installation walkthrough">
+            <source src="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3" type="video/mp4">
+            <track kind="captions" src="government-install-captions.vtt?v=20261023-3" srclang="en" label="English">
+            Your browser can't play this video. <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3">Download the MP4</a>.
+          </video>
+          <div class="frame-tools">
+            <button class="frame-btn btn-top" id="btnTop" type="button">&#8593; Back to video</button>
+            <button class="frame-btn" id="btnWide" type="button" aria-pressed="false">Wide view</button>
+            <button class="frame-btn" id="btnFull" type="button">Full screen</button>
+          </div>
+        </div>
+      </div>
+      <div class="video-fallback" id="videoFallback" hidden>
+        <strong>The video didn't start.</strong> <span class="fb-msg"></span>
+        Try reloading the page, or <a href="Copilot-Center-of-Excellence-GCC-Install-Walkthrough.mp4?v=20261023-3">download the MP4</a> and play it directly. The step-by-step details below cover the same content.
+      </div>
+      <div class="player-meta">
+        <span id="nowPlaying">Ten narrated sections (introduction, eight phases, and closing) · about 7 minutes · English captions included.</span>
+        <label><input type="checkbox" id="followAlong" checked> Follow along below</label>
+        <span>Use &ldquo;Play this section&rdquo; on a phase heading to jump the video there; turn on captions with CC.</span>
+      </div>
       <div class="warning"><strong>Recorded with release 3.8.22.</strong> The video is a summary, not a substitute for this page:
         use the commands and cautions below, including the Allow public client flows check, the naming-policy gate, the
         STOP / PROCEED prompts, and no routine <code>-RepairCapturedPages</code>. The footage is from a lab installation and is not a customer acceptance run.</div>
@@ -864,6 +929,113 @@ $missingWelcomeChannels = @()
     </div>
   </footer>
 
+  <script>
+    (() => {
+      const SECTION_IDS = ['walkthrough', 'package', 'settings', 'content', 'preflight', 'register', 'install', 'accept', 'update'];
+      const STARTS = [0.0, 37.082, 72.053, 111.469, 153.175, 179.526, 255.661, 326.372, 374.701];
+      const sections = SECTION_IDS.map((id) => document.getElementById(id));
+      if (sections.some((el) => !el)) return;
+      const titles = sections.map((el, i) => i === 0 ? 'Introduction'
+        : (el.querySelector('h2') ? el.querySelector('h2').textContent.replace(/^\d+/, '').trim() : ''));
+      const video = document.getElementById('walkVideo');
+      const frame = document.getElementById('playerFrame');
+      const slot = document.getElementById('playerSlot');
+      const nowPlaying = document.getElementById('nowPlaying');
+      const follow = document.getElementById('followAlong');
+      const btnFull = document.getElementById('btnFull');
+      const btnWide = document.getElementById('btnWide');
+      const btnTop = document.getElementById('btnTop');
+      if (!video || !frame || !slot || !nowPlaying || !follow || !btnFull || !btnWide || !btnTop) return;
+      const smooth = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      let lastIndex = -1, slotVisible = true;
+
+      function indexAt(t) {
+        for (let i = STARTS.length - 1; i >= 0; i--) if (t >= STARTS[i] - 0.05) return i;
+        return 0;
+      }
+      function setCurrent(i, scroll) {
+        sections.forEach((el) => el.classList.remove('current'));
+        sections[i].classList.add('current');
+        nowPlaying.textContent = 'Now playing: ' + (i + 1) + ' of ' + STARTS.length + ' \u00B7 ' + titles[i];
+        if (scroll && follow.checked && i > 0) sections[i].scrollIntoView({ behavior: smooth, block: 'start' });
+      }
+      function seekTo(i) {
+        lastIndex = i;
+        video.currentTime = STARTS[i] + 0.05;
+        setCurrent(i, false);
+        video.play().catch(() => {});
+      }
+      function updateMini() {
+        const started = video.currentTime > 0.5 && !video.ended;
+        frame.classList.toggle('mini', started && !slotVisible && !document.fullscreenElement);
+      }
+
+      sections.forEach((el, i) => {
+        if (i === 0) return;
+        const h2 = el.querySelector('h2');
+        if (!h2) return;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'seek-btn';
+        b.textContent = '\u25B6 Play this section';
+        b.setAttribute('aria-label', 'Play section ' + i + ': ' + titles[i]);
+        b.addEventListener('click', () => seekTo(i));
+        h2.classList.add('has-seek');
+        h2.appendChild(b);
+      });
+
+      video.addEventListener('timeupdate', () => {
+        const i = indexAt(video.currentTime);
+        if (i !== lastIndex) { lastIndex = i; setCurrent(i, !video.paused); }
+        updateMini();
+      });
+      video.addEventListener('seeked', () => {
+        const i = indexAt(video.currentTime);
+        lastIndex = i; setCurrent(i, false); updateMini();
+      });
+      ['play', 'pause', 'ended'].forEach((ev) => video.addEventListener(ev, updateMini));
+
+      new IntersectionObserver((entries) => {
+        slotVisible = entries[0].isIntersecting;
+        updateMini();
+      }, { threshold: 0.15 }).observe(slot);
+
+      btnFull.addEventListener('click', () => {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (frame.requestFullscreen) frame.requestFullscreen();
+        else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+      });
+      document.addEventListener('fullscreenchange', () => {
+        btnFull.textContent = document.fullscreenElement ? 'Exit full screen' : 'Full screen';
+        updateMini();
+      });
+      btnWide.addEventListener('click', () => {
+        const on = document.body.classList.toggle('wide');
+        btnWide.setAttribute('aria-pressed', String(on));
+        btnWide.textContent = on ? 'Standard view' : 'Wide view';
+      });
+      btnTop.addEventListener('click', () => slot.scrollIntoView({ behavior: smooth, block: 'start' }));
+
+      // If the video can't load or stalls after a click, say so instead of leaving a black frame.
+      const fallback = document.getElementById('videoFallback');
+      const fbMsg = fallback.querySelector('.fb-msg');
+      let watchdog;
+      function showFallback(msg) { fbMsg.textContent = msg; fallback.hidden = false; }
+      if (!video.canPlayType('video/mp4')) showFallback('This browser can\u2019t play MP4 video.');
+      video.addEventListener('error', () => showFallback('The browser couldn\u2019t load the video file.'), true);
+      setTimeout(() => {
+        if (video.readyState === 0 && video.networkState === 3) showFallback('The browser couldn\u2019t load the video file.');
+      }, 5000);
+      video.addEventListener('play', () => {
+        clearTimeout(watchdog);
+        const t0 = video.currentTime;
+        watchdog = setTimeout(() => {
+          if (!video.paused && video.currentTime === t0 && video.readyState < 3) showFallback('It is taking too long to start.');
+        }, 12000);
+      });
+      video.addEventListener('playing', () => { clearTimeout(watchdog); fallback.hidden = true; });
+    })();
+  </script>
   <script>
     document.querySelectorAll("[data-copy]").forEach((button) => {
       button.addEventListener("click", async () => {
