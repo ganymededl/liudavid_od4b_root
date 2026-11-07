@@ -907,7 +907,11 @@ if ($LASTEXITCODE -ne 0) { throw 'Second checker failed; stop and investigate.' 
         must be a Loop page, do not paste the SharePoint <code>.aspx</code> URL into that Loop-only picker and do not
         substitute a Website tab. Confirm each governance page opens directly and remains the home page of its own
         shared-channel SharePoint site. Preserve the installer’s <code>ManualStepsRequired</code> entries as compatibility
-        exceptions and resume the existing deployment only after Teams exposes a supported SharePoint page-tab option.</div>
+        exceptions; this is a known Teams compatibility limitation, so do not wait for a future page-tab option. If the
+        advisory is open, select <code>PROCEED</code> to record the exception and continue. If a prior <code>STOP</code>
+        ended Step 7, remove only the matching <code>SharedChannelTabManualInstall</code> saved STOP decision from
+        <code>CoE-Advisory-Decisions.json</code>, rerun the installer with <code>-ResumeExisting</code>, and select
+        <code>PROCEED</code> when prompted. Run Step 8 only after Step 7 finishes.</div>
       <div class="warning"><strong>If Teams reports “App is blocked by app permission policy” for
         <code>com.microsoft.teamspace.tab.web</code>:</strong> a Website row showing <strong>Unblocked</strong> but
         <strong>Available to: No one</strong> is still denied. Select the Microsoft Website row, use
