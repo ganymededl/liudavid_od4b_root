@@ -847,7 +847,22 @@ if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
         Script 03 replaces the pages it manages, so make lasting changes in <code>$orgPath\Content</code>, not
         directly in SharePoint.</p>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-update">Copy command</button></div>
-      <pre id="cmd-update"># Add -ReplaceFiles only if governance drafts under $orgPath\Content\Governance changed during review,
+      <pre id="cmd-update"># Self-contained: run this in a fresh terminal (for example, after obtaining the Step 07 approvals).
+$kitRoot = 'C:\CoE-Install\GovernmentOrg-v3.8.24\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\GovernmentOrg'
+$contentMode = 'Customer'
+Set-Location -LiteralPath $kitRoot
+
+$reportPath = Join-Path $orgPath 'CoE-Revision-Report.json'
+if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+  throw 'No completed deployment report exists. Stop and investigate the installation.'
+}
+$siteUrl = (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json).Site
+if ([string]::IsNullOrWhiteSpace($siteUrl)) {
+  throw 'The completed deployment report has no site URL.'
+}
+
+# Add -ReplaceFiles only if governance drafts under $orgPath\Content\Governance changed during review,
 # or if reviewers edited the governance Word documents on the site. Without it, 03 stops at the first
 # governance document that differs from the organization's draft, after earlier content has been published.
 .\03_Update-CoEContent.ps1 `

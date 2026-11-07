@@ -476,6 +476,7 @@ For recovery or removal, use the administrator guide included with release 3.8.2
       </details>
     </section>
 
+    <a id="eight-phase-runbook"></a>
     <section id="sources">
       <h2>Separate public information from tenant settings</h2>
       <p>Use only publicly published university material as research. An authorized tenant administrator and the
@@ -489,7 +490,7 @@ For recovery or removal, use the administrator guide included with release 3.8.2
           <tr><td>Microsoft Copilot Chat guidance</td><td><a href="https://genai.illinois.edu/ai-apps-copilot-chat/" target="_blank" rel="noopener">genai.illinois.edu/ai-apps-copilot-chat</a></td></tr>
           <tr><td>IT Service Desk</td><td><a href="https://www.techservices.illinois.edu/get-help/it-service-desk/" target="_blank" rel="noopener">techservices.illinois.edu/get-help/it-service-desk</a></td></tr>
           <tr><td>Technology request catalog</td><td><a href="https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog" target="_blank" rel="noopener">help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog</a></td></tr>
-          <tr><td>Cybersecurity incident reporting</td><td><a href="https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/" target="_blank" rel="noopener">cybersecurity.illinois.edu/report-a-cybersecurity-incident</a></td></tr>
+          <tr><td>Cybersecurity incident reporting</td><td><a href="https://cybersecurity.illinois.edu/report-a-cybersecurity-incident" target="_blank" rel="noopener">cybersecurity.illinois.edu/report-a-cybersecurity-incident</a></td></tr>
           <tr><td>Teaching &amp; learning best practices</td><td><a href="https://genai.illinois.edu/best-practices-teaching-and-learning/" target="_blank" rel="noopener">genai.illinois.edu/best-practices-teaching-and-learning</a></td></tr>
         </tbody>
       </table>
@@ -646,7 +647,7 @@ $siteUrl = (Get-Content (Join-Path $orgPath 'CoE-Revision-Report.json') -Raw | C
       <pre>"Links": {
   "ServiceDesk": "https://www.techservices.illinois.edu/get-help/it-service-desk/",
   "TechnologyRequest": "https://help.uillinois.edu/TDClient/42/UIUC/Requests/ServiceCatalog",
-  "DataSafetyIncident": "https://www.cybersecurity.illinois.edu/cybersecurity/report-a-cybersecurity-incident/",
+  "DataSafetyIncident": "https://cybersecurity.illinois.edu/report-a-cybersecurity-incident",
   "AIGuidelines": "https://genai.illinois.edu/ethical-and-responsible-use-of-generative-ai/"
 },
 "GovernanceLinks": [
@@ -987,7 +988,22 @@ if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
         <figcaption>Recording of the update command republishing catalogs on the lab site.</figcaption>
       </figure>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-update">Copy command</button></div>
-      <pre id="cmd-update"># Add -ReplaceFiles only if governance drafts under $orgPath\Content\Governance changed during review,
+      <pre id="cmd-update"># Self-contained: run this in a fresh terminal (for example, after obtaining the Step 07 approvals).
+$kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
+$orgPath = 'C:\CoE-Orgs\DemoOrg'
+$contentMode = 'Customer'
+Set-Location -LiteralPath $kitRoot
+
+$reportPath = Join-Path $orgPath 'CoE-Revision-Report.json'
+if (-not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+  throw 'No completed deployment report exists. Stop and investigate the installation.'
+}
+$siteUrl = (Get-Content -LiteralPath $reportPath -Raw | ConvertFrom-Json).Site
+if ([string]::IsNullOrWhiteSpace($siteUrl)) {
+  throw 'The completed deployment report has no site URL.'
+}
+
+# Add -ReplaceFiles only if governance drafts under $orgPath\Content\Governance changed during review,
 # or if reviewers edited the governance Word documents on the site. Without it, 03 stops at the first
 # governance document that differs from the organization's draft, after earlier content has been published.
 .\03_Update-CoEContent.ps1 `
