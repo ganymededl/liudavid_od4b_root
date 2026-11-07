@@ -388,7 +388,7 @@
       <section class="release-card" aria-label="Current approved release">
         <div class="release-grid">
           <div><span class="release-label">Approved release</span><span class="release-value">v3.8.24</span></div>
-          <div><span class="release-label">Approved ZIP SHA-256</span><span class="release-value"><code>EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9D</code></span></div>
+          <div><span class="release-label">Approved ZIP SHA-256</span><span class="release-value"><code>474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2</code></span></div>
           <div><span class="release-label">Implementation release asset</span><span class="release-value"><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip">Copilot-CoE-Implementation-Kit.zip</a></span></div>
         </div>
         <p class="integrity-note">Download the named implementation ZIP asset and its <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256">SHA256 receipt</a>. GitHub-generated source archives are not substitutes. Keep the receipt with the package.</p>
@@ -438,7 +438,7 @@
           <span>Which release should I deploy, where is the approved ZIP, and what is its hash?</span>
           <span class="tag">Release &amp; integrity</span>
         </summary>
-        <div class="answer"><p>Download the approved <strong>v3.8.24</strong> <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a> release asset.</p><p>Before extracting it, verify this SHA-256 hash:</p><p><code>EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9D</code></p><p>Keep the matching <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a> with your deployment records. See <a href="#faq-007-how-do-i-verify-the-zip-before-extracting-it">Question 7</a> for the PowerShell command and <a href="#faq-008-how-do-i-check-whether-my-copy-is-the-correct-release">Question 8</a> for checking a copied package.</p><div class="callout">Do not substitute GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository <em>Download ZIP</em>. Those are source snapshots, not installation packages.</div>
+        <div class="answer"><p>Download the approved <strong>v3.8.24</strong> <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a> release asset.</p><p>Before extracting it, verify this SHA-256 hash:</p><p><code>474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2</code></p><p>Keep the matching <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256"><code>.sha256</code> receipt</a> with your deployment records. See <a href="#faq-007-how-do-i-verify-the-zip-before-extracting-it">Question 7</a> for the PowerShell command and <a href="#faq-008-how-do-i-check-whether-my-copy-is-the-correct-release">Question 8</a> for checking a copied package.</p><div class="callout">Do not substitute GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository <em>Download ZIP</em>. Those are source snapshots, not installation packages.</div>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
       </details>
@@ -501,7 +501,7 @@
           <span class="tag">Release &amp; integrity</span>
         </summary>
         <div class="answer"><p>Run this before extracting the package:</p><div class="command-header"><button type="button" class="copy-command" data-target="hash-command">Copy command</button></div><pre><code id="hash-command">$zip = 'full path to Copilot-CoE-Implementation-Kit.zip'
-$expected = 'EFD59EDD830FDBE4FC7C83ECCA1163AAE98818234C645E71B1B7595D7B91BA9D'
+$expected = '474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2'
 if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne $expected) {
     throw 'The ZIP does not match the approved release.'
 }
