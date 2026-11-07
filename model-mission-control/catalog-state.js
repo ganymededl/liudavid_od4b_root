@@ -1,9 +1,9 @@
 window.MODEL_MISSION_CATALOGS = {
-  updatedAt: "2026-11-03T06:37:18-05:00",
+  updatedAt: "2026-11-07T06:31:00-05:00",
   platforms: {
     copilot: {
       confidence: "account-observed",
-      source: "Authenticated Microsoft 365 Copilot Chat picker capture (2026-11-03); top-level modes and Claude/GPT submenus inspected",
+      source: "Authenticated Microsoft 365 Copilot Chat picker capture (2026-11-07); top-level modes and Claude/GPT submenus inspected",
       models: [
         "copilot-auto",
         "copilot-quick-response",
@@ -18,20 +18,15 @@ window.MODEL_MISSION_CATALOGS = {
       ]
     },
     cowork: {
-      confidence: "account-observed",
-      source: "Authenticated Microsoft 365 Copilot Cowork picker capture (2026-11-03); runtime model IDs captured from the app response",
+      confidence: "live-capture-pending",
+      source: "Microsoft 365 Copilot Cowork picker not captured (2026-11-07); runtime model response is not picker evidence",
       models: [
-        "cowork-managed",
-        "gpt-6.1-sol",
-        "gpt-6-astra",
-        "gpt-5.5",
-        "opus-5.5",
-        "sonnet-5.5"
+        "cowork-managed"
       ]
     },
     scout: {
       confidence: "live-exact",
-      source: "Microsoft Scout m_list_models (2026-11-03)",
+      source: "Microsoft Scout m_list_models (2026-11-07)",
       models: [
         "auto",
         "claude-sonnet-5",
@@ -58,7 +53,7 @@ window.MODEL_MISSION_CATALOGS = {
     },
     "github-cli": {
       confidence: "account-live",
-      source: "GitHub Copilot CLI CAPI catalog (2026-11-03): picker enabled and policy enabled",
+      source: "GitHub Copilot CLI CAPI catalog (2026-11-07): picker enabled and policy enabled",
       models: [
         "auto",
         "observed-hydrafusion-max",
