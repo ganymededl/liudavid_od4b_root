@@ -911,6 +911,11 @@ if ([string]::IsNullOrWhiteSpace($siteUrl)) {
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
 if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
+      <div class="warning"><strong>Release 3.8.24 checker:</strong> always include the same explicit
+        <code>-ContentMode</code> used for installation. In that release, omitting the parameter can incorrectly require
+        the configured sample notice and produce a group of false missing-notice failures. Rerun the checker with
+        <code>-ContentMode Customer</code> before changing or republishing content; Customer mode intentionally suppresses
+        the sample notice.</div>
       <p class="ok">Expected: <code>ALL CHECKS PASSED (...)</code>, with every WARN reviewed manually.</p>
       <figure>
         <img class="site-shot" src="Images/ps-checker-pass-rows.png" loading="lazy" alt="PowerShell terminal showing a long column of PASS results from the read-only checker">
@@ -1046,6 +1051,12 @@ if ($LASTEXITCODE -ne 0) { throw 'Second checker failed; stop and investigate.' 
         <li>Use <code>04_Remove-CopilotCoE.ps1 -Purge -WhatIf</code> before any reviewed permanent removal.</li>
         <li>Keep the provisioning app until removal reports <code>AliasReusable : True</code>.</li>
       </ul>
+      <div class="warning"><strong>Shared-channel “Start here” tab compatibility:</strong> if Teams reports that the
+        tab was created but it cannot be verified, or the <strong>Page &gt; Existing page</strong> picker says the URL
+        must be a Loop page, do not paste the SharePoint <code>.aspx</code> URL into that Loop-only picker and do not
+        substitute a Website tab. Confirm each governance page opens directly and remains the home page of its own
+        shared-channel SharePoint site. Preserve the installer’s <code>ManualStepsRequired</code> entries as compatibility
+        exceptions and resume the existing deployment only after Teams exposes a supported SharePoint page-tab option.</div>
       <div class="warning"><strong>If Teams reports &ldquo;App is blocked by app permission policy&rdquo; for
         <code>com.microsoft.teamspace.tab.web</code>:</strong> a Website row showing <strong>Unblocked</strong> but
         <strong>Available to: No one</strong> is still denied. Select the Microsoft Website row, use

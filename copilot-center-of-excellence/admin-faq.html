@@ -926,7 +926,7 @@ Unblock-File -LiteralPath $zip</code></pre><p>Stop if the hash differs. If it ma
           <span>Which checker version and ContentMode should I use?</span>
           <span class="tag">Production acceptance</span>
         </summary>
-        <div class="answer"><p>Use the checker shipped in the deployed release and pass the same <code>-ContentMode Customer</code> or <code>Demo</code>. Omitting the mode skips checks that apply specifically to Customer or Demo mode.</p><p>Run it against the site URL the install script printed:</p><div class="command-header"><button type="button" class="copy-command" data-target="checker-command-q50">Copy command</button></div><pre><code id="checker-command-q50">$orgPath = 'C:\path\to\organization-folder'
+        <div class="answer"><p>Use the checker shipped in the deployed release and pass the same <code>-ContentMode Customer</code> or <code>Demo</code>. Omitting the mode is intended to skip checks that apply specifically to Customer or Demo mode, but the release 3.8.24 checker can instead produce false missing-notice failures. Always pass the explicit mode with that release; do not republish pages merely to satisfy those failures.</p><p>Run it against the site URL the install script printed:</p><div class="command-header"><button type="button" class="copy-command" data-target="checker-command-q50">Copy command</button></div><pre><code id="checker-command-q50">$orgPath = 'C:\path\to\organization-folder'
 .\Test-CoEInstall.ps1 -OrgPath $orgPath -SiteUrl '&lt;site URL&gt;' -ContentMode Customer</code></pre>
           <div class="answer-actions"><button type="button" class="copy-link">Copy question reference</button></div>
         </div>
