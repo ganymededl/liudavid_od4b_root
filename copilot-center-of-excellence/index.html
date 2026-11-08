@@ -368,9 +368,9 @@
         <div class="player-frame" id="playerFrame">
           <video id="walkVideo" controls preload="metadata" playsinline poster="Images/video-poster.jpg"
                  aria-label="Narrated eight-phase higher education Copilot Center of Excellence installation walkthrough">
-            <source src="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4?v=20261106-4" type="video/mp4">
+            <source src="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4?v=20261107-1" type="video/mp4">
             <track kind="captions" src="walkthrough-captions.vtt?v=20261106-4" srclang="en" label="English">
-            Your browser can't play this video. <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4?v=20261106-4">Download the MP4</a>.
+            Your browser can't play this video. <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4?v=20261107-1">Download the MP4</a>.
           </video>
           <div class="frame-tools">
             <button class="frame-btn btn-top" id="btnTop" type="button">&#8593; Back to video</button>
@@ -381,7 +381,7 @@
       </div>
       <div class="video-fallback" id="videoFallback" hidden>
         <strong>The video didn't start.</strong> <span class="fb-msg"></span>
-        Try reloading the page, or <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4?v=20261106-4">download the MP4</a> and play it directly. The step-by-step details below cover the same content.
+        Try reloading the page, or <a href="Copilot-Center-of-Excellence-EDU-Install-Walkthrough.mp4?v=20261107-1">download the MP4</a> and play it directly. The step-by-step details below cover the same content.
       </div>
       <div class="player-meta">
         <span id="nowPlaying">Ten narrated sections (introduction, eight phases, and closing) &middot; English captions included.</span>
@@ -391,6 +391,10 @@
       <div class="warning"><strong>Recorded with release 3.8.21.</strong> The video is a summary, not a substitute for this page:
         use the commands and cautions below, including the naming-policy gate, the STOP / PROCEED prompts, and no routine
         <code>-RepairCapturedPages</code>. The footage is from a lab installation and is not a customer acceptance run.</div>
+      <p class="meta"><strong>Corrected November 7, 2026:</strong> the Phase 5 "Install PnP.PowerShell and register the app"
+        segment (narration and on-screen slide) was re-recorded to remove outdated "reuse an existing app" wording that
+        conflicted with the mandatory fresh-registration steps below. The rest of the footage is unchanged from the
+        original 3.8.21 recording.</p>
       <p class="meta">Talk track: <a href="walkthrough-talktrack.txt">Download narration script</a>.</p>
       <details>
         <summary>Read the walkthrough talk track</summary>
@@ -1166,7 +1170,7 @@ $missingWelcomeChannels = @()
   <script>
     (() => {
       const SECTION_IDS = ['walkthrough', 'package', 'settings', 'content', 'preflight', 'register', 'install', 'accept', 'update'];
-      const STARTS = [0.0, 49.939, 69.659, 116.373, 151.713, 177.840, 214.667, 260.039, 299.987];
+      const STARTS = [0.0, 49.939, 69.659, 116.373, 151.713, 177.840, 225.794, 271.166, 311.114];
       const sections = SECTION_IDS.map((id) => document.getElementById(id));
       if (sections.some((el) => !el)) return;
       const titles = sections.map((el, i) => i === 0 ? 'Introduction'

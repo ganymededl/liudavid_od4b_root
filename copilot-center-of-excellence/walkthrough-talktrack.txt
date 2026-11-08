@@ -42,7 +42,7 @@ Fix every reported issue before continuing.
 PHASE 5 - Install PnP.PowerShell and register the app
 Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
 
-If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
+Script 01 always registers a new app for this organization profile. It is not a one-time, first-tenant-only step. Have an administrator authorized to grant consent run it, then confirm it saved a valid client ID before continuing.
 
 In Entra, confirm that all required delegated permissions are granted, and that Allow public client flows is set to Yes.
 

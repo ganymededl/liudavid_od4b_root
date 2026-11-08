@@ -121,109 +121,117 @@ Fix every reported issue before continuing.
 Use PowerShell 7.4 or later with PnP PowerShell 3.2.0.
 
 31
-00:03:04.760 --> 00:03:11.782
-If the tenant needs a new provisioning app, have an administrator authorized to grant consent run script 01.
+00:03:04.760 --> 00:03:10.079
+Script 01 always registers a new app for this organization profile.
 
 32
-00:03:12.832 --> 00:03:20.574
-In Entra, confirm that all required delegated permissions are granted, and that Allow public client flows is set to Yes.
+00:03:10.079 --> 00:03:13.651
+It is not a one-time, first-tenant-only step.
 
 33
-00:03:21.624 --> 00:03:33.950
-Review the group naming policy, and check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users.
+00:03:13.651 --> 00:03:22.859
+Have an administrator authorized to grant consent run it, then confirm it saved a valid client ID before continuing.
 
 34
-00:03:34.667 --> 00:03:37.302
-Run script 02 with SeedDemoContent.
+00:03:23.909 --> 00:03:31.651
+In Entra, confirm that all required delegated permissions are granted, and that Allow public client flows is set to Yes.
 
 35
-00:03:37.302 --> 00:03:43.249
-That switch loads the site's pages, catalogs, calendar, and governance content.
+00:03:32.701 --> 00:03:45.027
+Review the group naming policy, and check in the Teams admin center that the apps needed for the Website, PDF, PowerPoint, and SharePoint tabs are available to the installer and intended users.
 
 36
-00:03:44.299 --> 00:03:51.369
-Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
+00:03:45.744 --> 00:03:48.379
+Run script 02 with SeedDemoContent.
 
 37
-00:03:52.419 --> 00:03:59.505
-If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it.
+00:03:48.379 --> 00:03:54.326
+That switch loads the site's pages, catalogs, calendar, and governance content.
 
 38
-00:03:59.505 --> 00:04:04.385
-Choosing Proceed is a documented pilot decision, not production approval.
+00:03:55.376 --> 00:04:02.446
+Before creating resources, check the signed-in account, tenant, alias, owner, and target address.
 
 39
-00:04:05.435 --> 00:04:10.565
-After installation, use the actual site address recorded in the deployment report.
+00:04:03.496 --> 00:04:10.582
+If the installer flags a naming policy issue, an unconfigured route, or a lab mailbox, stop and review it.
 
 40
-00:04:10.565 --> 00:04:19.321
-If an earlier attempt already created resources for the alias, follow the recovery procedure instead of starting another clean installation.
+00:04:10.582 --> 00:04:15.462
+Choosing Proceed is a documented pilot decision, not production approval.
 
 41
-00:04:20.039 --> 00:04:26.957
-Run the read-only checker with the organization folder, the actual site address, and the same ContentMode.
+00:04:16.512 --> 00:04:21.642
+After installation, use the actual site address recorded in the deployment report.
 
 42
-00:04:26.957 --> 00:04:29.893
-Resolve every failure, and read each warning.
+00:04:21.642 --> 00:04:30.398
+If an earlier attempt already created resources for the alias, follow the recovery procedure instead of starting another clean installation.
 
 43
-00:04:30.943 --> 00:04:36.497
-Review Home, the tool pages, navigation, and catalog views as a regular reader.
+00:04:31.116 --> 00:04:38.034
+Run the read-only checker with the organization folder, the actual site address, and the same ContentMode.
 
 44
-00:04:36.497 --> 00:04:39.309
-Follow the support and governance links.
+00:04:38.034 --> 00:04:40.970
+Resolve every failure, and read each warning.
 
 45
-00:04:40.359 --> 00:04:50.206
-Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post.
+00:04:42.020 --> 00:04:47.574
+Review Home, the tool pages, navigation, and catalog views as a regular reader.
 
 46
-00:04:50.206 --> 00:04:51.612
-Check posts visually;
+00:04:47.574 --> 00:04:50.386
+Follow the support and governance links.
 
 47
-00:04:51.612 --> 00:04:55.229
-the app can't read them back without extra permission.
+00:04:51.436 --> 00:05:01.283
+Confirm the Team is private, external sharing is disabled, no demo content remains, and each standard channel has exactly one correct welcome post.
 
 48
-00:04:56.279 --> 00:04:59.269
-Keep the checker output and the manual review record.
+00:05:01.283 --> 00:05:02.689
+Check posts visually;
 
 49
-00:04:59.987 --> 00:05:06.223
-Publish reviewed changes from the organization folder with script 03 and interactive sign-in.
+00:05:02.689 --> 00:05:06.306
+the app can't read them back without extra permission.
 
 50
-00:05:06.223 --> 00:05:11.185
-Then run the same read-only checker and repeat the relevant manual review.
+00:05:07.356 --> 00:05:10.346
+Keep the checker output and the manual review record.
 
 51
-00:05:12.235 --> 00:05:15.596
-Do not add RepairCapturedPages for a routine update;
+00:05:11.064 --> 00:05:17.300
+Publish reviewed changes from the organization folder with script 03 and interactive sign-in.
 
 52
-00:05:15.596 --> 00:05:19.473
-it can replace managed parts of Home and the captured pages.
+00:05:17.300 --> 00:05:22.262
+Then run the same read-only checker and repeat the relevant manual review.
 
 53
-00:05:20.523 --> 00:05:28.193
-Complete the handoff only when both checker runs have passed and the required manual reviews are documented for this tenant.
+00:05:23.312 --> 00:05:26.673
+Do not add RepairCapturedPages for a routine update;
 
 54
-00:05:28.922 --> 00:05:32.769
-Passing the checker is not the same as production approval.
+00:05:26.673 --> 00:05:30.550
+it can replace managed parts of Home and the captured pages.
 
 55
-00:05:32.769 --> 00:05:39.616
-The organization still needs to approve the content, security, accessibility, and operating arrangements.
+00:05:31.600 --> 00:05:39.270
+Complete the handoff only when both checker runs have passed and the required manual reviews are documented for this tenant.
 
 56
-00:05:40.666 --> 00:05:48.792
-Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
+00:05:39.999 --> 00:05:43.846
+Passing the checker is not the same as production approval.
 
 57
-00:05:49.842 --> 00:05:56.768
+00:05:43.846 --> 00:05:50.693
+The organization still needs to approve the content, security, accessibility, and operating arrangements.
+
+58
+00:05:51.743 --> 00:05:59.869
+Keep the organization settings, deployment reports, run logs, both checker outputs, and manual review records together.
+
+59
+00:06:00.919 --> 00:06:07.845
 For recovery or removal, use the administrator guide included with release 3.8.24.

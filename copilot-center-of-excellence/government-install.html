@@ -357,6 +357,14 @@
       <div class="warning"><strong>Recorded with release 3.8.22.</strong> The video is a summary, not a substitute for this page:
         use the commands and cautions below, including the Allow public client flows check, the naming-policy gate, the
         STOP / PROCEED prompts, and no routine <code>-RepairCapturedPages</code>. The footage is from a lab installation and is not a customer acceptance run.</div>
+      <div class="danger"><strong>Known conflict at 03:06&ndash;03:25 (Phase 5, app registration):</strong> this
+        segment is genuine screen-recorded footage of the lab's original registration run, and its narration says to
+        "correct the existing app rather than creating another one" if a check stops. <strong>That is the obsolete
+        reuse-eligible workflow the written Step 05 below has since replaced.</strong> Always register a new app for
+        this organization profile, every time &mdash; do not follow the video's narration for this specific segment.
+        Unlike the EDU walkthrough's Phase 5 (a static code slide, which was re-recorded November 7, 2026), this
+        segment shows a real browser consent flow and live terminal output that cannot be corrected without a fresh
+        lab re-recording; it has not been re-recorded. Everything else in this video is unaffected.</div>
       <p class="meta">Talk track: <a href="government-install-talktrack.txt?v=20261106-1">Download narration script</a>.</p>
       <details>
         <summary>Read the walkthrough talk track</summary>
@@ -656,6 +664,7 @@ Write-Host 'Offline content preflight completed.'</pre>
         step for every organization profile, not a fallback for tenants without one. <code>PnPClientID</code> was
         cleared to blank when this profile was created (Step 02); run script 01 now and confirm below that it wrote a
         fresh, valid client ID before continuing to Step 06.</div>
+      <p class="meta"><strong>If you watched the walkthrough video first:</strong> ignore its narration at 03:06&ndash;03:25 ("correct the existing app rather than creating another one") &mdash; that reflects the obsolete reuse-eligible workflow this page no longer uses. See the <a href="#walkthrough">video section's correction note</a> for details.</p>
       <h3>1. Install and verify the required local module</h3>
         <p>Use the copy button for the command block below. Do not paste terminal prompt text such as
           <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
