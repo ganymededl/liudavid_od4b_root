@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GCC Moderate Copilot CoE installation runbook - Release 3.8.24</title>
-  <meta name="description" content="GCC Moderate Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.24.">
+  <title>GCC Moderate Copilot CoE installation runbook - Release 3.8.24-e2e-cb8486d</title>
+  <meta name="description" content="GCC Moderate Customer-mode installation runbook for the Copilot CoE Government-StateLocal content pack, release 3.8.24-e2e-cb8486d.">
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -302,7 +302,7 @@
   </div>
 
   <header class="shell">
-    <span class="eyebrow">Release 3.8.24 · GCC Moderate · Government-StateLocal · Customer mode</span>
+    <span class="eyebrow">Release 3.8.24-e2e-cb8486d · GCC Moderate · Government-StateLocal · Customer mode</span>
     <h1>GCC Moderate installation runbook</h1>
     <p class="lede">Use this page to install the Government-StateLocal content pack in a GCC Moderate tenant. Follow
       the same eight installation phases as the <a href="index.html#eight-phase-runbook">higher-ed guide</a> and the
@@ -491,7 +491,7 @@ For recovery or removal, use the administrator guide included with release 3.8.2
       <table>
         <thead><tr><th scope="col">Cloud</th><th scope="col">Status</th></tr></thead>
         <tbody>
-          <tr><td>Commercial Microsoft 365</td><td>End-to-end validated with release 3.8.21. Release 3.8.23 changed only setup documentation. Release 3.8.24 fixes several runtime defects (see below) and was validated live in a commercial tenant: the post-update checker passed 281 automated checks with 0 failures and 2 expected manual WARNs; the full offline test gate passed 717 tests with 0 failures across 18 suites. It has not been independently re-run end to end in a GCC Moderate tenant.</td></tr>
+          <tr><td>Commercial Microsoft 365</td><td>End-to-end validated with release 3.8.21. Release 3.8.23 changed only setup documentation. Release 3.8.24-e2e-cb8486d fixes several runtime defects (see below) and was validated live in a commercial tenant: the post-update checker passed 281 automated checks with 0 failures and 2 expected manual WARNs; the full offline test gate passed 717 tests with 0 failures across 18 suites. It has not been independently re-run end to end in a GCC Moderate tenant.</td></tr>
           <tr><td>GCC Moderate</td><td>Release 3.8.21: a production installation and Step 08 validation completed on October 22, 2026, with 270 automated checks passed and two documented manual-review warnings. Release 3.8.22: an internal fresh install and first checker passed 268 checks with two WARNs; the operator reports completing Step 08 elsewhere, but the update, second checker and manual WARN review are not independently evidenced. Releases 3.8.23 and 3.8.24 preserve that implementation (3.8.24 adds the runtime fixes described below, validated live only in a commercial tenant so far); repeat acceptance in each customer tenant.</td></tr>
           <tr><td>GCC High and DoD</td><td>Unsupported.</td></tr>
         </tbody>
@@ -504,7 +504,7 @@ For recovery or removal, use the administrator guide included with release 3.8.2
 
     <section id="package">
       <h2 class="step-title"><span class="step-number">01</span>Verify and extract the implementation package</h2>
-      <p>Run each block separately in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen implementation ZIP and its matching release receipt. Release 3.8.24 SHA256:</p>
+      <p>Run each block separately in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen implementation ZIP and its matching release receipt. Release 3.8.24-e2e-cb8486d SHA256:</p>
       <p><code>474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2</code></p>
       <div class="warning"><strong>GitHub ZIP distinction:</strong> download the named
         <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
@@ -528,7 +528,7 @@ $orgPath = 'C:\CoE-Orgs\GovernmentOrg'</pre>
       <pre id="cmd-package-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
 $receiptHash = ((Get-Content -LiteralPath $receipt -Raw).Trim() -split '\s+')[0]
 if ($zipHash -ne $expectedHash -or $receiptHash -ne $expectedHash) {
-  throw 'The implementation ZIP or its receipt does not match release 3.8.24.'
+  throw 'The implementation ZIP or its receipt does not match release 3.8.24-e2e-cb8486d.'
 }
 Write-Host 'Release ZIP and receipt verified.'</pre>
       <h3>3. Unblock the ZIP before extraction</h3>
@@ -547,6 +547,8 @@ Write-Host 'ZIP unblocked. It is now safe to extract.'</pre>
 }
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
 Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
+      <p class="ok">Expected: <code>VERSION.txt</code> reports <code>Version: 3.8.24-e2e-cb8486d</code>. A different
+        string means this is not the corrected build named in this guide.</p>
       <h3>5. Create the separate Government organization folder</h3>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-package-profile">Copy command</button></div>
       <pre id="cmd-package-profile">if (Test-Path -LiteralPath $orgPath) {
@@ -568,7 +570,7 @@ Copy-Item -LiteralPath '.\ContentPacks\Government-StateLocal' -Destination $orgP
           <tr><td><code>Tenant</code></td><td>The primary <code>.onmicrosoft.com</code> domain</td><td>Confirm with the tenant administrator; never infer it from an agency web page.</td></tr>
           <tr><td><code>AdminFQDN</code></td><td>SharePoint admin host, no protocol/path</td><td>Copy the actual admin-center host from this tenant.</td></tr>
           <tr><td><code>SiteFQDN</code></td><td>SharePoint content host, no protocol/path</td><td>Copy the actual content host; the team site may use <code>/teams/</code>, not <code>/sites/</code>.</td></tr>
-          <tr><td><code>PnPClientID</code></td><td>Blank only when this tenant has no approved kit app</td><td>Reuse this tenant's approved app ID and skip script 01; never reuse an app ID from another tenant.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Always blank for a new organization profile</td><td>Step 05 always registers a new app and writes its client ID here. Never carry a client ID forward from another profile or tenant.</td></tr>
           <tr><td><code>SharedChannelOwnerUPN</code></td><td>Approved in-tenant Member</td><td>Obtain from the governance owner; a public agency mailbox is not sufficient.</td></tr>
           <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved agency name, <code>agency</code>, and abbreviation</td><td>Use the organization's actual name and reader-facing language; public branding needs owner review.</td></tr>
           <tr><td><code>MailNickname</code></td><td>Unique agency Team alias</td><td>Confirm it is unused, including deleted groups/sites. This field sets the Team alias and site path.</td></tr>
@@ -650,10 +652,10 @@ Write-Host 'Offline content preflight completed.'</pre>
 
     <section id="register">
       <h2 class="step-title"><span class="step-number">05</span>Install PnP.PowerShell and register the tenant app</h2>
-      <div class="danger"><strong>Reuse an existing approved app; do not rerun script 01.</strong> Put its Application
-        (client) ID in <code>PnPClientID</code>, verify the permissions and public-client setting below, and continue
-        to Step 06. Script 01 creates a new app rather than updating the old one. Rerunning it creates a duplicate,
-        overwrites this profile's <code>PnPClientID</code>, and leaves the prior app in Entra.</div>
+      <div class="danger"><strong>Always register a new app for this organization profile; do not carry a client ID in from elsewhere.</strong> Script 01 creates a new Entra app registration every time it runs; it is the mandatory
+        step for every organization profile, not a fallback for tenants without one. <code>PnPClientID</code> was
+        cleared to blank when this profile was created (Step 02); run script 01 now and confirm below that it wrote a
+        fresh, valid client ID before continuing to Step 06.</div>
       <h3>1. Install and verify the required local module</h3>
         <p>Use the copy button for the command block below. Do not paste terminal prompt text such as
           <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
@@ -677,21 +679,28 @@ Get-Module PnP.PowerShell -ListAvailable |
       <p>Use <code>Install-PSResource</code>, included with supported PowerShell 7 releases. The repository check
         handles machines where PowerShell Gallery is not registered and avoids the legacy
         <code>PowerShellGet</code> autoload failure associated with <code>Install-Module</code>.</p>
-      <h3>2. Only when this tenant has no approved kit app, register one</h3>
+      <h3>2. Register a new tenant app for this organization profile</h3>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-register">Copy command</button></div>
       <pre id="cmd-register"># Keep this block self-contained if it is run in another PowerShell window.
 $kitRoot = 'C:\CoE-Install\GovernmentOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\GovernmentOrg'
 Set-Location -LiteralPath $kitRoot
 .\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
-# Confirm script 01 saved a non-empty client ID.
-(Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
+
+# Confirm script 01 saved a fresh, valid client ID before continuing.
+$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+$clientGuid = [guid]::Empty
+if (-not [guid]::TryParse([string]$settings.PnPClientID, [ref]$clientGuid) -or $clientGuid -eq [guid]::Empty) {
+  throw 'Script 01 did not save a valid PnPClientID.'
+}
+Write-Host "New PnPClientID: $clientGuid"</pre>
       <p>Running <code>pwsh</code> starts another PowerShell session and clears ordinary variables such as
         <code>$kitRoot</code> and <code>$orgPath</code>. Re-enter the paths in that new session before using a
         relative <code>.\</code> script path.</p>
-      <p>When no approved app exists, run script 01 once as an approved consent approver. It creates the single-tenant
-        <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings file.
-        Never copy that ID to another tenant.</p>
+      <p>Run script 01 once for this organization profile, as an approved consent approver. It always creates a new
+        single-tenant <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings
+        file. Entra display names are not unique, so an existing app with the same name does not mean one was reused;
+        confirm by the client ID. Never copy a client ID to another tenant or another organization profile.</p>
       <p>In Microsoft Entra, grant tenant-wide admin consent and confirm these delegated permissions show
         <strong>Granted</strong>:</p>
       <ul>
@@ -815,7 +824,7 @@ if ([string]::IsNullOrWhiteSpace($siteUrl)) {
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
 if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
-      <div class="warning"><strong>Release 3.8.24 checker:</strong> always include the same explicit
+      <div class="warning"><strong>Release 3.8.24-e2e-cb8486d checker:</strong> always include the same explicit
         <code>-ContentMode</code> used for installation. In that release, omitting the parameter can incorrectly require
         the configured sample notice and produce a group of false missing-notice failures. Rerun the checker with
         <code>-ContentMode Customer</code> before changing or republishing content; Customer mode intentionally suppresses
@@ -954,7 +963,7 @@ $missingWelcomeChannels = @()
 
   <footer>
     <div class="shell">
-      <p>Release 3.8.24 · GCC Moderate · Government-StateLocal content · Customer mode</p>
+      <p>Release 3.8.24-e2e-cb8486d · GCC Moderate · Government-StateLocal content · Customer mode</p>
       <p>A prior acceptance result does not replace acceptance in another tenant. GCC High and DoD are unsupported.</p>
     </div>
   </footer>

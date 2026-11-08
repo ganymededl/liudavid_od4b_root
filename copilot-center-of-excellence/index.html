@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Higher Education Copilot CoE installation runbook - Release 3.8.24</title>
-  <meta name="description" content="Higher education Customer-mode installation runbook for the Copilot CoE kit, release 3.8.24. Uses public University of Illinois Urbana-Champaign information in an unofficial Microsoft lab demonstration.">
+  <title>Higher Education Copilot CoE installation runbook - Release 3.8.24-e2e-cb8486d</title>
+  <meta name="description" content="Higher education Customer-mode installation runbook for the Copilot CoE kit, release 3.8.24-e2e-cb8486d. Uses public University of Illinois Urbana-Champaign information in an unofficial Microsoft lab demonstration.">
   <script>
     (() => {
       const param = new URLSearchParams(window.location.search).get("scoutTheme");
@@ -330,7 +330,7 @@
       university tenant, systems, accounts, data, or internal resources are used. For your own deployment, replace
       all lab-specific settings with values approved by your organization.
     </div>
-    <span class="eyebrow">Release 3.8.24 &middot; Commercial Microsoft 365 &middot; Higher Education &middot; Customer mode</span>
+    <span class="eyebrow">Release 3.8.24-e2e-cb8486d &middot; Commercial Microsoft 365 &middot; Higher Education &middot; Customer mode</span>
     <h1>Higher education installation runbook</h1>
     <p class="lede">Use this page to install the kit's Higher Education profile (<code>Org-Template</code>) in a
       commercial Microsoft 365 tenant. Follow the same eight installation phases as the
@@ -535,7 +535,7 @@ For recovery or removal, use the administrator guide included with release 3.8.2
         <figcaption>PowerShell 7 terminal, confirming the correct lab tenant before any kit command runs.</figcaption>
       </figure>
       <p>Run each block separately in <strong>PowerShell 7.4 or later</strong> (<code>pwsh</code>). Use the frozen
-        implementation ZIP and its matching release receipt. Release 3.8.24 SHA256:</p>
+        implementation ZIP and its matching release receipt. Release 3.8.24-e2e-cb8486d SHA256:</p>
       <p><code>474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2</code></p>
       <div class="warning"><strong>GitHub ZIP distinction:</strong> download the named
         <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip"><code>Copilot-CoE-Implementation-Kit.zip</code></a>
@@ -559,7 +559,7 @@ $orgPath = 'C:\CoE-Orgs\DemoOrg'</pre>
       <pre id="cmd-highered-verify">$zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash
 $receiptHash = ((Get-Content -LiteralPath $receipt -Raw).Trim() -split '\s+')[0]
 if ($zipHash -ne $expectedHash -or $receiptHash -ne $expectedHash) {
-  throw 'The implementation ZIP or its receipt does not match release 3.8.24.'
+  throw 'The implementation ZIP or its receipt does not match release 3.8.24-e2e-cb8486d.'
 }
 Write-Host 'Release ZIP and receipt verified.'</pre>
       <h3>3. Unblock the ZIP before extraction</h3>
@@ -580,6 +580,8 @@ Write-Host 'ZIP unblocked. It is now safe to extract.'</pre>
 Expand-Archive -LiteralPath $zip -DestinationPath $installRoot
 Set-Location $kitRoot
 Get-Content (Join-Path $installRoot 'VERSION.txt')</pre>
+      <p class="ok">Expected: <code>VERSION.txt</code> reports <code>Version: 3.8.24-e2e-cb8486d</code>. A different
+        string means this is not the corrected build named in this guide.</p>
       <h3>5. Create the separate organization folder</h3>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-profile">Copy command</button></div>
       <pre id="cmd-highered-profile">if (Test-Path -LiteralPath $orgPath) {
@@ -608,7 +610,7 @@ Copy-Item -LiteralPath '.\Org-Template' -Destination $orgPath -Recurse
           <tr><td><code>Tenant</code></td><td>The primary <code>.onmicrosoft.com</code> domain</td><td>Confirm with the tenant administrator; never infer it from a university web page.</td></tr>
           <tr><td><code>AdminFQDN</code></td><td>SharePoint admin host, no protocol/path</td><td>Copy the actual admin-center host from this tenant.</td></tr>
           <tr><td><code>SiteFQDN</code></td><td>SharePoint content host, no protocol/path</td><td>Copy the actual content host; the team site may use <code>/teams/</code>, not <code>/sites/</code>.</td></tr>
-          <tr><td><code>PnPClientID</code></td><td>Blank only when this tenant has no approved kit app</td><td>Reuse this tenant's approved app ID and skip script 01; never reuse an app ID from another tenant.</td></tr>
+          <tr><td><code>PnPClientID</code></td><td>Always blank for a new organization profile</td><td>Step 05 always registers a new app and writes its client ID here. Never carry a client ID forward from another profile or tenant.</td></tr>
           <tr><td><code>SharedChannelOwnerUPN</code></td><td>Approved in-tenant Member</td><td>Obtain from the governance owner; a public university mailbox is not sufficient.</td></tr>
           <tr><td><code>OrgName</code>, <code>OrgNoun</code>, <code>ShortName</code></td><td>Approved university name, <code>university</code>, and abbreviation</td><td>Use the organization's actual name and reader-facing language; public branding needs owner review.</td></tr>
           <tr><td><code>MailNickname</code></td><td>Unique Microsoft 365 group alias</td><td>Confirm it is unused, including deleted groups/sites. This field sets the Team alias and site path.</td></tr>
@@ -703,10 +705,10 @@ Write-Host 'Offline content preflight completed.'</pre>
 
     <section id="register">
       <h2 class="step-title"><span class="step-number">05</span>Install PnP.PowerShell and register the tenant app</h2>
-      <div class="danger"><strong>Reuse an existing approved app; do not rerun script 01.</strong> Put its Application
-        (client) ID in <code>PnPClientID</code>, verify the permissions and public-client setting below, and continue
-        to Step 06. Script 01 creates a new app rather than updating the old one. Rerunning it creates a duplicate,
-        overwrites this profile's <code>PnPClientID</code>, and leaves the prior app in Entra.</div>
+      <div class="danger"><strong>Always register a new app for this organization profile; do not carry a client ID in from elsewhere.</strong> Script 01 creates a new Entra app registration every time it runs; it is the mandatory
+        step for every organization profile, not a fallback for tenants without one. <code>PnPClientID</code> was
+        cleared to blank when this profile was created (Step 02); run script 01 now and confirm below that it wrote a
+        fresh, valid client ID before continuing to Step 06.</div>
       <h3>1. Install and verify the required local module</h3>
       <p>Use the copy button for the command block below. Do not paste terminal prompt text such as
         <code>PS C:\...&gt;</code>, continuation prompts such as <code>&gt;&gt;</code>, or prior error output.</p>
@@ -730,21 +732,28 @@ Get-Module PnP.PowerShell -ListAvailable |
       <p>Use <code>Install-PSResource</code>, included with supported PowerShell 7 releases. The repository check
         handles machines where PowerShell Gallery is not registered and avoids the legacy
         <code>PowerShellGet</code> autoload failure associated with <code>Install-Module</code>.</p>
-      <h3>2. Only when this tenant has no approved kit app, register one</h3>
+      <h3>2. Register a new tenant app for this organization profile</h3>
       <div class="command-head"><button class="copy" type="button" data-copy="cmd-highered-register">Copy command</button></div>
       <pre id="cmd-highered-register"># Keep this block self-contained if it is run in another PowerShell window.
 $kitRoot = 'C:\CoE-Install\DemoOrg-v3.8.24\03_Build\CopilotCoE-Kit'
 $orgPath = 'C:\CoE-Orgs\DemoOrg'
 Set-Location -LiteralPath $kitRoot
 .\01_Register-CoEProvisioningApp.ps1 -OrgPath $orgPath -Interactive
-# Confirm script 01 saved a non-empty client ID.
-(Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json).PnPClientID</pre>
+
+# Confirm script 01 saved a fresh, valid client ID before continuing.
+$settings = Get-Content (Join-Path $orgPath 'Deployment-Settings.json') -Raw | ConvertFrom-Json
+$clientGuid = [guid]::Empty
+if (-not [guid]::TryParse([string]$settings.PnPClientID, [ref]$clientGuid) -or $clientGuid -eq [guid]::Empty) {
+  throw 'Script 01 did not save a valid PnPClientID.'
+}
+Write-Host "New PnPClientID: $clientGuid"</pre>
       <p>Running <code>pwsh</code> starts another PowerShell session and clears ordinary variables such as
         <code>$kitRoot</code> and <code>$orgPath</code>. Re-enter the paths in that new session before using a
         relative <code>.\</code> script path.</p>
-      <p>When no approved app exists, run script 01 once as an approved consent approver. It creates the single-tenant
-        <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings file.
-        Never copy that ID to another tenant.</p>
+      <p>Run script 01 once for this organization profile, as an approved consent approver. It always creates a new
+        single-tenant <em>Copilot CoE Provisioning (PnP)</em> app and saves its client ID in the organization settings
+        file. Entra display names are not unique, so an existing app with the same name does not mean one was reused;
+        confirm by the client ID. Never copy a client ID to another tenant or another organization profile.</p>
       <p>In Microsoft Entra, grant tenant-wide admin consent and confirm these delegated permissions show
         <strong>Granted</strong>:</p>
       <ul>
@@ -912,7 +921,7 @@ if ([string]::IsNullOrWhiteSpace($siteUrl)) {
   -SiteUrl $siteUrl `
   -ContentMode $contentMode
 if ($LASTEXITCODE -ne 0) { throw 'Checker failed; stop and investigate.' }</pre>
-      <div class="warning"><strong>Release 3.8.24 checker:</strong> always include the same explicit
+      <div class="warning"><strong>Release 3.8.24-e2e-cb8486d checker:</strong> always include the same explicit
         <code>-ContentMode</code> used for installation. In that release, omitting the parameter can incorrectly require
         the configured sample notice and produce a group of false missing-notice failures. Rerun the checker with
         <code>-ContentMode Customer</code> before changing or republishing content; Customer mode intentionally suppresses
@@ -1105,13 +1114,14 @@ $missingWelcomeChannels = @()
 
     <section id="get-kit">
       <h2>Get the kit for this walkthrough</h2>
-      <p>Use the current release 3.8.24 implementation ZIP and its release receipt. The receipt identifies the
-        expected SHA256 hash: <code>474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2</code>.</p>
+      <p>Use the current release 3.8.24-e2e-cb8486d implementation ZIP and its release receipt. The receipt identifies the
+        expected SHA256 hash: <code>474F8676D43626C81EF8A6D452D32B2ECBB469B5DB7708BB3EE14C66A0BD19E2</code>. After
+        extracting, <code>VERSION.txt</code> reports <code>Version: 3.8.24-e2e-cb8486d</code>.</p>
       <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip">Download the v3.8.24 implementation ZIP</a>
         &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/download/v3.8.24/Copilot-CoE-Implementation-Kit.zip.sha256">Download its SHA256 receipt</a></p>
       <p>Do not choose GitHub's automatic <em>Source code (zip)</em>, <em>Source code (tar.gz)</em>, or repository
         <em>Download ZIP</em>. Those are source snapshots and are not installation packages.</p>
-      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.24" target="_blank" rel="noopener">Release 3.8.24 notes and assets</a>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.24" target="_blank" rel="noopener">Release 3.8.24 notes and assets</a> (build cb8486d)
         &middot; <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">Kit repository and documentation</a></p>
       <p class="meta">Keep organization settings and approved overrides outside the extracted kit. This recording
         uses delegated interactive sign-in through a tenant-owned Entra app. Installation, content updates,
@@ -1127,7 +1137,7 @@ $missingWelcomeChannels = @()
         recovery, plus what installation creates in the tenant and what it deliberately leaves alone.</p>
       <p><a href="admin-quickstart.html">Open the canonical Administrator Quickstart &rarr;</a></p>
       <p><a href="admin-faq.html">Open the Administrator FAQ &rarr;</a></p>
-      <p class="meta">Release 3.8.24. Searchable and filterable by topic, with a direct link to any question. Written
+      <p class="meta">Release 3.8.24-e2e-cb8486d. Searchable and filterable by topic, with a direct link to any question. Written
         reference material, not part of the narrated video.</p>
     </section>
 
@@ -1146,7 +1156,7 @@ $missingWelcomeChannels = @()
 
   <footer>
     <div class="shell">
-      <p>Release 3.8.24 &middot; Commercial Microsoft 365 &middot; Higher Education content &middot; Customer mode</p>
+      <p>Release 3.8.24-e2e-cb8486d &middot; Commercial Microsoft 365 &middot; Higher Education content &middot; Customer mode</p>
       <p>Unofficial demonstration in a Microsoft lab. Not affiliated with, endorsed by, or deployed for the
         University of Illinois Urbana-Champaign. A prior acceptance result does not replace acceptance in another
         customer tenant.</p>
