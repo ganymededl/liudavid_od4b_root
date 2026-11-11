@@ -1,9 +1,9 @@
 window.MODEL_MISSION_CATALOGS = {
-  updatedAt: "2026-11-09T16:19:28-05:00",
+  updatedAt: "2026-11-11T06:32:21-05:00",
   platforms: {
     copilot: {
       confidence: "account-observed",
-      source: "Authenticated Microsoft 365 Copilot Chat picker capture (2026-11-09): Auto, Quick response, Think deeper, Grok 4.5, Model fusion; Advanced reasoning (Experimental) not visible. Claude: Sonnet 5, Sonnet 5.5, Opus 5.5; GPT: GPT-5.6 Sol Quick response, GPT-6, GPT-5.6 Sol Think deeper, GPT-6.1 Sol. Grok 4.5/Model fusion IDs unavailable; not encoded.",
+      source: "Last successful authenticated Microsoft 365 Copilot Chat picker capture (2026-11-10): Auto, Quick response, Think deeper, Grok 4.6, Model fusion (Critique); Claude: Sonnet 5, Sonnet 5.5, Opus 5.5; GPT: GPT-5.6 Sol Quick response, GPT-6, GPT-5.6 Sol Think deeper, GPT-6.1 Sol. GPT-6 Astra and Advanced reasoning (Experimental) not visible in the picker capture. Exact IDs unavailable for Grok/Model fusion. 2026-11-11 refresh probe failed at sign-in; retained last-known state.",
       models: [
         "copilot-auto",
         "copilot-quick-response",
@@ -19,14 +19,14 @@ window.MODEL_MISSION_CATALOGS = {
     },
     cowork: {
       confidence: "account-observed",
-      source: "Authenticated Microsoft 365 Copilot Cowork picker capture (2026-11-09): Auto, GPT 6.1 Sol, GPT 6 Astra, GPT 5.5, Opus 5.5, Sonnet 5.5. Exact picker state IDs were not exposed; retained cowork-managed.",
+      source: "Last successful authenticated Microsoft 365 Copilot Cowork picker capture (2026-11-10): Auto; GPT: GPT 6.1 Sol, GPT 6 Astra, GPT 5.5; Claude: Opus 5.5, Sonnet 5.5, Fable 5.2. Exact picker state IDs were not exposed; retained cowork-managed. 2026-11-11 refresh probe failed at sign-in; retained last-known state.",
       models: [
         "cowork-managed"
       ]
     },
     scout: {
       confidence: "live-exact",
-      source: "Microsoft Scout m_list_models (2026-11-09)",
+      source: "Microsoft Scout m_list_models (2026-11-11)",
       models: [
         "auto",
         "claude-sonnet-5",
@@ -39,6 +39,7 @@ window.MODEL_MISSION_CATALOGS = {
         "claude-sonnet-5.5",
         "gemini-3.8-flash",
         "gemini-4-argon",
+        "gemini-4-carbon",
         "gpt-5.6-sol-fast",
         "gpt-6.1-sol",
         "gpt-6.1-terra",
@@ -51,7 +52,7 @@ window.MODEL_MISSION_CATALOGS = {
     },
     "github-cli": {
       confidence: "account-live",
-      source: "GitHub Copilot CLI CAPI catalog (2026-11-09): picker enabled and policy enabled; preserved prior research-preview/recent/local observations not returned by CAPI",
+      source: "GitHub Copilot CLI CAPI catalog (2026-11-11): helper succeeded; included models with model_picker_enabled=true and policy.state=enabled, added Auto; preserved prior research-preview/recent/local observations not returned by CAPI",
       models: [
         "auto",
         "observed-hydrafusion-max",
