@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automation Retrofit Lab | Scout, Cowork, or Copilot Chat?</title>
+  <meta name="description" content="Explore public-safe patterns from 61 Scout automations and see which can be recreated in Copilot Cowork, Copilot Chat, or Copilot Workflows.">
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.5;
+    }
+    button, input, select { font: inherit; }
+    a { color: var(--cp-link); }
+    .wrap { width: min(1240px, calc(100% - 36px)); margin: 0 auto; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      border-bottom: 1px solid var(--cp-border);
+      background: var(--cp-panel-strong);
+    }
+    .topbar-inner {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { color: var(--cp-text); font-size: 14px; font-weight: 750; text-decoration: none; }
+    .nav-links { display: flex; gap: 16px; font-size: 12px; font-weight: 700; }
+    .hero { padding: 66px 0 30px; }
+    .eyebrow {
+      margin: 0 0 12px;
+      color: var(--cp-accent);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 930px;
+      margin: 0;
+      font-size: clamp(42px, 6vw, 72px);
+      font-weight: 510;
+      letter-spacing: -.05em;
+      line-height: 1;
+    }
+    .lede { max-width: 820px; margin: 22px 0 0; color: var(--cp-text-muted); font-size: 18px; }
+    .notice {
+      margin-top: 24px;
+      padding: 14px 16px;
+      border: 1px solid var(--cp-border);
+      border-left: 4px solid var(--cp-accent);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      font-size: 12px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin: 28px 0 0;
+    }
+    .stat {
+      padding: 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+    }
+    .stat strong { display: block; font-size: 26px; letter-spacing: -.025em; }
+    .stat span { color: var(--cp-text-muted); font-size: 11px; }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+      color: var(--cp-text-muted);
+      font-size: 11px;
+    }
+    .legend span { padding: 5px 8px; border: 1px solid var(--cp-border); border-radius: 999px; background: var(--cp-surface); }
+    .filters {
+      position: sticky;
+      top: 60px;
+      z-index: 20;
+      margin: 24px 0;
+      padding: 14px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-panel-strong);
+      box-shadow: var(--cp-shadow);
+    }
+    .filter-grid {
+      display: grid;
+      grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(150px, 1fr));
+      gap: 10px;
+    }
+    .control {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 9px 11px;
+    }
+    .filter-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-top: 10px;
+      color: var(--cp-text-muted);
+      font-size: 11px;
+    }
+    .clear {
+      border: 0;
+      background: transparent;
+      color: var(--cp-link);
+      cursor: pointer;
+      font-weight: 700;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      padding-bottom: 68px;
+    }
+    .card {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      box-shadow: var(--cp-shadow);
+      overflow: hidden;
+    }
+    .card-main { padding: 20px; }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+    .card h2 { margin: 0; font-size: 20px; letter-spacing: -.02em; line-height: 1.2; }
+    .instance {
+      flex: 0 0 auto;
+      padding: 4px 8px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      color: var(--cp-text-muted);
+      background: var(--cp-surface-soft);
+      font-size: 10px;
+      font-weight: 750;
+    }
+    .summary { margin: 10px 0 15px; color: var(--cp-text-muted); font-size: 13px; }
+    .route-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .route {
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .fit {
+      padding: 4px 7px;
+      border: 1px solid currentColor;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .grade-a { color: var(--cp-success); }
+    .grade-b { color: var(--cp-link); }
+    .grade-c { color: var(--cp-warning); }
+    .grade-d { color: var(--cp-danger); }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .tag {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-soft);
+      font-size: 10px;
+    }
+    .matrix {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 15px;
+    }
+    .matrix-item {
+      padding: 7px 5px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      text-align: center;
+      background: var(--cp-surface-soft);
+      font-size: 9px;
+      color: var(--cp-text-muted);
+    }
+    .matrix-item b { display: block; font-size: 14px; }
+    details { border-top: 1px solid var(--cp-border); background: var(--cp-bg-elevated); }
+    summary {
+      padding: 13px 20px;
+      cursor: pointer;
+      color: var(--cp-link);
+      font-size: 12px;
+      font-weight: 750;
+      list-style-position: inside;
+    }
+    .details-body { padding: 0 20px 20px; }
+    .why { margin: 0 0 14px; color: var(--cp-text-muted); font-size: 12px; }
+    .model {
+      margin: 0 0 14px;
+      padding: 10px;
+      border-left: 3px solid var(--cp-link);
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+      font-size: 11px;
+    }
+    .prompt-block { margin-top: 12px; }
+    .prompt-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .prompt-head strong { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+    .copy {
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-link);
+      padding: 5px 8px;
+      cursor: pointer;
+      font-size: 10px;
+      font-weight: 750;
+    }
+    pre {
+      margin: 0;
+      max-height: 210px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      padding: 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      font: 11px/1.5 Consolas, "Courier New", Courier, monospace;
+    }
+    .empty {
+      grid-column: 1 / -1;
+      padding: 36px;
+      border: 1px dashed var(--cp-border-strong);
+      border-radius: 16px;
+      text-align: center;
+      color: var(--cp-text-muted);
+    }
+    footer { border-top: 1px solid var(--cp-border); padding: 22px 0 34px; color: var(--cp-text-muted); font-size: 11px; }
+    @media (max-width: 900px) {
+      .filter-grid { grid-template-columns: 1fr 1fr; }
+      .stats { grid-template-columns: 1fr 1fr; }
+      .cards { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 580px) {
+      .filter-grid, .stats { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+      .filters { position: static; }
+      .matrix { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="index.html">Right Work, Right Copilot</a>
+      <nav class="nav-links" aria-label="Page links">
+        <a href="index.html">Collection</a>
+        <a href="../model-mission-control/index.html?platform=scout">Mission Control</a>
+        <a href="../index.html">Main hub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero wrap">
+      <p class="eyebrow">Automation Retrofit Lab</p>
+      <h1>What should run where?</h1>
+      <p class="lede">A decision-ready view of David Liu's active Scout automation library: what can move to Copilot Cowork, Copilot Chat scheduled tasks, or Copilot Workflows—and what should remain in Scout.</p>
+      <div class="notice"><strong>Public-safe by design.</strong> The original prompts contain private account names, people, tenant identifiers, internal URLs, local paths, and operating state. The prompts below preserve the reusable task logic while removing those details.</div>
+      <div class="stats" id="stats" aria-label="Portfolio summary"></div>
+      <div class="legend">
+        <span><strong>A</strong> native fit</span>
+        <span><strong>B</strong> good retrofit</span>
+        <span><strong>C</strong> major redesign</span>
+        <span><strong>D</strong> do not move</span>
+      </div>
+    </section>
+
+    <section class="wrap" aria-label="Automation filters and results">
+      <div class="filters">
+        <div class="filter-grid">
+          <input class="control" id="search" type="search" placeholder="Search automations, tasks, or capabilities" aria-label="Search automations">
+          <select class="control" id="route" aria-label="Filter by recommended runtime">
+            <option value="">All recommended runtimes</option>
+            <option>Scout</option>
+            <option>Cowork</option>
+            <option>Copilot Chat</option>
+            <option>Workflows</option>
+          </select>
+          <select class="control" id="fit" aria-label="Filter by fit grade">
+            <option value="">All fit grades</option>
+            <option value="A">A — native fit</option>
+            <option value="B">B — good retrofit</option>
+            <option value="C">C — major redesign</option>
+            <option value="D">D — do not move</option>
+          </select>
+          <select class="control" id="capability" aria-label="Filter by capability">
+            <option value="">All capabilities</option>
+          </select>
+        </div>
+        <div class="filter-meta">
+          <span id="resultCount" aria-live="polite"></span>
+          <button class="clear" id="clear" type="button">Clear filters</button>
+        </div>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">Assessment date: November 21, 2026. Copilot model availability varies by account, tenant, policy, cloud, and release. “Workflows” means the Microsoft Copilot Workflows agent; Work IQ is a grounding layer, not a scheduler.</div>
+  </footer>
+
+  <script>
+    const AUTOMATIONS = [
+      {
+        name: "Agent BUILD Digest", count: 1, category: "Research digest", recommended: "Cowork", fit: "B",
+        summary: "Finds internal build-focused videos, verifies access, summarizes technical depth, emails a digest, and maintains seen/mute state.",
+        why: "Cowork can search organizational content, conduct deep research, manage OneDrive files, and send email. The durable dedupe ledger and exact player verification still need a custom skill and careful testing.",
+        model: "Cowork: Auto. Use a stronger reasoning model only when transcript synthesis or architecture comparison is the bottleneck.",
+        scoutPrompt: "Search the approved internal video sources sequentially. Keep only hands-on agent-building content, verify each player link, summarize the concrete build steps, send one digest, then atomically update history and feedback state.",
+        coworkPrompt: "Every weekday, search the approved SharePoint sources for new hands-on agent-building videos. Exclude strategy and marketing content. Verify that each selected recording opens, summarize the build steps and customer takeaway, email me the five best unseen items, and update the tracking workbook in my OneDrive only after the email succeeds.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "B", chat: "D", workflows: "D" },
+        tags: ["Research", "M365 read", "Messaging", "Stateful"]
+      },
+      {
+        name: "AI Platform Model Catalog Watch", count: 1, category: "Catalog monitoring", recommended: "Scout", fit: "A",
+        summary: "Checks live model pickers across several AI products and publishes changes to a local catalog.",
+        why: "The job combines authenticated browser inspection, local files, multiple product surfaces, and fail-closed change detection. Chat can summarize a known catalog but cannot reliably observe and persist all of it.",
+        model: "No Copilot Chat model is sufficient for the exact monitoring job.",
+        scoutPrompt: "Inspect each configured product's authenticated model picker, capture the visible options and confidence, compare with the prior catalog, and publish only verified changes.",
+        coworkPrompt: "Check the model picker in the Microsoft Copilot surfaces you can access, compare the visible options with the catalog file in my OneDrive, and draft a change report. Do not overwrite the catalog without my approval.",
+        chatPrompt: "Compare the model options visible in Microsoft 365 Copilot Chat with the attached prior catalog and summarize additions, removals, and renamed modes.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Browser/web", "Monitoring", "Local files", "Stateful"]
+      },
+      {
+        name: "Automations Playbook Refresh", count: 1, category: "Fleet documentation", recommended: "Scout", fit: "A",
+        summary: "Reads Scout's local automation store and regenerates a private operating playbook.",
+        why: "Scout is the system of record. Cowork and Chat do not have direct access to Scout's local scheduler database or history.",
+        model: "Not applicable outside Scout.",
+        scoutPrompt: "Read the local automation definitions and schedules, regenerate the private playbook, preserve manual annotations, and fail closed if a populated inventory becomes empty.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Local files", "Monitoring", "Stateful"]
+      },
+      {
+        name: "Awaiting-You Rollup", count: 1, category: "Approval briefing", recommended: "Scout", fit: "A",
+        summary: "Combines pending decisions from several local automation queues into one Teams self-chat digest.",
+        why: "The briefing itself is easy; the blocker is that its five source queues live in local JSON, memory, and private folders. It becomes a Workflows fit only after those queues move to SharePoint, Planner, or Approvals.",
+        model: "Copilot Chat Auto is sufficient for summarization after the source queues are centralized.",
+        scoutPrompt: "Read each approved pending-decision source. Distinguish empty from unavailable, flag stale sources, and send one concise index without approving or resolving anything.",
+        coworkPrompt: "Review the pending-decision files in the selected OneDrive folder, group unresolved items by source, flag files older than seven days, and send me one Teams summary. Do not approve or change any item.",
+        chatPrompt: "Review the attached pending-decision lists and produce one concise morning rollup grouped by source. Call out unreadable or stale sources separately from genuinely empty queues.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "C" },
+        tags: ["Briefing", "Messaging", "Local files", "Stateful"]
+      },
+      {
+        name: "Bloomberg Tech Digest + Catch-up Guard", count: 2, category: "Public-web digest", recommended: "Scout", fit: "A",
+        summary: "Finds the day's show and clips, enriches public-company segments with market data, sends HTML email, and prevents duplicate delivery.",
+        why: "Cowork can research and email, but the exact job depends on public APIs, deterministic time-series math, a durable send receipt, and a second recovery run.",
+        model: "Cowork Auto for research; no specific Chat model can replace the delivery and state controls.",
+        scoutPrompt: "Find today's full episode and segment clips, build factual summaries, calculate market reaction from intraday data, send one dark-mode-safe email, and atomically write a delivery receipt for the catch-up guard.",
+        coworkPrompt: "On weekdays after the show, find today's full episode and official segment clips. Summarize the top themes and each segment, add public ticker context when confidently available, email me one concise digest, and record the sent date in the selected OneDrive tracking file.",
+        chatPrompt: "Find today's Bloomberg Technology full episode and official clips. Return a segment-by-segment viewing guide with links and concise factual summaries. Do not send email or claim delivery.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Research", "Browser/web", "Messaging", "Stateful"]
+      },
+      {
+        name: "Bloomberg Tech Live Ping", count: 1, category: "Scheduled notification", recommended: "Workflows", fit: "A",
+        summary: "Posts a weekday show-start reminder with a live link.",
+        why: "This is deterministic schedule-plus-message work. Workflows is cheaper and more reliable than an agentic run; Cowork is also capable but unnecessary.",
+        model: "No model required.",
+        scoutPrompt: "At the scheduled weekday time, skip major market holidays and send exactly one Teams self-chat reminder with the live link.",
+        coworkPrompt: "Every weekday at 11:00 AM Eastern, send me a Teams message that Bloomberg Technology is live with this link. Skip major U.S. market holidays.",
+        chatPrompt: "Every weekday at 11:00 AM Eastern, remind me in Copilot Chat that Bloomberg Technology is live and include the viewing link.",
+        ratings: { scout: "A", cowork: "A", chat: "B", workflows: "A" },
+        tags: ["Messaging", "Schedule"]
+      },
+      {
+        name: "Cicerone Briefing", count: 1, category: "Daily briefing", recommended: "Copilot Chat", fit: "A",
+        summary: "Produces a weekday briefing from today's meetings, flagged mail, and due or overdue tasks.",
+        why: "This is the canonical scheduled Chat pattern: read Microsoft 365 context, synthesize it, and leave the answer in Copilot without taking action.",
+        model: "Copilot Chat Auto or Quick response. No specialist model is required.",
+        scoutPrompt: "Read today's calendar, flagged mail, and incomplete due tasks. Return only actionable or time-sensitive items, explain why they matter, and make no changes.",
+        coworkPrompt: "Each weekday morning, prepare a concise briefing from today's meetings, flagged mail, and due tasks. Do not send, respond, or modify anything.",
+        chatPrompt: "Every weekday morning, review today's Outlook meetings, flagged mail, and incomplete tasks due today or overdue. Summarize only actionable or time-sensitive items under Meetings, Flagged mail, and Due items. Explicitly say when a section has none. Do not modify anything.",
+        ratings: { scout: "A", cowork: "A", chat: "A", workflows: "B" },
+        tags: ["Briefing", "M365 read", "Schedule"]
+      },
+      {
+        name: "Clawbot Mirror", count: 1, category: "Personal reflection", recommended: "Scout", fit: "A",
+        summary: "Reviews local Scout sessions, artifacts, and recurring patterns to surface high-leverage critiques.",
+        why: "Its evidence is Scout's own local session history and generated artifacts. Those inputs are not available to Copilot Chat or Cowork by default.",
+        model: "Not applicable outside Scout.",
+        scoutPrompt: "Review recent local sessions, automation outcomes, and generated artifacts. Surface only surprising, high-leverage critiques or connections; stay silent when there is nothing substantive.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Local files", "Reflection", "Stateful"]
+      },
+      {
+        name: "Copilot Q&A Hub Poll Sources", count: 1, category: "Data publishing", recommended: "Scout", fit: "A",
+        summary: "Harvests answered Q&As into Dataverse and regenerates static browse views while preserving editorial state.",
+        why: "It combines raw Dataverse operations, incremental state, and static-site generation. Cowork could draft content but not safely replace the publishing transaction.",
+        model: "No Chat model is recommended for the write path.",
+        scoutPrompt: "Poll the approved Q&A sources, upsert only new answered items, preserve hide/star decisions, and regenerate the read-only hub without losing existing editorial state.",
+        coworkPrompt: "",
+        chatPrompt: "Review the provided answered Q&As and group them into a searchable editorial outline. Do not write to Dataverse.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["CRM", "Publishing", "Stateful", "Local files"]
+      },
+      {
+        name: "CSA Journal Weekly Signal Review", count: 1, category: "Customer signal processing", recommended: "Scout", fit: "A",
+        summary: "Extracts grounded signals from meetings, proposes account-specific actions, updates journals, and synchronizes a local knowledge vault.",
+        why: "The job uses meeting transcripts plus local Python libraries, JSON journals, an approval server, and a local second-brain vault.",
+        model: "Think deeper, GPT-6.1 Sol, or Claude Sonnet 5.5 can help analyze signals, but the end-to-end job still needs Scout.",
+        scoutPrompt: "Review in-scope meeting transcripts for concrete signals, propose only evidence-grounded actions, apply explicit approval commands, rebuild journal artifacts, and repair stale vault summaries.",
+        coworkPrompt: "Review the selected customer meeting transcripts and journal files. Identify concrete new signals, draft one or two specific adoption actions per signal, and write proposed updates to a review document. Do not modify the source journals.",
+        chatPrompt: "Review the supplied meeting notes and identify only concrete signals with a named process, owner, number, date, or organization change. Draft specific actions but do not update any system.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Meetings", "Local files", "Stateful", "CRM"]
+      },
+      {
+        name: "CSA Portfolio Dashboard Refresh", count: 1, category: "Portfolio analytics", recommended: "Scout", fit: "A",
+        summary: "Refreshes usage metrics, rebuilds portfolio benchmarks and customer dashboards, then runs data-quality gates.",
+        why: "This is a local data pipeline with Power BI/MSX reads, generated HTML, cross-dashboard writes, and transactional validation.",
+        model: "Not a Copilot Chat task.",
+        scoutPrompt: "Refresh the approved portfolio metrics, preserve source provenance, rebuild each dashboard and the roll-up, then publish only after the health-check and freshness gates pass.",
+        coworkPrompt: "",
+        chatPrompt: "Analyze the attached portfolio metrics and summarize the strongest gains, largest regressions, and data-quality concerns. Do not rebuild dashboards.",
+        ratings: { scout: "A", cowork: "D", chat: "C", workflows: "D" },
+        tags: ["Analytics", "Local files", "Publishing", "Stateful"]
+      },
+      {
+        name: "CSA Weekly Regression Watch", count: 1, category: "Threshold monitoring", recommended: "Scout", fit: "A",
+        summary: "Compares dashboard snapshots against tuned thresholds and distinguishes real regressions from stalled data.",
+        why: "It discovers local dashboards dynamically, compares durable history, and must stay silent unless a threshold or data-quality condition is met.",
+        model: "No model required for the threshold logic.",
+        scoutPrompt: "For every dashboard, compare the latest two valid snapshots against configured thresholds. Alert only on material regressions or repeated identical snapshots; preserve source and comparison dates.",
+        coworkPrompt: "",
+        chatPrompt: "Compare the attached current and prior portfolio snapshots. Explain material regressions and separate data-quality anomalies from real movement.",
+        ratings: { scout: "A", cowork: "D", chat: "C", workflows: "D" },
+        tags: ["Monitoring", "Analytics", "Local files", "Stateful"]
+      },
+      {
+        name: "Customer Copilot Weekly Trackers", count: 8, category: "Usage tracking", recommended: "Scout", fit: "A",
+        summary: "Eight customer-specific variants capture adoption and agent-consumption metrics and append verified weekly snapshots.",
+        why: "Each tracker depends on authenticated browser extraction, tenant identity checks, append-only JSON, dashboard regeneration, rollback, and customer-specific guards. Names and tenant identifiers are intentionally redacted here.",
+        model: "No Chat model can replace the browser and transactional state controls.",
+        scoutPrompt: "Open the approved usage portal for the configured tenant, verify the visible tenant identity, capture the required license, active-use, retention, and agent metrics, append one dated snapshot, rebuild the dashboard, and roll back both files on any validation failure.",
+        coworkPrompt: "Open the approved usage portal for the selected tenant, capture the listed adoption metrics, compare them with the tracking workbook in OneDrive, and draft a proposed new row for my review. Do not overwrite history automatically.",
+        chatPrompt: "Using the attached current and prior usage snapshots, summarize adoption movement, license changes, agent activity, and any freshness gaps.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Browser/web", "Analytics", "Local files", "Stateful"]
+      },
+      {
+        name: "Customer Labor Tracker + VBD Summary", count: 2, category: "Workbook operations", recommended: "Cowork", fit: "C",
+        summary: "Refreshes time entries from an authenticated site, updates an Excel tracker, preserves formulas, and sends a capacity summary.",
+        why: "Cowork has the right action profile—browser work, Excel editing, and Teams delivery—but the external site's sign-in, long retry window, dedupe keys, and formula preservation require a controlled pilot.",
+        model: "Cowork Auto; use Fast only after the workflow is deterministic and validated.",
+        scoutPrompt: "Read new time entries from the approved system, deduplicate by source key, update the workbook without changing formulas or formatting, recalculate capacity, save in place, and report mapping exceptions.",
+        coworkPrompt: "Open the approved time-entry site and the selected Excel tracker in OneDrive. Add only net-new entries using the source entry ID, refresh the capacity calculations without changing formulas or formatting, save the workbook, then send me a concise Teams summary. Stop and ask if sign-in, mapping, or workbook structure is ambiguous.",
+        chatPrompt: "Analyze the attached labor tracker and summarize hours logged, hours remaining, exhausted allocations, and rows that need a maximum-hours decision. Do not edit the workbook.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Browser/web", "Documents", "Messaging", "Stateful"]
+      },
+      {
+        name: "Daily Cadence Dashboard Survey", count: 1, category: "Dashboard publishing", recommended: "Scout", fit: "A",
+        summary: "Derives cadence summaries from categorized meetings and rebuilds account dashboards.",
+        why: "The current implementation joins Microsoft 365 activity with a local dashboard build pipeline.",
+        model: "Copilot Chat Auto can summarize a provided meeting list, but cannot publish the dashboards.",
+        scoutPrompt: "Read the in-scope categorized meetings, update each account's cadence summary, preserve prior history, rebuild dashboards, and validate the generated files.",
+        coworkPrompt: "Review categorized customer meetings from the selected period and update the cadence summary workbook in OneDrive. Do not alter unrelated sheets.",
+        chatPrompt: "Review the categorized meetings in the selected period and summarize cadence, gaps, and next expected touchpoints by account.",
+        ratings: { scout: "A", cowork: "C", chat: "B", workflows: "D" },
+        tags: ["Meetings", "Publishing", "Local files"]
+      },
+      {
+        name: "Daily Meeting Coaching", count: 1, category: "Meeting intelligence", recommended: "Copilot Chat", fit: "B",
+        summary: "Produces evidence-based coaching from all accessible meeting transcripts and currently writes a local report plus a Teams delivery.",
+        why: "The coaching analysis is an excellent scheduled Chat task. The exact local-file and Teams delivery contract would need to be removed or moved to Cowork.",
+        model: "Use Think deeper. Prefer GPT-6.1 Sol or Claude Sonnet 5.5 when available for nuanced, transcript-grounded coaching.",
+        scoutPrompt: "Read every accessible transcript from today's meetings, quote evidence with timestamps, evaluate communication dimensions, write the full report, and send a concise delivery message.",
+        coworkPrompt: "At the end of each weekday, review today's accessible meeting transcripts. Produce candid, evidence-based coaching with quoted examples, patterns, and five concrete adjustments. Save the report in my selected OneDrive folder and send me the executive summary in Teams.",
+        chatPrompt: "Every weekday evening, review today's meetings with accessible transcripts. Produce: top three strengths, top three improvements, per-meeting evidence with timestamps, recurring patterns, and five concrete behavior adjustments. Skip unsupported claims and list meetings without transcripts.",
+        ratings: { scout: "A", cowork: "A", chat: "B", workflows: "D" },
+        tags: ["Meetings", "M365 read", "Briefing", "Documents"]
+      },
+      {
+        name: "Daily Sent Items Cleanup", count: 1, category: "Mailbox management", recommended: "Cowork", fit: "A",
+        summary: "Moves narrowly matched self-sent alerts and digests to Deleted Items, then verifies the mailbox is clean.",
+        why: "This requires action on the mailbox. Scheduled Chat only returns an answer; Cowork can manage inbox content and verify the result.",
+        model: "Cowork Auto. No advanced reasoning model is required; precision in recipient and subject rules matters more.",
+        scoutPrompt: "Scan a bounded Sent Items window, collect all eligible messages before moving anything, move only exact matches to Deleted Items, then repeat the bounded scan and report remaining matches.",
+        coworkPrompt: "Each morning, inspect my Sent Items using these exact recipient and subject rules: [PASTE APPROVED RULES]. First collect all matches, then move only those messages to Deleted Items—never permanently delete. Re-scan the same bounded window and report moved and remaining counts. Preserve replies, forwards, meeting responses, and ambiguous messages.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "A", chat: "D", workflows: "C" },
+        tags: ["Messaging", "M365 action", "Stateful"]
+      },
+      {
+        name: "Dreaming Pattern Digests", count: 2, category: "Cross-session reflection", recommended: "Scout", fit: "A",
+        summary: "Daily and weekly reflection loops synthesize recurring friction and reusable improvements from local Scout history.",
+        why: "The source material is Scout's private session corpus, not Microsoft 365 work data.",
+        model: "Not applicable outside Scout.",
+        scoutPrompt: "Review recent local sessions for recurring friction, reusable improvements, and cross-session lessons. Avoid meeting summaries and operational status; report only durable patterns.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Reflection", "Local files", "Stateful"]
+      },
+      {
+        name: "Workshop Catalog Weekly Refresh", count: 1, category: "Catalog publishing", recommended: "Scout", fit: "A",
+        summary: "Rebuilds a service catalog from an authenticated internal source and updates public/private timestamps.",
+        why: "It combines an external/internal web source with local site generation and publish controls.",
+        model: "Chat can analyze a supplied export but cannot perform the full refresh.",
+        scoutPrompt: "Refresh the approved workshop source, rebuild the catalog page, preserve manual overrides, validate totals and timestamps, and publish only after the integrity checks pass.",
+        coworkPrompt: "Open the approved workshop source and update the selected catalog workbook in OneDrive. Preserve manual overrides and flag any mapping ambiguity for review.",
+        chatPrompt: "Analyze the attached workshop catalog export and summarize additions, removals, price changes, and missing metadata.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Browser/web", "Publishing", "Local files"]
+      },
+      {
+        name: "Fleet Watchdogs", count: 3, category: "Scheduler reliability", recommended: "Scout", fit: "A",
+        summary: "Detect missing artifacts, jobs with no run record, and enabled automations not covered by monitoring.",
+        why: "These jobs inspect Scout's own scheduler store, run ledgers, file freshness, and monitoring configuration. They must be out-of-band from the tasks they supervise.",
+        model: "No model required.",
+        scoutPrompt: "Inspect the local scheduler store, run history, expected artifacts, and monitoring coverage. Distinguish a failed run from a job that never fired, and alert only with verifiable evidence.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Monitoring", "Local files", "Stateful"]
+      },
+      {
+        name: "GitHub Public Repo Leak Audit", count: 1, category: "Security audit", recommended: "Scout", fit: "A",
+        summary: "Scans public repositories for tracked ignored files and secret-looking strings without rewriting history.",
+        why: "The job needs Git metadata, repository enumeration, local scanning, and controlled findings. Cowork and Chat are not code-scanning runtimes.",
+        model: "No Copilot Chat model is required for deterministic detection.",
+        scoutPrompt: "Enumerate the approved public repositories. Detect tracked files that match each repository's ignore rules and high-confidence secret patterns. Report evidence only; never rewrite history or rotate credentials.",
+        coworkPrompt: "",
+        chatPrompt: "Review the attached audit findings, rank them by likely exposure, and draft a remediation checklist. Do not access or modify repositories.",
+        ratings: { scout: "A", cowork: "D", chat: "C", workflows: "D" },
+        tags: ["Security", "Git", "Local files"]
+      },
+      {
+        name: "Customer Status Deck Daily Check", count: 1, category: "Presentation automation", recommended: "Cowork", fit: "B",
+        summary: "Detects new relevant meeting notes, updates a PowerPoint status deck, saves a dated version, and asks for human review.",
+        why: "Cowork can read meeting intelligence, edit an existing PowerPoint in OneDrive, manage files, and send a review notification. Strict occurrence matching and no-auto-send rules must be carried over.",
+        model: "Cowork Auto. Use a stronger reasoning option only for dense transcript synthesis.",
+        scoutPrompt: "Scan narrow calendar windows, match only the correct meeting occurrence and transcript, update the latest approved deck, save a new dated copy, verify it, and send one review nudge. Never auto-share.",
+        coworkPrompt: "Several times each business day, check for a new in-scope meeting with accessible notes or a matching transcript. If new evidence exists, update the latest approved PowerPoint status deck in the selected OneDrive folder, save a new file prefixed with the meeting date, verify no unrelated organization references remain, and send me one Teams review nudge. Never share the deck automatically.",
+        chatPrompt: "Review the latest in-scope meeting notes and draft the status, important considerations, and next steps that should appear in the next customer status deck. Do not create or send a file.",
+        ratings: { scout: "A", cowork: "B", chat: "C", workflows: "D" },
+        tags: ["Meetings", "Documents", "M365 action", "Messaging"]
+      },
+      {
+        name: "Monthly Customer Roadmap Deck", count: 1, category: "Research + presentation", recommended: "Scout", fit: "A",
+        summary: "Captures authenticated product-update data, validates source freshness, runs local validators, and builds a customer-safe roadmap deck.",
+        why: "Cowork can research and create a deck, but the exact automation uses browser network capture, Power BI, Python validators, PowerShell, provenance manifests, and fail-closed publication.",
+        model: "Cowork Auto can create a simplified version; no Chat model can replace the full build pipeline.",
+        scoutPrompt: "Capture fresh approved roadmap sources, maintain per-item provenance and freshness, run the validator suite, build customer and internal decks, and publish only after every source and content gate passes.",
+        coworkPrompt: "Research current Microsoft 365 Copilot roadmap items from the approved sources, create a customer-safe PowerPoint in the selected OneDrive folder, cite every item in speaker notes, exclude unsupported timing, and stop for review before sharing.",
+        chatPrompt: "Research current Microsoft 365 Copilot roadmap changes from the approved sources and produce a cited outline for a customer-facing deck. Separate confirmed timing from watchlist items.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Research", "Browser/web", "Documents", "Shell"]
+      },
+      {
+        name: "Hub Publish Watchdogs", count: 2, category: "Deployment monitoring", recommended: "Scout", fit: "A",
+        summary: "Checks GitHub Pages build health and stage-to-public parity, alerting only on genuine publication failures.",
+        why: "These jobs use GitHub APIs, local stage files, hashes, and the site's publication contract. Workflows has no standard non-Microsoft connector for this exact path.",
+        model: "No model required.",
+        scoutPrompt: "Check the approved GitHub workflow and Pages status, compare tracked stage and public artifacts, and alert only when the cloud build failed or staged content is newer or different.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Monitoring", "Git", "Publishing", "Local files"]
+      },
+      {
+        name: "Meeting-to-CRM Intake Gap Detector", count: 1, category: "CRM hygiene", recommended: "Scout", fit: "A",
+        summary: "Matches external meetings to CRM accounts and open opportunities, then drafts catch-up comments for unlogged activity.",
+        why: "The job needs raw CRM queries, domain matching, entity-state rules, and Microsoft 365 calendar reads. Chat lacks the CRM write/query surface unless a governed plugin is deployed.",
+        model: "Think deeper can help with ambiguous matching, but governed data access is the real requirement.",
+        scoutPrompt: "Review the last seven days of external meetings, match each to the correct CRM account and open opportunity, check for activity within the allowed window, and draft—but never submit—catch-up comments for verified gaps.",
+        coworkPrompt: "Using the approved CRM plugin, review last week's external meetings, match them to open opportunities, and draft catch-up comments where no activity was logged. Do not submit anything without my approval.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "C", chat: "D", workflows: "D" },
+        tags: ["CRM", "Meetings", "M365 read"]
+      },
+      {
+        name: "Memory Guard", count: 1, category: "Runtime integrity", recommended: "Scout", fit: "A",
+        summary: "Alerts when Scout's long-term memory count falls below a known high-water baseline.",
+        why: "It monitors Scout's own local memory store and upgrade behavior.",
+        model: "No model required.",
+        scoutPrompt: "Compare the current local memory count and store location with the high-water baseline. Alert on unexplained loss or orphaning and include the observed paths and counts.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Monitoring", "Local files", "Stateful"]
+      },
+      {
+        name: "Modern Work Copilot Video Digest", count: 1, category: "Enterprise research digest", recommended: "Cowork", fit: "B",
+        summary: "Searches internal Microsoft video sources, verifies recordings, summarizes transcripts, emails a digest, and manages a persistent backlog.",
+        why: "Cowork can search the organization, read SharePoint content, conduct deep research, manage OneDrive state, and send email. A custom skill is needed for exact dedupe and feedback semantics.",
+        model: "Cowork Auto; use a stronger reasoning option for transcript-heavy synthesis.",
+        scoutPrompt: "Search approved internal sources sequentially, verify each recording player, summarize only relevant technical or enablement content, send one digest, and update seen/mute/history state only after delivery.",
+        coworkPrompt: "Search the approved internal video libraries for new Microsoft Copilot enablement recordings. Verify access, use transcripts when available, group the best unseen items by theme, email me one concise digest with links, and update the OneDrive history file only after the message is sent.",
+        chatPrompt: "Search my organization for recent Microsoft Copilot enablement videos and return a theme-grouped shortlist with links and transcript-grounded summaries. Do not email or update tracking files.",
+        ratings: { scout: "A", cowork: "B", chat: "C", workflows: "D" },
+        tags: ["Research", "M365 read", "Messaging", "Stateful"]
+      },
+      {
+        name: "CRM Post-Meeting Logger", count: 1, category: "CRM writeback", recommended: "Scout", fit: "A",
+        summary: "Turns qualified customer meetings into engagement-milestone activity with strict account, audit, and fallback rules.",
+        why: "The automation performs governed CRM writes with custom schema, local configuration, recovery state, and an engagement-milestone-first policy.",
+        model: "No Chat model should be allowed to bypass the governed write path.",
+        scoutPrompt: "Review qualified customer meetings, resolve the correct engagement milestone first, draft the activity from grounded evidence, and write only through the governed CRM protocol with a complete audit trail.",
+        coworkPrompt: "Using the approved CRM plugin, draft an activity for each qualified customer meeting and show me the target record and exact text before writing. Never choose a fallback record silently.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "C", chat: "D", workflows: "D" },
+        tags: ["CRM", "Meetings", "M365 action", "Stateful"]
+      },
+      {
+        name: "Outlook Contacts + Calendar Backup", count: 1, category: "Backup", recommended: "Scout", fit: "A",
+        summary: "Runs a local PowerShell export, creates verified ZIP backups, mirrors them to another drive, prunes retention, and delivers status.",
+        why: "This is operating-system backup work with local scripts, CSV/ZIP generation, hashing, another cloud drive, logs, and hang handling.",
+        model: "No model required.",
+        scoutPrompt: "Run the approved backup script idempotently, export the configured contacts and calendar window, create and hash the archive, mirror it to the backup drive, enforce retention, and deliver the queued status notification.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Shell", "Local files", "Backup", "Monitoring"]
+      },
+      {
+        name: "Meeting Transcript Action Miner", count: 1, category: "Meeting intelligence", recommended: "Copilot Chat", fit: "A",
+        summary: "Reads recent accessible transcripts and extracts only explicit, speaker-owned commitments with evidence.",
+        why: "It is read-only and returns a structured answer. No file, email, calendar, or CRM action is required.",
+        model: "Use Think deeper. GPT-6.1 Sol or Claude Sonnet 5.5 is recommended for strict commitment-vs-aspiration discrimination.",
+        scoutPrompt: "Review recent meetings, read every available transcript completely, and return only explicit commitments with owner, due date when stated, confidence, and a short evidence quote.",
+        coworkPrompt: "Review the last 36 hours of accessible meeting transcripts and create an action register in my selected OneDrive folder. Include only explicit accepted commitments, with owner, due date when stated, confidence, and an evidence quote.",
+        chatPrompt: "Every morning, review meetings from the last 36 hours that have accessible transcripts. Extract only explicit actions or accepted commitments—not demos, aspirations, or unaccepted requests. Return meeting, owner, action, explicit due date or null, confidence, and a short evidence quote.",
+        ratings: { scout: "A", cowork: "A", chat: "A", workflows: "D" },
+        tags: ["Meetings", "M365 read", "Briefing"]
+      },
+      {
+        name: "OneDrive Permission Drift Audit", count: 1, category: "Security audit", recommended: "Scout", fit: "A",
+        summary: "Checks recent files for anonymous, organization-wide write, and external write grants.",
+        why: "The exact job requires permission metadata that standard Chat grounding does not reliably expose. Scout uses direct Graph-backed permission reads.",
+        model: "No specific model required; access to permission metadata is the gating capability.",
+        scoutPrompt: "Inspect recent files and their permission grants. Flag only anonymous links, organization-wide edit links, and external editors. Keep the run read-only and preserve per-file errors.",
+        coworkPrompt: "Review sharing access for the selected recent OneDrive and SharePoint files. Flag anonymous links, organization-wide edit links, and external editors. Do not change permissions.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "C", chat: "D", workflows: "D" },
+        tags: ["Security", "M365 read", "Files"]
+      },
+      {
+        name: "Scout Cost + Context Coach", count: 1, category: "Runtime efficiency", recommended: "Scout", fit: "A",
+        summary: "Analyzes local Scout usage, context growth, tool churn, and session cost behavior.",
+        why: "Its evidence is Scout's local timing and usage data.",
+        model: "Not applicable outside Scout.",
+        scoutPrompt: "Analyze the latest local usage and context data, identify the largest avoidable cost and latency drivers, and return ranked recommendations with measurable next steps.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Analytics", "Local files", "Monitoring"]
+      },
+      {
+        name: "Teams Customer Signal Sweep", count: 1, category: "Communication triage", recommended: "Copilot Chat", fit: "A",
+        summary: "Scans recent Teams chats for incident, blocker, escalation, and deadline signals and returns a prioritized list.",
+        why: "The current job is read-only and produces a bounded report. That is a strong scheduled Chat fit.",
+        model: "Copilot Chat Auto is sufficient. Use Think deeper only when nuanced prioritization is needed.",
+        scoutPrompt: "Review recent chats, keep messages from the last 24 hours, score customer-impact signals, and return a bounded prioritized list without replying or modifying anything.",
+        coworkPrompt: "Review recent Teams chats for customer-impact signals. Create a prioritized triage document with timestamp, sender, signal type, severity, and suggested next step. Do not send replies.",
+        chatPrompt: "Every morning, review my Teams chats from the last 24 hours. Identify incidents, blockers, escalations, executive attention, production risk, go-live risk, and deadlines. Return at most 20 prioritized signals with sender, time, short evidence snippet, severity, and suggested next step. Do not reply.",
+        ratings: { scout: "A", cowork: "A", chat: "A", workflows: "D" },
+        tags: ["M365 read", "Briefing", "Messaging"]
+      },
+      {
+        name: "Permission Prompt Audit", count: 1, category: "Runtime security", recommended: "Scout", fit: "A",
+        summary: "Compares local Scout permission-prompt logs against a baseline to detect regressions.",
+        why: "It reads Scout's local audit logs and shell permission configuration.",
+        model: "No model required.",
+        scoutPrompt: "Read the local permission audit logs for the current period, compare prompt frequency and tool patterns with the prior baseline, and flag only regressions or unexplained interactive prompts.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Security", "Local files", "Monitoring"]
+      },
+      {
+        name: "Personal Hub Build Review + Ledger Roster", count: 2, category: "Editorial publishing", recommended: "Scout", fit: "A",
+        summary: "Reviews recent local builds, maintains a private candidate queue, and publishes only owner-approved ledger entries.",
+        why: "The evidence spans Scout/Cowork sessions, local artifacts, approval state, and a GitHub Pages build.",
+        model: "Cowork can help review documents, but Scout must own the local and Git publication path.",
+        scoutPrompt: "Review recent local sessions and artifacts for tangible builds, update the private candidate queue without auto-approving anything, and publish only explicitly owner-approved entries.",
+        coworkPrompt: "Review the selected OneDrive artifact folder and draft candidate build-ledger entries with title, date, outcome, and evidence. Save them to a review document; do not publish.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "C", chat: "D", workflows: "D" },
+        tags: ["Local files", "Publishing", "Stateful"]
+      },
+      {
+        name: "Personal Hub Security + Timestamp Guards", count: 3, category: "Site governance", recommended: "Scout", fit: "A",
+        summary: "Audits the public site, verifies private-card timestamps, and remediates stale catalog markers.",
+        why: "The jobs need repository access, local file inspection, publication rules, and controlled edits.",
+        model: "No model required for the guards.",
+        scoutPrompt: "Audit the Personal Hub repository for exposure risks and stale card metadata. Apply only the approved timestamp remediation, verify the generated pages, and report unverified findings separately.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Security", "Publishing", "Git", "Local files"]
+      },
+      {
+        name: "Positive-Signal Mining", count: 1, category: "Portfolio insight", recommended: "Scout", fit: "A",
+        summary: "Finds the strongest positive weekly movement, then grounds a likely-driver narrative in meetings and journal evidence.",
+        why: "The automation joins local dashboard history, Microsoft 365 activity, private journals, and a persistent dedupe state.",
+        model: "Think deeper, GPT-6.1 Sol, or Claude Sonnet 5.5 is recommended for the narrative stage.",
+        scoutPrompt: "Find the strongest meaningful positive movement across account histories, retrieve only relevant recent evidence, explain likely drivers without claiming causation, and avoid resurfacing the same snapshot pair.",
+        coworkPrompt: "Using the selected portfolio workbook, meeting notes, and journal files, identify the strongest positive movement and draft a cited narrative of likely drivers. Clearly separate observed movement from interpretation.",
+        chatPrompt: "Review the supplied current/prior portfolio snapshots and recent notes. Identify the strongest positive movement and explain likely drivers with citations. Do not claim causation.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Analytics", "Meetings", "Local files", "Stateful"]
+      },
+      {
+        name: "Relabel Encrypted Downloads", count: 1, category: "Desktop utility", recommended: "Scout", fit: "A",
+        summary: "Runs a local executable overnight to relabel eligible downloaded files.",
+        why: "This is a Windows executable acting on local files. It is outside Chat, Cowork, and Workflows.",
+        model: "No model required.",
+        scoutPrompt: "Run the approved local relabeling utility against the configured folder, preserve unsupported files, and report the process exit code and changed-file count.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Shell", "Local files", "Desktop"]
+      },
+      {
+        name: "Second Brain Standup + Weekly Review", count: 2, category: "Knowledge management", recommended: "Scout", fit: "A",
+        summary: "Reads and updates a local Markdown vault using calendar, email, Teams, projects, tasks, and journal evidence.",
+        why: "The vault is local and the jobs make small additive edits across many files. Cowork becomes viable only if the vault moves to OneDrive or OneNote.",
+        model: "Copilot Chat Auto can produce the briefing, but not maintain the local vault.",
+        scoutPrompt: "Verify the local vault, combine current Microsoft 365 context with committed actions and active projects, make only small additive vault updates, and post a concise standup or weekly review.",
+        coworkPrompt: "Using the selected OneDrive knowledge folder plus my calendar, email, and Teams, prepare a standup briefing and make small additive updates to the relevant project, task, people, and journal files. List every file changed.",
+        chatPrompt: "Review today's calendar, recent mail and Teams asks, and the attached project/task notes. Produce a concise standup briefing with focus areas, key meetings, blockers, and dependencies. Do not edit any files.",
+        ratings: { scout: "A", cowork: "C", chat: "B", workflows: "D" },
+        tags: ["Knowledge", "Local files", "M365 read", "Stateful"]
+      },
+      {
+        name: "Stock Ticker Move Alert", count: 1, category: "Market monitoring", recommended: "Scout", fit: "A",
+        summary: "Polls an external quote API, applies a movement threshold, and deduplicates alerts per symbol and trading day.",
+        why: "It needs frequent API polling, precise market-time logic, durable dedupe state, and an outbound alert channel.",
+        model: "No model required.",
+        scoutPrompt: "Poll the configured watchlist during market hours, calculate the current daily move, alert only when the threshold is crossed, and send at most one alert per symbol per trading day.",
+        coworkPrompt: "",
+        chatPrompt: "At the scheduled time, summarize current public market moves for this watchlist and flag symbols beyond the threshold. Do not claim continuous monitoring.",
+        ratings: { scout: "A", cowork: "D", chat: "C", workflows: "D" },
+        tags: ["API", "Monitoring", "Stateful"]
+      },
+      {
+        name: "VIP Sender Watch", count: 1, category: "Communication workflow", recommended: "Scout", fit: "A",
+        summary: "Watches selected email and Teams senders, suppresses active conversations, drafts replies, and waits for replay-safe per-message approval.",
+        why: "A simplified email-only version fits Workflows with Approvals and SharePoint state. The current cross-channel design has local JSON, unanswered-message timing, command replay guards, and strict send invariants.",
+        model: "Copilot Chat Auto is sufficient for drafting; workflow safety and state are the hard parts.",
+        scoutPrompt: "Scan the configured VIP sources within the active window, suppress already answered chats, classify direct versus FYI, draft only when appropriate, and never send without a new replay-safe approval command.",
+        coworkPrompt: "Monitor messages from the approved VIP list. For each new direct message, summarize the ask and draft a short reply; for FYI messages, provide context only. Present every outbound reply for my approval and never reply-all.",
+        chatPrompt: "Review the supplied VIP messages. Classify each as direct or FYI, summarize what the sender wants, and draft a concise reply only for direct messages. Do not send anything.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "C" },
+        tags: ["Messaging", "M365 action", "Stateful", "Approvals"]
+      },
+      {
+        name: "Weekly Customer Roadmap Deck Refresh", count: 1, category: "Presentation operations", recommended: "Cowork", fit: "B",
+        summary: "Copies the newest approved source deck into customer folders, replaces editable institution references, and blocks unsafe outputs.",
+        why: "Cowork can manage OneDrive folders and edit PowerPoint while preserving the shared file. Batch QA and image/OLE checks still require careful review.",
+        model: "Cowork Auto. File fidelity matters more than choosing a specialist model.",
+        scoutPrompt: "Select the newest valid source deck by filename date, create one customer copy per allowed folder, replace editable institution references in slides and notes, and skip any output with unresolved or unverifiable content.",
+        coworkPrompt: "Each week, find the newest approved roadmap PowerPoint in the source folder. For each allowed customer folder, create or update one customer copy, replace editable institution references in slide text and speaker notes, preserve layouts, and verify no source-customer references remain. Skip and report any file with uneditable image or OLE references.",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "B", chat: "D", workflows: "D" },
+        tags: ["Documents", "M365 action", "Files"]
+      },
+      {
+        name: "Scout Runtime Performance Profiler", count: 1, category: "Performance engineering", recommended: "Scout", fit: "A",
+        summary: "Analyzes the local timing harness and turn log for latency regressions.",
+        why: "The source is Scout's local runtime telemetry and skill harness.",
+        model: "Not applicable outside Scout.",
+        scoutPrompt: "Analyze the latest local turn-timing log, separate model latency from tool waits and context overhead, identify regressions, and rank fixes by likely impact.",
+        coworkPrompt: "",
+        chatPrompt: "",
+        ratings: { scout: "A", cowork: "D", chat: "D", workflows: "D" },
+        tags: ["Analytics", "Local files", "Monitoring"]
+      },
+      {
+        name: "YouTube Topic Digest", count: 1, category: "Public-web research", recommended: "Scout", fit: "A",
+        summary: "Uses a local engine to search every active topic, adjudicate captions, prevent resends, and safely commit cache state.",
+        why: "Cowork can produce a simpler web digest, but the current automation depends on a Python engine, topic configuration, transcript adjudication, atomic state, and catch-up logic.",
+        model: "Cowork Auto for a simplified digest; Think deeper for transcript-heavy comparisons.",
+        scoutPrompt: "Read the configured topics and hardening rules, search trusted channels and flat discovery, verify every selected video and transcript, send one deduplicated digest, then atomically commit state.",
+        coworkPrompt: "Each morning, search YouTube for the configured topics and trusted channels. Prefer quality over recency, verify each selected video, summarize from captions when available, email me one digest, and update the OneDrive seen-history file only after delivery.",
+        chatPrompt: "Search YouTube for high-quality recent videos on these topics: [TOPICS]. Return a balanced shortlist with verified links, channel, date, and caption-grounded summary. Do not email or claim persistent deduplication.",
+        ratings: { scout: "A", cowork: "C", chat: "C", workflows: "D" },
+        tags: ["Research", "Browser/web", "Stateful", "Messaging"]
+      }
+    ];
+
+    const runtimeKeys = {
+      "Scout": "scout",
+      "Cowork": "cowork",
+      "Copilot Chat": "chat",
+      "Workflows": "workflows"
+    };
+    const gradeText = { A: "native fit", B: "good retrofit", C: "major redesign", D: "do not move" };
+    const search = document.getElementById("search");
+    const route = document.getElementById("route");
+    const fit = document.getElementById("fit");
+    const capability = document.getElementById("capability");
+    const cards = document.getElementById("cards");
+    const resultCount = document.getElementById("resultCount");
+
+    const escapeHtml = value => String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;");
+
+    const allTags = [...new Set(AUTOMATIONS.flatMap(item => item.tags))].sort();
+    allTags.forEach(tag => {
+      const option = document.createElement("option");
+      option.value = tag;
+      option.textContent = tag;
+      capability.appendChild(option);
+    });
+
+    const totals = AUTOMATIONS.reduce((sum, item) => sum + item.count, 0);
+    const migrationCount = AUTOMATIONS
+      .filter(item => item.recommended !== "Scout")
+      .reduce((sum, item) => sum + item.count, 0);
+    const chatCount = AUTOMATIONS
+      .filter(item => ["A", "B"].includes(item.ratings.chat))
+      .reduce((sum, item) => sum + item.count, 0);
+    const coworkCount = AUTOMATIONS
+      .filter(item => ["A", "B"].includes(item.ratings.cowork))
+      .reduce((sum, item) => sum + item.count, 0);
+    document.getElementById("stats").innerHTML = `
+      <div class="stat"><strong>${totals}</strong><span>active Scout automations represented</span></div>
+      <div class="stat"><strong>${AUTOMATIONS.length}</strong><span>public-safe automation patterns</span></div>
+      <div class="stat"><strong>${migrationCount}</strong><span>instances with a non-Scout recommended route</span></div>
+      <div class="stat"><strong>${chatCount} / ${coworkCount}</strong><span>Chat-fit / Cowork-fit instances at A or B</span></div>
+    `;
+
+    function promptBlock(label, text) {
+      if (!text) return "";
+      return `
+        <div class="prompt-block">
+          <div class="prompt-head">
+            <strong>${escapeHtml(label)}</strong>
+            <button class="copy" type="button" data-copy="${escapeHtml(text)}">Copy prompt</button>
+          </div>
+          <pre>${escapeHtml(text)}</pre>
+        </div>`;
+    }
+
+    function render() {
+      const query = search.value.trim().toLowerCase();
+      const selectedRoute = route.value;
+      const selectedFit = fit.value;
+      const selectedCapability = capability.value;
+      const visible = AUTOMATIONS.filter(item => {
+        const haystack = [
+          item.name, item.category, item.summary, item.why, item.model,
+          item.scoutPrompt, item.coworkPrompt, item.chatPrompt, ...item.tags
+        ].join(" ").toLowerCase();
+        return (!query || haystack.includes(query))
+          && (!selectedRoute || item.recommended === selectedRoute)
+          && (!selectedFit || item.fit === selectedFit)
+          && (!selectedCapability || item.tags.includes(selectedCapability));
+      });
+
+      const visibleInstances = visible.reduce((sum, item) => sum + item.count, 0);
+      resultCount.textContent = `${visible.length} patterns · ${visibleInstances} automation instance${visibleInstances === 1 ? "" : "s"}`;
+      if (!visible.length) {
+        cards.innerHTML = '<div class="empty">No automation patterns match those filters.</div>';
+        return;
+      }
+
+      cards.innerHTML = visible.map(item => {
+        const matrix = [
+          ["Scout", item.ratings.scout],
+          ["Cowork", item.ratings.cowork],
+          ["Chat", item.ratings.chat],
+          ["Workflows", item.ratings.workflows]
+        ].map(([label, grade]) => `
+          <div class="matrix-item"><b class="grade-${grade.toLowerCase()}">${grade}</b>${label}</div>
+        `).join("");
+        return `
+          <article class="card">
+            <div class="card-main">
+              <div class="card-top">
+                <h2>${escapeHtml(item.name)}</h2>
+                <span class="instance">${item.count} active</span>
+              </div>
+              <p class="summary">${escapeHtml(item.summary)}</p>
+              <div class="route-line">
+                <span class="route">${escapeHtml(item.recommended)}</span>
+                <span class="fit grade-${item.fit.toLowerCase()}">${item.fit} · ${gradeText[item.fit]}</span>
+                <span class="tag">${escapeHtml(item.category)}</span>
+              </div>
+              <div class="tags">${item.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+              <div class="matrix" aria-label="Runtime fit ratings">${matrix}</div>
+            </div>
+            <details>
+              <summary>Why, model guidance, and recreation prompts</summary>
+              <div class="details-body">
+                <p class="why"><strong>Why:</strong> ${escapeHtml(item.why)}</p>
+                <p class="model"><strong>Model guidance:</strong> ${escapeHtml(item.model)}</p>
+                ${promptBlock("Current Scout pattern", item.scoutPrompt)}
+                ${promptBlock("Cowork recreation prompt", item.coworkPrompt)}
+                ${promptBlock("Copilot Chat scheduled-task prompt", item.chatPrompt)}
+              </div>
+            </details>
+          </article>`;
+      }).join("");
+    }
+
+    [search, route, fit, capability].forEach(control => control.addEventListener("input", render));
+    document.getElementById("clear").addEventListener("click", () => {
+      search.value = "";
+      route.value = "";
+      fit.value = "";
+      capability.value = "";
+      render();
+      search.focus();
+    });
+    cards.addEventListener("click", async event => {
+      const button = event.target.closest("[data-copy]");
+      if (!button) return;
+      const original = button.textContent;
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy);
+        button.textContent = "Copied";
+      } catch {
+        button.textContent = "Select text below";
+      }
+      window.setTimeout(() => { button.textContent = original; }, 1600);
+    });
+    render();
+  </script>
+</body>
+</html>
