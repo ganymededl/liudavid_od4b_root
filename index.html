@@ -1492,14 +1492,26 @@ const CONFIG = {
       public: true
     },
     {
-      name:  "Cowork FinOps",
-      desc:  "Quickstart for the Copilot Cowork credit FinOps report, with Power BI templates and screenshots from a real run",
-      href:  "cowork-finops/index.html",
-      cta:   "Compare credit spend",
+      name:  "Cowork",
+      desc:  "Copilot Cowork resources for credit reporting and Guided Outcomes+.",
       icon:  "chart",
       color: ["#0e7c66", "#4fd8b5"],
       env:   "Commercial",
-      public: true
+      public: true,
+      groupItems: [
+        {
+          name: "Cowork FinOps",
+          desc: "Quickstart for the Copilot Cowork credit FinOps report, with Power BI templates and screenshots from a real run",
+          href: "cowork-finops/index.html",
+          cta: "Compare credit spend"
+        },
+        {
+          name: "Cowork Go+ FAQ",
+          desc: "Answered questions and delivery resources. Microsoft sign-in required; access is restricted.",
+          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/cowork-go-plus-faq.html",
+          cta: "Open Cowork Go+ FAQ"
+        }
+      ]
     },
     {
       name:  "Demos & Artifacts",
@@ -2005,12 +2017,30 @@ resourceFiltersReset.addEventListener("click", () => {
   resourceSearch.focus();
 });
 
+function renderResourceGroup(items) {
+  return `
+    <div class="lib-group-items">
+      ${items.map(item => `
+        <section class="lib-group-item">
+          <div class="lib-group-item-name">${item.name}</div>
+          <div class="lib-group-item-desc">${item.desc}</div>
+          <div class="lib-group-links">
+            <a class="lib-download" href="${item.href}" target="_blank" rel="noopener">${item.cta || "Open"} ${ICONS.arrow}</a>
+            ${(item.actions || []).map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener">${action.label}</a>`).join("")}
+          </div>
+        </section>
+      `).join("")}
+    </div>`;
+}
+
 CONFIG.libraries.forEach(lib => {
-  const a = document.createElement("a");
-  a.href = lib.href;
-  a.className = "lib";
-  if (lib.newTab) { a.target = "_blank"; a.rel = "noopener"; }
-  a.innerHTML = `
+  const card = document.createElement(lib.groupItems ? "div" : "a");
+  card.className = `lib${lib.groupItems ? " lib-collection" : ""}`;
+  if (!lib.groupItems) {
+    card.href = lib.href;
+    if (lib.newTab) { card.target = "_blank"; card.rel = "noopener"; }
+  }
+  card.innerHTML = `
     <div class="lib-badges">
       ${lib.public ? '<span class="lib-public-badge">Public</span>' : ''}
       ${lib.featured ? '<span class="lib-featured-badge">Featured</span>' : ''}
@@ -2021,10 +2051,10 @@ CONFIG.libraries.forEach(lib => {
     </div>
     <div class="lib-name">${lib.name}</div>
     <div class="lib-desc">${lib.desc}</div>
-    <div class="lib-cta">${lib.cta || "Explore resource"} ${ICONS.arrow}</div>
+    ${lib.groupItems ? renderResourceGroup(lib.groupItems) : `<div class="lib-cta">${lib.cta || "Explore resource"} ${ICONS.arrow}</div>`}
   `;
-  registerResourceCard(a, lib);
-  libsEl.appendChild(a);
+  registerResourceCard(card, lib);
+  libsEl.appendChild(card);
 });
 
 const toolsEl = document.getElementById("tools");
@@ -2046,20 +2076,7 @@ const toolsEl = document.getElementById("tools");
     </div>
     <div class="lib-name">${tool.name}</div>
     <div class="lib-desc">${tool.desc}</div>
-    ${tool.groupItems ? `
-      <div class="lib-group-items">
-        ${tool.groupItems.map(item => `
-          <section class="lib-group-item">
-            <div class="lib-group-item-name">${item.name}</div>
-            <div class="lib-group-item-desc">${item.desc}</div>
-            <div class="lib-group-links">
-              <a class="lib-download" href="${item.href}" target="_blank" rel="noopener">${item.cta || "Open"} ${ICONS.arrow}</a>
-              ${(item.actions || []).map(action => `<a class="lib-download" href="${action.href}" target="_blank" rel="noopener">${action.label}</a>`).join("")}
-            </div>
-          </section>
-        `).join("")}
-      </div>
-    ` : `<div class="lib-cta">${tool.cta || "Open"} ${ICONS.arrow}</div>`}
+    ${tool.groupItems ? renderResourceGroup(tool.groupItems) : `<div class="lib-cta">${tool.cta || "Open"} ${ICONS.arrow}</div>`}
     ${[
       ...(tool.actions || []),
       ...(tool.downloadHref ? [{ label: tool.downloadLabel || "Download a copy", href: tool.downloadHref }] : [])
