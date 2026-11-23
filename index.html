@@ -237,6 +237,10 @@
   .hero .backdrop-controls { margin-top: 20px; }
   @media (prefers-reduced-motion: reduce) {
     .slide.active { animation: none; }
+    .quote-line {
+      animation: none !important;
+      transform: none;
+    }
   }
   [hidden] { display: none !important; }
   .slides {
@@ -288,6 +292,35 @@
       rgba(240,242,248,0.24) 64%,
       rgba(240,242,248,0.86) 100%
     );
+  }
+  .quote-drift {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .quote-line {
+    position: absolute;
+    left: 0;
+    white-space: nowrap;
+    font-size: clamp(12px, 1.4vw, 16px);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: rgba(234, 244, 255, 0.25);
+    text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+    transform: translateX(-120%);
+    animation-name: quoteDrift;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+  }
+  [data-light="true"] .quote-line {
+    color: rgba(19, 37, 64, 0.28);
+    text-shadow: 0 1px 6px rgba(255,255,255,0.35);
+  }
+  @keyframes quoteDrift {
+    from { transform: translateX(-120%); }
+    to { transform: translateX(110vw); }
   }
 
   /* ── Layout ─────────────────────────────────────────── */
@@ -1273,6 +1306,7 @@
     .station .sg .change { padding: 4px 6px; margin: -4px -6px; }
     .now-playing:not([hidden]) { display: block; }
     .tv-pip { right: 12px; bottom: 12px; width: calc(100% - 24px); max-width: none; }
+    .quote-line { font-size: 11px; }
   }
 </style>
 </head>
@@ -1282,6 +1316,7 @@
   <iframe class="noir-backdrop" id="noirBackdrop" title="Decorative generative artwork" aria-hidden="true" tabindex="-1" inert></iframe>
   <div class="slides" id="slides" hidden></div>
   <div class="vignette"></div>
+  <div class="quote-drift" id="quoteDrift" aria-hidden="true"></div>
 
   <div class="content">
     <!-- NAV -->
@@ -2119,7 +2154,68 @@ applyResourceFilters();
 
 // ── RENDER: podcasts ────────────────────────────────────────
 const podEl = document.getElementById("podcasts");
+const quoteDriftEl = document.getElementById("quoteDrift");
+const quoteSourceLines = [];
+let quoteRenderScheduled = false;
 const podcastCards = [];
+
+function normalizeTitle(value) {
+  if (typeof value !== "string") return "";
+  let text = value.replace(/\s+/g, " ").trim();
+  if (!text || text.length > 220) return "";
+  text = text
+    .replace(/\|?\s*(Odd Lots|Decoder with Nilay Patel|Mixture of Experts|Uncanny Valley \| WIRED|On with Kara Swisher|Pivot|Bold Names).*$/i, "")
+    .replace(/\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}.*$/i, "")
+    .replace(/\s+\d+\s*(sec|secs|min|mins|m)\b.*$/i, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  if (!text || text.length < 10) return "";
+  return text;
+}
+
+function toQuoteLine(title) {
+  const clean = normalizeTitle(title);
+  if (!clean) return "";
+  return "“" + clean + "”";
+}
+
+function addQuoteSourceLines(lines) {
+  let changed = false;
+  (lines || []).forEach(line => {
+    if (typeof line !== "string" || !line) return;
+    if (quoteSourceLines.includes(line)) return;
+    quoteSourceLines.push(line);
+    changed = true;
+  });
+  if (changed && !quoteRenderScheduled) {
+    quoteRenderScheduled = true;
+    requestAnimationFrame(() => {
+      quoteRenderScheduled = false;
+      renderQuoteDrift();
+    });
+  }
+}
+
+function renderQuoteDrift() {
+  if (!quoteDriftEl) return;
+  const baseLines = quoteSourceLines
+    .filter(line => line.length >= 12)
+    .slice(0, 18);
+  quoteDriftEl.innerHTML = "";
+  if (!baseLines.length) return;
+  const rowCount = Math.min(10, Math.max(6, baseLines.length));
+  for (let i = 0; i < rowCount; i++) {
+    const line = document.createElement("div");
+    line.className = "quote-line";
+    const text = baseLines[i % baseLines.length];
+    line.textContent = text;
+    line.style.top = (8 + (i * (82 / Math.max(1, rowCount - 1)))) + "%";
+    line.style.animationDuration = (68 + (i * 7)) + "s";
+    line.style.animationDelay = "-" + ((i * 9) % 40) + "s";
+    quoteDriftEl.appendChild(line);
+  }
+}
+
 (CONFIG.podcasts || []).forEach(p => {
   const acc = p.accent || "#00d9ff";
   const card = document.createElement("div");
@@ -2155,6 +2251,9 @@ const podcastCards = [];
   podEl.appendChild(card);
   podcastCards.push({ p, card });
 });
+addQuoteSourceLines((CONFIG.podcasts || [])
+  .map(p => toQuoteLine(p.latestTitle))
+  .filter(line => line && !/hand-picked collection/i.test(line)));
 
 async function hydratePocketCastsStarredCard() {
   const match = podcastCards.find(entry => entry.p.dynamicSource === "pocketcasts-starred");
@@ -2173,6 +2272,10 @@ async function hydratePocketCastsStarredCard() {
     latest.href = payload.publicUrl || "pocketcasts-starred.html";
     title.textContent = top.title;
     date.textContent = payload.generatedDisplay || "Updated";
+    addQuoteSourceLines((payload.items || [])
+      .map(item => toQuoteLine(item?.title))
+      .filter(Boolean)
+      .slice(0, 14));
     if (typeof payload.total === "number" && payload.total > 0) {
       host.textContent = `${payload.total} starred episodes · Pocket Casts`;
     }
@@ -2181,6 +2284,7 @@ async function hydratePocketCastsStarredCard() {
   }
 }
 hydratePocketCastsStarredCard();
+renderQuoteDrift();
 
 // ── SLIDES ──────────────────────────────────────────────────
 const slidesEl = document.getElementById("slides");
