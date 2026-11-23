@@ -5,7 +5,7 @@
 
 Build a self-contained personal hub page as a single HTML file called `index.html`.
 This file will be saved (overwritten in place) to OneDrive for Business (OD4B) at:
-`CoworkPublic/DemosPublic/Personal Hub Page/liudavid_od4b_root/index.html`
+`PHPublic/DemosPublic/Personal Hub Page/liudavid_od4b_root/index.html`
 (This folder is a GitHub-synced repo; overwriting index.html here republishes the public site.)
 and opened directly in a browser by the owner and teammates (all signed into
 Microsoft 365). Zero external dependencies except the Pexels API (photo
@@ -469,7 +469,7 @@ Immediately openable in any modern browser with no setup.
 
 DELIVERY (STRICT): Save (OVERWRITE in place) the finished file directly to this
 OneDrive for Business path:
-`CoworkPublic/DemosPublic/Personal Hub Page/liudavid_od4b_root/index.html`
+`PHPublic/DemosPublic/Personal Hub Page/liudavid_od4b_root/index.html`
 Do NOT email it. Do NOT attach it. Do NOT create or send a share link.
 Do NOT save it to the Cowork session output folder as the final destination.
 Simply overwrite the existing index.html in that folder so the GitHub-synced
