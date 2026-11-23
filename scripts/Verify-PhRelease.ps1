@@ -80,7 +80,6 @@ $publicPaths = @(
     "copilot-center-of-excellence/index.html",
     "cowork-finops/index.html",
     "demos-public/index.html",
-    "fieldforge.html",
     "games-public/index.html",
     "model-mission-control/index.html?v=20261025-4&platform=scout",
     "prompt-engineering-public/index.html",
