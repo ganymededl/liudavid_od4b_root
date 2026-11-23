@@ -2155,36 +2155,31 @@ applyResourceFilters();
 // ── RENDER: podcasts ────────────────────────────────────────
 const podEl = document.getElementById("podcasts");
 const quoteDriftEl = document.getElementById("quoteDrift");
-const quoteSourceLines = [];
+const quoteSourceQuotes = [];
 let quoteRenderScheduled = false;
 const podcastCards = [];
 
-function normalizeTitle(value) {
+function normalizeQuote(value) {
   if (typeof value !== "string") return "";
-  let text = value.replace(/\s+/g, " ").trim();
-  if (!text || text.length > 220) return "";
-  text = text
-    .replace(/\|?\s*(Odd Lots|Decoder with Nilay Patel|Mixture of Experts|Uncanny Valley \| WIRED|On with Kara Swisher|Pivot|Bold Names).*$/i, "")
-    .replace(/\s*(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}.*$/i, "")
-    .replace(/\s+\d+\s*(sec|secs|min|mins|m)\b.*$/i, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
-  if (!text || text.length < 10) return "";
+  const text = value.replace(/\s+/g, " ").trim();
+  if (!text || text.length < 18 || text.length > 260) return "";
   return text;
 }
 
-function toQuoteLine(title) {
-  const clean = normalizeTitle(title);
-  if (!clean) return "";
-  return "“" + clean + "”";
+function normalizeSpeaker(value) {
+  if (typeof value !== "string") return "";
+  return value.replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
-function addQuoteSourceLines(lines) {
+function addQuoteSourceQuotes(quotes) {
   let changed = false;
-  (lines || []).forEach(line => {
-    if (typeof line !== "string" || !line) return;
-    if (quoteSourceLines.includes(line)) return;
-    quoteSourceLines.push(line);
+  (quotes || []).forEach(item => {
+    const quote = normalizeQuote(item?.quote);
+    if (!quote) return;
+    const speaker = normalizeSpeaker(item?.speaker);
+    const key = `${quote}||${speaker}`.toLowerCase();
+    if (quoteSourceQuotes.some(existing => `${existing.quote}||${existing.speaker || ""}`.toLowerCase() === key)) return;
+    quoteSourceQuotes.push({ quote, speaker });
     changed = true;
   });
   if (changed && !quoteRenderScheduled) {
@@ -2198,8 +2193,7 @@ function addQuoteSourceLines(lines) {
 
 function renderQuoteDrift() {
   if (!quoteDriftEl) return;
-  const baseLines = quoteSourceLines
-    .filter(line => line.length >= 12)
+  const baseLines = quoteSourceQuotes
     .slice(0, 18);
   quoteDriftEl.innerHTML = "";
   if (!baseLines.length) return;
@@ -2207,7 +2201,8 @@ function renderQuoteDrift() {
   for (let i = 0; i < rowCount; i++) {
     const line = document.createElement("div");
     line.className = "quote-line";
-    const text = baseLines[i % baseLines.length];
+    const item = baseLines[i % baseLines.length];
+    const text = `“${item.quote}”${item.speaker ? ` — ${item.speaker}` : ""}`;
     line.textContent = text;
     line.style.top = (8 + (i * (82 / Math.max(1, rowCount - 1)))) + "%";
     line.style.animationDuration = (68 + (i * 7)) + "s";
@@ -2251,9 +2246,6 @@ function renderQuoteDrift() {
   podEl.appendChild(card);
   podcastCards.push({ p, card });
 });
-addQuoteSourceLines((CONFIG.podcasts || [])
-  .map(p => toQuoteLine(p.latestTitle))
-  .filter(line => line && !/hand-picked collection/i.test(line)));
 
 async function hydratePocketCastsStarredCard() {
   const match = podcastCards.find(entry => entry.p.dynamicSource === "pocketcasts-starred");
@@ -2272,10 +2264,6 @@ async function hydratePocketCastsStarredCard() {
     latest.href = payload.publicUrl || "pocketcasts-starred.html";
     title.textContent = top.title;
     date.textContent = payload.generatedDisplay || "Updated";
-    addQuoteSourceLines((payload.items || [])
-      .map(item => toQuoteLine(item?.title))
-      .filter(Boolean)
-      .slice(0, 14));
     if (typeof payload.total === "number" && payload.total > 0) {
       host.textContent = `${payload.total} starred episodes · Pocket Casts`;
     }
@@ -2284,6 +2272,18 @@ async function hydratePocketCastsStarredCard() {
   }
 }
 hydratePocketCastsStarredCard();
+
+async function hydrateQuoteDrift() {
+  try {
+    const response = await fetch(`data/ai-quote-drift.json?ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = await response.json();
+    addQuoteSourceQuotes(payload?.quotes);
+  } catch (error) {
+    console.warn("Quote drift refresh failed:", error);
+  }
+}
+hydrateQuoteDrift();
 renderQuoteDrift();
 
 // ── SLIDES ──────────────────────────────────────────────────
