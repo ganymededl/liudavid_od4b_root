@@ -48,6 +48,7 @@ body.background-mode canvas{height:100vh}
     </div>
     <div class="row">
       <a href="artificial-gallery.html?scoutTheme=dark">Back to gallery</a>
+      <button id="sound" type="button" aria-pressed="false">Sound: Off</button>
       <button id="theme" type="button">Light / dark</button>
       <button id="save" type="button">Save PNG</button>
     </div>
@@ -86,10 +87,21 @@ body.background-mode canvas{height:100vh}
   const density = document.getElementById("density");
   const links = document.getElementById("links");
   const pulse = document.getElementById("pulse");
+  const soundBtn = document.getElementById("sound");
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   let hostPaused = false;
   let hostHidden = false;
   let signaledReady = false;
+  let audioCtx = null;
+  let masterGain = null;
+  let kickGain = null;
+  let bassGain = null;
+  let hatGain = null;
+  let isAudioOn = false;
+  let audioTimer = null;
+  let step = 0;
+  const BPM = 118;
+  const STEP_MS = (60 / BPM) * 1000 / 4;
 
   function postToParent(type, extra) {
     if (window.parent === window) return;
@@ -115,6 +127,123 @@ body.background-mode canvas{height:100vh}
   }
   addEventListener("resize", fit);
   fit();
+
+  function ensureAudio() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.0001;
+    masterGain.connect(audioCtx.destination);
+
+    kickGain = audioCtx.createGain();
+    kickGain.gain.value = 0.9;
+    kickGain.connect(masterGain);
+
+    bassGain = audioCtx.createGain();
+    bassGain.gain.value = 0.28;
+    bassGain.connect(masterGain);
+
+    hatGain = audioCtx.createGain();
+    hatGain.gain.value = 0.12;
+    hatGain.connect(masterGain);
+  }
+
+  function triggerKick(time) {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(120, time);
+    o.frequency.exponentialRampToValueAtTime(48, time + 0.11);
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(1.0, time + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.12);
+    o.connect(g).connect(kickGain);
+    o.start(time);
+    o.stop(time + 0.13);
+  }
+
+  function triggerHat(time) {
+    const b = audioCtx.createBuffer(1, Math.floor(audioCtx.sampleRate * 0.04), audioCtx.sampleRate);
+    const data = b.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = (Math.random() * 2 - 1) * 0.5;
+    const n = audioCtx.createBufferSource();
+    const hp = audioCtx.createBiquadFilter();
+    const g = audioCtx.createGain();
+    n.buffer = b;
+    hp.type = "highpass";
+    hp.frequency.value = 7800;
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(0.42, time + 0.001);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + 0.035);
+    n.connect(hp).connect(g).connect(hatGain);
+    n.start(time);
+    n.stop(time + 0.04);
+  }
+
+  function triggerBass(time, freq, len) {
+    const o = audioCtx.createOscillator();
+    const lp = audioCtx.createBiquadFilter();
+    const g = audioCtx.createGain();
+    o.type = "sawtooth";
+    o.frequency.setValueAtTime(freq, time);
+    lp.type = "lowpass";
+    lp.frequency.setValueAtTime(320, time);
+    lp.Q.value = 6;
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.exponentialRampToValueAtTime(0.62, time + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + len);
+    o.connect(lp).connect(g).connect(bassGain);
+    o.start(time);
+    o.stop(time + len + 0.03);
+  }
+
+  function runBeat() {
+    if (!isAudioOn || !audioCtx) return;
+    const time = audioCtx.currentTime + 0.01;
+    const barStep = step % 16;
+    const kickPattern = [0, 4, 8, 12];
+    const hatPattern = [2, 6, 10, 14];
+    const bassLine = [55, 55, 65.4, 73.4, 82.4, 73.4, 65.4, 55];
+    if (kickPattern.includes(barStep)) triggerKick(time);
+    if (hatPattern.includes(barStep) || barStep % 2 === 1) triggerHat(time);
+    if (barStep % 2 === 0) {
+      const idx = (barStep / 2) % bassLine.length;
+      triggerBass(time, bassLine[idx], 0.17);
+    }
+    step = (step + 1) % 16;
+  }
+
+  function startAudio() {
+    ensureAudio();
+    isAudioOn = true;
+    soundBtn.textContent = "Sound: On";
+    soundBtn.setAttribute("aria-pressed", "true");
+    audioCtx.resume();
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setTargetAtTime(0.2, audioCtx.currentTime, 0.05);
+    if (audioTimer) clearInterval(audioTimer);
+    runBeat();
+    audioTimer = setInterval(runBeat, STEP_MS);
+  }
+
+  function stopAudio() {
+    isAudioOn = false;
+    soundBtn.textContent = "Sound: Off";
+    soundBtn.setAttribute("aria-pressed", "false");
+    if (audioTimer) {
+      clearInterval(audioTimer);
+      audioTimer = null;
+    }
+    if (audioCtx && masterGain) {
+      masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      masterGain.gain.setTargetAtTime(0.0001, audioCtx.currentTime, 0.05);
+    }
+  }
+
+  soundBtn.addEventListener("click", () => {
+    if (isAudioOn) stopAudio();
+    else startAudio();
+  });
 
   const corePeople = [
     ["Jensen Huang", 1.0], ["Dario Amodei", 0.95], ["Sam Altman", 1.0], ["Yann LeCun", 0.9],
@@ -233,6 +362,7 @@ body.background-mode canvas{height:100vh}
   }
 
   function frame(ts) {
+    if ((isBackground || hostHidden || document.hidden) && isAudioOn) stopAudio();
     if (isBackground && (hostPaused || hostHidden || reducedMotion.matches)) {
       requestAnimationFrame(frame);
       return;
