@@ -74,12 +74,8 @@ async function launchContext(userDataDir, headless) {
   }
 }
 
-async function scrapeStarred(options) {
-  const context = await launchContext(options.userDataDir, options.headless);
-  const page = context.pages()[0] || await context.newPage();
-  await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
-  await page.waitForTimeout(1500);
-  const onLoginPage = await page.evaluate(() => {
+async function isOnLoginPage(page) {
+  return page.evaluate(() => {
     const url = window.location.href;
     if (url.includes("/user/login")) return true;
     const passwordField = document.querySelector('input[type="password"]');
@@ -88,15 +84,41 @@ async function scrapeStarred(options) {
       .some(text => text === "sign in" || text === "log in" || text === "login");
     return Boolean(passwordField && submit);
   });
+}
 
-  if (onLoginPage) {
-    await context.close();
+async function waitForManualLoginIfNeeded(page, options) {
+  const initialLoginPage = await isOnLoginPage(page);
+  if (!initialLoginPage) return;
+  if (options.headless) {
     throw new Error("Pocket Casts login is required. Run once with --headed, sign in, then rerun.");
   }
+
+  process.stdout.write("Pocket Casts sign-in required. Complete login in the opened browser window...\n");
+  const start = Date.now();
+  const timeoutMs = 10 * 60 * 1000;
+  while (Date.now() - start < timeoutMs) {
+    await page.waitForTimeout(2000);
+    if (!(await isOnLoginPage(page))) {
+      await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+      await page.waitForTimeout(1500);
+      return;
+    }
+  }
+  throw new Error("Timed out waiting for Pocket Casts sign-in in headed mode.");
+}
+
+async function scrapeStarred(options) {
+  const context = await launchContext(options.userDataDir, options.headless);
+  const page = context.pages()[0] || await context.newPage();
+  await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+  await page.waitForTimeout(1500);
+  await waitForManualLoginIfNeeded(page, options);
 
   const countVisibleItems = () => {
     const main = document.querySelector("main") || document.body;
     const selectors = [
+      '[role="row"]',
+      "tr",
       '[data-testid*="episode"]',
       '[class*="episode"]',
       '[class*="Episode"]',
@@ -111,7 +133,6 @@ async function scrapeStarred(options) {
         seen.add(node);
         const text = (node.textContent || "").trim();
         if (text.length < 20) continue;
-        if (!node.querySelector("a")) continue;
         count += 1;
       }
     }
@@ -136,6 +157,8 @@ async function scrapeStarred(options) {
   const items = await page.evaluate((limit) => {
     const main = document.querySelector("main") || document.body;
     const selectors = [
+      '[role="row"]',
+      "tr",
       '[data-testid*="episode"]',
       '[class*="episode"]',
       '[class*="Episode"]',
@@ -186,12 +209,14 @@ async function scrapeStarred(options) {
         const fullText = (row.textContent || "").replace(/\s+/g, " ").trim();
         if (fullText.length < 20) continue;
         const anchors = Array.from(row.querySelectorAll("a[href]"));
-        if (!anchors.length) continue;
 
         const titleFromSelector = getText(row, titleSelectors);
         const lineCandidates = linesOf(row.textContent || "");
         const title = titleFromSelector || lineCandidates.find(line => line.length > 6) || "";
         if (!title || /^starred$/i.test(title)) continue;
+        const hasDuration = /\b\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)\b/i.test(fullText);
+        const hasDateLike = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|today|yesterday)\b/i.test(fullText);
+        if (!hasDuration && !hasDateLike) continue;
 
         const subtitle = getText(row, subtitleSelectors);
         const podcast =
