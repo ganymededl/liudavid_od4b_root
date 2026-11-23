@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Atlas of Departures - Gemini 4 Argon</title>
+<style>
+:root{
+  --bg:#f4f0ea; --surface:#ffffff; --ink:#262626; --muted:#696969; --accent:#0c7ca8; --border:#d8d8d8;
+}
+html[data-theme="dark"]{
+  --bg:#161a1f; --surface:#232932; --ink:#e4eaf0; --muted:#9eb2c5; --accent:#4fd0ff; --border:#3a4554;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Aptos,Calibri,sans-serif;}
+.wrap{max-width:1240px;margin:0 auto;padding:20px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.meta{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.title{font-size:30px;margin:8px 0 2px;letter-spacing:-.03em}
+.subtitle{margin:0;color:var(--muted);font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+a,button{
+  border:1px solid var(--border);border-radius:999px;background:transparent;color:var(--ink);
+  text-decoration:none;padding:8px 12px;font:600 12px/1 "Segoe UI",sans-serif;cursor:pointer;
+}
+a:hover,button:hover{border-color:var(--accent);color:var(--accent)}
+.stage{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:0 20px 50px rgba(0,0,0,.2)}
+canvas{display:block;width:100%;height:min(72vh,760px)}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.controls .card{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}
+input[type="range"]{width:100%}
+@media (max-width:900px){.controls{grid-template-columns:1fr}.title{font-size:24px}}
+body.background-mode .wrap{max-width:none;padding:0}
+body.background-mode header,
+body.background-mode .controls{display:none}
+body.background-mode .stage{border:0;border-radius:0;box-shadow:none}
+body.background-mode canvas{height:100vh}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="meta">Study 011 / Built with Gemini 4 Argon</div>
+      <h1 class="title">Atlas of Departures</h1>
+      <p class="subtitle">Structured NYC-plus-world travel collage with polished gradients and route architecture.</p>
+    </div>
+    <div class="row">
+      <a href="artificial-gallery.html?scoutTheme=dark">Back to gallery</a>
+      <button id="theme" type="button">Light / dark</button>
+      <button id="save" type="button">Save PNG</button>
+    </div>
+  </header>
+  <div class="stage"><canvas id="c"></canvas></div>
+  <section class="controls">
+    <div class="card">
+      <label for="flow">Route flow</label>
+      <input id="flow" type="range" min="20" max="180" value="95">
+    </div>
+    <div class="card">
+      <label for="glass">Glass depth</label>
+      <input id="glass" type="range" min="10" max="130" value="64">
+    </div>
+    <div class="card">
+      <label for="stamp">Passport stamp pulse</label>
+      <input id="stamp" type="range" min="0" max="120" value="52">
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const qTheme = params.get("scoutTheme");
+  const isBackground = params.get("background") === "1";
+  const artworkFile = location.pathname.split("/").pop() || "atlas-of-departures-argon.html";
+  const root = document.documentElement;
+  root.dataset.theme = qTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  if (isBackground) document.body.classList.add("background-mode");
+  document.getElementById("theme").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  });
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const flow = document.getElementById("flow");
+  const glass = document.getElementById("glass");
+  const stamp = document.getElementById("stamp");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let hostPaused = false;
+  let hostHidden = false;
+  let signaledReady = false;
+
+  function postToParent(type, extra) {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type, artwork: artworkFile, ...(extra || {}) }, location.origin);
+  }
+
+  function syncMotionPreference() {
+    postToParent("artwork-motion-preference");
+  }
+  reducedMotion.addEventListener("change", syncMotionPreference);
+  syncMotionPreference();
+
+  addEventListener("message", (event) => {
+    if (event.origin !== location.origin || !event.data || event.data.type !== "artwork-settings") return;
+    if (event.data.theme) root.dataset.theme = event.data.theme;
+    hostPaused = event.data.paused === true;
+    hostHidden = event.data.hidden === true;
+  });
+
+  function fit() {
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * d);
+    canvas.height = Math.floor(rect.height * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  addEventListener("resize", fit);
+  fit();
+
+  function skylinePath(w, h) {
+    const y = h * .66;
+    ctx.beginPath();
+    ctx.moveTo(w * .09, y);
+    ctx.lineTo(w * .14, y - 80); ctx.lineTo(w * .18, y);
+    ctx.lineTo(w * .23, y - 130); ctx.lineTo(w * .28, y);
+    ctx.lineTo(w * .32, y - 95); ctx.lineTo(w * .36, y);
+    ctx.lineTo(w * .42, y - 160); ctx.lineTo(w * .47, y);
+    ctx.lineTo(w * .53, y - 120); ctx.lineTo(w * .58, y);
+    ctx.lineTo(w * .66, y - 170); ctx.lineTo(w * .72, y);
+    ctx.lineTo(w * .84, y); ctx.lineTo(w * .84, h); ctx.lineTo(w * .09, h);
+    ctx.closePath();
+  }
+
+  function drawBackground(w, h) {
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#11304a");
+    g.addColorStop(.35, "#1f5a74");
+    g.addColorStop(1, "#f1ba86");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function drawGlassPanels(w, h, t) {
+    const depth = Number(glass.value) / 100;
+    for (let i = 0; i < 8; i++) {
+      const x = 50 + i * (w / 9);
+      const y = 40 + (i % 3) * 36;
+      const ww = 120 + (i % 2) * 60;
+      const hh = 210 + (i % 4) * 24;
+      const drift = Math.sin(t * .5 + i) * 10 * depth;
+      ctx.fillStyle = "rgba(220,245,255," + (0.08 + depth * .13) + ")";
+      ctx.fillRect(x + drift, y, ww, hh);
+      ctx.strokeStyle = "rgba(255,255,255,.26)";
+      ctx.strokeRect(x + drift, y, ww, hh);
+    }
+  }
+
+  function drawRoutes(w, h, t) {
+    const speed = Number(flow.value) / 100;
+    const nodes = [
+      [w * .2, h * .56], [w * .33, h * .43], [w * .5, h * .36],
+      [w * .64, h * .48], [w * .77, h * .32], [w * .84, h * .52]
+    ];
+    nodes.forEach((n, i) => {
+      const [x1, y1] = n;
+      const [x2, y2] = nodes[(i + 2) % nodes.length];
+      ctx.strokeStyle = "rgba(255,255,255,.42)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.quadraticCurveTo((x1 + x2) / 2, Math.min(y1, y2) - 120 - (i * 8), x2, y2);
+      ctx.stroke();
+
+      const p = ((t * 0.15 * speed) + i * .17) % 1;
+      const cx = x1 + (x2 - x1) * p;
+      const cy = y1 + (y2 - y1) * p - Math.sin(p * Math.PI) * (120 + i * 8);
+      ctx.fillStyle = "rgba(255,248,220,.85)";
+      ctx.beginPath(); ctx.arc(cx, cy, 3, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  function drawStamps(w, h, t) {
+    const pulse = Number(stamp.value) / 100;
+    for (let i = 0; i < 6; i++) {
+      const x = 120 + i * 150;
+      const y = h * .76 + ((i % 2) * 28);
+      const r = 26 + Math.sin(t * 1.6 + i) * 5 * pulse;
+      ctx.strokeStyle = "rgba(180,50,70,.35)";
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(x + 10, y - 7, r * .6, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+
+  function drawMapGrid(w, h, t) {
+    ctx.strokeStyle = "rgba(255,255,255,.09)";
+    for (let x = 0; x < w; x += 42) {
+      ctx.beginPath(); ctx.moveTo(x + Math.sin(t * .2 + x) * 1.2, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (let y = 0; y < h; y += 38) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y + Math.cos(t * .18 + y) * 1.2); ctx.stroke();
+    }
+  }
+
+  function frame(ts) {
+    if (isBackground && (hostPaused || hostHidden || reducedMotion.matches)) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    const t = ts * 0.001;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    drawBackground(w, h);
+    drawMapGrid(w, h, t);
+    drawGlassPanels(w, h, t);
+    drawRoutes(w, h, t);
+    skylinePath(w, h);
+    ctx.fillStyle = "rgba(11,22,34,.64)";
+    ctx.fill();
+    drawStamps(w, h, t);
+    if (!signaledReady) {
+      signaledReady = true;
+      postToParent("artwork-ready");
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  document.getElementById("save").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "atlas-of-departures-argon.png";
+    a.click();
+  });
+})();
+</script>
+</body>
+</html>

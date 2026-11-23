@@ -76,12 +76,12 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="David Shih Chun Liu — Hub">
 <meta property="og:description" content="Public Copilot field playbooks, demos, automation, governance resources, creative experiments, and podcasts.">
-<meta property="og:image" content="https://ganymededl.github.io/liudavid_od4b_root/volatility-noir-thumb.png">
+<meta property="og:image" content="https://ganymededl.github.io/liudavid_od4b_root/cathedral-of-transit-gpt62-thumb.svg">
 <meta property="og:url" content="https://ganymededl.github.io/liudavid_od4b_root/">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="David Shih Chun Liu — Hub">
 <meta name="twitter:description" content="Public Copilot field playbooks, demos, automation, governance resources, creative experiments, and podcasts.">
-<meta name="twitter:image" content="https://ganymededl.github.io/liudavid_od4b_root/volatility-noir-thumb.png">
+<meta name="twitter:image" content="https://ganymededl.github.io/liudavid_od4b_root/cathedral-of-transit-gpt62-thumb.svg">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Cdefs%3E%3ClinearGradient%20id='g'%20x1='0'%20y1='0'%20x2='1'%20y2='1'%3E%3Cstop%20offset='0'%20stop-color='%2300d9ff'/%3E%3Cstop%20offset='1'%20stop-color='%2300ffa3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect%20width='32'%20height='32'%20rx='8'%20fill='url(%23g)'/%3E%3Cg%20fill='none'%20stroke='%23000'%20stroke-width='2.4'%20stroke-linejoin='round'%20stroke-linecap='round'%3E%3Cpath%20d='M6.9%2010.8L16%207.1l9.1%203.7L16%2014.7z'/%3E%3Cpath%20d='M6.9%2016l9.1%203.9%209.1-3.9'/%3E%3Cpath%20d='M6.9%2021.2l9.1%203.7%209.1-3.7'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preload" href="assets/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin>
 <style>
@@ -1471,7 +1471,7 @@ const CONFIG = {
   libraries: [
     {
       name:  "ARTificial Gallery",
-      desc:  "Four interactive studies and an unofficial Pet Shop Boys / Alan Turing fan film",
+      desc:  "Eleven interactive studies and film, now including the NYC and travel frontier triptych",
       href:  "artificial-gallery.html?scoutTheme=dark",
       cta:   "Enter gallery",
       newTab: true,
@@ -1740,12 +1740,18 @@ const CONFIG = {
   // key can't be kept secret and Pexels has no domain-restriction option).
   // The photo set below is a small fixed, self-hosted-friendly list.
   artworkBackground: {
-    rotateSecs: 45,
+    rotateSecs: 24,
     artworks: [
-      {name: "Volatility Noir", file: "volatility-noir.html", credit: "Built with GPT-6 Astra"},
-      {name: "Midnight Transit Orchestra", file: "midnight-transit-orchestra.html", credit: "Built with Claude Opus 5"},
-      {name: "Reno Noise / Luxe Score", file: "reno-noise-luxe-score.html", credit: "Built with Claude Opus 5"},
-      {name: "Mini Soundtrack Lab", file: "mini-soundtrack-lab.html", credit: "Original browser synth and cover art"}
+      {name: "Cathedral of Transit", file: "cathedral-of-transit-gpt62.html", credit: "Built with GPT-6.2 Sol", addedOn: "2026-11-23"},
+      {name: "Neon Pilgrim, Lower Manhattan", file: "neon-pilgrim-grok47.html", credit: "Built with Grok 4.7", addedOn: "2026-11-23"},
+      {name: "Atlas of Departures", file: "atlas-of-departures-argon.html", credit: "Built with Gemini 4 Argon", addedOn: "2026-11-23"},
+      {name: "Sonnet Chroma Zoo", file: "sonnet-chroma-zoo.html", credit: "Built with Claude Sonnet 5.5", addedOn: "2026-10-29"},
+      {name: "Terra Cathedral of Noise", file: "terra-cathedral-of-noise.html", credit: "Built with GPT-6 Terra", addedOn: "2026-10-29"},
+      {name: "Argon Bloom Engine", file: "argon-bloom-engine.html", credit: "Built with Gemini 4 Argon", addedOn: "2026-10-29"},
+      {name: "Mini Soundtrack Lab", file: "mini-soundtrack-lab.html", credit: "Original browser synth and cover art", addedOn: "2026-10-26"},
+      {name: "Reno Noise / Luxe Score", file: "reno-noise-luxe-score.html", credit: "Built with Claude Opus 5", addedOn: "2026-10-22"},
+      {name: "Midnight Transit Orchestra", file: "midnight-transit-orchestra.html", credit: "Built with Claude Opus 5", addedOn: "2026-10-21"},
+      {name: "Volatility Noir", file: "volatility-noir.html", credit: "Built with GPT-6 Astra", addedOn: "2026-10-20"}
     ]
   },
   photoBackground: {
@@ -2286,7 +2292,19 @@ const backgroundNext = document.getElementById("backgroundNext");
 const backgroundSwitch = document.getElementById("backgroundSwitch");
 const backgroundCredit = document.getElementById("backgroundCredit");
 const motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
-const artworks = CONFIG.artworkBackground.artworks;
+const artworks = (CONFIG.artworkBackground.artworks || [])
+  .map((item, sourceIndex) => ({ ...item, sourceIndex }))
+  .sort((a, b) => {
+    const timeA = Date.parse(a.addedOn || "");
+    const timeB = Date.parse(b.addedOn || "");
+    const validA = Number.isFinite(timeA);
+    const validB = Number.isFinite(timeB);
+    if (validA && validB && timeA !== timeB) return timeB - timeA;
+    if (validA && !validB) return -1;
+    if (!validA && validB) return 1;
+    return a.sourceIndex - b.sourceIndex;
+  })
+  .map(({ sourceIndex, ...item }) => item);
 let artworkIndex = 0;
 let artworkReady = false, artworkTimer = null, artworkTimerStarted = 0;
 let artworkRemaining = CONFIG.artworkBackground.rotateSecs * 1000, artworkLoadTimer = null;
