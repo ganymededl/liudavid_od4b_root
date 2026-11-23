@@ -65,7 +65,7 @@ body.background-mode canvas{height:100vh}
     </div>
     <div class="card">
       <label for="pulse">News pulse</label>
-      <input id="pulse" type="range" min="10" max="160" value="56">
+      <input id="pulse" type="range" min="10" max="160" value="38">
     </div>
   </section>
 </div>
@@ -274,8 +274,8 @@ body.background-mode canvas{height:100vh}
         label, weight, band,
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.06,
-        vy: (Math.random() - 0.5) * 0.06
+        vx: (Math.random() - 0.5) * 0.018,
+        vy: (Math.random() - 0.5) * 0.018
       });
     });
   }
@@ -298,15 +298,15 @@ body.background-mode canvas{height:100vh}
 
   function layout(w, h, t) {
     const centerX = w * .5, centerY = h * .5;
-    const pulseFactor = 0.75 + (Number(pulse.value) / 240);
+    const pulseFactor = 0.45 + (Number(pulse.value) / 420);
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
-      const orbit = (n.band === "people" ? 0.00018 : 0.00012) * pulseFactor;
+      const orbit = (n.band === "people" ? 0.00005 : 0.000035) * pulseFactor;
       n.vx += (centerX - n.x) * orbit * (n.band === "people" ? 1.15 : 0.75);
       n.vy += (centerY - n.y) * orbit;
-      n.vx += Math.sin(t * 0.22 + i) * 0.0011;
-      n.vy += Math.cos(t * 0.19 + i * 0.7) * 0.0011;
-      n.vx *= 0.992; n.vy *= 0.992;
+      n.vx += Math.sin(t * 0.11 + i) * 0.00035;
+      n.vy += Math.cos(t * 0.095 + i * 0.7) * 0.00035;
+      n.vx *= 0.9965; n.vy *= 0.9965;
       n.x += n.vx; n.y += n.vy;
 
       if (n.x < 8 || n.x > w - 8) n.vx *= -1;
@@ -340,14 +340,14 @@ body.background-mode canvas{height:100vh}
     const amp = Number(pulse.value) / 100;
     nodes.forEach((n, i) => {
       const size = (n.band === "people" ? 12 : 10) + n.weight * 10;
-      const flicker = 0.75 + (Math.sin(t * 1.7 + i) + 1) * 0.18 * amp;
-      ctx.font = (n.band === "people" ? "700 " : "600 ") + size + "px 'Aptos Display', 'Segoe UI Variable Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif";
+      const pulseGlow = 0.9 + (Math.sin(t * 0.55 + i) + 1) * 0.03 * amp;
+      ctx.font = (n.band === "people" ? "700 " : "600 ") + size + "px Calibri, 'Segoe UI', Arial, sans-serif";
       ctx.lineWidth = Math.max(1.2, size * 0.085);
       ctx.strokeStyle = n.band === "people" ? "rgba(4,8,13,.58)" : "rgba(15,8,15,.52)";
       ctx.strokeText(n.label, n.x, n.y);
       ctx.fillStyle = n.band === "people"
-        ? "rgba(224,246,255," + flicker + ")"
-        : "rgba(255,202,225," + (flicker * 0.92) + ")";
+        ? "rgba(224,246,255," + pulseGlow + ")"
+        : "rgba(255,202,225," + (pulseGlow * 0.95) + ")";
       ctx.fillText(n.label, n.x, n.y);
     });
   }
