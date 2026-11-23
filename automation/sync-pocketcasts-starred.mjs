@@ -107,12 +107,58 @@ async function waitForManualLoginIfNeeded(page, options) {
   throw new Error("Timed out waiting for Pocket Casts sign-in in headed mode.");
 }
 
+async function waitForStarredReady(page, options) {
+  const getState = () => {
+    const bodyText = (document.body?.innerText || "").toLowerCase();
+    const main = document.querySelector("main") || document.body;
+    const hasStarredHeading = Array.from(document.querySelectorAll("h1, h2, [role='heading']"))
+      .some(node => (node.textContent || "").trim().toLowerCase() === "starred");
+    const challengeHints = [
+      "captcha",
+      "verify you are human",
+      "checking your browser",
+      "security check",
+      "cloudflare"
+    ];
+    const hasChallenge = challengeHints.some(hint => bodyText.includes(hint));
+    const candidateRows = main.querySelectorAll('[role="row"], tr, [role="listitem"], li, article, section, div');
+    let episodeLikeRows = 0;
+    for (const row of candidateRows) {
+      const text = (row.textContent || "").replace(/\s+/g, " ").trim();
+      if (text.length < 20) continue;
+      const hasDuration = /\b\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)\b/i.test(text);
+      const hasDateLike = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|today|yesterday)\b/i.test(text);
+      if (hasDuration || hasDateLike) episodeLikeRows += 1;
+      if (episodeLikeRows >= 3) break;
+    }
+    return { hasChallenge, hasStarredHeading, episodeLikeRows };
+  };
+
+  let state = await page.evaluate(getState);
+  if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
+  if (options.headless && state.hasChallenge) {
+    throw new Error("Pocket Casts returned a CAPTCHA/security challenge. Run with --headed and complete it in the browser.");
+  }
+  if (options.headless) return;
+
+  process.stdout.write("Waiting for Pocket Casts Starred list to be ready (after CAPTCHA/sign-in)...\n");
+  const start = Date.now();
+  const timeoutMs = 12 * 60 * 1000;
+  while (Date.now() - start < timeoutMs) {
+    await page.waitForTimeout(2000);
+    state = await page.evaluate(getState);
+    if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
+  }
+  throw new Error("Timed out waiting for Pocket Casts Starred list after manual CAPTCHA/sign-in.");
+}
+
 async function scrapeStarred(options) {
   const context = await launchContext(options.userDataDir, options.headless);
   const page = context.pages()[0] || await context.newPage();
   await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await page.waitForTimeout(1500);
   await waitForManualLoginIfNeeded(page, options);
+  await waitForStarredReady(page, options);
 
   const countVisibleItems = () => {
     const main = document.querySelector("main") || document.body;
@@ -252,7 +298,39 @@ async function scrapeStarred(options) {
       seenKeys.add(key);
       deduped.push(item);
     }
-    return deduped;
+    if (deduped.length) return deduped;
+
+    // Fallback when Pocket Casts changes row markup: infer from visible text blocks.
+    const coarse = [];
+    const blocks = main.querySelectorAll("div, article, section, li, tr");
+    for (const block of blocks) {
+      const text = (block.textContent || "").replace(/\s+/g, " ").trim();
+      if (text.length < 25) continue;
+      const hasDuration = /\b\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)\b/i.test(text);
+      const hasDateLike = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|today|yesterday)\b/i.test(text);
+      if (!hasDuration && !hasDateLike) continue;
+      const lines = linesOf(block.textContent || "");
+      const title = lines.find(line => line.length > 10 && !/^starred$/i.test(line)) || "";
+      if (!title) continue;
+      const podcast = lines.find(line => line !== title && line.length > 2 && !/\b\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)\b/i.test(line)) || "";
+      coarse.push({
+        title,
+        podcast,
+        publishedLabel: parseDateLike(text),
+        duration: parseDuration(text),
+        episodeUrl: ""
+      });
+      if (coarse.length >= limit) break;
+    }
+    const fallbackDeduped = [];
+    const fallbackSeen = new Set();
+    for (const item of coarse) {
+      const key = `${item.title.toLowerCase()}|${(item.podcast || "").toLowerCase()}`;
+      if (fallbackSeen.has(key)) continue;
+      fallbackSeen.add(key);
+      fallbackDeduped.push(item);
+    }
+    return fallbackDeduped;
   }, options.limit);
 
   await context.close();
