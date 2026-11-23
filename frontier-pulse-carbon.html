@@ -65,7 +65,7 @@ body.background-mode canvas{height:100vh}
     </div>
     <div class="card">
       <label for="pulse">News pulse</label>
-      <input id="pulse" type="range" min="10" max="160" value="72">
+      <input id="pulse" type="range" min="10" max="160" value="56">
     </div>
   </section>
 </div>
@@ -274,8 +274,8 @@ body.background-mode canvas{height:100vh}
         label, weight, band,
         x: Math.random() * w,
         y: Math.random() * h,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25
+        vx: (Math.random() - 0.5) * 0.06,
+        vy: (Math.random() - 0.5) * 0.06
       });
     });
   }
@@ -298,14 +298,15 @@ body.background-mode canvas{height:100vh}
 
   function layout(w, h, t) {
     const centerX = w * .5, centerY = h * .5;
+    const pulseFactor = 0.75 + (Number(pulse.value) / 240);
     for (let i = 0; i < nodes.length; i++) {
       const n = nodes[i];
-      const orbit = (n.band === "people" ? 0.0009 : 0.0006) * Number(pulse.value);
+      const orbit = (n.band === "people" ? 0.00018 : 0.00012) * pulseFactor;
       n.vx += (centerX - n.x) * orbit * (n.band === "people" ? 1.15 : 0.75);
       n.vy += (centerY - n.y) * orbit;
-      n.vx += Math.sin(t * 0.35 + i) * 0.004;
-      n.vy += Math.cos(t * 0.28 + i * 0.7) * 0.004;
-      n.vx *= 0.985; n.vy *= 0.985;
+      n.vx += Math.sin(t * 0.22 + i) * 0.0011;
+      n.vy += Math.cos(t * 0.19 + i * 0.7) * 0.0011;
+      n.vx *= 0.992; n.vy *= 0.992;
       n.x += n.vx; n.y += n.vy;
 
       if (n.x < 8 || n.x > w - 8) n.vx *= -1;
@@ -340,7 +341,10 @@ body.background-mode canvas{height:100vh}
     nodes.forEach((n, i) => {
       const size = (n.band === "people" ? 12 : 10) + n.weight * 10;
       const flicker = 0.75 + (Math.sin(t * 1.7 + i) + 1) * 0.18 * amp;
-      ctx.font = (n.band === "people" ? "700 " : "600 ") + size + "px 'Segoe UI', sans-serif";
+      ctx.font = (n.band === "people" ? "700 " : "600 ") + size + "px 'Aptos Display', 'Segoe UI Variable Display', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif";
+      ctx.lineWidth = Math.max(1.2, size * 0.085);
+      ctx.strokeStyle = n.band === "people" ? "rgba(4,8,13,.58)" : "rgba(15,8,15,.52)";
+      ctx.strokeText(n.label, n.x, n.y);
       ctx.fillStyle = n.band === "people"
         ? "rgba(224,246,255," + flicker + ")"
         : "rgba(255,202,225," + (flicker * 0.92) + ")";
