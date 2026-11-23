@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon Pilgrim, Lower Manhattan - Grok 4.7</title>
+<style>
+:root{
+  --bg:#0f0f12; --surface:#1d1d21; --ink:#efefef; --muted:#a8a8b3; --accent:#ff5c9e; --border:#373743;
+}
+html[data-theme="light"]{
+  --bg:#f8f6f2; --surface:#ffffff; --ink:#1f1f1f; --muted:#69697a; --accent:#b11f4b; --border:#dbdbe3;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Aptos,Calibri,sans-serif;}
+.wrap{max-width:1240px;margin:0 auto;padding:20px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.meta{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.title{font-size:30px;margin:8px 0 2px;letter-spacing:-.03em}
+.subtitle{margin:0;color:var(--muted);font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+a,button{
+  border:1px solid var(--border);border-radius:999px;background:transparent;color:var(--ink);
+  text-decoration:none;padding:8px 12px;font:600 12px/1 "Segoe UI",sans-serif;cursor:pointer;
+}
+a:hover,button:hover{border-color:var(--accent);color:var(--accent)}
+.stage{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:0 22px 54px rgba(0,0,0,.3)}
+canvas{display:block;width:100%;height:min(72vh,760px);background:#04050a}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.controls .card{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}
+input[type="range"]{width:100%}
+@media (max-width:900px){.controls{grid-template-columns:1fr}.title{font-size:24px}}
+body.background-mode .wrap{max-width:none;padding:0}
+body.background-mode header,
+body.background-mode .controls{display:none}
+body.background-mode .stage{border:0;border-radius:0;box-shadow:none}
+body.background-mode canvas{height:100vh}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="meta">Study 010 / Built with Grok 4.7</div>
+      <h1 class="title">Neon Pilgrim, Lower Manhattan</h1>
+      <p class="subtitle">Neo-noir Chinatown rain, palette collision, and hard-motion glitch energy.</p>
+    </div>
+    <div class="row">
+      <a href="artificial-gallery.html?scoutTheme=dark">Back to gallery</a>
+      <button id="theme" type="button">Light / dark</button>
+      <button id="save" type="button">Save PNG</button>
+    </div>
+  </header>
+  <div class="stage"><canvas id="c"></canvas></div>
+  <section class="controls">
+    <div class="card">
+      <label for="chaos">Glitch chaos</label>
+      <input id="chaos" type="range" min="0" max="100" value="62">
+    </div>
+    <div class="card">
+      <label for="rain">Rain speed</label>
+      <input id="rain" type="range" min="10" max="120" value="74">
+    </div>
+    <div class="card">
+      <label for="contrast">Neon intensity</label>
+      <input id="contrast" type="range" min="20" max="180" value="110">
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const qTheme = params.get("scoutTheme");
+  const isBackground = params.get("background") === "1";
+  const artworkFile = location.pathname.split("/").pop() || "neon-pilgrim-grok47.html";
+  const root = document.documentElement;
+  root.dataset.theme = qTheme || "dark";
+  if (isBackground) document.body.classList.add("background-mode");
+  document.getElementById("theme").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  });
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const chaos = document.getElementById("chaos");
+  const rain = document.getElementById("rain");
+  const contrast = document.getElementById("contrast");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let hostPaused = false;
+  let hostHidden = false;
+  let signaledReady = false;
+
+  function postToParent(type, extra) {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type, artwork: artworkFile, ...(extra || {}) }, location.origin);
+  }
+
+  function syncMotionPreference() {
+    postToParent("artwork-motion-preference");
+  }
+  reducedMotion.addEventListener("change", syncMotionPreference);
+  syncMotionPreference();
+
+  addEventListener("message", (event) => {
+    if (event.origin !== location.origin || !event.data || event.data.type !== "artwork-settings") return;
+    if (event.data.theme) root.dataset.theme = event.data.theme;
+    hostPaused = event.data.paused === true;
+    hostHidden = event.data.hidden === true;
+  });
+
+  function fit() {
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * d);
+    canvas.height = Math.floor(rect.height * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  addEventListener("resize", fit);
+  fit();
+
+  const drops = [];
+  function seedDrops() {
+    drops.length = 0;
+    const count = 120;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    for (let i = 0; i < count; i++) {
+      drops.push({ x: Math.random() * w, y: Math.random() * h, z: .3 + Math.random() * 1.5 });
+    }
+  }
+  seedDrops();
+
+  function rectGlow(x, y, w, h, c, alpha) {
+    ctx.fillStyle = c;
+    ctx.globalAlpha = alpha;
+    ctx.fillRect(x, y, w, h);
+    ctx.globalAlpha = alpha * .28;
+    ctx.fillRect(x - 10, y - 10, w + 20, h + 20);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawStreetBase(w, h) {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, "#060810");
+    g.addColorStop(.55, "#0a1020");
+    g.addColorStop(1, "#08060a");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = "rgba(8,8,12,.76)";
+    ctx.fillRect(0, h * .62, w, h * .38);
+  }
+
+  function drawSigns(w, h, t, amp) {
+    const c = Number(contrast.value) / 100;
+    const colors = ["#00d5ff", "#ff3f8e", "#ffb300", "#7e5bff"];
+    for (let i = 0; i < 18; i++) {
+      const x = (i * 91 + (Math.sin(t + i) * 12)) % (w + 120) - 60;
+      const y = 40 + (i % 7) * 38;
+      const ww = 60 + (i % 4) * 20;
+      const hh = 14 + (i % 3) * 5;
+      const color = colors[i % colors.length];
+      rectGlow(x + amp * ((i % 2) ? 1 : -1), y, ww, hh, color, .35 * c);
+    }
+  }
+
+  function drawPilgrim(w, h, t, amp) {
+    const px = w * .5 + Math.sin(t * 1.8) * 28 + amp * 1.4;
+    const py = h * .72;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.fillStyle = "rgba(8,8,10,.94)";
+    ctx.beginPath();
+    ctx.moveTo(-16, -64); ctx.lineTo(10, -64); ctx.lineTo(18, -6); ctx.lineTo(-24, -6); ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(-3, -78, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "rgba(255,95,160,.45)";
+    ctx.fillRect(8, -46, 22, 8);
+    ctx.restore();
+  }
+
+  function drawReflections(w, h, t, amp) {
+    const y = h * .62;
+    for (let i = 0; i < 30; i++) {
+      const x = i * (w / 28);
+      const len = 60 + (i % 5) * 26;
+      const wobble = Math.sin(t * 4 + i) * 8;
+      ctx.strokeStyle = (i % 3 === 0) ? "rgba(0,213,255,.22)" : (i % 3 === 1 ? "rgba(255,63,142,.2)" : "rgba(255,179,0,.18)");
+      ctx.lineWidth = 2 + (i % 2);
+      ctx.beginPath();
+      ctx.moveTo(x + amp * .5, y + wobble);
+      ctx.lineTo(x + 8 + amp * .6, y + len + wobble);
+      ctx.stroke();
+    }
+  }
+
+  function drawRain(w, h, t, amp) {
+    const speed = Number(rain.value) / 100;
+    ctx.strokeStyle = "rgba(190,210,255,.34)";
+    ctx.lineWidth = 1;
+    drops.forEach((d, i) => {
+      d.y += 2 + d.z * 3 * speed;
+      d.x -= .7 + d.z * .3;
+      if (d.y > h + 16) { d.y = -20; d.x = Math.random() * w; }
+      if (d.x < -20) d.x = w + 20;
+      const sl = 8 + d.z * 14;
+      const jitter = Math.sin(t * 5 + i) * 2;
+      ctx.beginPath();
+      ctx.moveTo(d.x + amp * .2, d.y);
+      ctx.lineTo(d.x - sl + jitter + amp * .25, d.y + sl * 1.2);
+      ctx.stroke();
+    });
+  }
+
+  function frame(ts) {
+    if (isBackground && (hostPaused || hostHidden || reducedMotion.matches)) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    const t = ts * 0.001;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const amp = (Number(chaos.value) / 100) * (Math.sin(t * 7) * 7 + Math.cos(t * 4.4) * 4);
+
+    drawStreetBase(w, h);
+    drawSigns(w, h, t, amp);
+    drawPilgrim(w, h, t, amp);
+    drawReflections(w, h, t, amp);
+    drawRain(w, h, t, amp);
+
+    if (Number(chaos.value) > 45) {
+      ctx.globalAlpha = .1 + Number(chaos.value) / 500;
+      ctx.drawImage(canvas, amp * 1.3, 0, w, h, 0, 0, w, h);
+      ctx.globalAlpha = 1;
+    }
+    if (!signaledReady) {
+      signaledReady = true;
+      postToParent("artwork-ready");
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  document.getElementById("save").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "neon-pilgrim-grok47.png";
+    a.click();
+  });
+})();
+</script>
+</body>
+</html>

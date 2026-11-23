@@ -1,0 +1,11 @@
+{
+  "name": "ph-pocketcasts-sync",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync:pocketcasts": "node ./sync-pocketcasts-starred.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.56.1"
+  }
+}

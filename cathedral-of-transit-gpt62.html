@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cathedral of Transit - GPT-6.2 Sol</title>
+<style>
+:root{
+  --bg:#f7f4ef; --surface:#ffffff; --ink:#1f1f1f; --muted:#686868; --accent:#b11f4b; --border:#dddddd;
+}
+html[data-theme="dark"]{
+  --bg:#151515; --surface:#222222; --ink:#e2e2e2; --muted:#aaaaaa; --accent:#fd8ea1; --border:#434343;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Segoe UI",Aptos,Calibri,sans-serif;
+}
+.wrap{max-width:1240px; margin:0 auto; padding:20px}
+header{display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:14px}
+.meta{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+.title{font-size:30px; margin:8px 0 2px; letter-spacing:-.03em}
+.subtitle{margin:0; color:var(--muted); font-size:14px}
+.row{display:flex; gap:10px; flex-wrap:wrap}
+a,button{
+  border:1px solid var(--border); border-radius:999px; background:transparent; color:var(--ink);
+  text-decoration:none; padding:8px 12px; font:600 12px/1 "Segoe UI",sans-serif; cursor:pointer;
+}
+a:hover,button:hover{border-color:var(--accent); color:var(--accent)}
+.stage{
+  border:1px solid var(--border); border-radius:16px; overflow:hidden; background:var(--surface);
+  box-shadow:0 20px 50px rgba(0,0,0,.2);
+}
+canvas{display:block; width:100%; height:min(72vh,760px); background:#090d15}
+.controls{
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:12px;
+}
+.controls .card{
+  border:1px solid var(--border); border-radius:12px; padding:10px; background:var(--surface);
+}
+label{font-size:12px; color:var(--muted); display:block; margin-bottom:8px}
+input[type="range"]{width:100%}
+@media (max-width:900px){ .controls{grid-template-columns:1fr} .title{font-size:24px;} }
+body.background-mode .wrap{max-width:none;padding:0}
+body.background-mode header,
+body.background-mode .controls{display:none}
+body.background-mode .stage{border:0;border-radius:0;box-shadow:none}
+body.background-mode canvas{height:100vh}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="meta">Study 009 / Built with GPT-6.2 Sol</div>
+      <h1 class="title">Cathedral of Transit</h1>
+      <p class="subtitle">Cinematic NYC blue hour with elevated rails, rain reflections, and station-light pulse.</p>
+    </div>
+    <div class="row">
+      <a href="artificial-gallery.html?scoutTheme=dark">Back to gallery</a>
+      <button id="theme" type="button">Light / dark</button>
+      <button id="save" type="button">Save PNG</button>
+    </div>
+  </header>
+  <div class="stage"><canvas id="c"></canvas></div>
+  <section class="controls">
+    <div class="card">
+      <label for="density">Rain density</label>
+      <input id="density" type="range" min="10" max="150" value="76">
+    </div>
+    <div class="card">
+      <label for="glow">Station glow</label>
+      <input id="glow" type="range" min="20" max="160" value="90">
+    </div>
+    <div class="card">
+      <label for="drift">Camera drift</label>
+      <input id="drift" type="range" min="0" max="100" value="46">
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const qTheme = params.get("scoutTheme");
+  const isBackground = params.get("background") === "1";
+  const artworkFile = location.pathname.split("/").pop() || "cathedral-of-transit-gpt62.html";
+  const root = document.documentElement;
+  root.dataset.theme = qTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  if (isBackground) document.body.classList.add("background-mode");
+  document.getElementById("theme").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  });
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const density = document.getElementById("density");
+  const glow = document.getElementById("glow");
+  const drift = document.getElementById("drift");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let hostPaused = false;
+  let hostHidden = false;
+  let signaledReady = false;
+
+  function postToParent(type, extra) {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type, artwork: artworkFile, ...(extra || {}) }, location.origin);
+  }
+
+  function syncMotionPreference() {
+    postToParent("artwork-motion-preference");
+  }
+  reducedMotion.addEventListener("change", syncMotionPreference);
+  syncMotionPreference();
+
+  addEventListener("message", (event) => {
+    if (event.origin !== location.origin || !event.data || event.data.type !== "artwork-settings") return;
+    if (event.data.theme) root.dataset.theme = event.data.theme;
+    hostPaused = event.data.paused === true;
+    hostHidden = event.data.hidden === true;
+  });
+
+  const DPR = () => Math.min(2, window.devicePixelRatio || 1);
+  function fit() {
+    const rect = canvas.getBoundingClientRect();
+    const d = DPR();
+    canvas.width = Math.max(1, Math.floor(rect.width * d));
+    canvas.height = Math.max(1, Math.floor(rect.height * d));
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  addEventListener("resize", fit);
+  fit();
+
+  const raindrops = [];
+  function seedRain() {
+    raindrops.length = 0;
+    const count = Number(density.value);
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    for (let i = 0; i < count; i++) {
+      raindrops.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        z: 0.2 + Math.random() * 1.2,
+        len: 12 + Math.random() * 20
+      });
+    }
+  }
+  density.addEventListener("input", seedRain);
+  seedRain();
+
+  function drawSky(w, h, t, cam) {
+    const g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, "#0d1a31");
+    g.addColorStop(.45, "#1a2b47");
+    g.addColorStop(1, "#191212");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    for (let i = 0; i < 24; i++) {
+      const y = h * (.12 + i * .02);
+      const pulse = 12 + Math.sin(t * .2 + i * .55) * 5;
+      ctx.fillStyle = "rgba(255,170,120," + (0.015 + (pulse / 900)) + ")";
+      ctx.fillRect(0, y + cam * .2, w, 2);
+    }
+  }
+
+  function drawSkyline(w, h, cam) {
+    const base = h * .56;
+    const bands = [
+      { color: "#15263f", scale: .14, shift: .23 },
+      { color: "#1b3150", scale: .2, shift: .15 },
+      { color: "#243f63", scale: .26, shift: .07 }
+    ];
+    bands.forEach((b, bi) => {
+      let x = -50;
+      ctx.fillStyle = b.color;
+      while (x < w + 60) {
+        const bw = 24 + Math.random() * 38;
+        const bh = h * (b.scale + Math.random() * .2);
+        ctx.fillRect(x + cam * b.shift, base - bh - bi * 14, bw, bh + bi * 12);
+        x += bw + 4;
+      }
+    });
+
+    ctx.fillStyle = "rgba(255,230,180,0.7)";
+    for (let i = 0; i < 260; i++) {
+      const wx = (i * 37) % w;
+      const wy = base - 10 - (i % 19) * 8;
+      const ww = 1 + (i % 3);
+      const wh = 1 + ((i + 1) % 2);
+      ctx.fillRect(wx + cam * .08, wy, ww, wh);
+    }
+  }
+
+  function drawTransit(w, h, t, cam) {
+    const y0 = h * .68;
+    ctx.lineCap = "round";
+
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      ctx.strokeStyle = "rgba(24,33,49," + (0.65 - i * 0.08) + ")";
+      ctx.lineWidth = 14 - i * 2;
+      for (let x = -20; x <= w + 20; x += 12) {
+        const bend = Math.sin((x * .007) + t * .25) * (38 + i * 8);
+        const y = y0 + bend + Math.sin((x * .004) + i) * 15;
+        if (x === -20) ctx.moveTo(x + cam * .6, y);
+        else ctx.lineTo(x + cam * .6, y);
+      }
+      ctx.stroke();
+    }
+
+    const trainX = (t * 130) % (w + 240) - 120;
+    const trainY = y0 + Math.sin(trainX * .007 + t * .25) * 36;
+    ctx.fillStyle = "#d9dde3";
+    ctx.fillRect(trainX + cam * .45, trainY - 18, 128, 20);
+    ctx.fillStyle = "#f7c285";
+    for (let i = 0; i < 8; i++) {
+      ctx.fillRect(trainX + 10 + i * 14 + cam * .45, trainY - 14, 8, 6);
+    }
+    const halo = Number(glow.value) / 100;
+    ctx.fillStyle = "rgba(255,190,120," + (0.25 * halo) + ")";
+    ctx.beginPath();
+    ctx.arc(trainX + 126 + cam * .45, trainY - 9, 28 + halo * 16, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  function drawStreet(w, h, t, cam) {
+    const y = h * .73;
+    const g = ctx.createLinearGradient(0, y, 0, h);
+    g.addColorStop(0, "#1f2632");
+    g.addColorStop(1, "#090a0f");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, y, w, h - y);
+
+    for (let i = 0; i < 26; i++) {
+      const x = i * (w / 25);
+      const pulse = (Math.sin(t * 1.8 + i) + 1) * .5;
+      ctx.strokeStyle = "rgba(253,142,161," + (0.04 + pulse * .09) + ")";
+      ctx.beginPath();
+      ctx.moveTo(x + cam * .12, y + 4);
+      ctx.lineTo(x + cam * .32, h);
+      ctx.stroke();
+    }
+  }
+
+  function drawRain(w, h, t, cam) {
+    ctx.strokeStyle = "rgba(200,220,255,.36)";
+    ctx.lineWidth = 1;
+    raindrops.forEach((d, i) => {
+      d.y += 2 + d.z * 3;
+      d.x += .2 + d.z * .6;
+      if (d.y > h + 20) { d.y = -20; d.x = Math.random() * w; }
+      if (d.x > w + 20) d.x = -20;
+      const skew = 12 + Math.sin(t + i) * 4;
+      ctx.beginPath();
+      ctx.moveTo(d.x + cam * .2, d.y);
+      ctx.lineTo(d.x + skew + cam * .2, d.y + d.len);
+      ctx.stroke();
+    });
+  }
+
+  function frame(ts) {
+    if (isBackground && (hostPaused || hostHidden || reducedMotion.matches)) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    const t = ts * 0.001;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const cam = (Number(drift.value) / 100) * Math.sin(t * 0.28) * 40;
+    drawSky(w, h, t, cam);
+    drawSkyline(w, h, cam);
+    drawTransit(w, h, t, cam);
+    drawStreet(w, h, t, cam);
+    drawRain(w, h, t, cam);
+    if (!signaledReady) {
+      signaledReady = true;
+      postToParent("artwork-ready");
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  document.getElementById("save").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "cathedral-of-transit-gpt62.png";
+    a.click();
+  });
+})();
+</script>
+</body>
+</html>

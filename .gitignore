@@ -35,3 +35,5 @@ __pycache__/
 _logs/
 *.bak
 
+# Local automation dependencies
+/automation/node_modules/

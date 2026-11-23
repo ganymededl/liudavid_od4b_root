@@ -1,0 +1,118 @@
+{
+  "source": "Curated transcript pull-lines from favorite AI episodes",
+  "generatedAt": "2026-11-23T06:20:00Z",
+  "quotes": [
+    {
+      "quote": "The problem is when you speed up the AI race, you're speeding it up for everyone involved.",
+      "speaker": "Decoder with Nilay Patel"
+    },
+    {
+      "quote": "It also has to continuously grow the amount of money it makes so it can keep paying its ever-increasing compute bills.",
+      "speaker": "Hayden Field"
+    },
+    {
+      "quote": "The thing with AI that we keep hearing out of China is this idea of diffusion.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "They're not just developing their own models — they're also developing components for those components.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "We're filling up a context window before the agent has even done anything useful.",
+      "speaker": "Agent tooling episode"
+    },
+    {
+      "quote": "That's a couple thousand tokens of tool definitions loaded into context just so the agent could use two of them.",
+      "speaker": "Agent tooling episode"
+    },
+    {
+      "quote": "If I have it and you don't, I'm tempted to use it.",
+      "speaker": "AI race and safety episode"
+    },
+    {
+      "quote": "Anthropic is planning to buy all the flavors on the entire hardware ice cream truck with their IPO money.",
+      "speaker": "Mixture of Experts panel"
+    },
+    {
+      "quote": "There is not catching up to the frontier and then keeping pace — the frontier itself is accelerating.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "The price wars are here — or the agent wars are here.",
+      "speaker": "Agent commerce episode"
+    },
+    {
+      "quote": "In fact, you won't be able to get tickets unless you have an agent for it.",
+      "speaker": "Mixture of Experts panel"
+    },
+    {
+      "quote": "I can't stop thinking about Anthropic in terms of just dumb business fundamentals now that it's a public company.",
+      "speaker": "Decoder with Nilay Patel"
+    },
+    {
+      "quote": "People are really concerned about where all of these frontier models are going with regards to alignment and guardrails.",
+      "speaker": "Mixture of Experts panel"
+    },
+    {
+      "quote": "At the same time, this compute issue is going to continue to be something we all have to think about.",
+      "speaker": "Mixture of Experts panel"
+    },
+    {
+      "quote": "Different technologies like EVs, batteries, robotics, smartphones, consumer electronics, and AI feed each other.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "By supply side, I mean the resources, the supply chains, and the talent that let you jump into adjacent sectors.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "You have smartphone companies making their own chips and foundation models as well.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "Both CLI and MCP are ways for AI agents to interact with the outside world.",
+      "speaker": "Agent tooling episode"
+    },
+    {
+      "quote": "When agents act on behalf of different employees, we might need per-user access control.",
+      "speaker": "Agent tooling episode"
+    },
+    {
+      "quote": "How do I know that the agent is actually finding me the best bargain?",
+      "speaker": "Agent commerce episode"
+    },
+    {
+      "quote": "OpenAI can kind of ride on its coattails and say, yeah, us too.",
+      "speaker": "Decoder with Nilay Patel"
+    },
+    {
+      "quote": "Anthropic, the AI lab behind Claude, went public on the Nasdaq last Thursday.",
+      "speaker": "Hayden Field"
+    },
+    {
+      "quote": "Anthropic has become one of the most valuable companies on the planet.",
+      "speaker": "Hayden Field"
+    },
+    {
+      "quote": "This is peak AI hype right here.",
+      "speaker": "Decoder with Nilay Patel"
+    },
+    {
+      "quote": "It's very hard to actually use it all, but that's the sort of thing AI is very good at optimizing.",
+      "speaker": "Mixture of Experts panel"
+    },
+    {
+      "quote": "For now, Huawei chips were good enough for inference.",
+      "speaker": "Odd Lots panel"
+    },
+    {
+      "quote": "Guardrails are also known as the alignment problem.",
+      "speaker": "AI race and safety episode"
+    },
+    {
+      "quote": "It's a new race that could occur as a result of this technology.",
+      "speaker": "AI race and safety episode"
+    }
+  ]
+}
