@@ -2157,7 +2157,10 @@ const podEl = document.getElementById("podcasts");
 const quoteDriftEl = document.getElementById("quoteDrift");
 const quoteSourceQuotes = [];
 let quoteRenderScheduled = false;
+let quoteRotationTimer = null;
+let previousQuoteKeys = new Set();
 const podcastCards = [];
+const QUOTE_ROTATION_MS = 90000;
 
 function normalizeQuote(value) {
   if (typeof value !== "string") return "";
@@ -2187,28 +2190,80 @@ function addQuoteSourceQuotes(quotes) {
     requestAnimationFrame(() => {
       quoteRenderScheduled = false;
       renderQuoteDrift();
+      startQuoteRotation();
     });
   }
 }
 
+function shuffleQuotes(list) {
+  const copy = list.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function quoteKey(item) {
+  return `${item.quote}||${item.speaker || ""}`.toLowerCase();
+}
+
+function pickQuoteBatch(count) {
+  const source = quoteSourceQuotes.slice();
+  if (!source.length) return [];
+  if (source.length <= count) return shuffleQuotes(source);
+
+  const freshPool = source.filter(item => !previousQuoteKeys.has(quoteKey(item)));
+  const shuffledFresh = shuffleQuotes(freshPool);
+  const shuffledAll = shuffleQuotes(source);
+  const selected = [];
+  const selectedKeys = new Set();
+
+  for (const item of shuffledFresh) {
+    const key = quoteKey(item);
+    if (selectedKeys.has(key)) continue;
+    selected.push(item);
+    selectedKeys.add(key);
+    if (selected.length >= count) break;
+  }
+  if (selected.length < count) {
+    for (const item of shuffledAll) {
+      const key = quoteKey(item);
+      if (selectedKeys.has(key)) continue;
+      selected.push(item);
+      selectedKeys.add(key);
+      if (selected.length >= count) break;
+    }
+  }
+  previousQuoteKeys = selectedKeys;
+  return selected;
+}
+
 function renderQuoteDrift() {
   if (!quoteDriftEl) return;
-  const baseLines = quoteSourceQuotes
-    .slice(0, 18);
+  const rowCount = Math.min(10, Math.max(6, quoteSourceQuotes.length));
+  const baseLines = pickQuoteBatch(rowCount);
   quoteDriftEl.innerHTML = "";
   if (!baseLines.length) return;
-  const rowCount = Math.min(10, Math.max(6, baseLines.length));
   for (let i = 0; i < rowCount; i++) {
     const line = document.createElement("div");
     line.className = "quote-line";
     const item = baseLines[i % baseLines.length];
     const text = `“${item.quote}”${item.speaker ? ` — ${item.speaker}` : ""}`;
     line.textContent = text;
-    line.style.top = (8 + (i * (82 / Math.max(1, rowCount - 1)))) + "%";
-    line.style.animationDuration = (68 + (i * 7)) + "s";
-    line.style.animationDelay = "-" + ((i * 9) % 40) + "s";
+    line.style.top = (8 + (i * (82 / Math.max(1, rowCount - 1))) + (Math.random() * 2 - 1)) + "%";
+    line.style.animationDuration = (70 + (i * 6) + Math.floor(Math.random() * 8)) + "s";
+    line.style.animationDelay = "-" + ((i * 11 + Math.floor(Math.random() * 10)) % 50) + "s";
     quoteDriftEl.appendChild(line);
   }
+}
+
+function startQuoteRotation() {
+  if (quoteRotationTimer) clearInterval(quoteRotationTimer);
+  if (!quoteSourceQuotes.length) return;
+  quoteRotationTimer = setInterval(() => {
+    if (!document.hidden) renderQuoteDrift();
+  }, QUOTE_ROTATION_MS);
 }
 
 (CONFIG.podcasts || []).forEach(p => {
@@ -2285,6 +2340,7 @@ async function hydrateQuoteDrift() {
 }
 hydrateQuoteDrift();
 renderQuoteDrift();
+startQuoteRotation();
 
 // ── SLIDES ──────────────────────────────────────────────────
 const slidesEl = document.getElementById("slides");
