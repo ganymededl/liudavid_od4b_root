@@ -6,7 +6,7 @@
     as UTF-8 WITHOUT BOM on both PowerShell 5.1 and 7 (web-safe, no mojibake).
 
     PARAMETERS
-      -Root <path>          PH card folder. Default: private OneDrive Hub\Private folder (outside public GitHub Pages)
+      -Root <path>          PH card folder. Default: private OneDrive PHPrivate folder (outside public GitHub Pages)
       -StaleAfterDays <int> Age (days) before a marker is "stale". Default 10.
       -LogFolder <path>     Run-log output folder. Default: <Root>\_logs (outside public GitHub Pages)
       -Backup               Write <card>.<stamp>.bak before overwriting.
@@ -17,9 +17,9 @@
 #>
 [CmdletBinding(SupportsShouldProcess = $true, ConfirmImpact = 'Medium')]
 param(
-    [string]$Root = "C:\Users\liudavid\OneDrive - Microsoft\Hub\Private",
+    [string]$Root = "C:\Users\liudavid\OneDrive - Microsoft\PHPrivate",
     [ValidateRange(1, 3650)][int]$StaleAfterDays = 10,
-    [string]$LogFolder = "C:\Users\liudavid\OneDrive - Microsoft\Hub\Private\_logs",
+    [string]$LogFolder = "C:\Users\liudavid\OneDrive - Microsoft\PHPrivate\_logs",
     [switch]$Backup,
     [switch]$Rollback,
     [switch]$Force,
@@ -32,7 +32,7 @@ $ErrorActionPreference = 'Stop'
 if ($Help) {
 @"
 Ensure-PhCatalogReadTimestamp.ps1  (PH Weekly Card Timestamp Guard)
-  -Root <path>          PH card folder (default: C:\Users\liudavid\OneDrive - Microsoft\Hub\Private)
+  -Root <path>          PH card folder (default: C:\Users\liudavid\OneDrive - Microsoft\PHPrivate)
   -StaleAfterDays <int> Staleness threshold in days (default: 10)
   -LogFolder <path>     Run-log folder (default: <Root>\_logs)
   -Backup               Write <card>.<stamp>.bak before overwrite

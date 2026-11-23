@@ -96,7 +96,7 @@ the schedule.
 ## Operations, Security Boundary & Rollback Runbook
 
 - **Owner & Escalation:** David Shih Chun Liu (`liudavid@microsoft.com`). Automated monitoring is enforced daily by **Hub Publish Watchdog** (`a48hksgjms0tehg2`) and weekly by **PH Weekly Card Timestamp Guard** (`t5nb6ldcmvsx9sso`), with red Teams self-chat (`48:notes`) and SMS failure escalation.
-- **Public vs. Private Boundary:** Public GitHub Pages (`ganymededl.github.io/liudavid_od4b_root`) serves only public portfolio assets. All owner-only/internal Personal Hub cards live exclusively in `OneDrive - Microsoft\Hub\Private` (outside this repository), and `/ph-private-cards/`, `_logs/`, and `*.bak` are gitignored.
+- **Public vs. Private Boundary:** Public GitHub Pages (`ganymededl.github.io/liudavid_od4b_root`) serves only public portfolio assets. All owner-only/internal Personal Hub cards live exclusively in `OneDrive - Microsoft\PHPrivate` (outside this repository), FTE-shared cards live in `OneDrive - Microsoft\PHMSFTAccess`, and `/ph-private-cards/`, `_logs/`, and `*.bak` are gitignored.
 - **Analytics & Privacy:** Microsoft Clarity is **default-denied** (`liudavid-clarity-consent-v1 = denied`) and only loads after explicit opt-in. Opting out via **Privacy and analytics settings** calls `unloadClarity()`, removes Clarity scripts/globals, and reloads into a clean zero-Clarity session.
 - **Card Timestamp Guard & Rollback:**
   - Preview: `powershell.exe -NoProfile -NonInteractive -File .\scripts\Ensure-PhCatalogReadTimestamp.ps1 -WhatIf -Force`

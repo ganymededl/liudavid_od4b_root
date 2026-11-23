@@ -7,14 +7,14 @@
       - Direct outside-in HTTP negative checks on all 8 ph-private-cards URLs (must be 404)
       - Live HTTP 200 checks on index.html and all 10 public library destinations
       - Unauthenticated HTTP 401 gate check on the SharePoint Personal Vault URL
-      - Writes immutable JSON evidence to C:\Users\liudavid\OneDrive - Microsoft\Hub\Private\_logs
+      - Writes immutable JSON evidence to C:\Users\liudavid\OneDrive - Microsoft\PHPrivate\_logs
 #>
 [CmdletBinding()]
 param(
     [string]$RepoRoot = "C:\Users\liudavid\OneDrive - Microsoft\Documents\Microsoft Scout\liudavid_od4b_root",
-    [string]$PrivateRoot = "C:\Users\liudavid\OneDrive - Microsoft\Hub\Private",
+    [string]$PrivateRoot = "C:\Users\liudavid\OneDrive - Microsoft\PHPrivate",
     [string]$BaseUrl = "https://ganymededl.github.io/liudavid_od4b_root",
-    [string]$LogFolder = "C:\Users\liudavid\OneDrive - Microsoft\Hub\Private\_logs"
+    [string]$LogFolder = "C:\Users\liudavid\OneDrive - Microsoft\PHPrivate\_logs"
 )
 
 Set-StrictMode -Version 2.0
@@ -107,7 +107,7 @@ $publicUrlChecks = foreach ($rel in $publicPaths) {
 }
 
 # 4. Unauthenticated SharePoint toolkit gate check (expect 401/403/302 sign-in wall)
-$vaultUrl = "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/Hub/Private/personal-vault.html"
+$vaultUrl = "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHPrivate/personal-vault.html"
 $vaultStatus = [int](& curl.exe -sS -L -o NUL -w "%{http_code}" $vaultUrl)
 
 # 5. Live homepage & Copilot CoE v3.8.22 parity/body contract check
@@ -117,7 +117,7 @@ $coeFaqHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/adm
 $coeGovHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/government-install.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
 
 $stageFaq = "C:\Scout_Output\Hub-Guide-Parity-Stage\copilot-center-of-excellence\admin-faq.html"
-$cpFaq = "C:\Users\liudavid\OneDrive - Microsoft\CoworkPublic\DemosPublic\Personal Hub Page\liudavid_od4b_root\copilot-center-of-excellence\admin-faq.html"
+$cpFaq = "C:\Users\liudavid\OneDrive - Microsoft\PHPublic\DemosPublic\Personal Hub Page\liudavid_od4b_root\copilot-center-of-excellence\admin-faq.html"
 $ghFaq = Join-Path $RepoRoot "copilot-center-of-excellence\admin-faq.html"
 $coeParityMatch = ((Get-FileHash -LiteralPath $ghFaq).Hash -eq (Get-FileHash -LiteralPath $stageFaq).Hash) -and
                   ((Get-FileHash -LiteralPath $ghFaq).Hash -eq (Get-FileHash -LiteralPath $cpFaq).Hash)
