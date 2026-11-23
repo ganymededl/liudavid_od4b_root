@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import readline from "node:readline/promises";
 import { chromium } from "playwright";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -107,6 +108,24 @@ async function waitForManualLoginIfNeeded(page, options) {
   throw new Error("Timed out waiting for Pocket Casts sign-in in headed mode.");
 }
 
+async function waitForManualReadyConfirmation(page, options) {
+  if (options.headless) return;
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  try {
+    process.stdout.write(
+      "When you can see your Pocket Casts Starred list in the opened browser, press Enter here to continue extraction...\n"
+    );
+    await rl.question("");
+    await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+    await page.waitForTimeout(1500);
+  } finally {
+    rl.close();
+  }
+}
+
 async function waitForStarredReady(page, options) {
   const getState = () => {
     const bodyText = (document.body?.innerText || "").toLowerCase();
@@ -158,6 +177,7 @@ async function scrapeStarred(options) {
   await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await page.waitForTimeout(1500);
   await waitForManualLoginIfNeeded(page, options);
+  await waitForManualReadyConfirmation(page, options);
   await waitForStarredReady(page, options);
 
   const countVisibleItems = () => {
