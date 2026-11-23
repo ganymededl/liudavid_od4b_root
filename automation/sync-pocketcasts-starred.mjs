@@ -108,6 +108,19 @@ async function waitForManualLoginIfNeeded(page, options) {
   throw new Error("Timed out waiting for Pocket Casts sign-in in headed mode.");
 }
 
+async function isGoogleOAuthBlocked(page) {
+  return page.evaluate(() => {
+    const bodyText = (document.body?.innerText || "").toLowerCase();
+    const url = window.location.href.toLowerCase();
+    return (
+      url.includes("accounts.google.com") &&
+      (bodyText.includes("couldn’t sign you in") ||
+        bodyText.includes("couldn't sign you in")) &&
+      bodyText.includes("this browser or app may not be secure")
+    );
+  });
+}
+
 async function waitForManualReadyConfirmation(page, options) {
   if (options.headless) return;
   const rl = readline.createInterface({
@@ -127,6 +140,12 @@ async function waitForManualReadyConfirmation(page, options) {
 }
 
 async function waitForStarredReady(page, options) {
+  if (await isGoogleOAuthBlocked(page)) {
+    throw new Error(
+      "Google OAuth blocked this automated browser ('This browser or app may not be secure'). " +
+      "Use Pocket Casts email/password login in this profile (not Google SSO), or pre-seed this profile with an already authenticated Pocket Casts session."
+    );
+  }
   const getState = () => {
     const bodyText = (document.body?.innerText || "").toLowerCase();
     const main = document.querySelector("main") || document.body;
@@ -165,6 +184,12 @@ async function waitForStarredReady(page, options) {
   const timeoutMs = 12 * 60 * 1000;
   while (Date.now() - start < timeoutMs) {
     await page.waitForTimeout(2000);
+    if (await isGoogleOAuthBlocked(page)) {
+      throw new Error(
+        "Google OAuth blocked this automated browser ('This browser or app may not be secure'). " +
+        "Use Pocket Casts email/password login in this profile (not Google SSO), or pre-seed this profile with an already authenticated Pocket Casts session."
+      );
+    }
     state = await page.evaluate(getState);
     if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
   }
