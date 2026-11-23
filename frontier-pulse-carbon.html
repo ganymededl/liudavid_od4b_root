@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Frontier Pulse - Gemini 4 Carbon</title>
+<style>
+:root{
+  --bg:#f5f1ea; --surface:#ffffff; --ink:#262626; --muted:#666; --accent:#0b88b6; --border:#d9d9d9;
+}
+html[data-theme="dark"]{
+  --bg:#11151b; --surface:#1f2732; --ink:#e8eef6; --muted:#9bb0c6; --accent:#4fd3ff; --border:#39485a;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",Aptos,Calibri,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:20px}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.meta{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.title{font-size:30px;margin:8px 0 2px;letter-spacing:-.03em}
+.subtitle{margin:0;color:var(--muted);font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+a,button{
+  border:1px solid var(--border);border-radius:999px;background:transparent;color:var(--ink);
+  text-decoration:none;padding:8px 12px;font:600 12px/1 "Segoe UI",sans-serif;cursor:pointer;
+}
+a:hover,button:hover{border-color:var(--accent);color:var(--accent)}
+.stage{border:1px solid var(--border);border-radius:16px;overflow:hidden;background:var(--surface);box-shadow:0 20px 50px rgba(0,0,0,.2)}
+canvas{display:block;width:100%;height:min(72vh,760px);background:#0b1118}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:12px}
+.controls .card{border:1px solid var(--border);border-radius:12px;padding:10px;background:var(--surface)}
+label{font-size:12px;color:var(--muted);display:block;margin-bottom:8px}
+input[type="range"]{width:100%}
+@media (max-width:900px){.controls{grid-template-columns:1fr}.title{font-size:24px}}
+body.background-mode .wrap{max-width:none;padding:0}
+body.background-mode header,
+body.background-mode .controls{display:none}
+body.background-mode .stage{border:0;border-radius:0;box-shadow:none}
+body.background-mode canvas{height:100vh}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="meta">Study 012 / Built with Gemini 4 Carbon</div>
+      <h1 class="title">Frontier Pulse — Humanist Signal Map</h1>
+      <p class="subtitle">Current-event AI word cloud: people, ideas, and pressure points without faces.</p>
+    </div>
+    <div class="row">
+      <a href="artificial-gallery.html?scoutTheme=dark">Back to gallery</a>
+      <button id="theme" type="button">Light / dark</button>
+      <button id="save" type="button">Save PNG</button>
+    </div>
+  </header>
+  <div class="stage"><canvas id="c"></canvas></div>
+  <section class="controls">
+    <div class="card">
+      <label for="density">Word density</label>
+      <input id="density" type="range" min="40" max="180" value="108">
+    </div>
+    <div class="card">
+      <label for="links">Connection intensity</label>
+      <input id="links" type="range" min="10" max="100" value="54">
+    </div>
+    <div class="card">
+      <label for="pulse">News pulse</label>
+      <input id="pulse" type="range" min="10" max="160" value="72">
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const params = new URLSearchParams(location.search);
+  const qTheme = params.get("scoutTheme");
+  const isBackground = params.get("background") === "1";
+  const artworkFile = location.pathname.split("/").pop() || "frontier-pulse-carbon.html";
+  const root = document.documentElement;
+  root.dataset.theme = qTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  if (isBackground) document.body.classList.add("background-mode");
+  document.getElementById("theme").addEventListener("click", () => {
+    root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  });
+
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const density = document.getElementById("density");
+  const links = document.getElementById("links");
+  const pulse = document.getElementById("pulse");
+  const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+  let hostPaused = false;
+  let hostHidden = false;
+  let signaledReady = false;
+
+  function postToParent(type, extra) {
+    if (window.parent === window) return;
+    window.parent.postMessage({ type, artwork: artworkFile, ...(extra || {}) }, location.origin);
+  }
+  function syncMotionPreference() { postToParent("artwork-motion-preference"); }
+  reducedMotion.addEventListener("change", syncMotionPreference);
+  syncMotionPreference();
+
+  addEventListener("message", (event) => {
+    if (event.origin !== location.origin || !event.data || event.data.type !== "artwork-settings") return;
+    if (event.data.theme) root.dataset.theme = event.data.theme;
+    hostPaused = event.data.paused === true;
+    hostHidden = event.data.hidden === true;
+  });
+
+  function fit() {
+    const d = Math.min(2, window.devicePixelRatio || 1);
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.floor(rect.width * d);
+    canvas.height = Math.floor(rect.height * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+  }
+  addEventListener("resize", fit);
+  fit();
+
+  const corePeople = [
+    ["Jensen Huang", 1.0], ["Dario Amodei", 0.95], ["Sam Altman", 1.0], ["Yann LeCun", 0.9],
+    ["Demis Hassabis", 0.9], ["Fei-Fei Li", 0.82], ["Ilya Sutskever", 0.78], ["Mira Murati", 0.75],
+    ["Mustafa Suleyman", 0.8], ["Satya Nadella", 0.86], ["Arthur Mensch", 0.66], ["Aidan Gomez", 0.63],
+    ["Noam Shazeer", 0.68], ["Andrej Karpathy", 0.7], ["Ali Ghodsi", 0.56], ["Aravind Srinivas", 0.58]
+  ];
+  const eventTerms = [
+    ["agentic workflows", 0.95], ["reasoning models", 0.88], ["inference-time scaling", 0.82],
+    ["open-weight release", 0.75], ["frontier safety", 0.86], ["eval benchmarks", 0.8],
+    ["sovereign AI", 0.72], ["compute capacity", 0.84], ["energy for AI", 0.71],
+    ["copyright licensing", 0.68], ["AI policy", 0.78], ["EU AI Act", 0.6],
+    ["developer platforms", 0.7], ["multimodal agents", 0.86], ["model distillation", 0.64],
+    ["long-context memory", 0.74], ["synthetic data", 0.59], ["data centers", 0.62]
+  ];
+  const allTerms = corePeople.concat(eventTerms);
+  const nodes = [];
+
+  function reseed() {
+    nodes.length = 0;
+    const count = Math.max(30, Math.min(allTerms.length, Math.floor(Number(density.value) / 2)));
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    const chosen = allTerms.slice(0, count);
+    chosen.forEach((entry, i) => {
+      const [label, weight] = entry;
+      const band = i < Math.ceil(count * 0.55) ? "people" : "events";
+      nodes.push({
+        label, weight, band,
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25
+      });
+    });
+  }
+  density.addEventListener("input", reseed);
+  reseed();
+
+  function drawBackground(w, h, t) {
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, "#0d1b2c");
+    g.addColorStop(.5, "#12273d");
+    g.addColorStop(1, "#2b1a24");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+    for (let i = 0; i < 16; i++) {
+      const y = h * (i / 15);
+      ctx.fillStyle = "rgba(180,220,255," + (0.01 + Math.sin(t * .2 + i) * 0.004 + 0.012) + ")";
+      ctx.fillRect(0, y, w, 1);
+    }
+  }
+
+  function layout(w, h, t) {
+    const centerX = w * .5, centerY = h * .5;
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      const orbit = (n.band === "people" ? 0.0009 : 0.0006) * Number(pulse.value);
+      n.vx += (centerX - n.x) * orbit * (n.band === "people" ? 1.15 : 0.75);
+      n.vy += (centerY - n.y) * orbit;
+      n.vx += Math.sin(t * 0.35 + i) * 0.004;
+      n.vy += Math.cos(t * 0.28 + i * 0.7) * 0.004;
+      n.vx *= 0.985; n.vy *= 0.985;
+      n.x += n.vx; n.y += n.vy;
+
+      if (n.x < 8 || n.x > w - 8) n.vx *= -1;
+      if (n.y < 8 || n.y > h - 8) n.vy *= -1;
+      n.x = Math.max(8, Math.min(w - 8, n.x));
+      n.y = Math.max(8, Math.min(h - 8, n.y));
+    }
+  }
+
+  function drawLinks() {
+    const strength = Number(links.value) / 100;
+    const maxDist = 120 + strength * 170;
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d = Math.hypot(dx, dy);
+        if (d > maxDist) continue;
+        const alpha = (1 - d / maxDist) * 0.22 * strength;
+        ctx.strokeStyle = a.band === b.band ? "rgba(102,224,255," + alpha + ")" : "rgba(255,166,197," + alpha + ")";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function drawWords(t) {
+    const amp = Number(pulse.value) / 100;
+    nodes.forEach((n, i) => {
+      const size = (n.band === "people" ? 12 : 10) + n.weight * 10;
+      const flicker = 0.75 + (Math.sin(t * 1.7 + i) + 1) * 0.18 * amp;
+      ctx.font = (n.band === "people" ? "700 " : "600 ") + size + "px 'Segoe UI', sans-serif";
+      ctx.fillStyle = n.band === "people"
+        ? "rgba(224,246,255," + flicker + ")"
+        : "rgba(255,202,225," + (flicker * 0.92) + ")";
+      ctx.fillText(n.label, n.x, n.y);
+    });
+  }
+
+  function drawLegend(w, h) {
+    ctx.fillStyle = "rgba(16,24,34,.55)";
+    ctx.fillRect(14, 14, 270, 58);
+    ctx.strokeStyle = "rgba(255,255,255,.25)";
+    ctx.strokeRect(14, 14, 270, 58);
+    ctx.font = "600 12px 'Segoe UI', sans-serif";
+    ctx.fillStyle = "rgba(226,246,255,.95)";
+    ctx.fillText("Frontier Pulse — built with Gemini 4 Carbon", 24, 35);
+    ctx.font = "500 11px 'Segoe UI', sans-serif";
+    ctx.fillStyle = "rgba(255,210,228,.9)";
+    ctx.fillText("People + events as live language topology", 24, 54);
+  }
+
+  function frame(ts) {
+    if (isBackground && (hostPaused || hostHidden || reducedMotion.matches)) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    const t = ts * 0.001;
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+    drawBackground(w, h, t);
+    layout(w, h, t);
+    drawLinks();
+    drawWords(t);
+    drawLegend(w, h);
+    if (!signaledReady) {
+      signaledReady = true;
+      postToParent("artwork-ready");
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  document.getElementById("save").addEventListener("click", () => {
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = "frontier-pulse-carbon.png";
+    a.click();
+  });
+})();
+</script>
+</body>
+</html>
