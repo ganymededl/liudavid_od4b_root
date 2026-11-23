@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pocket Casts Starred · David Liu</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #06080d;
+      --panel: #0b1020;
+      --line: rgba(0, 217, 255, 0.24);
+      --text: #eaf8ff;
+      --muted: #95a8bf;
+      --link: #00d9ff;
+      --accent: #7b61ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font: 14px/1.5 Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(1200px 700px at 20% -10%, rgba(123, 97, 255, 0.18), transparent 65%), var(--bg);
+      color: var(--text);
+    }
+    .wrap {
+      width: min(1100px, 96vw);
+      margin: 28px auto 44px;
+    }
+    .hero {
+      border: 1px solid var(--line);
+      background: linear-gradient(160deg, rgba(123, 97, 255, 0.12), rgba(0, 0, 0, 0.36));
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(20px, 2.2vw, 30px);
+    }
+    .meta {
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+    }
+    .meta a { color: var(--link); }
+    .list {
+      border: 1px solid var(--line);
+      background: color-mix(in oklab, var(--panel) 86%, black);
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: minmax(320px, 1fr) 220px 94px 120px;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      align-items: center;
+    }
+    .row:last-child { border-bottom: 0; }
+    .title {
+      margin: 0;
+      font-weight: 650;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .title:hover { color: var(--link); }
+    .podcast, .date, .duration {
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .empty {
+      padding: 22px 16px;
+      color: var(--muted);
+    }
+    @media (max-width: 900px) {
+      .row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .podcast, .date, .duration { white-space: normal; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>David Liu’s Pocket Casts Starred episodes</h1>
+      <div class="meta" id="meta">Loading…</div>
+    </section>
+    <section class="list" id="list"></section>
+  </main>
+  <script>
+    const meta = document.getElementById("meta");
+    const list = document.getElementById("list");
+
+    function renderItem(item) {
+      const row = document.createElement("article");
+      row.className = "row";
+      const title = document.createElement(item.episodeUrl ? "a" : "p");
+      title.className = "title";
+      title.textContent = item.title || "Untitled";
+      if (item.episodeUrl) {
+        title.href = item.episodeUrl;
+        title.target = "_blank";
+        title.rel = "noopener";
+      } else {
+        title.style.margin = "0";
+      }
+      const podcast = document.createElement("div");
+      podcast.className = "podcast";
+      podcast.textContent = item.podcast || "Unknown show";
+      const date = document.createElement("div");
+      date.className = "date";
+      date.textContent = item.starredDate || item.publishedLabel || "";
+      const duration = document.createElement("div");
+      duration.className = "duration";
+      duration.textContent = item.duration || "";
+      row.appendChild(title);
+      row.appendChild(podcast);
+      row.appendChild(date);
+      row.appendChild(duration);
+      return row;
+    }
+
+    async function init() {
+      try {
+        const response = await fetch("data/pocketcasts-starred.json?ts=" + Date.now(), { cache: "no-store" });
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const payload = await response.json();
+        const count = Number.isFinite(payload.total) ? payload.total : 0;
+        const updated = payload.generatedDisplay || "Unknown";
+        const source = payload.profileUrl || "https://pocketcasts.com/starred";
+        meta.innerHTML = `<span>${count} episodes</span><span>Updated ${updated}</span><a href="${source}" target="_blank" rel="noopener">Open Pocket Casts starred</a>`;
+        if (!Array.isArray(payload.items) || payload.items.length === 0) {
+          list.innerHTML = '<div class="empty">No starred episodes have been published yet. Run the sync automation to populate this page.</div>';
+          return;
+        }
+        payload.items.forEach(item => list.appendChild(renderItem(item)));
+      } catch (error) {
+        meta.textContent = "Could not load Pocket Casts Starred feed.";
+        list.innerHTML = `<div class="empty">Feed load failed: ${error.message}</div>`;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

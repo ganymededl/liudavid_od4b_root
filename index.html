@@ -1797,15 +1797,16 @@ const CONFIG = {
       img: "assets/podcasts/odd-lots.jpg"
     },
     {
-      name:        "David Liu's Favorite AI Podcast episodes",
-      host:        "Curated playlist · David Liu",
+      name:        "David Liu's Pocket Casts Starred episodes",
+      host:        "Pocket Casts · auto-synced",
       accent:      "#7b61ff",
       channelUrl:  "",
       source:      "",
-      latestUrl:   "https://www.youtube.com/playlist?list=PLA7jg78abFvBOQh8K4olRy2MK482N3hVH",
-      latestTitle: "A hand-picked collection of standout AI podcast episodes",
-      latestDate:  "Curated",
-      latestLabel: "Open playlist",
+      latestUrl:   "pocketcasts-starred.html",
+      latestTitle: "A hand-picked collection of starred episodes",
+      latestDate:  "Sync pending",
+      latestLabel: "Open starred list",
+      dynamicSource: "pocketcasts-starred",
       img: "assets/podcasts/david-lius-favorite-ai-podcast-episodes.jpg"
     }
   ],
@@ -2099,6 +2100,7 @@ applyResourceFilters();
 
 // ── RENDER: podcasts ────────────────────────────────────────
 const podEl = document.getElementById("podcasts");
+const podcastCards = [];
 (CONFIG.podcasts || []).forEach(p => {
   const acc = p.accent || "#00d9ff";
   const card = document.createElement("div");
@@ -2132,7 +2134,34 @@ const podEl = document.getElementById("podcasts");
   // as broken, so just omit the date pill in that case (:empty rule hides it).
   card.querySelector(".pod-date").textContent = p.latestDate === "Latest" ? "" : p.latestDate;
   podEl.appendChild(card);
+  podcastCards.push({ p, card });
 });
+
+async function hydratePocketCastsStarredCard() {
+  const match = podcastCards.find(entry => entry.p.dynamicSource === "pocketcasts-starred");
+  if (!match) return;
+  try {
+    const response = await fetch(`data/pocketcasts-starred.json?ts=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const payload = await response.json();
+    if (!payload || !Array.isArray(payload.items)) throw new Error("Invalid Pocket Casts payload");
+    const top = payload.items.find(item => item && item.title) || null;
+    if (!top) return;
+    const latest = match.card.querySelector(".pod-latest");
+    const title = match.card.querySelector(".pod-latest-title");
+    const date = match.card.querySelector(".pod-date");
+    const host = match.card.querySelector(".pod-host");
+    latest.href = payload.publicUrl || "pocketcasts-starred.html";
+    title.textContent = top.title;
+    date.textContent = payload.generatedDisplay || "Updated";
+    if (typeof payload.total === "number" && payload.total > 0) {
+      host.textContent = `${payload.total} starred episodes · Pocket Casts`;
+    }
+  } catch (error) {
+    console.warn("Pocket Casts starred card refresh failed:", error);
+  }
+}
+hydratePocketCastsStarredCard();
 
 // ── SLIDES ──────────────────────────────────────────────────
 const slidesEl = document.getElementById("slides");

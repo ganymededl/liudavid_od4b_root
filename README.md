@@ -93,6 +93,38 @@ separately approved GitHub App with narrowly scoped access/bypass, or a PR-based
 publisher with the necessary checks. Do not grant broad bypass just to retain
 the schedule.
 
+## Pocket Casts Starred sync (local scheduled automation)
+
+This repo now includes a local automation path that reads your Pocket Casts
+`/starred` page and publishes it to:
+
+- `data/pocketcasts-starred.json`
+- `pocketcasts-starred.html`
+- the bottom card in `index.html` ("Pocket Casts Starred episodes")
+
+Setup and first run:
+
+```powershell
+cd automation
+npm install
+npm run sync:pocketcasts -- --headed
+```
+
+On first run, sign in to Pocket Casts in the opened browser profile, then rerun
+without `--headed` (or use the scheduled runner).
+
+Register the daily Windows Task Scheduler job:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\automation\register-pocketcasts-starred-task.ps1 -At "06:30"
+```
+
+Run the full sync + publish pipeline manually:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\automation\run-pocketcasts-starred-sync.ps1
+```
+
 ## Operations, Security Boundary & Rollback Runbook
 
 - **Owner & Escalation:** David Shih Chun Liu (`liudavid@microsoft.com`). Automated monitoring is enforced daily by **Hub Publish Watchdog** (`a48hksgjms0tehg2`) and weekly by **PH Weekly Card Timestamp Guard** (`t5nb6ldcmvsx9sso`), with red Teams self-chat (`48:notes`) and SMS failure escalation.
@@ -108,5 +140,4 @@ the schedule.
 - **Public-Repository Secret Scan Disposition (2026-10-29):**
   - `david-hub-cowork-prompt.md` (Pexels API key): Explicitly accepted design choice per owner disposition (2026-09-08); not used by live `index.html`.
   - `model-mission-control-api/test/foundry.test.js` (`"managed-identity-token"`) & `scripts/tests/test_podcast_artifact.py` (`"test-only-not-a-real-token"`): Synthetic unit-test mock strings, not real credentials.
-
 
