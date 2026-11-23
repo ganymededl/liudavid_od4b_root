@@ -14,7 +14,8 @@ function parseArgs(argv) {
     url: "https://pocketcasts.com/starred",
     limit: 200,
     headless: true,
-    userDataDir: path.join(process.env.LOCALAPPDATA || process.env.TEMP || ".", "PocketCastsSync", "profile")
+    userDataDir: path.join(process.env.LOCALAPPDATA || process.env.TEMP || ".", "PocketCastsSync", "profile"),
+    allowEmpty: false
   };
   for (let i = 2; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -35,6 +36,8 @@ function parseArgs(argv) {
     } else if (arg === "--user-data-dir" && next) {
       parsed.userDataDir = path.resolve(next);
       i += 1;
+    } else if (arg === "--allow-empty") {
+      parsed.allowEmpty = true;
     }
   }
   return parsed;
@@ -76,8 +79,17 @@ async function scrapeStarred(options) {
   const page = context.pages()[0] || await context.newPage();
   await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
   await page.waitForTimeout(1500);
+  const onLoginPage = await page.evaluate(() => {
+    const url = window.location.href;
+    if (url.includes("/user/login")) return true;
+    const passwordField = document.querySelector('input[type="password"]');
+    const submit = Array.from(document.querySelectorAll("button, [role='button']"))
+      .map(el => (el.textContent || "").trim().toLowerCase())
+      .some(text => text === "sign in" || text === "log in" || text === "login");
+    return Boolean(passwordField && submit);
+  });
 
-  if (page.url().includes("/user/login")) {
+  if (onLoginPage) {
     await context.close();
     throw new Error("Pocket Casts login is required. Run once with --headed, sign in, then rerun.");
   }
@@ -226,6 +238,9 @@ async function main() {
   const options = parseArgs(process.argv);
   const now = new Date();
   const items = await scrapeStarred(options);
+  if (!items.length && !options.allowEmpty) {
+    throw new Error("No starred episodes were found. This usually means the session is signed out or selectors changed.");
+  }
 
   const payload = {
     source: "Pocket Casts Starred",
