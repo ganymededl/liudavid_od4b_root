@@ -75,8 +75,32 @@ async function launchContext(userDataDir, headless) {
   }
 }
 
+function isTransientExecutionContextError(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+  return (
+    message.includes("execution context was destroyed") ||
+    message.includes("cannot find context with specified id") ||
+    message.includes("target closed") ||
+    message.includes("most likely because of a navigation")
+  );
+}
+
+async function evaluateWithNavigationRetry(page, fn, options) {
+  const retries = options?.retries ?? 6;
+  const delayMs = options?.delayMs ?? 300;
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    try {
+      return await page.evaluate(fn);
+    } catch (error) {
+      if (!isTransientExecutionContextError(error) || attempt === retries) throw error;
+      await page.waitForTimeout(delayMs);
+    }
+  }
+  throw new Error("Failed to evaluate page state after navigation retries.");
+}
+
 async function isOnLoginPage(page) {
-  return page.evaluate(() => {
+  return evaluateWithNavigationRetry(page, () => {
     const url = window.location.href;
     if (url.includes("/user/login")) return true;
     const passwordField = document.querySelector('input[type="password"]');
@@ -109,7 +133,7 @@ async function waitForManualLoginIfNeeded(page, options) {
 }
 
 async function isGoogleOAuthBlocked(page) {
-  return page.evaluate(() => {
+  return evaluateWithNavigationRetry(page, () => {
     const bodyText = (document.body?.innerText || "").toLowerCase();
     const url = window.location.href.toLowerCase();
     return (
@@ -172,7 +196,7 @@ async function waitForStarredReady(page, options) {
     return { hasChallenge, hasStarredHeading, episodeLikeRows };
   };
 
-  let state = await page.evaluate(getState);
+  let state = await evaluateWithNavigationRetry(page, getState, { retries: 10, delayMs: 400 });
   if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
   if (options.headless && state.hasChallenge) {
     throw new Error("Pocket Casts returned a CAPTCHA/security challenge. Run with --headed and complete it in the browser.");
@@ -190,7 +214,7 @@ async function waitForStarredReady(page, options) {
         "Use Pocket Casts email/password login in this profile (not Google SSO), or pre-seed this profile with an already authenticated Pocket Casts session."
       );
     }
-    state = await page.evaluate(getState);
+    state = await evaluateWithNavigationRetry(page, getState, { retries: 10, delayMs: 400 });
     if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
   }
   throw new Error("Timed out waiting for Pocket Casts Starred list after manual CAPTCHA/sign-in.");
