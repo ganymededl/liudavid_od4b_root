@@ -1,0 +1,185 @@
+WEBVTT
+
+1
+00:00:00.591 --> 00:00:04.458
+Let's walk through card 6 Retention verify the
+
+2
+00:00:04.471 --> 00:00:08.703
+agent's mailbox protection Does finding an agent conversation
+
+3
+00:00:08.716 --> 00:00:11.060
+prove it is protected for a year We'll
+
+4
+00:00:11.073 --> 00:00:14.367
+check permissions follow the click path then see
+
+5
+00:00:14.380 --> 00:00:17.036
+where to look for evidence These screens are
+
+6
+00:00:17.050 --> 00:00:20.799
+public-guidance reconstructions not a live tenant capture
+
+7
+00:00:22.491 --> 00:00:27.752
+Start with permissions Least-privileged policy administration a custom
+
+8
+00:00:27.765 --> 00:00:31.254
+role group with Retention Management for inspection use
+
+9
+00:00:31.267 --> 00:00:35.694
+View-Only Retention Management The broader Compliance Administrator role
+
+10
+00:00:35.707 --> 00:00:38.976
+group also works The card lists broader roles
+
+11
+00:00:38.989 --> 00:00:40.916
+and separate content permissions
+
+12
+00:00:42.624 --> 00:00:45.645
+Now follow the click path Open Purview Data
+
+13
+00:00:45.658 --> 00:00:49.877
+Lifecycle Management Retention policies and inspect the approved
+
+14
+00:00:49.890 --> 00:00:50.554
+policy
+
+15
+00:00:52.224 --> 00:00:55.389
+Next check the scope For new policies check
+
+16
+00:00:55.402 --> 00:01:00.415
+Microsoft Copilot experiences and selected experiences / users
+
+17
+00:01:00.831 --> 00:01:03.396
+Do not assume a Teams chats policy includes
+
+18
+00:01:03.409 --> 00:01:04.711
+these new locations
+
+19
+00:01:06.391 --> 00:01:10.935
+Before continuing verify this boundary Verify the effective
+
+20
+00:01:10.948 --> 00:01:14.855
+retain / delete action duration / start basis
+
+21
+00:01:15.180 --> 00:01:18.435
+policy distribution and intended mailbox inclusion
+
+22
+00:01:20.137 --> 00:01:22.768
+Here is the controlled test step Ask the
+
+23
+00:01:22.781 --> 00:01:26.960
+authorized owners to check overlapping retention litigation /
+
+24
+00:01:27.052 --> 00:01:30.502
+eDiscovery holds and delay holds Do not remove
+
+25
+00:01:30.515 --> 00:01:32.065
+legal holds for a demo
+
+26
+00:01:33.758 --> 00:01:37.195
+Now check the actual result Use eDiscovery to
+
+27
+00:01:37.208 --> 00:01:40.516
+observe the supported synthetic interaction in the intended
+
+28
+00:01:40.529 --> 00:01:41.766
+user's mailbox
+
+29
+00:01:43.458 --> 00:01:47.403
+Finally record the claim carefully If duration /
+
+30
+00:01:47.416 --> 00:01:51.453
+deletion validation is required use an approved disposable
+
+31
+00:01:51.466 --> 00:01:55.815
+lifecycle test and record the actual observations Visible
+
+32
+00:01:55.828 --> 00:01:58.302
+chat history is not the compliance store
+
+33
+00:02:00.037 --> 00:02:03.176
+Here is where to check Effective policy /
+
+34
+00:02:03.189 --> 00:02:07.147
+user / mailbox scope and holds Supported mailbox
+
+35
+00:02:07.160 --> 00:02:11.913
+content and lifecycle observations audit-log retention is separate
+
+36
+00:02:12.342 --> 00:02:17.707
+Exchange processing typically runs within 1–7 days soft-deleted content
+
+37
+00:02:17.720 --> 00:02:20.037
+remains at least one day before a later
+
+38
+00:02:20.051 --> 00:02:24.191
+eligible deletion run Holds can suspend deletion These
+
+39
+00:02:24.204 --> 00:02:27.056
+illustrative screens do not establish a pass
+
+40
+00:02:28.758 --> 00:02:33.081
+Let's recap Inspect effective location and mailbox scope
+
+41
+00:02:33.484 --> 00:02:37.234
+Check duration action and holds Use the compliance
+
+42
+00:02:37.247 --> 00:02:41.466
+store not chat visibility Account for backend processing
+
+43
+00:02:41.883 --> 00:02:45.177
+Discovery alone is not a duration guarantee A
+
+44
+00:02:45.190 --> 00:02:48.432
+one-day delete setting does not imply deletion tomorrow
+
+45
+00:02:48.849 --> 00:02:51.792
+Keep real evidence in the protected Word validation
+
+46
+00:02:51.805 --> 00:02:53.289
+draft linked on the card

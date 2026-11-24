@@ -1,0 +1,177 @@
+WEBVTT
+
+1
+00:00:00.591 --> 00:00:04.380
+Let's walk through card 8 Restricted discovery a
+
+2
+00:00:04.393 --> 00:00:08.417
+site control not universal agent denial Does hiding
+
+3
+00:00:08.430 --> 00:00:10.969
+a SharePoint site mean every agent cannot read
+
+4
+00:00:10.982 --> 00:00:14.341
+it We'll check permissions follow the click path
+
+5
+00:00:14.628 --> 00:00:17.128
+then see where to look for evidence These
+
+6
+00:00:17.141 --> 00:00:20.552
+screens are public-guidance reconstructions not a live tenant
+
+7
+00:00:20.565 --> 00:00:21.203
+capture
+
+8
+00:00:22.891 --> 00:00:28.920
+Start with permissions Least-privileged default administrator SharePoint Administrator
+
+9
+00:00:29.336 --> 00:00:32.032
+A site administrator can manage their own site's
+
+10
+00:00:32.045 --> 00:00:35.014
+setting only when the tenant has explicitly delegated
+
+11
+00:00:35.027 --> 00:00:38.230
+that capability The card lists broader roles and
+
+12
+00:00:38.243 --> 00:00:40.014
+separate content permissions
+
+13
+00:00:41.724 --> 00:00:44.954
+Now follow the click path Open SharePoint admin
+
+14
+00:00:44.967 --> 00:00:47.935
+center Sites Active sites and select the approved
+
+15
+00:00:47.948 --> 00:00:49.290
+synthetic test site
+
+16
+00:00:50.991 --> 00:00:54.663
+Next check the scope Open Settings Restrict content
+
+17
+00:00:54.676 --> 00:00:58.843
+from Microsoft Copilot Inspect the current state change
+
+18
+00:00:58.856 --> 00:01:01.108
+it only under an approved test change
+
+19
+00:01:02.837 --> 00:01:06.835
+Before continuing verify this boundary Save and allow
+
+20
+00:01:06.848 --> 00:01:10.754
+discovery propagation Keep source permissions and the test
+
+21
+00:01:10.767 --> 00:01:12.030
+identity constant
+
+22
+00:01:13.737 --> 00:01:17.566
+Here is the controlled test step Compare organization-wide
+
+23
+00:01:17.579 --> 00:01:21.381
+discovery with permitted direct access and site-context search
+
+24
+00:01:21.915 --> 00:01:23.282
+these are different paths
+
+25
+00:01:24.958 --> 00:01:28.005
+Now check the actual result For each actual
+
+26
+00:01:28.018 --> 00:01:31.611
+agent identify whether its knowledge / tool path
+
+27
+00:01:31.637 --> 00:01:34.789
+uses the governed discovery experience or a separate
+
+28
+00:01:34.802 --> 00:01:36.624
+direct / connector path
+
+29
+00:01:38.324 --> 00:01:42.140
+Finally record the claim carefully Record results as
+
+30
+00:01:42.153 --> 00:01:47.009
+discovery observations not universal access denial Remove the
+
+31
+00:01:47.022 --> 00:01:50.447
+temporary restriction only under the approved change plan
+
+32
+00:01:52.137 --> 00:01:54.833
+Here is where to check Site setting /
+
+33
+00:01:54.846 --> 00:02:00.197
+status and organization-wide discovery Separate direct / site-context
+
+34
+00:02:00.210 --> 00:02:04.221
+/ connector behavior for the actual agent Propagation
+
+35
+00:02:04.234 --> 00:02:07.007
+depends on site size file count and concurrent
+
+36
+00:02:07.020 --> 00:02:11.226
+updates Recheck the actual path no fixed twenty-minute
+
+37
+00:02:11.239 --> 00:02:14.703
+agent result is claimed These illustrative screens do
+
+38
+00:02:14.716 --> 00:02:16.291
+not establish a pass
+
+39
+00:02:18.024 --> 00:02:23.194
+Let's recap Temporary discovery control No permission change
+
+40
+00:02:23.610 --> 00:02:27.699
+SharePoint sites not OneDrive Test discovery and direct
+
+41
+00:02:27.712 --> 00:02:31.215
+access separately Do not substitute a baseline for
+
+42
+00:02:31.228 --> 00:02:35.694
+an agent test Permissions remain unchanged direct access
+
+43
+00:02:35.707 --> 00:02:38.376
+may still work Keep real evidence in the
+
+44
+00:02:38.389 --> 00:02:41.514
+protected Word validation draft linked on the card

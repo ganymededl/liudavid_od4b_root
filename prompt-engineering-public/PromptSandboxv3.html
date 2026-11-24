@@ -422,12 +422,8 @@
 </head>
 <body>
 
-<!-- Layered background: CSS gradient always on; video fades in if bg.mp4 loads -->
 <div class="bg-stack" id="bgStack" aria-hidden="true">
   <div class="bg-css"></div>
-  <video class="bg-video" id="bgVideo" autoplay muted loop playsinline preload="auto">
-    <source src="bg.mp4" type="video/mp4">
-  </video>
   <div class="bg-tint"></div>
 </div>
 
@@ -560,18 +556,10 @@
 
   /* ============================================================
      BACKGROUND LAYER
-     - CSS gradient is always present (true fallback).
-     - Video fades in only if bg.mp4 loads successfully.
      - Toggle hides the whole stack; preference is remembered.
      ============================================================ */
   const bgStack = document.getElementById("bgStack");
-  const bgVideo = document.getElementById("bgVideo");
   const bgToggle = document.getElementById("bgToggle");
-
-  // Fade the video in once it has enough data to actually play.
-  bgVideo.addEventListener("canplay", () => bgVideo.classList.add("ready"));
-  // If bg.mp4 is missing or blocked, just leave the CSS gradient visible.
-  bgVideo.addEventListener("error", () => bgVideo.classList.remove("ready"));
 
   const savedBg = (function () {
     try { return localStorage.getItem("ps-bg"); } catch (e) { return null; }

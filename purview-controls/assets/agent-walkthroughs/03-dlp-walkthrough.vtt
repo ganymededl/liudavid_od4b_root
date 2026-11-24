@@ -1,0 +1,193 @@
+WEBVTT
+
+1
+00:00:00.604 --> 00:00:03.872
+Let's walk through card 3 DLP prove a
+
+2
+00:00:03.872 --> 00:00:08.000
+supported sensitive-content restriction Can a policy stop an
+
+3
+00:00:08.117 --> 00:00:11.490
+agent from processing a labelled knowledge file We'll
+
+4
+00:00:11.490 --> 00:00:14.836
+check permissions follow the click path then see
+
+5
+00:00:14.836 --> 00:00:17.557
+where to look for evidence These screens are
+
+6
+00:00:17.557 --> 00:00:21.424
+public-guidance reconstructions not a live tenant capture
+
+7
+00:00:23.137 --> 00:00:27.135
+Start with permissions Least-privileged administration can use a
+
+8
+00:00:27.148 --> 00:00:31.276
+scoped custom role group containing DLP Compliance Management
+
+9
+00:00:31.679 --> 00:00:36.770
+Information Protection Admin / Information Protection Compliance Administrator
+
+10
+00:00:37.018 --> 00:00:41.627
+Compliance Data Administrator and Security Administrator are documented
+
+11
+00:00:41.640 --> 00:00:45.026
+broader starting points The card lists broader roles
+
+12
+00:00:45.130 --> 00:00:46.914
+and separate content permissions
+
+13
+00:00:48.604 --> 00:00:51.391
+Now follow the click path Open Purview Data
+
+14
+00:00:51.391 --> 00:00:55.076
+Loss Prevention Policies and inspect an approved test
+
+15
+00:00:55.076 --> 00:00:58.031
+policy do not broaden production scope for a
+
+16
+00:00:58.031 --> 00:00:58.786
+demonstration
+
+17
+00:01:00.471 --> 00:01:05.210
+Next check the scope Check the Microsoft 365 Copilot
+
+18
+00:01:05.210 --> 00:01:10.731
+location selected users sensitivity-label condition action and policy
+
+19
+00:01:10.744 --> 00:01:11.122
+mode
+
+20
+00:01:12.838 --> 00:01:17.121
+Before continuing verify this boundary Confirm the agent's
+
+21
+00:01:17.134 --> 00:01:20.559
+published channel and SharePoint knowledge path are supported
+
+22
+00:01:20.989 --> 00:01:23.762
+Do not extend this conclusion to arbitrary tools
+
+23
+00:01:23.957 --> 00:01:25.220
+or uploaded files
+
+24
+00:01:26.917 --> 00:01:30.264
+Here is the controlled test step Use equivalent
+
+25
+00:01:30.264 --> 00:01:34.925
+synthetic allowed and restricted source cases Verify effective
+
+26
+00:01:34.925 --> 00:01:39.808
+permissions encryption rights and retrieval before attributing an
+
+27
+00:01:39.808 --> 00:01:41.774
+answer difference to DLP
+
+28
+00:01:43.471 --> 00:01:46.830
+Now check the actual result After policy distribution
+
+29
+00:01:47.208 --> 00:01:50.880
+run the matched cases and inspect available policy-linked
+
+30
+00:01:50.880 --> 00:01:54.200
+resource / activity evidence for the exact run
+
+31
+00:01:55.969 --> 00:02:00.605
+Finally record the claim carefully Record configured captured
+
+32
+00:02:01.008 --> 00:02:05.448
+enforced or unconfirmed separately Only claim restriction when
+
+33
+00:02:05.448 --> 00:02:08.495
+the evidence ties the outcome to the policy
+
+34
+00:02:08.678 --> 00:02:10.266
+and the allowed control works
+
+35
+00:02:11.997 --> 00:02:14.796
+Here is where to check Policy scope and
+
+36
+00:02:14.809 --> 00:02:20.252
+enforcement mode Available DLP activity / resource policy
+
+37
+00:02:20.265 --> 00:02:24.809
+details plus the actual allowed / restricted outcome
+
+38
+00:02:25.213 --> 00:02:29.432
+Allow policy distribution before testing and activity ingestion
+
+39
+00:02:29.653 --> 00:02:34.119
+before review No tenant-specific propagation or blocking result
+
+40
+00:02:34.367 --> 00:02:38.221
+is asserted These illustrative screens do not establish
+
+41
+00:02:38.221 --> 00:02:38.898
+a pass
+
+42
+00:02:40.591 --> 00:02:44.654
+Let's recap Supported source and channel first Inspect
+
+43
+00:02:44.654 --> 00:02:48.534
+scope action and policy mode Keep rights and
+
+44
+00:02:48.547 --> 00:02:53.742
+retrieval equivalent Seek policy-linked outcome evidence No DLP
+
+45
+00:02:53.742 --> 00:02:58.612
+claim from refusal alone Encryption missing EXTRACT rights
+
+46
+00:02:58.794 --> 00:03:01.841
+authentication and retrieval can all explain a different
+
+47
+00:03:01.841 --> 00:03:05.461
+answer Keep real evidence in the protected Word
+
+48
+00:03:05.461 --> 00:03:07.831
+validation draft linked on the card

@@ -150,7 +150,7 @@ ul.links li { margin: 0 0 8px; }
   body { background: #fff; color: #000; font-size: 11pt; }
   .noprint, header.top .btns, #home, .lb { display: none !important; }
   .detail { display: none !important; }
-  body.print-one .detail.on, body.print-all .detail { display: block !important; }
+  .detail.on, body.print-all .detail { display: block !important; }
   body.print-all .detail { page-break-after: always; }
   .panel, .card { box-shadow: none; }
   figure { page-break-inside: avoid; }
@@ -158,9 +158,8 @@ ul.links li { margin: 0 0 8px; }
   pre.code { white-space: pre-wrap; }
 }
 
-.video-url { display:block; width:100%; max-width:100%; min-height:72px; margin-top:8px; padding:8px; font:12px Consolas,"Courier New",monospace; color:var(--cp-text); background:var(--cp-surface); border:1px solid var(--cp-border); border-radius:0.625rem; resize:vertical; }
-.vid { display:block; }
 </style>
+<script src="print-guide.js" defer></script>
 </head>
 <body>
 <div class="wrap">
@@ -170,7 +169,7 @@ ul.links li { margin: 0 0 8px; }
       <h1>Protect sensitive information when people use Copilot and Cowork</h1>
       <p class="sub">See which Microsoft Purview controls can detect risky prompts, preserve conversations, support investigations, and limit how sensitive content is used. Start with the question you need to answer.</p>
     </div>
-    <div class="btns noprint"><a class="tag" href="index.html#home">Public guide</a> <a class="tag audience" href="#medical-centers">Medical Centers</a> <button class="tag tag-btn" id="openVideoWalkthroughs" type="button">Open video walkthroughs</button> <a class="btn" href="agents.html">Open Agents Governance</a> <a class="btn" id="pdfAll" href="copilot-cowork-purview-quick-guide.pdf">Open PDF</a></div>
+    <div class="btns noprint"><a class="tag" href="index.html#home">Public guide</a> <a class="tag audience" href="#medical-centers">Medical Centers</a> <a class="tag" href="agents.html#audit">Watch the Agents Audit walkthrough</a> <a class="btn" href="agents.html">Open Agents Governance</a> <a class="btn" id="pdfAll" href="copilot-cowork-purview-quick-guide.pdf">Open PDF</a></div>
   </header>
 
 
@@ -206,7 +205,7 @@ ul.links li { margin: 0 0 8px; }
     <p class="note noprint">Open a card for the plain-language outcome. Admin steps, evidence, licensing, and source links stay collapsed until you need them.</p>
   </section>
 
-  <section class="medical-view" id="medical-view">
+  <section class="medical-view" id="medical-centers">
     <div class="dhead">
       <div>
         <span class="tag audience">Medical Centers</span>
@@ -397,17 +396,6 @@ function evidenceChips(c) {
     `<span class="evidence-chip tenant">Validate in your tenant</span>`;
 }
 
-const VIDEO_LINKS = {"ediscovery": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQrxjOaetxWxTLphDaXth58xEgUCYB-DJ8aDDfZUcymhkIq0Iw", "len": "2 min 45 s"}, "audit": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQo_iUmdqUVdRpwBNOlPI5I6EgUCp6UT3xm4gRtaIj4qnzhKUQ", "len": "3 min 3 s"}, "dlp": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQodhZIaIDciSKfQSJmyg2tEEgUChNiq1TiHGTaCHHhdXeqbLg", "len": "2 min 56 s"}, "cc": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQqdrU3kLm3HSa0Yn3Rt4rjrEgUCTuD1g230uB6ssuDSPegI1A", "len": "2 min 51 s"}, "irm": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQr-oJZUA6sqQb0ksb5OfC38EgUCnuY4lXLzWBXlGZbUdOXp4w", "len": "2 min 42 s"}, "retention": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQrdub4xaYZcS6qxCfblBEQ1EgUCaMpkPaoetkbc6zHZn5Uiyw", "len": "3 min 0 s"}, "labels": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQplB0XQwJTpSIriX4xYejXVEgUCjIQRoJoLdyfJNTwB4W2U1g", "len": "2 min 34 s"}, "rcd": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQqDweaX2YwnQZVTcOs-6ch2EgUCBNl6SbPo7umoOow9PxlqyQ", "len": "1 min 53 s"}, "mail": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQr5rCIMFeRgSI4h6Qr6vfH-EgUCZJlqq9y-cPH-m0ChoMUhSQ", "len": "2 min 11 s"}, "graph": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQqMLejVX3XJQZ59cx9gCQx0EgUCNX07n0JuS-D-Qp11haGstQ", "len": "2 min 12 s"}, "gaps": {"url": "https://microsoft-my.sharepoint.com/:v:/p/liudavid/cQowK1EZfGWXTr2q-tgE2Vt9EgUCq5AHS4qjEcxKclK5Ng1inA", "len": "1 min 45 s"}};
-function videoLink(c) {
-  const v = VIDEO_LINKS[c.id];
-  if (!v) return "";
-  return `<div class="panel vid noprint"><h4>Video walkthrough</h4>
-    <a class="video-link" href="${esc(v.url)}" target="_blank" rel="noopener noreferrer">Open video</a>
-    <div class="vcap">${esc(v.len)} · red boxes show where to click · recorded in a Microsoft test tenant</div>
-    <p class="note">Microsoft sign-in required. If opening is blocked, right-click “Open video” and choose “Open link in new tab”, or select the secure URL below and paste it into your browser’s address bar.</p>
-    <textarea class="video-url" readonly rows="3" aria-label="Secure video URL">${esc(v.url)}</textarea></div>`;
-}
-
 const stCls = s => /gap/i.test(s) ? "gap" : /progress|pending/i.test(s) ? "wip" : "ok";
 
 document.getElementById("lic").innerHTML += DATA.lic.map(r => `<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("");
@@ -441,8 +429,6 @@ function list(items, ordered) {
 }
 
 const details = document.getElementById("details");
-const PDF_LINKS = {"cowork-purview-all-cards.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQoTS6OKPmOGSKxRx1zLByvJEgUCLlhEJgBaPpHXQ_mY9FesVw","cowork-purview-card-10-graph.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQpi9putYFBqQpi9vbC04PvtEgUCjr1564WxbfjKi3ZdZgMenA","cowork-purview-card-11-gaps.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQrbBbLsnOLHQIo2pH_YRvkGEgUCryX4woM6Dc7xSdsjC3ZPcQ","cowork-purview-card-1-ediscovery.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQpAMFeSP8WGTpO7OgHdtFUMEgUCzr_B99IXzv4Ipvdm2EXi2Q","cowork-purview-card-2-audit.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQoqgLlmG64DR4l-TmUzheJ8EgUC6yZJUv2wk5iEAOCz_KAfjw","cowork-purview-card-3-dlp.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQoniwyOBX_RQZh9_hoNtzfxEgUC0eVlc2e6tG-qLI6d5mVuwg","cowork-purview-card-4-cc.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQqIeRc5b89tRYiTWiMlwcdwEgUCdLyU7EOW2Yi5vaM6oGHijA","cowork-purview-card-5-irm.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQpWg0wjDpbySpEw4sBK0LX0EgUCKGp3VNZkmaUlmcA8NpifuQ","cowork-purview-card-6-retention.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQpoJbIh4MnkTJdRq-1CF-bsEgUC7hGtu5mvQ2a1JqJXAgxpmA","cowork-purview-card-7-labels.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQqnMxcy2LRzQJ0PlE3F67u1EgUCyMrpXGSQXm_z0wWMDq10_Q","cowork-purview-card-8-rcd.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQrA3hBX_-2MTYPl9tR7Mm-bEgUCe8bnPa-tuOKZs1yARkeCOg","cowork-purview-card-9-mail.pdf":"https://microsoft-my.sharepoint.com/:b:/p/liudavid/cQpu7nqtBTHhSKzs1Q-kBy3NEgUCl4I830OskmIswtDrMYVLyw"};
-function pdfUrl(name) { if (!Object.hasOwn(PDF_LINKS, name)) throw new Error("Unknown guide PDF: " + name); return PDF_LINKS[name]; }
 DATA.cards.forEach(c => {
   const m = guideMeta(c);
   const d = document.createElement("article");
@@ -452,7 +438,7 @@ DATA.cards.forEach(c => {
   d.innerHTML = `
     <div class="dhead">
       <div><span class="tag">Control ${esc(c.num)}</span> <span class="st ${stCls(c.status)}">${esc(c.status)}</span><h2>${esc(m.title)}</h2><p class="eyebrow">${esc(c.title)}</p></div>
-      <div class="noprint"><button class="btn back" type="button">← All cards</button> <a class="btn primary pdf1" href="${pdfUrl("cowork-purview-card-" + c.num + "-" + c.id + ".pdf")}" target="_top" rel="noopener">Export this card to PDF</a></div>
+      <div class="noprint"><button class="btn back" type="button">← All cards</button> <button class="btn primary pdf1" type="button">Print or save this card as PDF</button></div>
     </div>
     <div class="qbox"><b>${esc(m.question)}</b><p>${esc(m.answer)}</p>${m.note ? `<div class="accuracy-note">${esc(m.note)}</div>` : ""}</div>
     <div class="outcome-grid">
@@ -475,7 +461,7 @@ DATA.cards.forEach(c => {
     <details class="disclosure">
       <summary>See test evidence</summary>
       <div class="disclosure-body">
-        ${videoLink(c)}
+        <p class="note noprint">The test-tenant recording is not publicly available. Use the screenshots below (where available) or open <b>Show admin steps</b> for the written walkthrough.</p>
         ${ex ? `<div class="panel sec" style="margin-bottom:14px"><h4>What we tested</h4>${ex}</div>` : ""}
         ${figs}
       </div>
@@ -491,13 +477,14 @@ DATA.cards.forEach(c => {
       </div>
     </details>`;
   d.querySelector(".back").addEventListener("click", home);
+  d.querySelector(".pdf1").addEventListener("click", () => printGuide(d));
   d.querySelectorAll("figure img").forEach(im => im.addEventListener("click", () => zoom(im.src)));
   details.appendChild(d);
 });
 
 function show(id) {
   document.getElementById("home").style.display = "none";
-  document.getElementById("medical-view").classList.remove("on");
+  document.getElementById("medical-centers").classList.remove("on");
   document.querySelectorAll(".detail").forEach(x => x.classList.toggle("on", x.id === "d-" + id));
   try { if (location.hash !== "#" + id) location.hash = id; } catch (e) {}
   window.scrollTo(0, 0);
@@ -505,13 +492,13 @@ function show(id) {
 function showMedical() {
   document.getElementById("home").style.display = "none";
   document.querySelectorAll(".detail").forEach(x => x.classList.remove("on"));
-  document.getElementById("medical-view").classList.add("on");
+  document.getElementById("medical-centers").classList.add("on");
   try { if (location.hash !== "#medical-centers") location.hash = "medical-centers"; } catch (e) {}
   window.scrollTo(0, 0);
 }
 function home() {
   document.querySelectorAll(".detail").forEach(x => x.classList.remove("on"));
-  document.getElementById("medical-view").classList.remove("on");
+  document.getElementById("medical-centers").classList.remove("on");
   document.getElementById("home").style.display = "";
   try { location.hash = ""; } catch (e) {}
 }
@@ -519,23 +506,6 @@ document.getElementById("medical-back").addEventListener("click", home);
 function zoom(src) { const lb = document.getElementById("lb"); lb.querySelector("img").src = src; lb.classList.add("on"); }
 document.getElementById("lb").addEventListener("click", e => e.currentTarget.classList.remove("on"));
 document.addEventListener("keydown", e => { if (e.key === "Escape") { document.getElementById("lb").classList.remove("on"); } });
-
-const openVideoWalkthroughsBtn = document.getElementById("openVideoWalkthroughs");
-if (openVideoWalkthroughsBtn) {
-  openVideoWalkthroughsBtn.addEventListener("click", () => {
-    show("ediscovery");
-    requestAnimationFrame(() => {
-      const evidenceDisclosure = [...document.querySelectorAll("#d-ediscovery details.disclosure")]
-        .find(d => (d.querySelector("summary")?.textContent || "").includes("See test evidence"));
-      if (evidenceDisclosure) evidenceDisclosure.open = true;
-      const videoLink = document.querySelector("#d-ediscovery .video-link");
-      if (videoLink) {
-        videoLink.focus();
-        videoLink.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    });
-  });
-}
 
 const h = (location.hash || "").slice(1);
 if (h === "print-all") { document.body.classList.add("print-all"); document.querySelectorAll("img[loading]").forEach(i => i.removeAttribute("loading")); }

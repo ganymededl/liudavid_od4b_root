@@ -1,0 +1,189 @@
+WEBVTT
+
+1
+00:00:00.604 --> 00:00:04.172
+Let's walk through card 5 Insider Risk distinguish
+
+2
+00:00:04.172 --> 00:00:07.440
+user risk from agent risk Does a configured
+
+3
+00:00:07.453 --> 00:00:10.370
+or scored agent prove all its tools are
+
+4
+00:00:10.383 --> 00:00:14.081
+monitored We'll check permissions follow the click path
+
+5
+00:00:14.510 --> 00:00:16.919
+then see where to look for evidence These
+
+6
+00:00:16.919 --> 00:00:20.630
+screens are public-guidance reconstructions not a live tenant
+
+7
+00:00:20.630 --> 00:00:21.268
+capture
+
+8
+00:00:22.971 --> 00:00:27.684
+Start with permissions Least-privileged policy setup Insider Risk
+
+9
+00:00:27.697 --> 00:00:32.684
+Management Admins Alert / case investigation Insider Risk
+
+10
+00:00:32.684 --> 00:00:36.486
+Management Analysts or Investigators according to the task
+
+11
+00:00:36.916 --> 00:00:39.781
+The card lists broader roles and separate content
+
+12
+00:00:39.794 --> 00:00:40.484
+permissions
+
+13
+00:00:42.171 --> 00:00:45.218
+Now follow the click path Open Purview Insider
+
+14
+00:00:45.218 --> 00:00:48.512
+Risk Management Policies Decide whether the risk object
+
+15
+00:00:48.642 --> 00:00:51.246
+is a user using AI or a supported
+
+16
+00:00:51.246 --> 00:00:51.676
+agent
+
+17
+00:00:53.371 --> 00:00:56.379
+Next check the scope Choose the applicable template
+
+18
+00:00:56.808 --> 00:01:01.001
+and inspect prerequisites Risky Agents guidance lists Copilot
+
+19
+00:01:01.001 --> 00:01:04.881
+Studio and Microsoft Foundry agents do not infer
+
+20
+00:01:04.894 --> 00:01:06.769
+declarative coverage from that list
+
+21
+00:01:08.484 --> 00:01:13.458
+Before continuing verify this boundary Inspect actual scope
+
+22
+00:01:13.861 --> 00:01:18.223
+enabled indicators triggers and thresholds rather than treating
+
+23
+00:01:18.236 --> 00:01:20.450
+template creation as coverage proof
+
+24
+00:01:22.164 --> 00:01:25.562
+Here is the controlled test step Use approved
+
+25
+00:01:25.575 --> 00:01:29.286
+harmless synthetic activity Do not cause real risky
+
+26
+00:01:29.286 --> 00:01:31.864
+behavior simply to produce an alert
+
+27
+00:01:33.571 --> 00:01:36.644
+Now check the actual result As an authorized
+
+28
+00:01:36.657 --> 00:01:41.670
+analyst / investigator inspect correlated activity a score
+
+29
+00:01:41.683 --> 00:01:45.094
+or an alert when present Record exactly which
+
+30
+00:01:45.107 --> 00:01:46.488
+indicator was observed
+
+31
+00:01:48.236 --> 00:01:53.158
+Finally record the claim carefully Document untested channels
+
+32
+00:01:53.366 --> 00:01:58.614
+MCP tools and autonomous paths separately Keep privacy
+
+33
+00:01:58.627 --> 00:02:00.410
+and reviewer controls intact
+
+34
+00:02:02.130 --> 00:02:05.620
+Here is where to check Policy template /
+
+35
+00:02:05.750 --> 00:02:11.492
+prerequisite details Actual correlated indicator / activity /
+
+36
+00:02:11.492 --> 00:02:15.802
+alert not only the agent inventory Signal ingestion
+
+37
+00:02:16.050 --> 00:02:19.552
+scoring and alerts are asynchronous and depend on
+
+38
+00:02:19.565 --> 00:02:23.393
+prerequisites / thresholds Role changes can take up
+
+39
+00:02:23.393 --> 00:02:26.740
+to 30 minutes no guaranteed alert time is
+
+40
+00:02:26.740 --> 00:02:30.424
+claimed These illustrative screens do not establish a
+
+41
+00:02:30.424 --> 00:02:31.063
+pass
+
+42
+00:02:32.771 --> 00:02:36.365
+Let's recap Choose user risk or agent risk
+
+43
+00:02:36.794 --> 00:02:41.169
+Check current supported templates Inspect actual enabled signals
+
+44
+00:02:41.573 --> 00:02:45.987
+Correlate activity before a claim Leave untested MCP
+
+45
+00:02:46.000 --> 00:02:48.773
+paths open A risk score is not a
+
+46
+00:02:48.786 --> 00:02:52.732
+tool-coverage certificate Keep real evidence in the protected
+
+47
+00:02:52.745 --> 00:02:55.284
+Word validation draft linked on the card

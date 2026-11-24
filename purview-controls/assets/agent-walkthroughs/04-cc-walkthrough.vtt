@@ -1,0 +1,177 @@
+WEBVTT
+
+1
+00:00:00.591 --> 00:00:05.031
+Let's walk through card 4 Communication Compliance review
+
+2
+00:00:05.044 --> 00:00:09.029
+risky agent prompts Can a designated reviewer inspect
+
+3
+00:00:09.042 --> 00:00:12.648
+a supported agent policy match We'll check permissions
+
+4
+00:00:12.674 --> 00:00:14.953
+follow the click path then see where to
+
+5
+00:00:14.966 --> 00:00:19.237
+look for evidence These screens are public-guidance reconstructions
+
+6
+00:00:19.550 --> 00:00:21.177
+not a live tenant capture
+
+7
+00:00:22.891 --> 00:00:28.373
+Start with permissions Least-privileged setup group Communication Compliance
+
+8
+00:00:28.386 --> 00:00:33.803
+Admins For alert investigation Communication Compliance Analysts or
+
+9
+00:00:33.816 --> 00:00:36.615
+Investigators plus assignment as a reviewer on the
+
+10
+00:00:36.628 --> 00:00:39.870
+policy The card lists broader roles and separate
+
+11
+00:00:39.883 --> 00:00:41.172
+content permissions
+
+12
+00:00:42.904 --> 00:00:46.420
+Now follow the click path Open Purview Communication
+
+13
+00:00:46.433 --> 00:00:49.662
+Compliance Policies and create or inspect an approved
+
+14
+00:00:49.675 --> 00:00:52.370
+policy for supported AI interactions
+
+15
+00:00:54.058 --> 00:00:57.560
+Next check the scope Select the intended users
+
+16
+00:00:57.573 --> 00:01:01.818
+and Microsoft Copilot experiences source check the exact
+
+17
+00:01:01.831 --> 00:01:04.110
+agent data and billing prerequisites
+
+18
+00:01:05.824 --> 00:01:10.616
+Before continuing verify this boundary Add authorized reviewers
+
+19
+00:01:10.707 --> 00:01:14.496
+and a harmless synthetic keyword / classification condition
+
+20
+00:01:14.913 --> 00:01:17.726
+Reviewers should not be the monitored participants
+
+21
+00:01:19.438 --> 00:01:22.042
+Here is the controlled test step Run the
+
+22
+00:01:22.055 --> 00:01:25.557
+marked synthetic interaction in the intended published channel
+
+23
+00:01:25.870 --> 00:01:27.146
+then allow processing
+
+24
+00:01:28.858 --> 00:01:32.035
+Now check the actual result Open the policy's
+
+25
+00:01:32.048 --> 00:01:34.821
+Pending tab as an assigned reviewer and inspect
+
+26
+00:01:34.834 --> 00:01:37.816
+the actual match and related prompt / response
+
+27
+00:01:37.829 --> 00:01:38.428
+items
+
+28
+00:01:40.124 --> 00:01:44.877
+Finally record the claim carefully Correlate time application
+
+29
+00:01:44.890 --> 00:01:47.559
+/ channel and content to the protected run
+
+30
+00:01:47.572 --> 00:01:50.945
+record Record whether the prompt response or both
+
+31
+00:01:50.958 --> 00:01:51.557
+matched
+
+32
+00:01:53.271 --> 00:01:57.021
+Here is where to check Communication Compliance Policies
+
+33
+00:01:57.034 --> 00:02:01.240
+selected policy Pending Reviewer membership source scope and
+
+34
+00:02:01.253 --> 00:02:05.953
+actual matched content Policy matching is asynchronous Role
+
+35
+00:02:05.966 --> 00:02:08.154
+assignments can take up to 30 minutes to
+
+36
+00:02:08.167 --> 00:02:12.411
+apply record actual processing / recheck times instead
+
+37
+00:02:12.424 --> 00:02:16.279
+of importing CP / CW lab timings These
+
+38
+00:02:16.292 --> 00:02:19.156
+illustrative screens do not establish a pass
+
+39
+00:02:20.858 --> 00:02:25.545
+Let's recap Supported source and users Assign authorized
+
+40
+00:02:25.558 --> 00:02:30.129
+reviewers Use harmless synthetic conditions Read the actual
+
+41
+00:02:30.142 --> 00:02:34.217
+Pending match Detection is not prevention A role
+
+42
+00:02:34.230 --> 00:02:38.110
+without policy reviewer assignment can be insufficient Keep
+
+43
+00:02:38.123 --> 00:02:41.222
+real evidence in the protected Word validation draft
+
+44
+00:02:41.235 --> 00:02:42.238
+linked on the card

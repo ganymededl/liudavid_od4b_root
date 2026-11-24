@@ -1,0 +1,165 @@
+WEBVTT
+
+1
+00:00:00.604 --> 00:00:04.497
+Let's walk through card 10 Agent identity separate
+
+2
+00:00:04.510 --> 00:00:08.143
+Builder Studio and ordinary Copilot What must we
+
+3
+00:00:08.156 --> 00:00:11.919
+record before reusing a governance conclusion We'll check
+
+4
+00:00:11.932 --> 00:00:15.031
+permissions follow the click path then see where
+
+5
+00:00:15.044 --> 00:00:18.417
+to look for evidence These screens are public-guidance
+
+6
+00:00:18.430 --> 00:00:21.320
+reconstructions not a live tenant capture
+
+7
+00:00:23.024 --> 00:00:27.465
+Start with permissions Least privilege the authorized agent
+
+8
+00:00:27.478 --> 00:00:30.199
+owner / maker can inspect their own permitted
+
+9
+00:00:30.212 --> 00:00:34.743
+configuration Audit Reader can inspect supported audit metadata
+
+10
+00:00:35.173 --> 00:00:37.829
+The card lists broader roles and separate content
+
+11
+00:00:37.842 --> 00:00:38.676
+permissions
+
+12
+00:00:40.358 --> 00:00:43.730
+Now follow the click path Identify Agent Builder
+
+13
+00:00:43.743 --> 00:00:49.433
+/ declarative Studio / custom-engine or ordinary Microsoft 365
+
+14
+00:00:49.446 --> 00:00:50.944
+Copilot before the run
+
+15
+00:00:52.637 --> 00:00:55.906
+Next check the scope Inspect the published agent
+
+16
+00:00:55.919 --> 00:00:59.122
+version and channel Do not substitute the maker
+
+17
+00:00:59.135 --> 00:01:01.075
+test pane for the deployed channel
+
+18
+00:01:02.758 --> 00:01:07.641
+Before continuing verify this boundary Record authentication and
+
+19
+00:01:07.654 --> 00:01:10.388
+whether each connection uses the user or maker
+
+20
+00:01:10.401 --> 00:01:11.938
+/ service identity
+
+21
+00:01:13.637 --> 00:01:16.450
+Here is the controlled test step List every
+
+22
+00:01:16.463 --> 00:01:19.705
+knowledge source and action / connector / MCP
+
+23
+00:01:19.718 --> 00:01:23.143
+tool source permissions remain a separate boundary
+
+24
+00:01:24.858 --> 00:01:27.827
+Now check the actual result Run a harmless
+
+25
+00:01:27.840 --> 00:01:31.577
+marked interaction and correlate available agent / host
+
+26
+00:01:31.590 --> 00:01:34.845
+/ version audit metadata to the approved inventory
+
+27
+00:01:36.524 --> 00:01:40.613
+Finally record the claim carefully Keep real identities
+
+28
+00:01:40.873 --> 00:01:44.506
+identifiers and run content only in protected evidence
+
+29
+00:01:44.923 --> 00:01:48.595
+Retest after engine source connection or channel changes
+
+30
+00:01:50.317 --> 00:01:54.067
+Here is where to check Published configuration channel
+
+31
+00:01:54.080 --> 00:01:58.989
+and connection identity Actual available AgentId / AgentName
+
+32
+00:01:59.002 --> 00:02:04.484
+/ AgentVersion / AppHost / AppIdentity metadata Configuration
+
+33
+00:02:04.497 --> 00:02:08.533
+inspection is immediate publication and telemetry can take
+
+34
+00:02:08.546 --> 00:02:12.414
+time No live attribution result is embedded here
+
+35
+00:02:12.843 --> 00:02:15.955
+These illustrative screens do not establish a pass
+
+36
+00:02:17.658 --> 00:02:21.473
+Let's recap Name the agent type first Record
+
+37
+00:02:21.486 --> 00:02:25.653
+version channel and identity Inventory knowledge and tools
+
+38
+00:02:26.069 --> 00:02:30.041
+Correlate actual metadata Retest when the path changes
+
+39
+00:02:30.470 --> 00:02:33.752
+Do not assume Studio environment policies govern every
+
+40
+00:02:33.765 --> 00:02:37.423
+declarative agent Keep real evidence in the protected
+
+41
+00:02:37.436 --> 00:02:39.936
+Word validation draft linked on the card

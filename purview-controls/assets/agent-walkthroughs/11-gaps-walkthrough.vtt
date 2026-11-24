@@ -1,0 +1,181 @@
+WEBVTT
+
+1
+00:00:00.604 --> 00:00:02.687
+Let's walk through card 11 What we have
+
+2
+00:00:02.688 --> 00:00:04.992
+not proven yet What should we not promise
+
+3
+00:00:04.992 --> 00:00:07.922
+from this guide We'll check permissions follow the
+
+4
+00:00:07.935 --> 00:00:10.096
+click path then see where to look for
+
+5
+00:00:10.109 --> 00:00:14.354
+evidence These screens are public-guidance reconstructions not a
+
+6
+00:00:14.354 --> 00:00:15.852
+live tenant capture
+
+7
+00:00:17.571 --> 00:00:21.855
+Start with permissions Least privilege the deployment approver
+
+8
+00:00:22.050 --> 00:00:26.425
+and relevant control owners review scoped evidence each
+
+9
+00:00:26.425 --> 00:00:28.847
+technical task uses the role on its own
+
+10
+00:00:28.847 --> 00:00:33.014
+card Broader administrative roles may perform some tasks
+
+11
+00:00:33.274 --> 00:00:36.594
+but access and responsibility do not establish that
+
+12
+00:00:36.594 --> 00:00:39.550
+a control worked The card lists broader roles
+
+13
+00:00:39.667 --> 00:00:41.503
+and separate content permissions
+
+14
+00:00:43.204 --> 00:00:45.743
+Now follow the click path Open the protected
+
+15
+00:00:45.743 --> 00:00:50.665
+Word v0.5 validation draft for private evidence do
+
+16
+00:00:50.678 --> 00:00:54.220
+not copy internal content into this HTML or
+
+17
+00:00:54.220 --> 00:00:54.793
+narration
+
+18
+00:00:56.504 --> 00:00:59.798
+Next check the scope For every control record
+
+19
+00:00:59.798 --> 00:01:04.864
+configured captured enforced or unconfirmed as distinct states
+
+20
+00:01:06.537 --> 00:01:10.157
+Before continuing verify this boundary Check that the
+
+21
+00:01:10.157 --> 00:01:15.131
+run's actual type channel identity source and UTC
+
+22
+00:01:15.144 --> 00:01:16.368
+interval match the claim
+
+23
+00:01:18.097 --> 00:01:21.235
+Here is the controlled test step Require a
+
+24
+00:01:21.235 --> 00:01:25.662
+working allowed control and attributable outcome for preventive
+
+25
+00:01:25.662 --> 00:01:30.128
+claims detection-only controls do not become blocking controls
+
+26
+00:01:31.837 --> 00:01:35.731
+Now check the actual result List untested sources
+
+27
+00:01:35.913 --> 00:01:41.486
+channels connections MCP tools autonomous runs holds and
+
+28
+00:01:41.499 --> 00:01:42.814
+lifecycle timings
+
+29
+00:01:44.603 --> 00:01:48.808
+Finally record the claim carefully Assign gap owners
+
+30
+00:01:48.926 --> 00:01:53.509
+and retest triggers Deployment / publication requires exact
+
+31
+00:01:53.626 --> 00:01:57.415
+audience / content approval this build does not
+
+32
+00:01:57.415 --> 00:01:59.446
+publish or alter permissions
+
+33
+00:02:01.184 --> 00:02:04.374
+Here is where to check Protected validation record
+
+34
+00:02:04.778 --> 00:02:08.710
+scoped claims and gap owners Release decision and
+
+35
+00:02:08.710 --> 00:02:13.463
+explicit audience / content approval No time-based promotion
+
+36
+00:02:13.606 --> 00:02:17.017
+to a pass A gap remains unconfirmed until
+
+37
+00:02:17.017 --> 00:02:20.442
+the appropriate evidence exists and is reviewed These
+
+38
+00:02:20.455 --> 00:02:23.723
+illustrative screens do not establish a pass
+
+39
+00:02:25.437 --> 00:02:30.945
+Let's recap Configured captured enforced unconfirmed Match the
+
+40
+00:02:30.958 --> 00:02:34.799
+exact run to the claim Resolve confounders before
+
+41
+00:02:34.799 --> 00:02:39.565
+causation Keep private evidence protected No publication without
+
+42
+00:02:39.565 --> 00:02:43.432
+approval A configured / scored policy is not
+
+43
+00:02:43.432 --> 00:02:47.625
+proof of MCP coverage Keep real evidence in
+
+44
+00:02:47.638 --> 00:02:50.724
+the protected Word validation draft linked on the
+
+45
+00:02:50.724 --> 00:02:51.154
+card
