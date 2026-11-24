@@ -265,7 +265,7 @@
 
     <header id="tour-00" data-tour="0">
       <h1>Inside a Microsoft 365 Copilot CoE site</h1>
-      <p class="meta">A plain-language tour for IT admins of what's included in a Copilot Center of Excellence (CoE) site, how it's organized, and how it supports training, governance, and user support. Built with the open-source <strong><a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">CopilotCoE-Kit</a></strong>.</p>
+      <p class="meta">A plain-language tour for IT admins of what's included in a Copilot Center of Excellence (CoE) site, how it's organized, and how it supports training, governance, and user support. Built with the open-source <strong>CopilotCoE-Kit</strong>. <a href="#tour-10">Get the current implementation kit</a>.</p>
       <p>The CoE brings Microsoft Teams and SharePoint together so users can find training, prompts, reviewed agents, guidance, and support in one place.</p>
       <div id="tourBar" class="tour-bar">
         <button id="tourPlay" class="tour-btn tour-btn-primary" type="button">&#9658; Play the guided walkthrough</button>
@@ -359,18 +359,18 @@
       <p>The site is deployed through a PowerShell-based kit. Organization-specific settings are kept separately from the deployment scripts, making the kit easier to reuse and update.</p>
       <p class="admin-label">For administrators</p>
       <ul class="checklist">
-        <li><strong>Private by default.</strong> The Team is private, and external SharePoint sharing is disabled unless an admin explicitly enables it for a reviewed lab preview. See the <a href="external-sharing-addendum.html">sharing addendum</a> for exactly where that switch lives and how to add one external guest as a read-only visitor.</li>
+        <li><strong>Private by default.</strong> The Team is private, and external SharePoint sharing is disabled unless an admin explicitly enables it for a reviewed lab preview. See the <a href="../../copilot-center-of-excellence/external-sharing-addendum.html">sharing addendum</a> to review the settings and read-only access procedure.</li>
         <li><strong>Interactive provisioning.</strong> The kit uses delegated sign-in through a tenant-owned Entra app, with no certificates or stored secrets.</li>
         <li><strong>Update and removal scripts.</strong> The update script republishes edited content. The removal script tears down the deployment, with soft deletion by default.</li>
         <li><strong>Post-install validation.</strong> A test script checks pages, navigation, catalogs, permissions, and links before a deployment is considered complete.</li>
       </ul>
       <p style="margin-top:12px;">
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit" target="_blank" rel="noopener">github.com/ganymededl/CopilotCoE-Kit</a>
+        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/latest" target="_blank" rel="noopener">Latest stable release and implementation ZIP</a>
         &nbsp;&middot;&nbsp;
-        <a href="https://github.com/ganymededl/CopilotCoE-Kit/releases/tag/v3.8.12" target="_blank" rel="noopener">v3.8.12 release (includes the vendor site template)</a>
-        &nbsp;&middot;&nbsp;
-        <a href="external-sharing-addendum.html">Addendum: sharing this site with an external guest &rarr;</a>
+        <a href="../../copilot-center-of-excellence/index.html#get-kit">Version-matched installation guide and checksum</a>
       </p>
+      <p>Use the named implementation ZIP and its matching SHA-256 receipt, not the GitHub-generated source archives.</p>
+      <p><a href="https://github.com/ganymededl/CopilotCoE-Kit#readme" target="_blank" rel="noopener">Source repository and README</a></p>
       <div class="warning">
         <p style="margin:0 0 8px;"><strong>About the screenshots:</strong> they come from a demo tenant used to validate the kit, not a customer production site.</p>
         <p style="margin:0;">The on-page banner identifies the content as sample guidance, not official policy.</p>

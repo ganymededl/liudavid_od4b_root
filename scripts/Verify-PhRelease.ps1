@@ -78,6 +78,7 @@ $publicPaths = @(
     "",
     "artificial-gallery.html?scoutTheme=dark",
     "copilot-center-of-excellence/index.html",
+    "demos-public/copilot-coe-overview/index.html",
     "cowork-finops/index.html",
     "demos-public/index.html",
     "games-public/index.html",
@@ -109,11 +110,28 @@ $publicUrlChecks = foreach ($rel in $publicPaths) {
 $vaultUrl = "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHPrivate/personal-vault.html"
 $vaultStatus = [int](& curl.exe -sS -L -o NUL -w "%{http_code}" $vaultUrl)
 
-# 5. Live homepage & Copilot CoE v3.8.22 parity/body contract check
+# 5. Check the live CoE links and pinned guides against the actual latest stable release.
 $liveHtml = (Invoke-WebRequest -Uri "$BaseUrl/?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
 $coeIndexHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/index.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
 $coeFaqHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/admin-faq.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
 $coeGovHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/government-install.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+$coeQuickstartHtml = (Invoke-WebRequest -Uri "$BaseUrl/copilot-center-of-excellence/admin-quickstart.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+$coeTourHtml = (Invoke-WebRequest -Uri "$BaseUrl/demos-public/copilot-coe-overview/index.html?v=$commitSha" -UseBasicParsing -TimeoutSec 20).Content
+$coeLatestUrl = "https://github.com/ganymededl/CopilotCoE-Kit/releases/latest"
+$coeLatest = Invoke-RestMethod -Uri "https://api.github.com/repos/ganymededl/CopilotCoE-Kit/releases/latest" -TimeoutSec 20 -Headers @{ "User-Agent" = "PersonalHubReleaseCheck" }
+$coeZip = @($coeLatest.assets | Where-Object { $_.name -eq "Copilot-CoE-Implementation-Kit.zip" })
+$coeReceipt = @($coeLatest.assets | Where-Object { $_.name -eq "Copilot-CoE-Implementation-Kit.zip.sha256" })
+if ($coeZip.Count -ne 1 -or $coeReceipt.Count -ne 1 -or $coeZip[0].digest -notmatch '^sha256:[0-9a-f]{64}$') {
+    throw "Latest CoE release $($coeLatest.tag_name) has no unique implementation ZIP, SHA-256 digest, and matching receipt."
+}
+$coeDigest = $coeZip[0].digest.Substring(7)
+$coeGuides = @($coeIndexHtml, $coeGovHtml, $coeFaqHtml, $coeQuickstartHtml)
+$coeGuideLinksMatch = @($coeGuides | Where-Object {
+    -not $_.Contains($coeZip[0].browser_download_url) -or -not $_.Contains($coeReceipt[0].browser_download_url)
+}).Count -eq 0
+$coeGuideHashesMatch = @(@($coeIndexHtml, $coeGovHtml, $coeFaqHtml) | Where-Object {
+    $_ -notmatch [regex]::Escape($coeDigest)
+}).Count -eq 0
 
 $stageFaq = "C:\Scout_Output\Hub-Guide-Parity-Stage\copilot-center-of-excellence\admin-faq.html"
 $cpFaq = "C:\Users\liudavid\OneDrive - Microsoft\PHPublic\DemosPublic\Personal Hub Page\liudavid_od4b_root\copilot-center-of-excellence\admin-faq.html"
@@ -129,7 +147,8 @@ $contractChecks = [pscustomobject]@{
     hasCollapsiblePodcasts = ($liveHtml -match 'id="podcastsDetails"')
     hasFeaturedBadges      = ($liveHtml -match 'lib-featured-badge')
     hasCloudEnvBadges      = ($liveHtml -match 'lib-env-badge')
-    coeLiveHas3822Hash     = ($coeFaqHtml -match 'D0A59E2B9F3F543813E19FF98A3A465EFA0777FF81B36B6A0251916335033E3F') -and ($coeIndexHtml -match '3\.8\.22')
+    coeLatestReleaseLinks = $liveHtml.Contains($coeLatestUrl) -and $coeTourHtml.Contains($coeLatestUrl)
+    coePinnedPackageCurrent = $coeGuideLinksMatch -and $coeGuideHashesMatch
     coeHarmonizedGcc       = ($coeFaqHtml -match 'partial GCC Moderate evidence') -and ($coeGovHtml -match 'Release 3\.8\.22: an internal fresh install and first checker passed 268 checks')
     coeStagePublicParity   = $coeParityMatch
 }
@@ -146,7 +165,8 @@ $allPassed = (-not $privateDirInRepo) -and
              $contractChecks.hasCollapsiblePodcasts -and
              $contractChecks.hasFeaturedBadges -and
              $contractChecks.hasCloudEnvBadges -and
-             $contractChecks.coeLiveHas3822Hash -and
+             $contractChecks.coeLatestReleaseLinks -and
+             $contractChecks.coePinnedPackageCurrent -and
              $contractChecks.coeHarmonizedGcc -and
              $contractChecks.coeStagePublicParity
 
@@ -156,6 +176,7 @@ $bundle = [pscustomobject]@{
     allPassed          = $allPassed
     privateDirInRepo   = $privateDirInRepo
     vaultUnauthStatus  = $vaultStatus
+    coeLatestRelease   = $coeLatest.tag_name
     contractChecks     = $contractChecks
     privateUrlChecks   = $privateUrlChecks
     publicUrlChecks    = $publicUrlChecks
