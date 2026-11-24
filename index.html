@@ -1611,11 +1611,23 @@ const CONFIG = {
     {
       name:  "Cowork Go+ FAQ",
       desc:  "Answered Go+ delivery questions with timestamped recording links. Restricted to Microsoft FTE sign-in.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHMSFTAccess/cowork-go-plus-faq.html",
-      cta:   "Open Cowork Go+ FAQ",
       icon:  "lock",
       color: ["#0e7c66", "#4fd8b5"],
-      env:   "MSFT only"
+      env:   "MSFT only",
+      groupItems: [
+        {
+          name: "Delivery FAQ",
+          desc: "Browse the existing Cowork Go+ FAQ.",
+          href: "https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2Fcowork%2Dgo%2Dplus%2Dfaq%2Ehtml&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess&share=cQrJBtGnlvXRS4rtb6%2DGieaoEgUDrx0n7wQISqZO1h%5Fud5B5rA",
+          cta: "Open Cowork Go+ FAQ"
+        },
+        {
+          name: "SME&C End-to-End Runbook (PDF)",
+          desc: "Microsoft sign-in required.",
+          href: "https://microsoft-my.sharepoint.com/my?viewid=d2d242d5%2Ded2d%2D46ef%2Db5a3%2Dd3339deee25e&id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2FSMECRunbook%2Epdf&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess",
+          cta: "Open protected PDF"
+        }
+      ]
     },
     {
       name:  "Copilot Q&A Hub",
@@ -1642,7 +1654,7 @@ const CONFIG = {
       name:  "DemoIQ Backdated · Config Builder",
       desc:  "Customer demos from the SLED use-case library, seeded before the demo date.",
       note:  "Opening in OneDrive's viewer blocks downloads. Use Download setup to install and run locally.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHMSFTAccess/DemoIQ-Config-Builder.html",
+      href:  "https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2FDemoIQ%2DConfig%2DBuilder%2Ehtml&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess&share=cQp9fR%2DObbxhTbhTkKvJo3%5FxEgUDPP9pfXNs6xg4O19d%2DLQkFQ",
       cta:   "Open config builder",
       downloadHref: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/_layouts/15/download.aspx?SourceUrl=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2FDemoIQ%2DBackdated%2DSetup%2Ezip",
       downloadLabel: "Download setup (skill + builder)",
@@ -1689,11 +1701,32 @@ const CONFIG = {
     {
       name:  "Copilot VBD Catalog",
       desc:  "Compare service variants, catalog prices, and estimated billable hours.",
-      href:  "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHMSFTAccess/copilot-workshops-billable-hours.html",
+      href:  "https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2Fcopilot%2Dworkshops%2Dbillable%2Dhours%2Ehtml&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess&share=cQomTaBq3McnT5IUnveclS%5FqEgUDgqQVqiYfd2D463IoYxXMNg",
       cta:   "Open VBD catalog",
       icon:  "list",
       color: ["#00d9ff", "#7b61ff"],
       env:   "MSFT only"
+    },
+    {
+      name:  "Internal Field Resources",
+      desc:  "Microsoft FTE-only reference guides — not David-only.",
+      icon:  "lock",
+      color: ["#00d9ff", "#7b61ff"],
+      env:   "MSFT only",
+      groupItems: [
+        {
+          name: "GCC Copilot Parity Tracker",
+          desc: "Commercial feature differences, parity dates, exclusions, evidence links, and open GCC field questions.",
+          href: "https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2Fgcc%2Dcopilot%2Dparity%2Dtracker%2Ehtml&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess&share=cQq7M4a9VTXEQrav7Ru9pm5tEgUDa8CtGK6onjXHzsxMAdXExA",
+          cta: "Open GCC parity tracker"
+        },
+        {
+          name: "CW Skills",
+          desc: "Guide to Copilot skills with readiness notes and trial prompts.",
+          href: "https://microsoft-my.sharepoint.com/:u:/r/personal/liudavid_microsoft_com/_layouts/15/onedrive.aspx?id=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2FSkills%2FREADME%2Ehtml&parent=%2Fpersonal%2Fliudavid%5Fmicrosoft%5Fcom%2FDocuments%2FPHMSFTAccess%2FSkills&share=cQrAyphiguMSTIKmyxfDOL6JEgUDYyJ8gbcAY4s7YxTYViJn0A",
+          cta: "Open CW Skills"
+        }
+      ]
     },
     {
       name:  "liudavid's Personal Vault",
@@ -1702,26 +1735,8 @@ const CONFIG = {
       color: ["#b11f4b", "#f59e0b"],
       env:   "David only",
       privateOnly: true,
-      groupItems: [
-        {
-          name: "Open Personal Vault",
-          desc: "Private visitor analytics and Scout automation controls.",
-          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHPrivate/personal-vault.html",
-          cta: "Open Personal Vault"
-        },
-        {
-          name: "GCC Copilot Parity Tracker",
-          desc: "Commercial feature differences, parity dates, exclusions, evidence links, and open GCC field questions.",
-          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHMSFTAccess/gcc-copilot-parity-tracker.html",
-          cta: "Open GCC parity tracker"
-        },
-        {
-          name: "CW Skills",
-          desc: "Private guide to Copilot skills with readiness notes and trial prompts.",
-          href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHMSFTAccess/Skills/README.html",
-          cta: "Open CW Skills"
-        }
-      ]
+      href: "https://microsoft-my.sharepoint.com/personal/liudavid_microsoft_com/Documents/PHPrivate/personal-vault.html",
+      cta: "Open Personal Vault"
     },
     {
       name:  "Archive",
