@@ -1518,13 +1518,25 @@ const CONFIG = {
     {
       name:  "Copilot Center of Excellence",
       desc:  "Release 3.8.22 setup steps, video walkthrough, admin FAQ, and external-sharing addendum",
-      href:  "copilot-center-of-excellence/index.html",
-      cta:   "Start adoption work",
       icon:  "hub",
       color: ["#ff6bb5", "#ff3d81"],
       env:   "Commercial + GCC-Mod",
       featured: true,
-      public: true
+      public: true,
+      groupItems: [
+        {
+          name: "Installation and adoption",
+          desc: "Runbooks and resources for setting up the CoE.",
+          href: "copilot-center-of-excellence/index.html",
+          cta: "Start adoption work"
+        },
+        {
+          name: "Copilot CoE Site Tour",
+          desc: "See what the CoE site looks like and where users find training, governance, and support.",
+          href: "demos-public/copilot-coe-overview/index.html",
+          cta: "Open site tour"
+        }
+      ]
     },
     {
       name:  "Cowork",
