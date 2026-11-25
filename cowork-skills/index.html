@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cowork Skills — David Shih Chun Liu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060609; --bg2: #0d0d14;
+    --c1: #00d9ff; --c2: #00ffa3; --c3: #7b61ff; --c4: #ff6b35;
+    --t1: #f4f4f8; --t2: rgba(244,244,248,0.55); --t3: rgba(244,244,248,0.30);
+    --card: rgba(255,255,255,0.04); --cardh: rgba(255,255,255,0.08);
+    --border: rgba(255,255,255,0.09);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: radial-gradient(1200px 600px at 20% -10%, rgba(14,124,102,0.18), transparent),
+                radial-gradient(1000px 600px at 100% 0%, rgba(0,217,255,0.10), transparent),
+                var(--bg);
+    color: var(--t1);
+    font-family: "Space Grotesk", system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 48px 24px 80px; }
+  .back {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--t2); text-decoration: none; font-size: 13px; margin-bottom: 28px;
+  }
+  .back:hover { color: var(--t1); }
+  h1 {
+    font-size: clamp(28px, 4vw, 40px);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--t2); font-size: 15px; margin-bottom: 8px; max-width: 660px; }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    margin: 16px 0 40px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    color: #042016;
+    background: linear-gradient(135deg, #00ffa3, #00d9ff);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 24px;
+    transition: background 0.2s ease, border-color 0.2s ease;
+  }
+  .card:hover { background: var(--cardh); }
+  .card-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .icon-box {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-box svg { width: 20px; height: 20px; }
+  .card h2 { font-size: 19px; font-weight: 600; }
+  .card p.desc { color: var(--t2); font-size: 14px; line-height: 1.55; margin-bottom: 18px; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 18px;
+  }
+  .pill {
+    font-size: 11.5px; color: var(--t2);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+  .btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 20px;
+    border-radius: 10px;
+    font-size: 14px; font-weight: 600;
+    text-decoration: none;
+    color: #06060a;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn svg { width: 15px; height: 15px; }
+  .note {
+    font-size: 12.5px;
+    color: var(--t3);
+    margin-top: 4px;
+  }
+  code {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 7px;
+    font-size: 12.5px;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+  ol.steps { margin: 0 0 18px 18px; color: var(--t2); font-size: 13.5px; line-height: 1.7; }
+  footer { color: var(--t3); font-size: 12px; margin-top: 40px; }
+</style>
+</head>
+<body>
+<div data-ph-last-updated style="position:fixed;top:52px;left:8px;z-index:2147483647;background:rgba(17,17,17,.74);color:#fff;font:600 11px/1.4 'Segoe UI',Arial,sans-serif;padding:4px 9px;border-radius:7px;pointer-events:none;letter-spacing:.01em;box-shadow:0 2px 8px rgba(0,0,0,.25)">Last updated: November 25, 2026</div>
+
+<div class="wrap">
+  <a class="back" href="../index.html">&larr; Back to Hub</a>
+  <h1>Cowork Skills</h1>
+  <p class="subtitle">Two companion custom skills for Microsoft 365 Copilot Cowork: estimate the personal time/dollar value your own Cowork use represents, then net that estimate against what your current billing period's credits cost. Public download — no sign-in required.</p>
+  <div class="gate-badge">🌐 Public download — no Microsoft sign-in required</div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="icon-box" style="background: linear-gradient(135deg, #00d9ff, #00ffa3);">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="9" width="2.8" height="5" rx="0.8"/><rect x="6.6" y="5.5" width="2.8" height="8.5" rx="0.8"/><rect x="11.2" y="2.5" width="2.8" height="11.5" rx="0.8"/></svg>
+      </div>
+      <h2>Cowork Value Report</h2>
+    </div>
+    <p class="desc">
+      Reconstructs your own Cowork business-value <strong>ESTIMATE</strong> by reading your OneDrive
+      <code>Documents/Cowork/Tasks</code> folder (or a pasted/attached task list as a fallback): separates
+      recurring automation runs from one-off tasks, classifies each task into one of 8 categories, applies
+      Cowork effort-band minutes, and outputs a summary table, an itemized CSV, a multi-tab Excel workbook,
+      and an offline HTML chart report. Every number is an estimate built from effort bands — never billed,
+      metered, or measured savings.
+    </p>
+    <div class="meta-row">
+      <span class="pill">Cowork custom skill (SKILL.md + Python)</span>
+      <span class="pill">Personal use — your own tasks only</span>
+      <span class="pill">Validated in Commercial M365</span>
+      <span class="pill">~43 KB zip</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn" style="background: linear-gradient(135deg, #00d9ff, #00ffa3);"
+         href="cowork-value-report.zip" download>
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1 L8 10 M4.5 6.5 L8 10 L11.5 6.5 M2 12.5 L14 12.5"/></svg>
+        Download cowork-value-report.zip
+      </a>
+    </div>
+    <p class="note">Trigger phrases once installed: "run my Cowork value", "reconstruct my use cases", "estimate my Cowork hours saved".</p>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <div class="icon-box" style="background: linear-gradient(135deg, #7b61ff, #ff6b35);">
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6.2"/><path d="M8 4.6V8l2.6 1.6"/></svg>
+      </div>
+      <h2>Cowork Net Value</h2>
+    </div>
+    <p class="desc">
+      Companion to Cowork Value Report. Finds the newest value-report CSV for the current calendar month,
+      sums this month's scored one-off tasks at a standard hourly rate across Low/Mid/High bands, asks once
+      for your credit count and $-per-credit rate, and returns a <strong>NET</strong> verdict per band plus a
+      one-row CSV and an Excel workbook (Results and Legend tabs). Refuses a CSV from an earlier month so the
+      net figure always matches the current billing period.
+    </p>
+    <div class="meta-row">
+      <span class="pill">Cowork custom skill (SKILL.md + Python)</span>
+      <span class="pill">Requires Cowork Value Report run first</span>
+      <span class="pill">Current billing period only</span>
+      <span class="pill">~16 KB zip</span>
+    </div>
+    <div class="btn-row">
+      <a class="btn" style="background: linear-gradient(135deg, #7b61ff, #ff6b35);"
+         href="cowork-net-value.zip" download>
+        <svg viewBox="0 0 16 16" fill="none" stroke="#06060a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1 L8 10 M4.5 6.5 L8 10 L11.5 6.5 M2 12.5 L14 12.5"/></svg>
+        Download cowork-net-value.zip
+      </a>
+    </div>
+    <p class="note">Trigger phrases once installed: "net my Cowork value", "Cowork net savings", "what did Cowork actually cost me net of savings".</p>
+  </div>
+
+  <div class="card">
+    <h2 style="margin-bottom: 14px;">How to install</h2>
+    <ol class="steps">
+      <li>Download the zip(s) above — each one already contains a <code>SKILL.md</code> plus its <code>scripts/</code> folder, unzipped.</li>
+      <li>In Copilot Cowork, open <strong>Settings → Skills</strong> and choose to add or upload a custom skill.</li>
+      <li>Upload the downloaded zip directly (no need to re-zip or rename anything).</li>
+      <li>Run Cowork Value Report first each month before Cowork Net Value — the net skill reads its CSV output.</li>
+    </ol>
+    <p class="note">Both skills only ever read the signed-in user's own OneDrive task history and produce personal estimates — never another person's data, and never billed or measured figures.</p>
+  </div>
+
+  <footer>
+    Both skills are plain-text SKILL.md + Python bundles — safe to inspect before installing. Figures they produce are always estimates, not billed or metered savings.
+  </footer>
+</div>
+<script id="hub-nav-controls">(function(){if(document.querySelector('[data-global-hub-back]'))return;var p=window.location.pathname.toLowerCase();if(p.endsWith('/liudavid_od4b_root/')||p.endsWith('/liudavid_od4b_root/index.html'))return;var bar=document.createElement('div');bar.setAttribute('data-global-hub-back','true');bar.style.cssText='position:fixed;top:12px;left:12px;z-index:2147483647;display:flex;gap:8px;align-items:center;padding:6px 8px;border-radius:999px;border:1px solid rgba(177,31,75,.45);background:rgba(20,20,20,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 4px 14px rgba(0,0,0,.28)';var back=document.createElement('button');back.type='button';back.textContent='← Back';back.style.cssText='border:1px solid rgba(255,255,255,.28);background:transparent;color:#fff;border-radius:999px;padding:4px 10px;font:600 12px/1 "Segoe UI",sans-serif;cursor:pointer';back.addEventListener('click',function(){try{if(document.referrer&&new URL(document.referrer).origin===location.origin){history.back();return;}}catch(e){}location.href=new URL('.',window.location.href).href;});var hub=document.createElement('a');hub.href='https://ganymededl.github.io/liudavid_od4b_root/index.html';hub.textContent='Main hub';hub.style.cssText='border:1px solid rgba(177,31,75,.85);background:rgba(177,31,75,.22);color:#fff;text-decoration:none;border-radius:999px;padding:4px 10px;font:600 12px/1 "Segoe UI",sans-serif';bar.appendChild(back);bar.appendChild(hub);document.body.appendChild(bar);})();</script>
+</body>
+</html>
