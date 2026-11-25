@@ -245,7 +245,7 @@ textarea:focus, select:focus, input:focus, button:focus-visible, a:focus-visible
       <span class="brand-mark">MC</span>
       <span>Model Mission Control</span>
     </a>
-    <div class="catalog-stamp"><span id="catalogLabel">Catalog snapshot</span><br><strong>October 24, 2026</strong><br><a class="runbook-link" href="azure-deployment-runbook.html">Azure setup runbook</a></div>
+    <div class="catalog-stamp"><span id="catalogLabel">Catalog snapshot</span><br><strong id="catalogCheckedDate">October 24, 2026</strong><br><a class="runbook-link" href="azure-deployment-runbook.html">Azure setup runbook</a></div>
   </header>
 
   <nav class="platform-nav" aria-label="Choose AI platform">
@@ -1143,9 +1143,30 @@ function renderCatalog() {
   `).join("") || `<div class="empty">No models match that filter.</div>`;
 }
 
+function formatCatalogDate(value) {
+  if (!value) return "October 24, 2026";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "October 24, 2026";
+  return parsed.toLocaleDateString("en-US", {month: "long", day: "numeric", year: "numeric"});
+}
+
+function catalogLabelFromConfidence(confidence) {
+  if (confidence === "live-exact") return "Live exact catalog";
+  if (confidence === "account-live") return "Account-live catalog";
+  if (confidence === "account-observed") return "Account-observed catalog";
+  if (confidence === "live-capture-pending") return "Live catalog pending";
+  return "Catalog snapshot";
+}
+
 function renderPlatformChrome() {
+  const platformState = window.MODEL_MISSION_CATALOGS?.platforms?.[platformKey];
+  const checkedDate = formatCatalogDate(window.MODEL_MISSION_CATALOGS?.updatedAt);
+  const catalogLabel = platformState?.confidence
+    ? catalogLabelFromConfidence(platformState.confidence)
+    : PLATFORM.catalogLabel;
   document.title = `${PLATFORM.name} Model Mission Control`;
-  document.getElementById("catalogLabel").textContent = PLATFORM.catalogLabel;
+  document.getElementById("catalogLabel").textContent = catalogLabel;
+  document.getElementById("catalogCheckedDate").textContent = checkedDate;
   document.getElementById("platformEyebrow").textContent = `${PLATFORM.name} model advisor`;
   document.getElementById("platformLede").textContent =
     `Paste a ${PLATFORM.shortName} task and get a platform-specific recommendation, a quicker fallback, and a clear reason to switch.`;
@@ -1160,11 +1181,12 @@ function renderPlatformChrome() {
   document.getElementById("familyFilters").innerHTML =
     `<button class="filter active" data-family="all">All</button>` +
     families.map(family => `<button class="filter" data-family="${family}">${family}</button>`).join("");
+  const sourceText = platformState?.source || PLATFORM.source;
   const source = PLATFORM.sourceUrl ?
-    `<a href="${PLATFORM.sourceUrl}" target="_blank" rel="noopener noreferrer">${PLATFORM.source}</a>` :
-    PLATFORM.source;
+    `<a href="${PLATFORM.sourceUrl}" target="_blank" rel="noopener noreferrer">${sourceText}</a>` :
+    sourceText;
   document.getElementById("sourceNote").innerHTML =
-    `<strong>Availability source:</strong> ${source}. Last checked October 24, 2026. ` +
+    `<strong>Availability source:</strong> ${source}. Last checked ${checkedDate}. ` +
     `Capability ratings are qualitative guidance, not benchmark scores or pricing claims. ` +
     `AI-assisted routing, when selected, uses DIAx sign-in and a managed-identity Azure backend.`;
 }
