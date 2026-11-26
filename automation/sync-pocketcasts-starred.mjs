@@ -370,7 +370,21 @@ async function scrapeStarred(options) {
       const relRegex = /\b(?:today|yesterday)\b/i;
       return (text.match(dateRegex)?.[0] || text.match(relRegex)?.[0] || "").trim();
     };
-    const parseDuration = text => {
+    const parseDuration = (lines, text) => {
+      const exactLine = lines.find(line =>
+        /^\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)$/i.test(line)
+      );
+      if (exactLine) return exactLine.trim();
+
+      const mergedDateAndDuration = text.match(
+        /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2})(\d{1,3})\s*(sec|secs|min|mins|hr|hrs|hour|hours)\b/i
+      );
+      if (mergedDateAndDuration) {
+        const mergedValue = Number.parseInt(mergedDateAndDuration[2], 10);
+        const unit = mergedDateAndDuration[3].toLowerCase();
+        return `${mergedValue} ${unit}`;
+      }
+
       const m = text.match(/\b\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)\b/i);
       return (m?.[0] || "").trim();
     };
@@ -421,7 +435,7 @@ async function scrapeStarred(options) {
         const hasDateLike = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|today|yesterday)\b/i.test(fullText);
         if (!hasDuration && !hasDateLike) continue;
         const publishedLabel = parseDateLike(fullText);
-        const duration = parseDuration(fullText);
+        const duration = parseDuration(lineCandidates, fullText);
 
         out.push({
           title,
