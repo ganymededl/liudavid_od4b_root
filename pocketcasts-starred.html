@@ -136,14 +136,34 @@
     function normalizeDuration(rawDuration) {
       const value = (rawDuration || "").trim();
       if (!value) return "";
+      const unwrapMergedDayDuration = (num, unit) => {
+        const text = String(num);
+        const candidates = [];
+        for (const suffixLength of [2, 1]) {
+          if (text.length <= suffixLength) continue;
+          const day = Number.parseInt(text.slice(0, -suffixLength), 10);
+          const duration = Number.parseInt(text.slice(-suffixLength), 10);
+          if (day >= 1 && day <= 31 && duration >= 1 && duration <= 60) {
+            candidates.push({ day, duration, suffixLength });
+          }
+        }
+        if (!candidates.length) return num;
+        if (/^sec/i.test(unit)) {
+          const twoDigit = candidates.find(c => c.suffixLength === 2);
+          return twoDigit ? twoDigit.duration : candidates[0].duration;
+        }
+        candidates.sort((a, b) => b.day - a.day);
+        return candidates[0].duration;
+      };
       const secs = value.match(/^(\d+)\s*sec(?:s)?$/i);
       if (secs) {
-        const mins = Math.max(1, Math.round(Number(secs[1]) / 60));
+        const normalizedSecs = unwrapMergedDayDuration(Number(secs[1]), "secs");
+        const mins = Math.max(1, Math.round(normalizedSecs / 60));
         return `${mins} min${mins === 1 ? "" : "s"}`;
       }
       const mins = value.match(/^(\d+)\s*min(?:s)?$/i);
       if (mins) {
-        const total = Number(mins[1]);
+        const total = unwrapMergedDayDuration(Number(mins[1]), "mins");
         return `${total} min${total === 1 ? "" : "s"}`;
       }
       const hours = value.match(/^(\d+)\s*(?:hr|hrs|hour|hours)$/i);
