@@ -86,7 +86,7 @@
     }
     .row {
       display: grid;
-      grid-template-columns: minmax(320px, 1fr) 220px 94px 120px;
+      grid-template-columns: minmax(320px, 1fr) 220px 94px;
       gap: 10px;
       padding: 12px 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.06);
@@ -133,47 +133,6 @@
     const meta = document.getElementById("meta");
     const list = document.getElementById("list");
 
-    function normalizeDuration(rawDuration) {
-      const value = (rawDuration || "").trim();
-      if (!value) return "";
-      const unwrapMergedDayDuration = (num, unit) => {
-        const text = String(num);
-        const candidates = [];
-        for (const suffixLength of [2, 1]) {
-          if (text.length <= suffixLength) continue;
-          const day = Number.parseInt(text.slice(0, -suffixLength), 10);
-          const duration = Number.parseInt(text.slice(-suffixLength), 10);
-          if (day >= 1 && day <= 31 && duration >= 1 && duration <= 60) {
-            candidates.push({ day, duration, suffixLength });
-          }
-        }
-        if (!candidates.length) return num;
-        if (/^sec/i.test(unit)) {
-          const twoDigit = candidates.find(c => c.suffixLength === 2);
-          return twoDigit ? twoDigit.duration : candidates[0].duration;
-        }
-        candidates.sort((a, b) => b.day - a.day);
-        return candidates[0].duration;
-      };
-      const secs = value.match(/^(\d+)\s*sec(?:s)?$/i);
-      if (secs) {
-        const normalizedSecs = unwrapMergedDayDuration(Number(secs[1]), "secs");
-        const mins = Math.max(1, Math.round(normalizedSecs / 60));
-        return `${mins} min${mins === 1 ? "" : "s"}`;
-      }
-      const mins = value.match(/^(\d+)\s*min(?:s)?$/i);
-      if (mins) {
-        const total = unwrapMergedDayDuration(Number(mins[1]), "mins");
-        return `${total} min${total === 1 ? "" : "s"}`;
-      }
-      const hours = value.match(/^(\d+)\s*(?:hr|hrs|hour|hours)$/i);
-      if (hours) {
-        const total = Number(hours[1]) * 60;
-        return `${total} mins`;
-      }
-      return value;
-    }
-
     function renderItem(item) {
       const row = document.createElement("article");
       row.className = "row";
@@ -193,13 +152,9 @@
       const date = document.createElement("div");
       date.className = "date";
       date.textContent = item.starredDate || item.publishedLabel || "";
-      const duration = document.createElement("div");
-      duration.className = "duration";
-      duration.textContent = normalizeDuration(item.duration);
       row.appendChild(title);
       row.appendChild(podcast);
       row.appendChild(date);
-      row.appendChild(duration);
       return row;
     }
 
