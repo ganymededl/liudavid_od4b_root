@@ -133,6 +133,27 @@
     const meta = document.getElementById("meta");
     const list = document.getElementById("list");
 
+    function normalizeDuration(rawDuration) {
+      const value = (rawDuration || "").trim();
+      if (!value) return "";
+      const secs = value.match(/^(\d+)\s*sec(?:s)?$/i);
+      if (secs) {
+        const mins = Math.max(1, Math.round(Number(secs[1]) / 60));
+        return `${mins} min${mins === 1 ? "" : "s"}`;
+      }
+      const mins = value.match(/^(\d+)\s*min(?:s)?$/i);
+      if (mins) {
+        const total = Number(mins[1]);
+        return `${total} min${total === 1 ? "" : "s"}`;
+      }
+      const hours = value.match(/^(\d+)\s*(?:hr|hrs|hour|hours)$/i);
+      if (hours) {
+        const total = Number(hours[1]) * 60;
+        return `${total} mins`;
+      }
+      return value;
+    }
+
     function renderItem(item) {
       const row = document.createElement("article");
       row.className = "row";
@@ -154,7 +175,7 @@
       date.textContent = item.starredDate || item.publishedLabel || "";
       const duration = document.createElement("div");
       duration.className = "duration";
-      duration.textContent = item.duration || "";
+      duration.textContent = normalizeDuration(item.duration);
       row.appendChild(title);
       row.appendChild(podcast);
       row.appendChild(date);
