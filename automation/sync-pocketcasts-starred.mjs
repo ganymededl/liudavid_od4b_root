@@ -85,6 +85,28 @@ function isTransientExecutionContextError(error) {
   );
 }
 
+function hasInteractiveConsole() {
+  return Boolean(process.stdin?.isTTY && process.stdout?.isTTY);
+}
+
+async function acknowledgeAndContinue(message) {
+  process.stdout.write(`${message}\n`);
+  if (!hasInteractiveConsole()) {
+    process.stdout.write("Non-interactive shell detected; continuing without acknowledgement prompt.\n");
+    return;
+  }
+
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+  try {
+    await rl.question("Press Enter to acknowledge and continue...");
+  } finally {
+    rl.close();
+  }
+}
+
 async function evaluateWithNavigationRetry(page, fn, options) {
   const retries = options?.retries ?? 6;
   const delayMs = options?.delayMs ?? 300;
@@ -183,6 +205,14 @@ async function waitForStarredReady(page, options) {
       "cloudflare"
     ];
     const hasChallenge = challengeHints.some(hint => bodyText.includes(hint));
+    const emptyHints = [
+      "no starred episodes",
+      "you haven't starred",
+      "you haven’t starred",
+      "star episodes",
+      "nothing here yet"
+    ];
+    const hasEmptyState = emptyHints.some(hint => bodyText.includes(hint));
     const candidateRows = main.querySelectorAll('[role="row"], tr, [role="listitem"], li, article, section, div');
     let episodeLikeRows = 0;
     for (const row of candidateRows) {
@@ -193,11 +223,11 @@ async function waitForStarredReady(page, options) {
       if (hasDuration || hasDateLike) episodeLikeRows += 1;
       if (episodeLikeRows >= 3) break;
     }
-    return { hasChallenge, hasStarredHeading, episodeLikeRows };
+    return { hasChallenge, hasStarredHeading, hasEmptyState, episodeLikeRows };
   };
 
   let state = await evaluateWithNavigationRetry(page, getState, { retries: 10, delayMs: 400 });
-  if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
+  if (state.hasStarredHeading && (state.episodeLikeRows > 0 || state.hasEmptyState)) return;
   if (options.headless && state.hasChallenge) {
     throw new Error("Pocket Casts returned a CAPTCHA/security challenge. Run with --headed and complete it in the browser.");
   }
@@ -215,9 +245,40 @@ async function waitForStarredReady(page, options) {
       );
     }
     state = await evaluateWithNavigationRetry(page, getState, { retries: 10, delayMs: 400 });
-    if (state.hasStarredHeading && state.episodeLikeRows > 0) return;
+    if (state.hasStarredHeading && (state.episodeLikeRows > 0 || state.hasEmptyState)) return;
   }
   throw new Error("Timed out waiting for Pocket Casts Starred list after manual CAPTCHA/sign-in.");
+}
+
+function isRecoverableAuthError(error) {
+  const message = String(error?.message || error || "").toLowerCase();
+  return (
+    message.includes("login is required") ||
+    message.includes("captcha/security challenge") ||
+    message.includes("google oauth blocked") ||
+    message.includes("timed out waiting for pocket casts sign-in")
+  );
+}
+
+async function runInteractiveAuthRecovery(options, reason) {
+  const headedOptions = { ...options, headless: false };
+  process.stdout.write(
+    `Headless auth failed (${reason}). Launching browser so you can re-authenticate...\n`
+  );
+
+  const context = await launchContext(options.userDataDir, false);
+  try {
+    const page = context.pages()[0] || await context.newPage();
+    await page.goto(options.url, { waitUntil: "domcontentloaded", timeout: 90_000 });
+    await page.waitForTimeout(1500);
+    await waitForManualLoginIfNeeded(page, headedOptions);
+    await waitForManualReadyConfirmation(page, headedOptions);
+    await waitForStarredReady(page, headedOptions);
+    process.stdout.write("Pocket Casts authentication completed.\n");
+    await acknowledgeAndContinue("Re-authentication acknowledged. Closing browser and resuming sync...");
+  } finally {
+    await context.close();
+  }
 }
 
 async function scrapeStarred(options) {
@@ -325,25 +386,40 @@ async function scrapeStarred(options) {
         if (fullText.length < 20) continue;
         const anchors = Array.from(row.querySelectorAll("a[href]"));
 
+        const anchorCandidates = anchors.filter(anchor => {
+          const href = anchor.href || "";
+          return Boolean(href) && !href.includes("/starred") && !href.includes("/user/login");
+        });
+        if (anchorCandidates.length > 3) continue;
+
+        const episodeAnchor =
+          anchorCandidates.find(anchor =>
+            anchor.href.includes("pca.st") ||
+            anchor.href.includes("/podcast/") ||
+            anchor.href.includes("/episode/")
+          ) || anchorCandidates[0] || null;
+        const episodeUrl = episodeAnchor?.href || "";
+
         const titleFromSelector = getText(row, titleSelectors);
+        const titleFromAnchor = (episodeAnchor?.textContent || "").replace(/\s+/g, " ").trim();
         const lineCandidates = linesOf(row.textContent || "");
-        const title = titleFromSelector || lineCandidates.find(line => line.length > 6) || "";
+        const subtitle = getText(row, subtitleSelectors);
+        const fallbackPodcast =
+          lineCandidates.find(line => !/\d+\s*(?:sec|min|hr|hour)/i.test(line) && line.length > 2) || "";
+        const podcast = subtitle || fallbackPodcast;
+
+        let title = titleFromAnchor || titleFromSelector || lineCandidates.find(line => line.length > 6) || "";
+        if (podcast) {
+          const at = title.toLowerCase().indexOf(podcast.toLowerCase());
+          if (at > 8) title = title.slice(0, at).trim();
+        }
+        title = title.replace(/\s+/g, " ").trim();
         if (!title || /^starred$/i.test(title)) continue;
+        if (title.length > 180 && anchorCandidates.length > 1) continue;
+
         const hasDuration = /\b\d+\s*(?:sec|secs|min|mins|hr|hrs|hour|hours)\b/i.test(fullText);
         const hasDateLike = /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|today|yesterday)\b/i.test(fullText);
         if (!hasDuration && !hasDateLike) continue;
-
-        const subtitle = getText(row, subtitleSelectors);
-        const podcast =
-          subtitle ||
-          lineCandidates.find(line => line !== title && !/\d+\s*(?:sec|min|hr|hour)/i.test(line) && line.length > 2) ||
-          "";
-
-        const urls = anchors
-          .map(anchor => anchor.href)
-          .filter(Boolean)
-          .filter(href => !href.includes("/starred") && !href.includes("/user/login"));
-        const episodeUrl = urls.find(href => href.includes("pca.st") || href.includes("/podcast/") || href.includes("/episode/")) || urls[0] || "";
         const publishedLabel = parseDateLike(fullText);
         const duration = parseDuration(fullText);
 
@@ -409,9 +485,20 @@ async function scrapeStarred(options) {
 async function main() {
   const options = parseArgs(process.argv);
   const now = new Date();
-  const items = await scrapeStarred(options);
+
+  let items;
+  try {
+    items = await scrapeStarred(options);
+  } catch (error) {
+    if (!options.headless || !isRecoverableAuthError(error)) throw error;
+    await runInteractiveAuthRecovery(options, error.message || String(error));
+    items = await scrapeStarred(options);
+  }
+
   if (!items.length && !options.allowEmpty) {
-    throw new Error("No starred episodes were found. This usually means the session is signed out or selectors changed.");
+    await acknowledgeAndContinue(
+      "No starred episodes were found. This can be normal (empty Starred list) or indicate selector drift."
+    );
   }
 
   const payload = {
