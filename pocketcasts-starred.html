@@ -19,12 +19,46 @@
     body {
       margin: 0;
       font: 14px/1.5 Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
-      background: radial-gradient(1200px 700px at 20% -10%, rgba(123, 97, 255, 0.18), transparent 65%), var(--bg);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      background:
+        radial-gradient(1100px 620px at 18% -10%, rgba(123, 97, 255, 0.2), transparent 64%),
+        radial-gradient(900px 540px at 88% 6%, rgba(0, 217, 255, 0.1), transparent 70%),
+        linear-gradient(180deg, #04060b 0%, #070b15 48%, #06080d 100%);
       color: var(--text);
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(125% 90% at 50% -10%, black 35%, transparent 85%);
+      opacity: 0.26;
+      z-index: 0;
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      inset: -20% -10% auto;
+      height: 70vh;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 15% 28%, rgba(123, 97, 255, 0.2), transparent 42%),
+        radial-gradient(circle at 80% 6%, rgba(0, 217, 255, 0.14), transparent 36%);
+      filter: blur(26px);
+      opacity: 0.6;
+      z-index: 0;
     }
     .wrap {
       width: min(1100px, 96vw);
       margin: 28px auto 44px;
+      position: relative;
+      z-index: 1;
     }
     .hero {
       border: 1px solid var(--line);
